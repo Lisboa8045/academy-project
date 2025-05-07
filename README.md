@@ -1,1 +1,1 @@
-# academy-project
+# Academy Project
