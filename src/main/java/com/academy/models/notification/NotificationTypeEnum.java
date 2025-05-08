@@ -1,0 +1,14 @@
+package com.academy.models.notification;
+
+public enum NotificationTypeEnum {
+
+    ADDED_TO_CART,
+    REMOVED_FROM_CART,
+    APPOINTMENT_CONFIRMED,
+    APPOINTMENT_REJECTED,
+    APPOINTMENT_CANCELLED,
+    APPOINTMENT_RESCHEDULED,
+    PAYMENT_SUCCESS,
+    PAYMENT_FAILED,
+    WARNING
+}
