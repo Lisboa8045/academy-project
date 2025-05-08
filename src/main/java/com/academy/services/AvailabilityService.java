@@ -15,12 +15,16 @@ import jakarta.transaction.Transactional;
 @Service
 public class AvailabilityService {
 
-    @Autowired
-    private AvailabilityRepository availabilityRepository;
+    private final AvailabilityRepository availabilityRepository;
+    private final ServiceProviderRepository serviceProviderRepository;
 
     @Autowired
-    private ServiceProviderRepository serviceProviderRepository; // Repository for service_providers table
+    public AvailabilityService (AvailabilityRepository availabilityRepository, ServiceProviderRepository serviceProviderRepository) {
+        this.availabilityRepository = availabilityRepository;
+        this.serviceProviderRepository = serviceProviderRepository;
+    }
 
+    @Transactional
     // Create a new availability
     public Availability createAvailability(Availability availability) {
         return availabilityRepository.save(availability);
