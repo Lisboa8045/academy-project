@@ -22,7 +22,7 @@ public class Availability {
     private long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "id", nullable = false)
     @NotNull(message = "Member cannot be null")
     private Member member;
 
