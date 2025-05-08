@@ -56,7 +56,6 @@ public class ServiceService {
     }
 
     // Mapping methods
-
     private Service mapToEntity(ServiceRequestDTO dto, Service service) {
         service.setName(dto.getName());
         service.setDescription(dto.getDescription());
