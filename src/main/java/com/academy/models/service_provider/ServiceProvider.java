@@ -3,11 +3,15 @@ package com.academy.models.service_provider;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
+
+// TODO Service, Member, Appointment
 
 @Entity
 @Table(name="service_provider")
 @Getter
 @Setter
+@ToString
 public class ServiceProvider {
 
     // TODO Might not make sense to have single id for service provider
@@ -24,9 +28,9 @@ public class ServiceProvider {
     @JoinColumn(name="service_id")
     private Service service;
 
-//    @OneToOne
-//    @JoinColumn(name="role_id")
-//    private Role role;
+    @OneToMany
+    @JoinColumn(name="appointment_id")
+    private List<Appointment> appointmentList;
 
     @Enumerated(EnumType.STRING)
     @Column(name="provider_permission")
