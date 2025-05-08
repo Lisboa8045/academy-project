@@ -21,7 +21,7 @@ public class Tag {
     private long id;
 
     @Column(name="tag_name", unique = true)
-    private String tagName;
+    private String name;
 
     @Column(name="is_custom")
     private Boolean isCustom;

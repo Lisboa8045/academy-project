@@ -21,6 +21,12 @@ public class Service {
     @Id
     private long id;
 
+    @Column(name="name")
+    private String name;
+
+    @Column(name="description")
+    private String description;
+
     @Column(name="price")
     private double price;
 

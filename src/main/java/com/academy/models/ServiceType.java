@@ -20,7 +20,7 @@ public class ServiceType {
     private long id;
 
     @Column(name="service_type_name")
-    private String serviceTypeName;
+    private String name;
 
     @Column(name="created_at")
     private LocalDateTime createdAt;
