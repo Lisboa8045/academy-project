@@ -3,6 +3,7 @@ package com.academy.Models;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -12,12 +13,13 @@ import java.util.List;
 @Table(name="service")
 @Getter
 @Setter
+@ToString
 public class Service {
 
     @Column(name="service_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private int serviceId;
+    private Long serviceId;
 
     @Column(name="price")
     private double price;
@@ -47,5 +49,5 @@ public class Service {
             joinColumns = @JoinColumn(name = "service_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
-    private List<ServiceTag> serviceTags = new ArrayList<>();
+    private List<Tag> tags = new ArrayList<>();
 }

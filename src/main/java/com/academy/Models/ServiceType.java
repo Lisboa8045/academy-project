@@ -3,6 +3,7 @@ package com.academy.Models;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
@@ -10,12 +11,13 @@ import java.time.LocalDateTime;
 @Table(name="service_type")
 @Getter
 @Setter
+@ToString
 public class ServiceType {
 
     @Column(name="service_type_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private int serviceTypeId;
+    private Long serviceTypeId;
 
     @Column(name="service_type_name")
     private String serviceTypeName;
