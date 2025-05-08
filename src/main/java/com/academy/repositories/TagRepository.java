@@ -1,6 +1,6 @@
-package com.academy.Repositories;
+package com.academy.repositories;
 
-import com.academy.Models.Tag;
+import com.academy.models.Tag;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TagRepository extends JpaRepository<Tag, Long> {

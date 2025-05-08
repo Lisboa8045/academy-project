@@ -1,4 +1,4 @@
-package com.academy.Models;
+package com.academy.models;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -17,7 +17,7 @@ public class ServiceType {
     @Column(name="service_type_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private Long serviceTypeId;
+    private long id;
 
     @Column(name="service_type_name")
     private String serviceTypeName;
