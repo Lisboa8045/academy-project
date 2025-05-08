@@ -34,5 +34,5 @@ public class ServiceProvider {
 
     @Enumerated(EnumType.STRING)
     @Column(name="provider_permission")
-    private ProviderPermissions permission;
+    private ProviderPermission permission;
 }
