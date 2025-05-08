@@ -1,11 +1,14 @@
 package com.academy.models.service_provider;
 
+import com.academy.models.Appointment;
 import com.academy.models.Member;
 import com.academy.models.Service;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.util.List;
 
 // TODO Appointment
 
@@ -30,7 +33,6 @@ public class ServiceProvider {
     private Service service;
 
     @OneToMany
-    @JoinColumn(name="appointment_id")
     private List<Appointment> appointmentList;
 
     @Enumerated(EnumType.STRING)
