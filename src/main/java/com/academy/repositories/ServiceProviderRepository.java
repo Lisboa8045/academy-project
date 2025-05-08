@@ -1,6 +1,6 @@
 package com.academy.repositories;
 
-import com.academy.models.ServiceProvider;
+import com.academy.models.service_provider.ServiceProvider;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
