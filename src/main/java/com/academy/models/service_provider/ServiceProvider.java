@@ -1,11 +1,13 @@
 package com.academy.models.service_provider;
 
+import com.academy.models.Member;
+import com.academy.models.Service;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-// TODO Service, Member, Appointment
+// TODO Appointment
 
 @Entity
 @Table(name="service_provider")
@@ -18,7 +20,7 @@ public class ServiceProvider {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name="user_service_id")
-    private int serviceProviderId;
+    private long id;
 
     @OneToOne
     @JoinColumn(name="member_id")
