@@ -1,74 +1,92 @@
 package com.academy.services;
 
-import com.academy.models.ServiceType;
+import com.academy.dto.service.ServiceRequestDTO;
+import com.academy.dto.service.ServiceResponseDTO;
+import com.academy.models.Service;
 import com.academy.models.Tag;
 import com.academy.repositories.ServiceRepository;
-import com.academy.repositories.ServiceTypeRepository;
 import com.academy.repositories.TagRepository;
-import com.academy.models.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
 public class ServiceService {
 
-    private ServiceTypeRepository serviceTypeRepository;
     private ServiceRepository serviceRepository;
     private TagRepository tagRepository;
 
-    public ServiceService(ServiceRepository serviceRepository, TagRepository tagRepository, ServiceTypeRepository serviceTypeRepository) {
+    public ServiceService(ServiceRepository serviceRepository, TagRepository tagRepository) {
         this.serviceRepository = serviceRepository;
         this.tagRepository = tagRepository;
-        this.serviceTypeRepository = serviceTypeRepository;
     }
 
-    public void createService(String name, String description, double price, int discount, boolean isNegotiable,
-                              int duration, Long serviceTypeId, List<Long> tagIds) {
-
-        // Create the Service entity
-        Service service = new Service();
-
-        // Set all the fields
-        service.setName(name);
-        service.setDescription(description);
-        service.setPrice(price);
-        service.setDiscount(discount);
-        service.setNegotiable(isNegotiable);
-        service.setDuration(duration);
-
-        // Set the type
-        Optional<ServiceType> type = serviceTypeRepository.findById(serviceTypeId);
-        type.ifPresent(service::setServiceType);
-
-        // Set the tags
-        List<Tag> tags = tagRepository.findAllById(tagIds);
-        service.setTags(tags);
-
-        // Set the creation time
-        service.setCreatedAt(LocalDateTime.now());
-        service.setUpdatedAt(LocalDateTime.now());
-
-        // Save the service
-        serviceRepository.save(service);
-        System.out.println(service);
+    // Create
+    public ServiceResponseDTO create(ServiceRequestDTO dto) {
+        Service entity = mapToEntity(dto, new Service());
+        return mapToResponse(serviceRepository.save(entity));
     }
 
-    public void deleteService(Service service) {
-        serviceRepository.delete(service);
+    // Update
+    public Optional<ServiceResponseDTO> update(Long id, ServiceRequestDTO dto) {
+        return serviceRepository.findById(id).map(existing -> {
+            Service updated = mapToEntity(dto, existing);
+            return mapToResponse(serviceRepository.save(updated));
+        });
     }
 
-    public void updateService(Service service) {
-        serviceRepository.save(service);
+    // Read all
+    public List<ServiceResponseDTO> getAll() {
+        return serviceRepository.findAll()
+                .stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
     }
 
-    public List<Service> getServices() {
-        return serviceRepository.findAll();
+    // Read one
+    public Optional<ServiceResponseDTO> getById(Long id) {
+        return serviceRepository.findById(id)
+                .map(this::mapToResponse);
     }
 
-    public Service getServiceById(long id) {
-        Optional<Service> service = serviceRepository.findById(id);
-        return service.orElse(null);
+    // Delete
+    public void delete(Long id) {
+        serviceRepository.deleteById(id);
+    }
+
+    // Mapping methods
+
+    private Service mapToEntity(ServiceRequestDTO dto, Service service) {
+        service.setName(dto.getName());
+        service.setDescription(dto.getDescription());
+        service.setPrice(dto.getPrice());
+        service.setDiscount(dto.getDiscount());
+        service.setNegotiable(dto.isNegotiable());
+        service.setDuration(dto.getDuration());
+        service.setServiceType(dto.getServiceType());
+
+        if (dto.getTagIds() != null) {
+            List<Tag> tags = tagRepository.findAllById(dto.getTagIds());
+            service.setTags(tags);
+        }
+
+        return service;
+    }
+
+    private ServiceResponseDTO mapToResponse(Service service) {
+        ServiceResponseDTO dto = new ServiceResponseDTO();
+        dto.setId(service.getId());
+        dto.setName(service.getName());
+        dto.setDescription(service.getDescription());
+        dto.setPrice(service.getPrice());
+        dto.setDiscount(service.getDiscount());
+        dto.setNegotiable(service.isNegotiable());
+        dto.setDuration(service.getDuration());
+        dto.setServiceType(service.getServiceType());
+        dto.setTags(service.getTags().stream().map(Tag::getName).collect(Collectors.toList()));
+        dto.setCreatedAt(service.getCreatedAt());
+        dto.setUpdatedAt(service.getUpdatedAt());
+        return dto;
     }
 }
