@@ -19,7 +19,7 @@ import java.time.LocalTime;
 public class Availability {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer availabilityId;
+    private long id;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
