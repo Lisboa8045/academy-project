@@ -3,6 +3,7 @@ package com.academy.controllers;
 import com.academy.dto.service.ServiceRequestDTO;
 import com.academy.dto.service.ServiceResponseDTO;
 import com.academy.services.ServiceService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,12 +23,12 @@ public class ServiceController {
     }
 
     @PostMapping
-    public ResponseEntity<ServiceResponseDTO> create(@RequestBody ServiceRequestDTO dto) {
+    public ResponseEntity<ServiceResponseDTO> create(@Valid @RequestBody ServiceRequestDTO dto) {
         return ResponseEntity.ok(serviceService.create(dto));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ServiceResponseDTO> update(@PathVariable Long id, @RequestBody ServiceRequestDTO dto) {
+    public ResponseEntity<ServiceResponseDTO> update(@PathVariable Long id, @Valid @RequestBody ServiceRequestDTO dto) {
         return serviceService.update(id, dto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
