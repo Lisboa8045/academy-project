@@ -16,7 +16,7 @@ import java.util.List;
 @ToString
 public class Service {
 
-    @Column(name="service_id")
+    @Column(name="id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private long id;

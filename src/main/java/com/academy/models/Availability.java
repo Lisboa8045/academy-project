@@ -19,10 +19,11 @@ import java.time.LocalTime;
 public class Availability {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="id")
     private long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "member_id", nullable = false)
     @NotNull(message = "Member cannot be null")
     private Member member;
 

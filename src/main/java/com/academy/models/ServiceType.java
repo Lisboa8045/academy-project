@@ -14,13 +14,13 @@ import java.time.LocalDateTime;
 @ToString
 public class ServiceType {
 
-    @Column(name="service_type_id")
+    @Column(name="id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private long id;
 
-    @Column(name="service_type_name")
-    private String serviceTypeName;
+    @Column(name="name")
+    private String name;
 
     @Column(name="created_at")
     private LocalDateTime createdAt;

@@ -16,10 +16,9 @@ import lombok.ToString;
 @ToString
 public class ServiceProvider {
 
-    // TODO Might not make sense to have single id for service provider
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column(name="user_service_id")
+    @Column(name="service_provider_id")
     private long id;
 
     @OneToOne
