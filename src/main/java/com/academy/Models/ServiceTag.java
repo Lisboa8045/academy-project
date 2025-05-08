@@ -18,11 +18,11 @@ public class ServiceTag {
     private int serviceTagId;
 
     @ManyToOne
-    @JoinColumn(name = "service_id")
+    @JoinColumn(name = "service_id", nullable = false)
     private Service service;
 
     @ManyToOne
-    @JoinColumn(name = "tag_id")
+    @JoinColumn(name = "tag_id", nullable = true)
     private Tag tag;
 
     @Column(name="tag_name")

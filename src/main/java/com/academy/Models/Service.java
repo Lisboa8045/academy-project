@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name="service")
@@ -38,4 +40,12 @@ public class Service {
     @OneToOne
     @JoinColumn(name = "service_type_id", nullable = false)
     private ServiceType serviceType;
+
+    @ManyToMany
+    @JoinTable(
+            name = "service_tag",
+            joinColumns = @JoinColumn(name = "service_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private List<ServiceTag> serviceTags = new ArrayList<>();
 }
