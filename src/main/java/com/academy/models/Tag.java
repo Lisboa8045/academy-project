@@ -15,12 +15,12 @@ import java.util.List;
 @ToString
 public class Tag {
 
-    @Column(name="tag_id")
+    @Column(name="id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private long id;
 
-    @Column(name="tag_name", unique = true)
+    @Column(name="name", unique = true)
     private String name;
 
     @Column(name="is_custom")
