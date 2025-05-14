@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -30,7 +32,6 @@ public class Appointment {
     @JoinColumn(name = "member_id", nullable = true)
     private Member member;
 
-    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "service_provider_id", nullable = false)
     private ServiceProvider serviceProvider;
@@ -44,10 +45,12 @@ public class Appointment {
     @Column(name="comment")
     private String comment;
 
-    @Column(name="created_at")
+    @Column(name="created_at", updatable = false)
+    @CreationTimestamp
     private LocalDateTime createdAt;
 
     @Column(name="updated_at")
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
 
 }

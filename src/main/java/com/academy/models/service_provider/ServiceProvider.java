@@ -8,9 +8,12 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 // TODO Appointment
@@ -35,11 +38,18 @@ public class ServiceProvider {
     @JoinColumn(name="service_id")
     private Service service;
 
-    @JsonManagedReference
     @OneToMany(mappedBy = "serviceProvider")
     private List<Appointment> appointmentList;
 
     @Enumerated(EnumType.STRING)
     @Column(name="provider_permission")
     private ProviderPermission permission;
+
+    @Column(name="created_at", updatable = false)
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @Column(name="updated_at")
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }
