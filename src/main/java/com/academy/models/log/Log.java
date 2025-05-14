@@ -19,7 +19,7 @@ public class Log {
     private long id;
 
     @ManyToOne
-    @JoinColumn(name="member_id")
+    @JoinColumn(name="member_id", nullable = false)
     private Member member;
 
     @Enumerated(EnumType.STRING)
