@@ -1,7 +1,9 @@
 // AppointmentService.java
 package com.academy.services;
 
+import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.Appointment;
+import com.academy.models.service_provider.ServiceProvider;
 import com.academy.repositories.AppointmentRepository;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +33,7 @@ public class AppointmentService {
 
     public Appointment updateAppointment(int id, Appointment appointmentDetails) {
         Appointment appointment = appointmentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+                .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
         if(appointmentDetails.getMember() != null) appointment.setMember(appointmentDetails.getMember());
         if(appointmentDetails.getServiceProvider() != null) appointment.setServiceProvider(appointmentDetails.getServiceProvider());
         if(appointmentDetails.getRating() != appointment.getRating() )appointment.setRating(appointmentDetails.getRating());
@@ -46,9 +48,9 @@ public class AppointmentService {
 
     public void deleteReview(int id){
         Appointment appointment = appointmentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+                .orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
 
-        appointment.setRating(0);
+        appointment.setRating(null);
         appointment.setComment(null);
         appointmentRepository.save(appointment);
 

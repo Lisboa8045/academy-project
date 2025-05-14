@@ -1,6 +1,7 @@
 // AppointmentController.java
 package com.academy.controllers;
 
+import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.Appointment;
 import com.academy.services.AppointmentService;
 import jakarta.validation.Valid;
@@ -28,7 +29,7 @@ public class AppointmentController {
     public ResponseEntity<Appointment> getAppointmentById(@PathVariable int id) {
         return appointmentService.getAppointmentById(id)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(()-> new EntityNotFoundException(Appointment.class, id));
     }
 
     @PostMapping
@@ -42,7 +43,7 @@ public class AppointmentController {
             Appointment updatedAppointment = appointmentService.updateAppointment(id, appointmentDetails);
             return ResponseEntity.ok(updatedAppointment);
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            throw new EntityNotFoundException(Appointment.class, id);
         }
     }
 

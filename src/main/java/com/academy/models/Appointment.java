@@ -40,7 +40,7 @@ public class Appointment {
     @Min(0)
     @Max(value = 5)
     @Column(name="rating")
-    private int rating;
+    private Integer rating;
 
     @Size(max = 400)
     @Column(name="comment")

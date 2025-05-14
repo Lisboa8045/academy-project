@@ -1,6 +1,7 @@
 // ServiceProviderService.java
 package com.academy.services;
 
+import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.service_provider.ServiceProvider;
 import com.academy.repositories.ServiceProviderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +13,12 @@ import java.util.Optional;
 @Service
 public class ServiceProviderService {
 
-    @Autowired
     private ServiceProviderRepository serviceProviderRepository;
+
+    @Autowired
+    public ServiceProviderService(ServiceProviderRepository serviceProviderRepository) {
+        this.serviceProviderRepository = serviceProviderRepository;
+    }
 
     public List<ServiceProvider> getAllServiceProviders() {
         return serviceProviderRepository.findAll();
@@ -29,7 +34,7 @@ public class ServiceProviderService {
 
     public ServiceProvider updateServiceProvider(long id, ServiceProvider details) {
         ServiceProvider serviceProvider = serviceProviderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("ServiceProvider not found"));
+                .orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
 
         serviceProvider.setProvider(details.getProvider());
         serviceProvider.setService(details.getService());

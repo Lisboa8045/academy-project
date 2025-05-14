@@ -1,8 +1,10 @@
 // ServiceProviderController.java
 package com.academy.controllers;
 
+import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.service_provider.ServiceProvider;
 import com.academy.services.ServiceProviderService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,21 +28,21 @@ public class ServiceProviderController {
     public ResponseEntity<ServiceProvider> getServiceProviderById(@PathVariable long id) {
         return serviceProviderService.getServiceProviderById(id)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
     }
 
     @PostMapping
-    public ServiceProvider createServiceProvider(@RequestBody ServiceProvider serviceProvider) {
+    public ServiceProvider createServiceProvider(@Valid @RequestBody ServiceProvider serviceProvider) {
         return serviceProviderService.createServiceProvider(serviceProvider);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ServiceProvider> updateServiceProvider(@PathVariable long id, @RequestBody ServiceProvider serviceProvider) {
+    public ResponseEntity<ServiceProvider> updateServiceProvider(@PathVariable long id, @Valid @RequestBody ServiceProvider serviceProvider) {
         try {
             ServiceProvider updated = serviceProviderService.updateServiceProvider(id, serviceProvider);
             return ResponseEntity.ok(updated);
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            throw new EntityNotFoundException(ServiceProvider.class, id);
         }
     }
 
