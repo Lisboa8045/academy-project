@@ -63,10 +63,9 @@ public class AvailabilityController {
 
     // Update an existing availability
     @PutMapping("/availability/{availabilityId}")
-    public AvailabilityResponseDTO updateAvailability(@Valid @PathVariable long availabilityId,
-            @RequestBody AvailabilityRequestDTO availabilityRequestDTO) {
+    public AvailabilityResponseDTO updateAvailability(@RequestBody AvailabilityRequestDTO availabilityRequestDTO) {
         Availability availability = availabilityMapper.toEntityWithMember(availabilityRequestDTO);
-        Availability updatedAvailability = availabilityService.updateAvailability(availabilityId, availability);
+        Availability updatedAvailability = availabilityService.updateAvailability(availability);
         return availabilityMapper.toResponseDTO(updatedAvailability);
     }
 

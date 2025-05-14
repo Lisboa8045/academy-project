@@ -89,14 +89,11 @@ public class AvailabilityService {
 
     // Update an existing availability
     @Transactional
-    public Availability updateAvailability(Long id, Availability availability) {
-        if (id == null) {
-            throw new InvalidArgumentException("Availability ID cannot be null");
-        }
+    public Availability updateAvailability(Availability availability) {
         if (availability == null) {
             throw new InvalidArgumentException("Availability cannot be null");
         }	
-        if (!availabilityRepository.existsById(id)) {
+        if (!availabilityRepository.existsById((Long)availability.getId())) {
             throw new InvalidArgumentException("Availability with ID " + availability.getId() + " does not exist.");
         }
         return availabilityRepository.save(availability);
