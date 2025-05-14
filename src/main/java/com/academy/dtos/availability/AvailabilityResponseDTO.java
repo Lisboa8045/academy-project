@@ -4,28 +4,29 @@ import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
 import java.time.DayOfWeek;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotEmpty;
 
 
 
 @Getter
 @Setter
 public class AvailabilityResponseDTO {
-    @NotNull
+    
+    @NotEmpty
     private long id;
 
-    @NotNull
+    @NotEmpty
     private long memberId;
 
-    @NotNull
+    @NotEmpty
     private DayOfWeek dayOfWeek;
 
-    @NotNull
+    @NotEmpty
     @FutureOrPresent(message = "End date and time must be in the future or present")
     private LocalDateTime startDateTime;
 
-    @NotNull
+    @NotEmpty
     @FutureOrPresent(message = "End date and time must be in the future or present")
     private LocalDateTime endDateTime;
 }
