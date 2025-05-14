@@ -1,6 +1,7 @@
 package com.academy.models;
 
 import com.academy.models.service_provider.ServiceProvider;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -9,13 +10,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.validator.internal.engine.validationcontext.ValidationContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 
 import java.time.LocalDateTime;
-import java.util.List;
+
 @Entity
 @Table(name="appointment")
 
@@ -30,15 +27,16 @@ public class Appointment {
     private int id;
 
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "member_id", nullable = false)
+    @JoinColumn(name = "member_id", nullable = true)
     private Member member;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @JsonBackReference
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "service_provider_id", nullable = false)
     private ServiceProvider serviceProvider;
 
     @Min(0)
-    @Max(5)
+    @Max(value = 5, message = "WOWOWOOWOW")
     @Column(name="rating")
     private int rating;
 
