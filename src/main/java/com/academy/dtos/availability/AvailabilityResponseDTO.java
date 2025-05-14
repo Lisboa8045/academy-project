@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.time.DayOfWeek;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 
 
@@ -13,20 +14,20 @@ import jakarta.validation.constraints.NotEmpty;
 @Setter
 public class AvailabilityResponseDTO {
     
-    @NotEmpty
+    @NotNull
     private long id;
 
-    @NotEmpty
+    @NotNull
     private long memberId;
 
-    @NotEmpty
+    @NotNull
     private DayOfWeek dayOfWeek;
 
-    @NotEmpty
+    @NotNull
     @FutureOrPresent(message = "End date and time must be in the future or present")
     private LocalDateTime startDateTime;
 
-    @NotEmpty
+    @NotNull
     @FutureOrPresent(message = "End date and time must be in the future or present")
     private LocalDateTime endDateTime;
 }
