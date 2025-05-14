@@ -4,7 +4,6 @@ package com.academy.controllers;
 import com.academy.models.Appointment;
 import com.academy.services.AppointmentService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,6 +49,17 @@ public class AppointmentController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAppointment(@PathVariable int id) {
         appointmentService.deleteAppointment(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/review")
+    public ResponseEntity<Appointment> createReview(@PathVariable int id, @RequestBody Appointment appointmentDetails) {
+        return updateAppointment(id, appointmentDetails);
+    }
+
+    @DeleteMapping("/{id}/review")
+    public ResponseEntity<Void> deleteReview(@PathVariable int id) {
+        appointmentService.deleteReview(id);
         return ResponseEntity.noContent().build();
     }
 }

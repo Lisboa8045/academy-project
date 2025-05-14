@@ -3,7 +3,6 @@ package com.academy.services;
 
 import com.academy.models.Appointment;
 import com.academy.repositories.AppointmentRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -44,4 +43,15 @@ public class AppointmentService {
     public void deleteAppointment(int id) {
         appointmentRepository.deleteById(id);
     }
+
+    public void deleteReview(int id){
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        appointment.setRating(0);
+        appointment.setComment(null);
+        appointmentRepository.save(appointment);
+
+    }
+
 }
