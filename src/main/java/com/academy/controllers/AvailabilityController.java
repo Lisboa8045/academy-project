@@ -11,6 +11,7 @@ import com.academy.dtos.availability.AvailabilityResponseDTO;
 import com.academy.dtos.availability.AvailabilityMapper;
 import com.academy.models.Availability;
 import com.academy.services.AvailabilityService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/auth")
@@ -54,7 +55,7 @@ public class AvailabilityController {
 
     // Create a new availability
     @PostMapping("/availability")
-    public AvailabilityResponseDTO createAvailability(@RequestBody AvailabilityRequestDTO availabilityRequestDTO) {
+    public AvailabilityResponseDTO createAvailability(@Valid @RequestBody AvailabilityRequestDTO availabilityRequestDTO) {
         Availability availability = availabilityMapper.toEntityWithMember(availabilityRequestDTO);
         Availability createdAvailability = availabilityService.createAvailability(availability);
         return availabilityMapper.toResponseDTO(createdAvailability);
@@ -62,7 +63,7 @@ public class AvailabilityController {
 
     // Update an existing availability
     @PutMapping("/availability/{availabilityId}")
-    public AvailabilityResponseDTO updateAvailability(@PathVariable long availabilityId,
+    public AvailabilityResponseDTO updateAvailability(@Valid @PathVariable long availabilityId,
             @RequestBody AvailabilityRequestDTO availabilityRequestDTO) {
         Availability availability = availabilityMapper.toEntityWithMember(availabilityRequestDTO);
         Availability updatedAvailability = availabilityService.updateAvailability(availabilityId, availability);
