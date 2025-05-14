@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -21,6 +23,12 @@ public class Service {
     @Id
     private long id;
 
+    @Column(name="name")
+    private String name;
+
+    @Column(name="description")
+    private String description;
+
     @Column(name="price")
     private double price;
 
@@ -28,26 +36,35 @@ public class Service {
     private int discount;
 
     @Column(name="is_negotiable")
-    private boolean isNegotiable;
+    private boolean isNegotiable = false; // Default value
 
     @Column(name="duration")
     private int duration;
 
-    @Column(name="created_at")
+    @Column(name="created_at", updatable=false)
+    @CreationTimestamp
     private LocalDateTime createdAt;
 
     @Column(name="updated_at")
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
 
     @ManyToOne
     @JoinColumn(name = "service_type_id", nullable = false)
     private ServiceType serviceType;
 
-    @ManyToMany
+    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(
             name = "service_tag",
             joinColumns = @JoinColumn(name = "service_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     private List<Tag> tags = new ArrayList<>();
+
+    public void removeAllTags() {
+        for (Tag tag : tags) {
+            tag.getServices().remove(this);
+        }
+        tags.clear();
+    }
 }
