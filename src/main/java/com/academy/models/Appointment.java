@@ -2,9 +2,11 @@ package com.academy.models;
 
 import com.academy.models.service_provider.ServiceProvider;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,12 +34,14 @@ public class Appointment {
     @JoinColumn(name = "member_id", nullable = true)
     private Member member;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @NotNull
+    @JsonManagedReference
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "service_provider_id", nullable = false)
     private ServiceProvider serviceProvider;
 
     @Min(0)
-    @Max(value = 5, message = "WOWOWOOWOW")
+    @Max(value = 5)
     @Column(name="rating")
     private int rating;
 

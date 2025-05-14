@@ -12,8 +12,11 @@ import java.util.Optional;
 @Service
 public class AppointmentService {
 
-    @Autowired
-    private AppointmentRepository appointmentRepository;
+    private final AppointmentRepository appointmentRepository;
+
+    public AppointmentService(AppointmentRepository appointmentRepository) {
+        this.appointmentRepository = appointmentRepository;
+    }
 
     public List<Appointment> getAllAppointments() {
         return appointmentRepository.findAll();
@@ -30,12 +33,10 @@ public class AppointmentService {
     public Appointment updateAppointment(int id, Appointment appointmentDetails) {
         Appointment appointment = appointmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
-
-        appointment.setMember(appointmentDetails.getMember());
-        appointment.setServiceProvider(appointmentDetails.getServiceProvider());
-        appointment.setRating(appointmentDetails.getRating());
-        appointment.setComment(appointmentDetails.getComment());
-        appointment.setUpdatedAt(appointmentDetails.getUpdatedAt());
+        if(appointmentDetails.getMember() != null) appointment.setMember(appointmentDetails.getMember());
+        if(appointmentDetails.getServiceProvider() != null) appointment.setServiceProvider(appointmentDetails.getServiceProvider());
+        if(appointmentDetails.getRating() != appointment.getRating() )appointment.setRating(appointmentDetails.getRating());
+        if(appointmentDetails.getComment() != null) appointment.setComment(appointmentDetails.getComment());
 
         return appointmentRepository.save(appointment);
     }

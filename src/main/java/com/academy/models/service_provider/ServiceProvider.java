@@ -3,6 +3,7 @@ package com.academy.models.service_provider;
 import com.academy.models.Appointment;
 import com.academy.models.Member;
 import com.academy.models.Service;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -38,6 +39,7 @@ public class ServiceProvider {
     @JoinColumn(name="service_id")
     private Service service;
 
+    @JsonBackReference
     @OneToMany(mappedBy = "serviceProvider")
     private List<Appointment> appointmentList;
 

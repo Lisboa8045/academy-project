@@ -3,6 +3,7 @@ package com.academy.controllers;
 
 import com.academy.models.Appointment;
 import com.academy.services.AppointmentService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,8 +14,11 @@ import java.util.List;
 @RequestMapping("/appointments")
 public class AppointmentController {
 
-    @Autowired
     private AppointmentService appointmentService;
+
+    public AppointmentController(AppointmentService appointmentService) {
+        this.appointmentService = appointmentService;
+    }
 
     @GetMapping
     public List<Appointment> getAllAppointments() {
@@ -29,7 +33,7 @@ public class AppointmentController {
     }
 
     @PostMapping
-    public Appointment createAppointment(@RequestBody Appointment appointment) {
+    public Appointment createAppointment(@Valid @RequestBody Appointment appointment) {
         return appointmentService.createAppointment(appointment);
     }
 

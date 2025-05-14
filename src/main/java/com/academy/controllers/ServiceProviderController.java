@@ -12,10 +12,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/service-providers")
 public class ServiceProviderController {
-
-    @Autowired
     private ServiceProviderService serviceProviderService;
 
+    public ServiceProviderController(ServiceProviderService serviceProviderService) {
+        this.serviceProviderService = serviceProviderService;
+    }
     @GetMapping
     public List<ServiceProvider> getAllServiceProviders() {
         return serviceProviderService.getAllServiceProviders();
