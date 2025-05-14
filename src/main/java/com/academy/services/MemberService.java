@@ -1,6 +1,9 @@
 package com.academy.services;
 
+import com.academy.dtos.register.LoginRequestDto;
+import com.academy.dtos.register.LoginResponseDto;
 import com.academy.dtos.register.RegisterRequestDto;
+import com.academy.exceptions.AuthenticationException;
 import com.academy.exceptions.InvalidArgumentException;
 import com.academy.exceptions.EntityAlreadyExists;
 import com.academy.exceptions.NotFoundException;
@@ -9,9 +12,11 @@ import com.academy.models.Role;
 import com.academy.repositories.MemberRepository;
 import com.academy.repositories.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Service
@@ -19,12 +24,17 @@ public class MemberService {
     private MemberRepository memberRepository;
     private PasswordEncoder passwordEncoder;;
     private RoleRepository roleRepository;
+    private JwtUtil jwtUtil;
 
     @Autowired
-    public MemberService(MemberRepository memberRepository, PasswordEncoder passwordEncoder, RoleRepository roleRepository) {
+    public MemberService(MemberRepository memberRepository,
+                         PasswordEncoder passwordEncoder,
+                         RoleRepository roleRepository,
+                         JwtUtil jwtUtil) {
         this.memberRepository = memberRepository;
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
+        this.jwtUtil = jwtUtil;
     }
 
     public long register(RegisterRequestDto request) {
@@ -53,6 +63,19 @@ public class MemberService {
                 && password.chars().anyMatch(Character::isLowerCase)
                 && password.chars().anyMatch(Character::isUpperCase)
                 && password.chars().anyMatch(c -> !Character.isLetterOrDigit(c));
+
+    }
+
+    public String login(LoginRequestDto request) {
+        Optional<Member> member = memberRepository.findByUsername(request.username());
+        if(member.isPresent() && passwordEncoder.matches(request.password(), member.get().getPassword())) {
+            UserDetails userDetails = new org.springframework.security.core.userdetails.User(
+                    member.get().getUsername(), member.get().getPassword(), new ArrayList<>()
+            );
+            String token = jwtUtil.generateToken(userDetails);
+            return token;
+        }
+        throw new AuthenticationException("Invalid Credentials");
 
     }
 }
