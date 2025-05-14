@@ -40,6 +40,8 @@ public class AvailabilityService {
    
         List<Long> memberIds = serviceProviderRepository.findMemberIdsByServiceId(serviceId);
 
+        System.out.println("Member IDs: " + memberIds);
+
         // Collect all availabilities for the members
         List<Availability> availabilities = new ArrayList<>();
         for (Long memberId : memberIds) {
@@ -56,8 +58,8 @@ public class AvailabilityService {
 
     // Update an existing availability
     @Transactional
-    public Availability updateAvailability(Availability availability) {
-        if (!availabilityRepository.existsById(availability.getId())) {
+    public Availability updateAvailability(long id, Availability availability) {
+        if (!availabilityRepository.existsById(id)) {
             throw new IllegalArgumentException("Availability with ID " + availability.getId() + " does not exist.");
         }
         return availabilityRepository.save(availability);

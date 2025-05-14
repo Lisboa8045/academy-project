@@ -10,6 +10,6 @@ import java.util.List;
 @Repository
 public interface ServiceProviderRepository extends JpaRepository<ServiceProvider, Long> {
 
-    @Query("SELECT sp.member.id FROM ServiceProvider sp WHERE sp.service.id = :serviceId")
+    @Query("SELECT sp.provider.id FROM ServiceProvider sp WHERE sp.service.id = :serviceId")
     List<Long> findMemberIdsByServiceId(Long serviceId);
 }

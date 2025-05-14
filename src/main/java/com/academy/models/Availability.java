@@ -1,13 +1,15 @@
 package com.academy.models;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import java.time.DayOfWeek;
 
 @Getter
@@ -18,28 +20,38 @@ import java.time.DayOfWeek;
 @Table(name = "availability")
 
 public class Availability {
+
+    public Availability(Member member, DayOfWeek dayOfWeek, String startDateTime, String endDateTime) {
+        this.setMember(member);
+        this.setStartDateTime(LocalDateTime.parse(startDateTime));
+        this.setEndDateTime(LocalDateTime.parse(endDateTime));
+        this.setDayOfWeek(dayOfWeek);
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="id")
     private long id;
 
     @ManyToOne
-    @JoinColumn(name = "member_id", nullable = false)
+    @JoinColumn(name = "member_id")
     private Member member;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "day_of_week", nullable = false)
+    @Column(name = "day_of_week")
     private DayOfWeek dayOfWeek;
 
-    @Column(name = "start_time", nullable = false)
-    private LocalTime startTime;
+    @Column(name = "start_date_time")
+    private LocalDateTime startDateTime;
 
-    @Column(name = "end_time", nullable = false)
-    private LocalTime endTime;
+    @Column(name = "end_date_time")
+    private LocalDateTime endDateTime;
 
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @CreationTimestamp
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt = LocalDateTime.now();
+    private LocalDateTime updatedAt;
 }
