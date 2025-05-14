@@ -12,6 +12,10 @@ import jakarta.validation.constraints.AssertTrue;
 @Getter
 @Setter
 public class AvailabilityRequestDTO {
+
+    @NotNull
+    private long id;
+
     @NotNull
     private long memberId;
 
