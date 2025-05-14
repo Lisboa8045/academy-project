@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.academy.exceptions.InvalidArgumentException;
 import com.academy.models.Availability;
 import com.academy.repositories.AvailabilityRepository;
 import com.academy.repositories.MemberRepository;
@@ -37,10 +38,10 @@ public class AvailabilityService {
     // Get all availabilities for a specific member by their ID
     public List<Availability> getAvailabilitiesByMemberId(Long memberId) {
         if (memberId == null) {
-            throw new IllegalArgumentException("Member ID cannot be null");
+            throw new InvalidArgumentException("Member ID cannot be null");
         }
         if (!memberRepository.existsById(memberId)) {
-            throw new IllegalArgumentException("Member with ID " + memberId + " does not exist.");
+            throw new InvalidArgumentException("Member with ID " + memberId + " does not exist.");
         }
         return availabilityRepository.findByMember_Id(memberId);
     }
@@ -49,10 +50,10 @@ public class AvailabilityService {
     public List<Availability> getAvailabilitiesByServiceId(Long serviceId) {
 
         if (serviceId == null) {
-            throw new IllegalArgumentException("Service ID cannot be null");
+            throw new InvalidArgumentException("Service ID cannot be null");
         }
         if (!serviceRepository.existsById(serviceId)) {
-            throw new IllegalArgumentException("Service with ID " + serviceId + " does not exist.");
+            throw new InvalidArgumentException("Service with ID " + serviceId + " does not exist.");
         }
    
         List<Long> memberIds = serviceProviderRepository.findMemberIdsByServiceId(serviceId);
@@ -71,10 +72,10 @@ public class AvailabilityService {
     // Get a specific availability by its ID
     public Availability getAvailabilityById(Long availabilityId) {
         if (availabilityId == null) {
-            throw new IllegalArgumentException("Availability ID cannot be null");
+            throw new InvalidArgumentException("Availability ID cannot be null");
         }
         if (!availabilityRepository.existsById(availabilityId)) {
-            throw new IllegalArgumentException("Availability with ID " + availabilityId + " does not exist.");
+            throw new InvalidArgumentException("Availability with ID " + availabilityId + " does not exist.");
         }
         return availabilityRepository.findById(availabilityId).orElse(null);
     }
@@ -90,13 +91,13 @@ public class AvailabilityService {
     @Transactional
     public Availability updateAvailability(Long id, Availability availability) {
         if (id == null) {
-            throw new IllegalArgumentException("Availability ID cannot be null");
+            throw new InvalidArgumentException("Availability ID cannot be null");
         }
         if (availability == null) {
-            throw new IllegalArgumentException("Availability cannot be null");
+            throw new InvalidArgumentException("Availability cannot be null");
         }	
         if (!availabilityRepository.existsById(id)) {
-            throw new IllegalArgumentException("Availability with ID " + availability.getId() + " does not exist.");
+            throw new InvalidArgumentException("Availability with ID " + availability.getId() + " does not exist.");
         }
         return availabilityRepository.save(availability);
     }
@@ -105,10 +106,10 @@ public class AvailabilityService {
     @Transactional
     public void deleteAvailabilityById(Long availabilityId) {
         if (availabilityId == null) {
-            throw new IllegalArgumentException("Availability ID cannot be null");
+            throw new InvalidArgumentException("Availability ID cannot be null");
         }
         if (!availabilityRepository.existsById(availabilityId)) {
-            throw new IllegalArgumentException("Availability with ID " + availabilityId + " does not exist.");
+            throw new InvalidArgumentException("Availability with ID " + availabilityId + " does not exist.");
         }
         availabilityRepository.deleteById(availabilityId);
     }
