@@ -2,6 +2,7 @@ package com.academy.services;
 
 import com.academy.dto.service.ServiceRequestDTO;
 import com.academy.dto.service.ServiceResponseDTO;
+import com.academy.exceptions.ServiceNotFoundException;
 import com.academy.models.Service;
 import com.academy.models.Tag;
 import com.academy.repositories.ServiceRepository;
@@ -30,11 +31,12 @@ public class ServiceService {
     }
 
     // Update
-    public Optional<ServiceResponseDTO> update(Long id, ServiceRequestDTO dto) {
-        return serviceRepository.findById(id).map(existing -> {
-            Service updated = mapToEntity(dto, existing);
-            return mapToResponse(serviceRepository.save(updated));
-        });
+    public ServiceResponseDTO update(Long id, ServiceRequestDTO dto) {
+        Service existing = serviceRepository.findById(id)
+                .orElseThrow(() -> new ServiceNotFoundException(id));
+
+        Service updated = mapToEntity(dto, existing);
+        return mapToResponse(serviceRepository.save(updated));
     }
 
     // Read all
@@ -46,20 +48,21 @@ public class ServiceService {
     }
 
     // Read one
-    public Optional<ServiceResponseDTO> getById(Long id) {
-        return serviceRepository.findById(id)
-                .map(this::mapToResponse);
+    public ServiceResponseDTO getById(Long id) {
+        Service service = serviceRepository.findById(id)
+                .orElseThrow(() -> new ServiceNotFoundException(id));
+
+        return mapToResponse(service);
     }
 
     // Delete
     @Transactional
     public void delete(Long id) {
-        Optional<Service> opt = serviceRepository.findById(id);
-        Service service = opt.orElse(null);
-        if (service != null) {
-            service.removeAllTags();
-            serviceRepository.delete(service);
-        }
+        Service service = serviceRepository.findById(id)
+                .orElseThrow(() -> new ServiceNotFoundException(id));
+
+        service.removeAllTags(); // Disassociate the tags from the service
+        serviceRepository.delete(service);
     }
 
     // Mapping methods

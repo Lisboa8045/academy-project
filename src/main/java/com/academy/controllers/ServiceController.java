@@ -28,10 +28,10 @@ public class ServiceController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ServiceResponseDTO> update(@PathVariable Long id, @Valid @RequestBody ServiceRequestDTO dto) {
-        return serviceService.update(id, dto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<ServiceResponseDTO> update(@PathVariable Long id,
+                                                     @Valid @RequestBody ServiceRequestDTO dto) {
+        ServiceResponseDTO response = serviceService.update(id, dto);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
@@ -41,9 +41,8 @@ public class ServiceController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ServiceResponseDTO> getById(@PathVariable Long id) {
-        return serviceService.getById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        ServiceResponseDTO response = serviceService.getById(id);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
