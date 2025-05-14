@@ -16,7 +16,7 @@ import com.academy.services.AvailabilityService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/auth/availability")
 public class AvailabilityController {
 
     private final AvailabilityService availabilityService;
@@ -29,7 +29,7 @@ public class AvailabilityController {
     }
 
     // Get all availabilities
-    @GetMapping("/availability")
+    @GetMapping
     public ResponseEntity<List<AvailabilityResponseDTO>> getAllAvailabilities() {
         List<AvailabilityResponseDTO> response = availabilityService.getAllAvailabilities()
                 .stream()
@@ -39,7 +39,7 @@ public class AvailabilityController {
     }
 
     // Get availabilities by memberId
-    @GetMapping("/availability/member/{memberId}")
+    @GetMapping("/member/{memberId}")
     public ResponseEntity<List<AvailabilityResponseDTO>> getMemberAvailability(@PathVariable long memberId) {
         List<AvailabilityResponseDTO> response = availabilityService.getAvailabilitiesByMemberId(memberId)
                 .stream()
@@ -49,7 +49,7 @@ public class AvailabilityController {
     }
 
     // Get availabilities by serviceId
-    @GetMapping("/availability/service/{serviceId}")
+    @GetMapping("/service/{serviceId}")
     public ResponseEntity<List<AvailabilityResponseDTO>> getServiceAvailability(@PathVariable long serviceId) {
         List<AvailabilityResponseDTO> response = availabilityService.getAvailabilitiesByServiceId(serviceId)
                 .stream()
@@ -59,7 +59,7 @@ public class AvailabilityController {
     }
 
     // Create a new availability
-    @PostMapping("/availability")
+    @PostMapping
     public ResponseEntity<AvailabilityResponseDTO> createAvailability(@Valid @RequestBody AvailabilityRequestDTO availabilityRequestDTO) {
         Availability availability = availabilityMapper.toEntityWithMember(availabilityRequestDTO);
         Availability createdAvailability = availabilityService.createAvailability(availability);
@@ -68,7 +68,7 @@ public class AvailabilityController {
     }
 
     // Update an existing availability
-    @PutMapping("/availability/{availabilityId}")
+    @PutMapping("/{availabilityId}")
     public ResponseEntity<AvailabilityResponseDTO> updateAvailability(@Valid @RequestBody AvailabilityRequestDTO availabilityRequestDTO) {
         Availability availability = availabilityMapper.toEntityWithMember(availabilityRequestDTO);
         Availability updatedAvailability = availabilityService.updateAvailability(availability);
@@ -77,7 +77,7 @@ public class AvailabilityController {
     }
 
     // Delete an availability
-    @DeleteMapping("/availability/{availabilityId}")
+    @DeleteMapping("/{availabilityId}")
     public ResponseEntity<Void> deleteAvailability(@PathVariable long availabilityId) {
         availabilityService.deleteAvailabilityById(availabilityId);
         return ResponseEntity.noContent().build(); 
