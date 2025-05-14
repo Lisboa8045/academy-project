@@ -1,10 +1,10 @@
 package com.academy.services;
 
+import com.academy.dtos.service.ServiceMapper;
 import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.exceptions.ServiceNotFoundException;
 import com.academy.models.Service;
-import com.academy.models.Tag;
 import com.academy.repositories.ServiceRepository;
 import com.academy.repositories.TagRepository;
 import jakarta.transaction.Transactional;
@@ -17,16 +17,20 @@ public class ServiceService {
 
     private ServiceRepository serviceRepository;
     private TagRepository tagRepository;
+    private ServiceMapper serviceMapper;
 
-    public ServiceService(ServiceRepository serviceRepository, TagRepository tagRepository) {
+    public ServiceService(ServiceRepository serviceRepository, TagRepository tagRepository, ServiceMapper serviceMapper) {
         this.serviceRepository = serviceRepository;
         this.tagRepository = tagRepository;
+        this.serviceMapper = serviceMapper;
     }
 
     // Create
     public ServiceResponseDTO create(ServiceRequestDTO dto) {
-        Service entity = mapToEntity(dto, new Service());
-        return mapToResponse(serviceRepository.save(entity));
+        Service service = serviceMapper.toEntity(dto);
+
+        Service savedService = serviceRepository.save(service);
+        return serviceMapper.toDto(savedService);
     }
 
     // Update
@@ -34,15 +38,18 @@ public class ServiceService {
         Service existing = serviceRepository.findById(id)
                 .orElseThrow(() -> new ServiceNotFoundException(id));
 
-        Service updated = mapToEntity(dto, existing);
-        return mapToResponse(serviceRepository.save(updated));
+        Service updated = serviceMapper.toEntity(dto);
+        updated.setId(existing.getId());  // Retain existing ID
+        updated = serviceRepository.save(updated);
+
+        return serviceMapper.toDto(updated);
     }
 
     // Read all
     public List<ServiceResponseDTO> getAll() {
         return serviceRepository.findAll()
                 .stream()
-                .map(this::mapToResponse)
+                .map(serviceMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -51,7 +58,7 @@ public class ServiceService {
         Service service = serviceRepository.findById(id)
                 .orElseThrow(() -> new ServiceNotFoundException(id));
 
-        return mapToResponse(service);
+        return serviceMapper.toDto(service);
     }
 
     // Delete
@@ -62,39 +69,5 @@ public class ServiceService {
 
         service.removeAllTags(); // Disassociate the tags from the service
         serviceRepository.delete(service);
-    }
-
-    // Mapping methods
-    private Service mapToEntity(ServiceRequestDTO dto, Service service) {
-        service.setName(dto.getName());
-        service.setDescription(dto.getDescription());
-        service.setPrice(dto.getPrice());
-        service.setDiscount(dto.getDiscount());
-        service.setNegotiable(dto.isNegotiable());
-        service.setDuration(dto.getDuration());
-        service.setServiceType(dto.getServiceType());
-
-        if (dto.getTagNames() != null) {
-            List<Tag> tags = tagRepository.findAllByNameIn(dto.getTagNames());
-            service.setTags(tags);
-        }
-
-        return service;
-    }
-
-    private ServiceResponseDTO mapToResponse(Service service) {
-        ServiceResponseDTO dto = new ServiceResponseDTO();
-        dto.setId(service.getId());
-        dto.setName(service.getName());
-        dto.setDescription(service.getDescription());
-        dto.setPrice(service.getPrice());
-        dto.setDiscount(service.getDiscount());
-        dto.setNegotiable(service.isNegotiable());
-        dto.setDuration(service.getDuration());
-        dto.setServiceType(service.getServiceType());
-        dto.setTags(service.getTags().stream().map(Tag::getName).collect(Collectors.toList()));
-        dto.setCreatedAt(service.getCreatedAt());
-        dto.setUpdatedAt(service.getUpdatedAt());
-        return dto;
     }
 }

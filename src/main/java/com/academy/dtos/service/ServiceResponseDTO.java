@@ -18,7 +18,7 @@ public class ServiceResponseDTO {
     private boolean isNegotiable;
     private int duration;
     private ServiceType serviceType;
-    private List<String> tags;
+    private List<String> tagNames;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
