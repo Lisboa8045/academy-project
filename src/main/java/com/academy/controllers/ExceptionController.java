@@ -13,4 +13,6 @@ public class ExceptionController {
     public ResponseEntity<Object> handleInvalidValue(InvalidArgumentException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
+
+    
 }
