@@ -2,18 +2,18 @@ package com.academy.services;
 
 import com.academy.dtos.register.MemberMapper;
 import com.academy.dtos.register.LoginRequestDto;
-import com.academy.dtos.register.LoginResponseDto;
 import com.academy.dtos.register.RegisterRequestDto;
 import com.academy.exceptions.AuthenticationException;
 import com.academy.exceptions.InvalidArgumentException;
 import com.academy.exceptions.EntityAlreadyExists;
-import com.academy.exceptions.InvalidArgumentException;
 import com.academy.exceptions.NotFoundException;
 import com.academy.models.Member;
 import com.academy.models.Role;
 import com.academy.repositories.MemberRepository;
 import com.academy.repositories.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,30 +28,32 @@ public class MemberService {
     private RoleRepository roleRepository;
     private MemberMapper memberMapper;
     private JwtUtil jwtUtil;
+    private MessageSource messageSource;
 
     @Autowired
-    public MemberService(MemberRepository memberRepository, PasswordEncoder passwordEncoder, RoleRepository roleRepository,
-                         MemberMapper memberMapper) {
     public MemberService(MemberRepository memberRepository,
                          PasswordEncoder passwordEncoder,
                          RoleRepository roleRepository,
-                         JwtUtil jwtUtil) {
+                MemberMapper memberMapper,
+                         JwtUtil jwtUtil,
+                         MessageSource messageSource) {
         this.memberRepository = memberRepository;
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
         this.memberMapper = memberMapper;
         this.jwtUtil = jwtUtil;
+        this.messageSource = messageSource;
     }
 
     public long register(RegisterRequestDto request) {
         if (memberRepository.findByUsername(request.username()).isPresent()
                 || memberRepository.findByEmail(request.email()).isPresent())
-            throw new EntityAlreadyExists("Username or Email already exists");
+            throw new EntityAlreadyExists(messageSource.getMessage("user.exists", null, LocaleContextHolder.getLocale()));
         if (!isValidPassword(request.password()))
-            throw new InvalidArgumentException("Invalid Password");
+            throw new InvalidArgumentException(messageSource.getMessage("register.invalidpassword", null, LocaleContextHolder.getLocale()));
         Optional<Role> optionalRole = roleRepository.findById(request.roleId());
         if(optionalRole.isEmpty())
-            throw new NotFoundException("Role not found");
+            throw new NotFoundException(messageSource.getMessage("role.notfound", null, LocaleContextHolder.getLocale()));
         Member member = memberMapper.toMember(request);
         member.setPassword(passwordEncoder.encode(request.password()));
         member.setRole(optionalRole.get());
@@ -77,7 +79,7 @@ public class MemberService {
             String token = jwtUtil.generateToken(userDetails);
             return token;
         }
-        throw new AuthenticationException("Invalid Credentials");
+        throw new AuthenticationException(messageSource.getMessage("auth.invalid", null, LocaleContextHolder.getLocale()));
 
     }
 }

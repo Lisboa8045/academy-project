@@ -1,8 +1,8 @@
 package com.academy.dtos.register;
 
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
 
 public record LoginRequestDto(
-        @NotEmpty String username,
-        @NotEmpty String password) {
+        @NotBlank String username,
+        @NotBlank String password) {
 }
