@@ -4,6 +4,8 @@ import com.academy.models.Member;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalTime;
 
@@ -28,12 +30,16 @@ public class Notification {
     private boolean seen;
 
     @Column(name="created_at")
+    @CreationTimestamp
     private LocalTime createdAt;
 
     @Column(name="update_at")
+    @UpdateTimestamp
     private LocalTime updatedAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "notification_type", nullable = false)
     private NotificationTypeEnum notificationTypeEnum;
+
+
 }
