@@ -6,6 +6,7 @@ import com.academy.models.Service;
 import com.academy.models.Tag;
 import com.academy.repositories.ServiceRepository;
 import com.academy.repositories.TagRepository;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -51,8 +52,14 @@ public class ServiceService {
     }
 
     // Delete
+    @Transactional
     public void delete(Long id) {
-        serviceRepository.deleteById(id);
+        Optional<Service> opt = serviceRepository.findById(id);
+        Service service = opt.orElse(null);
+        if (service != null) {
+            service.removeAllTags();
+            serviceRepository.delete(service);
+        }
     }
 
     // Mapping methods
@@ -65,8 +72,8 @@ public class ServiceService {
         service.setDuration(dto.getDuration());
         service.setServiceType(dto.getServiceType());
 
-        if (dto.getTagIds() != null) {
-            List<Tag> tags = tagRepository.findAllById(dto.getTagIds());
+        if (dto.getTagNames() != null) {
+            List<Tag> tags = tagRepository.findAllByNameIn(dto.getTagNames());
             service.setTags(tags);
         }
 

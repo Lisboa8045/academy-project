@@ -11,26 +11,26 @@ import java.util.List;
 @Setter
 public class ServiceRequestDTO {
 
-    @NotBlank
+    @NotBlank(message = "Service name is required")
     private String name;
 
-    @NotBlank
+    @NotBlank(message = "Description must not be empty")
     private String description;
 
-    @Positive
+    @Positive(message = "Price must be greater than zero")
     private double price;
 
-    @Min(0)
-    @Max(100)
+    @Min(value = 0, message = "Discount cannot be less than 0%")
+    @Max(value = 100, message = "Discount cannot exceed 100%")
     private int discount;
 
     private boolean isNegotiable = false; // Default value
 
-    @Positive
+    @Positive(message = "Invalid duration, must be a positive number in minutes")
     private int duration;
 
-    @NotNull
+    @NotNull(message = "Service type is required")
     private ServiceType serviceType;
 
-    private List<Long> tagIds;
+    private List<String> tagNames;
 }

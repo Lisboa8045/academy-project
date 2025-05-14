@@ -1,7 +1,6 @@
 package com.academy.models;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -24,27 +23,21 @@ public class Service {
     @Id
     private long id;
 
-    @NotBlank
     @Column(name="name")
     private String name;
 
-    @NotBlank
     @Column(name="description")
     private String description;
 
-    @Positive
     @Column(name="price")
     private double price;
 
-    @Min(0)
-    @Max(100)
     @Column(name="discount")
     private int discount;
 
     @Column(name="is_negotiable")
     private boolean isNegotiable = false; // Default value
 
-    @Positive
     @Column(name="duration")
     private int duration;
 
@@ -58,14 +51,20 @@ public class Service {
 
     @ManyToOne
     @JoinColumn(name = "service_type_id", nullable = false)
-    @NotNull
     private ServiceType serviceType;
 
-    @ManyToMany
+    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(
             name = "service_tag",
             joinColumns = @JoinColumn(name = "service_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     private List<Tag> tags = new ArrayList<>();
+
+    public void removeAllTags() {
+        for (Tag tag : tags) {
+            tag.getServices().remove(this);
+        }
+        tags.clear();
+    }
 }
