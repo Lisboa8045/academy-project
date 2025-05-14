@@ -1,7 +1,7 @@
 package com.academy.controllers;
 
-import com.academy.dto.service.ServiceRequestDTO;
-import com.academy.dto.service.ServiceResponseDTO;
+import com.academy.dtos.service.ServiceRequestDTO;
+import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.services.ServiceService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

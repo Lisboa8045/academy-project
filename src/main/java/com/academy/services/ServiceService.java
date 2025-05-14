@@ -1,7 +1,7 @@
 package com.academy.services;
 
-import com.academy.dto.service.ServiceRequestDTO;
-import com.academy.dto.service.ServiceResponseDTO;
+import com.academy.dtos.service.ServiceRequestDTO;
+import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.exceptions.ServiceNotFoundException;
 import com.academy.models.Service;
 import com.academy.models.Tag;

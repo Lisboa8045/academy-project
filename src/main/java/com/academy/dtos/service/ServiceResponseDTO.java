@@ -1,4 +1,4 @@
-package com.academy.dto.service;
+package com.academy.dtos.service;
 
 import com.academy.models.ServiceType;
 import lombok.Getter;
