@@ -1,11 +1,13 @@
 package com.academy.services;
 
+import com.academy.dtos.register.MemberMapper;
 import com.academy.dtos.register.LoginRequestDto;
 import com.academy.dtos.register.LoginResponseDto;
 import com.academy.dtos.register.RegisterRequestDto;
 import com.academy.exceptions.AuthenticationException;
 import com.academy.exceptions.InvalidArgumentException;
 import com.academy.exceptions.EntityAlreadyExists;
+import com.academy.exceptions.InvalidArgumentException;
 import com.academy.exceptions.NotFoundException;
 import com.academy.models.Member;
 import com.academy.models.Role;
@@ -24,9 +26,12 @@ public class MemberService {
     private MemberRepository memberRepository;
     private PasswordEncoder passwordEncoder;;
     private RoleRepository roleRepository;
+    private MemberMapper memberMapper;
     private JwtUtil jwtUtil;
 
     @Autowired
+    public MemberService(MemberRepository memberRepository, PasswordEncoder passwordEncoder, RoleRepository roleRepository,
+                         MemberMapper memberMapper) {
     public MemberService(MemberRepository memberRepository,
                          PasswordEncoder passwordEncoder,
                          RoleRepository roleRepository,
@@ -34,6 +39,7 @@ public class MemberService {
         this.memberRepository = memberRepository;
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
+        this.memberMapper = memberMapper;
         this.jwtUtil = jwtUtil;
     }
 
@@ -46,12 +52,8 @@ public class MemberService {
         Optional<Role> optionalRole = roleRepository.findById(request.roleId());
         if(optionalRole.isEmpty())
             throw new NotFoundException("Role not found");
-        Member member = new Member();
-        member.setUsername(request.username());
+        Member member = memberMapper.toMember(request);
         member.setPassword(passwordEncoder.encode(request.password()));
-        member.setEmail(request.email());
-        member.setAddress(request.address());
-        member.setPhoneNumber(request.phoneNumber());
         member.setRole(optionalRole.get());
         memberRepository.save(member);
         return member.getId();
