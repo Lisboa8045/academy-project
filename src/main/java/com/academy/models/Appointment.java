@@ -26,7 +26,7 @@ public class Appointment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private long id;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "member_id", nullable = true)
