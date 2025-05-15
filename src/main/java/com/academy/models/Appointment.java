@@ -26,23 +26,19 @@ public class Appointment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private long id;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "member_id", nullable = true)
     private Member member;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "service_provider_id", nullable = false)
     private ServiceProvider serviceProvider;
 
-    @Min(0)
-    @Max(value = 5)
     @Column(name="rating")
     private Integer rating;
 
-    @Size(max = 400)
     @Column(name="comment")
     private String comment;
 

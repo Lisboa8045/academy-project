@@ -1,6 +1,8 @@
 // AppointmentController.java
 package com.academy.controllers;
 
+import com.academy.dtos.appointment.AppointmentRequestDTO;
+import com.academy.dtos.appointment.AppointmentResponseDTO;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.Appointment;
 import com.academy.services.AppointmentService;
@@ -14,37 +16,34 @@ import java.util.List;
 @RequestMapping("/appointments")
 public class AppointmentController {
 
-    private AppointmentService appointmentService;
+    private final AppointmentService appointmentService;
 
     public AppointmentController(AppointmentService appointmentService) {
         this.appointmentService = appointmentService;
     }
 
     @GetMapping
-    public List<Appointment> getAllAppointments() {
+    public List<AppointmentResponseDTO> getAllAppointments() {
         return appointmentService.getAllAppointments();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Appointment> getAppointmentById(@PathVariable int id) {
+    public ResponseEntity<AppointmentResponseDTO> getAppointmentById(@PathVariable int id) {
         return appointmentService.getAppointmentById(id)
                 .map(ResponseEntity::ok)
                 .orElseThrow(()-> new EntityNotFoundException(Appointment.class, id));
     }
 
     @PostMapping
-    public Appointment createAppointment(@Valid @RequestBody Appointment appointment) {
-        return appointmentService.createAppointment(appointment);
+    public ResponseEntity<AppointmentResponseDTO> createAppointment(@Valid @RequestBody AppointmentRequestDTO dto) {
+        AppointmentResponseDTO response = appointmentService.createAppointment(dto);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Appointment> updateAppointment(@PathVariable int id, @RequestBody Appointment appointmentDetails) {
-        try {
-            Appointment updatedAppointment = appointmentService.updateAppointment(id, appointmentDetails);
-            return ResponseEntity.ok(updatedAppointment);
-        } catch (RuntimeException e) {
-            throw new EntityNotFoundException(Appointment.class, id);
-        }
+    public ResponseEntity<AppointmentResponseDTO> updateAppointment(@PathVariable int id, @RequestBody AppointmentRequestDTO appointmentDetails) {
+            AppointmentResponseDTO updated = appointmentService.updateAppointment(id, appointmentDetails);
+            return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
@@ -54,7 +53,7 @@ public class AppointmentController {
     }
 
     @PostMapping("/{id}/review")
-    public ResponseEntity<Appointment> createReview(@PathVariable int id, @RequestBody Appointment appointmentDetails) {
+    public ResponseEntity<AppointmentResponseDTO> createReview(@PathVariable int id, @RequestBody AppointmentRequestDTO appointmentDetails) {
         return updateAppointment(id, appointmentDetails);
     }
 
