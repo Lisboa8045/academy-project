@@ -16,4 +16,8 @@ public abstract class AppointmentMapper {
 
 
     public abstract Appointment toEntity(AppointmentRequestDTO appointmentRequestDTO);
+
+    @Mapping(source="member.username", target = "memberUsername")
+    public abstract AppointmentReviewResponseDTO toReviewResponseDTO(Appointment appointment);
+
 }

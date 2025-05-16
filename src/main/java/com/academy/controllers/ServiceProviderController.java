@@ -1,11 +1,12 @@
 // ServiceProviderController.java
 package com.academy.controllers;
 
+import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
+import com.academy.dtos.service_provider.ServiceProviderResponseDTO;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.service_provider.ServiceProvider;
 import com.academy.services.ServiceProviderService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,26 +21,26 @@ public class ServiceProviderController {
         this.serviceProviderService = serviceProviderService;
     }
     @GetMapping
-    public List<ServiceProvider> getAllServiceProviders() {
+    public List<ServiceProviderResponseDTO> getAllServiceProviders() {
         return serviceProviderService.getAllServiceProviders();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ServiceProvider> getServiceProviderById(@PathVariable long id) {
+    public ResponseEntity<ServiceProviderResponseDTO> getServiceProviderById(@PathVariable long id) {
         return serviceProviderService.getServiceProviderById(id)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
     }
 
     @PostMapping
-    public ServiceProvider createServiceProvider(@Valid @RequestBody ServiceProvider serviceProvider) {
+    public ServiceProviderResponseDTO createServiceProvider(@Valid @RequestBody ServiceProviderRequestDTO serviceProvider) {
         return serviceProviderService.createServiceProvider(serviceProvider);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ServiceProvider> updateServiceProvider(@PathVariable long id, @Valid @RequestBody ServiceProvider serviceProvider) {
+    public ResponseEntity<ServiceProviderResponseDTO> updateServiceProvider(@PathVariable long id, @Valid @RequestBody ServiceProviderRequestDTO serviceProvider) {
         try {
-            ServiceProvider updated = serviceProviderService.updateServiceProvider(id, serviceProvider);
+            ServiceProviderResponseDTO updated = serviceProviderService.updateServiceProvider(id, serviceProvider);
             return ResponseEntity.ok(updated);
         } catch (RuntimeException e) {
             throw new EntityNotFoundException(ServiceProvider.class, id);

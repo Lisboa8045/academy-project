@@ -49,9 +49,12 @@ public class AppointmentService {
         ServiceProvider serviceProvider = serviceProviderRepository.findById(dto.getServiceProviderId())
                         .orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, dto.getServiceProviderId()));
 
+        Member member = memberRepository.findById(dto.getMemberId())
+                .orElseThrow(() -> new EntityNotFoundException(Member.class, dto.getMemberId()));
         Appointment appointment = appointmentMapper.toEntity(dto);
 
         appointment.setServiceProvider(serviceProvider);
+        appointment.setMember(member);
 
         return appointmentMapper.toResponseDTO(appointmentRepository.save(appointment));
     }

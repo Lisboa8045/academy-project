@@ -1,7 +1,6 @@
 package com.academy.controllers;
 
 import com.academy.exceptions.EntityNotFoundException;
-import com.academy.exceptions.InvalidArgumentException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -9,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +29,11 @@ public class ExceptionController {
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException e) {
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        String key = e.getEntityClass().getSimpleName();
+        String value = "id " + e.getId() + " not found";
+
+        Map<String, String> body = Collections.singletonMap(key, value);
+
+        return ResponseEntity.status(404).body(body);
     }
 }
