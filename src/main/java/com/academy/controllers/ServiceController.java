@@ -22,9 +22,10 @@ public class ServiceController {
         this.serviceService = serviceService;
     }
 
-    @PostMapping
-    public ResponseEntity<ServiceResponseDTO> create(@Valid @RequestBody ServiceRequestDTO dto) {
-        return ResponseEntity.ok(serviceService.create(dto));
+    @PostMapping("/{ownerId}")
+    public ResponseEntity<ServiceResponseDTO> create(@PathVariable Long ownerId,
+                                                     @Valid @RequestBody ServiceRequestDTO dto) {
+        return ResponseEntity.ok(serviceService.create(dto, ownerId));
     }
 
     @PutMapping("/{id}")
