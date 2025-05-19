@@ -28,10 +28,10 @@ public class ServiceController {
         return ResponseEntity.ok(serviceService.create(dto, ownerId));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ServiceResponseDTO> update(@PathVariable Long id,
+    @PutMapping("/{serviceId}")
+    public ResponseEntity<ServiceResponseDTO> update(@PathVariable Long serviceId,
                                                      @Valid @RequestBody ServiceRequestDTO dto) {
-        ServiceResponseDTO response = serviceService.update(id, dto);
+        ServiceResponseDTO response = serviceService.update(serviceId, dto);
         return ResponseEntity.ok(response);
     }
 
@@ -41,15 +41,15 @@ public class ServiceController {
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ServiceResponseDTO> getById(@PathVariable Long id) {
-        ServiceResponseDTO response = serviceService.getById(id);
+    @GetMapping("/{serviceId}")
+    public ResponseEntity<ServiceResponseDTO> getById(@PathVariable Long serviceId) {
+        ServiceResponseDTO response = serviceService.getById(serviceId);
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        serviceService.delete(id);
+    @DeleteMapping("/{serviceId}")
+    public ResponseEntity<Void> delete(@PathVariable Long serviceId) {
+        serviceService.delete(serviceId);
         return ResponseEntity.noContent().build();
     }
 }

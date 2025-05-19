@@ -34,6 +34,7 @@ public class ServiceService {
     public ServiceResponseDTO create(ServiceRequestDTO dto, Long ownerId) {
         Service service = serviceMapper.toEntity(dto);
         Member owner = memberRepository.findById(ownerId).orElseThrow(); // TODO Create specific exception
+        // TODO Check that owner is worker. Perhaps should be done at endpoint level.
         service.setOwner(owner);
 
         Service savedService = serviceRepository.save(service);
