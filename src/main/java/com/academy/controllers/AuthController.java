@@ -19,8 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/auth")
 public class AuthController {
 
-    private MemberService memberService;
-    private MessageSource messageSource;
+    private final MemberService memberService;
+    private final MessageSource messageSource;
     @Autowired
     public AuthController(MemberService memberService, MessageSource messageSource) {
         this.memberService = memberService;
@@ -39,10 +39,8 @@ public class AuthController {
     }
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@Valid @RequestBody LoginRequestDto request){
-        String token = memberService.login(request);
-        return ResponseEntity.ok(new LoginResponseDto(
-                messageSource.getMessage("user.loggedin", null, LocaleContextHolder.getLocale()),
-                token));
+        LoginResponseDto response = memberService.login(request);
+        return ResponseEntity.ok(response);
     }
 
 }

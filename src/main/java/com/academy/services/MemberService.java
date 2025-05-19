@@ -1,5 +1,7 @@
 package com.academy.services;
 
+import com.academy.config.authentication.JwtUtil;
+import com.academy.dtos.register.LoginResponseDto;
 import com.academy.dtos.register.MemberMapper;
 import com.academy.dtos.register.LoginRequestDto;
 import com.academy.dtos.register.RegisterRequestDto;
@@ -23,12 +25,12 @@ import java.util.Optional;
 
 @Service
 public class MemberService {
-    private MemberRepository memberRepository;
-    private PasswordEncoder passwordEncoder;;
-    private RoleRepository roleRepository;
-    private MemberMapper memberMapper;
-    private JwtUtil jwtUtil;
-    private MessageSource messageSource;
+    private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
+    private final MemberMapper memberMapper;
+    private final JwtUtil jwtUtil;
+    private final MessageSource messageSource;
 
     @Autowired
     public MemberService(MemberRepository memberRepository,
@@ -70,14 +72,16 @@ public class MemberService {
 
     }
 
-    public String login(LoginRequestDto request) {
+    public LoginResponseDto login(LoginRequestDto request) {
         Optional<Member> member = memberRepository.findByUsername(request.username());
         if(member.isPresent() && passwordEncoder.matches(request.password(), member.get().getPassword())) {
             UserDetails userDetails = new org.springframework.security.core.userdetails.User(
                     member.get().getUsername(), member.get().getPassword(), new ArrayList<>()
             );
             String token = jwtUtil.generateToken(userDetails);
-            return token;
+            return new LoginResponseDto(
+                    messageSource.getMessage("user.loggedin", null, LocaleContextHolder.getLocale()),
+                    token, member.get().getId());
         }
         throw new AuthenticationException(messageSource.getMessage("auth.invalid", null, LocaleContextHolder.getLocale()));
 
