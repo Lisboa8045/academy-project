@@ -9,9 +9,9 @@ import lombok.Setter;
 @Setter
 public class TagRequestDTO {
 
-    @NotBlank
+    @NotBlank(message = "Tag name is required")
     private String name;
 
-    @NotNull
+    @NotNull(message = "Custom tag field must be set")
     private Boolean isCustom;
 }

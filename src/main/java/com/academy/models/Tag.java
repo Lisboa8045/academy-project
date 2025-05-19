@@ -2,8 +2,6 @@ package com.academy.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -26,11 +24,9 @@ public class Tag {
     @Id
     private long id;
 
-    @NotBlank
     @Column(name="name", unique = true)
     private String name;
 
-    @NotNull
     @Column(name="is_custom")
     private Boolean isCustom;
 
