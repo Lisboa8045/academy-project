@@ -7,7 +7,10 @@ import com.academy.exceptions.TagNotFoundException;
 import com.academy.models.Tag;
 import com.academy.repositories.TagRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.dao.DataIntegrityViolationException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,10 +19,12 @@ public class TagService {
 
     private final TagRepository tagRepository;
     private final TagMapper tagMapper;
+    private final ServiceService serviceService;
 
-    public TagService(TagRepository tagRepository, TagMapper tagMapper) {
+    public TagService(TagRepository tagRepository, TagMapper tagMapper, @Lazy ServiceService serviceService) {
         this.tagRepository = tagRepository;
         this.tagMapper = tagMapper;
+        this.serviceService = serviceService;
     }
 
     // Create
@@ -66,7 +71,43 @@ public class TagService {
         Tag tag = tagRepository.findById(id)
                 .orElseThrow(() -> new TagNotFoundException(id));
 
-        tag.getServices().forEach(service -> service.getTags().remove(tag)); // Disassociate the service references
+        serviceService.dissociateTagFromAllServices(tag); // Break relationship with services
         tagRepository.delete(tag);
+    }
+
+    // Get/Create a list of tags based on the names given on request
+    @Transactional
+    public List<Tag> findOrCreateTagsByNames(List<String> tagNames) {
+        List<Tag> existingTags = tagRepository.findAllByNameIn(tagNames);
+        List<String> existingTagNames = existingTags.stream()
+                .map(Tag::getName)
+                .toList();
+
+        List<String> newTagNames = tagNames.stream()
+                .filter(name -> !existingTagNames.contains(name))
+                .toList();
+
+        // Create new tags for names that don't exist
+        List<Tag> newTags = newTagNames.stream()
+                .map(name -> {
+                    Tag tag = new Tag();
+                    tag.setName(name);
+                    tag.setIsCustom(true);
+                    return tag;
+                })
+                .toList();
+
+        if (!newTags.isEmpty()) {
+            try {
+                tagRepository.saveAll(newTags); // Try inserting all new tags
+            } catch (DataIntegrityViolationException e) {
+                // Race condition likely occurred: // TODO log
+            }
+        }
+
+        // Combine existing and new tags and return them
+        List<Tag> allTags = new ArrayList<>(existingTags);
+        allTags.addAll(newTags);
+        return allTags;
     }
 }

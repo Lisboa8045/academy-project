@@ -15,7 +15,7 @@ import java.util.List;
 @RequestMapping("/auth/services")
 public class ServiceController {
 
-    private ServiceService serviceService;
+    private final ServiceService serviceService;
 
     @Autowired
     public ServiceController(ServiceService serviceService) {

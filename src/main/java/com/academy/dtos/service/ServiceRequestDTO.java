@@ -1,6 +1,5 @@
 package com.academy.dtos.service;
 
-import com.academy.models.ServiceType;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,7 +29,7 @@ public class ServiceRequestDTO {
     private int duration;
 
     @NotNull(message = "Service type is required")
-    private ServiceType serviceType;
+    private Long serviceTypeId;
 
     private List<String> tagNames;
 }

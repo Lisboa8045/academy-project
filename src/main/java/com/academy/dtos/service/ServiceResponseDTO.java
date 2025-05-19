@@ -1,6 +1,5 @@
 package com.academy.dtos.service;
 
-import com.academy.models.ServiceType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,7 +16,7 @@ public class ServiceResponseDTO {
     private int discount;
     private boolean isNegotiable;
     private int duration;
-    private ServiceType serviceType;
+    private String serviceTypeName;
     private List<String> tagNames;
 
     private LocalDateTime createdAt;
