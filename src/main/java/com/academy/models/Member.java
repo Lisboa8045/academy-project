@@ -36,7 +36,7 @@ public class Member {
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    @OneToMany(mappedBy = "ownerId")
+    @OneToMany(mappedBy = "owner")
     private List<Service> createdServices;
 
     @Column(name = "created_at")
