@@ -5,9 +5,7 @@ import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.exceptions.ServiceNotFoundException;
 import com.academy.models.Service;
-import com.academy.repositories.MemberRepository;
 import com.academy.repositories.ServiceRepository;
-import com.academy.repositories.TagRepository;
 import jakarta.transaction.Transactional;
 
 import java.util.List;
@@ -17,13 +15,11 @@ import java.util.stream.Collectors;
 public class ServiceService {
 
     private ServiceRepository serviceRepository;
-    private TagRepository tagRepository;
     private ServiceMapper serviceMapper;
 
-    public ServiceService(ServiceRepository serviceRepository, TagRepository tagRepository, MemberRepository memberRepository,
+    public ServiceService(ServiceRepository serviceRepository,
                           ServiceMapper serviceMapper) {
         this.serviceRepository = serviceRepository;
-        this.tagRepository = tagRepository;
         this.serviceMapper = serviceMapper;
     }
 
