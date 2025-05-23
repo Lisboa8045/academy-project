@@ -4,7 +4,6 @@ import com.academy.dtos.service.ServiceMapper;
 import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.exceptions.ServiceNotFoundException;
-import com.academy.models.Member;
 import com.academy.models.Service;
 import com.academy.repositories.MemberRepository;
 import com.academy.repositories.ServiceRepository;
@@ -19,22 +18,18 @@ public class ServiceService {
 
     private ServiceRepository serviceRepository;
     private TagRepository tagRepository;
-    private MemberRepository memberRepository; // Could also be MemberService
     private ServiceMapper serviceMapper;
 
     public ServiceService(ServiceRepository serviceRepository, TagRepository tagRepository, MemberRepository memberRepository,
                           ServiceMapper serviceMapper) {
         this.serviceRepository = serviceRepository;
         this.tagRepository = tagRepository;
-        this.memberRepository = memberRepository;
         this.serviceMapper = serviceMapper;
     }
 
     // Create
-    public ServiceResponseDTO create(ServiceRequestDTO dto, Long ownerId) {
+    public ServiceResponseDTO create(ServiceRequestDTO dto) {
         Service service = serviceMapper.toEntity(dto);
-        Member owner = memberRepository.findById(ownerId).orElseThrow(); // TODO Create specific exception
-        service.setOwner(owner);
 
         Service savedService = serviceRepository.save(service);
         return serviceMapper.toDto(savedService);

@@ -17,6 +17,9 @@ public class ServiceRequestDTO {
     @NotBlank(message = "Description must not be empty")
     private String description;
 
+    @NotNull(message = "Service must have owner")
+    private long ownerId;
+
     @Positive(message = "Price must be greater than zero")
     private double price;
 

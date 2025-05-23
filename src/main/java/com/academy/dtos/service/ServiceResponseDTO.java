@@ -13,6 +13,7 @@ public class ServiceResponseDTO {
     private Long id;
     private String name;
     private String description;
+    private long ownerId;
     private double price;
     private int discount;
     private boolean isNegotiable;
