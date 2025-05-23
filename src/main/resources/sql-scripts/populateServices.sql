@@ -10,21 +10,21 @@ INSERT INTO service_type (id, name, created_at, updated_at) VALUES
 
 -- Insert Tags
 INSERT INTO tag (id, name, is_custom, created_at, updated_at) VALUES
-                                                                  (1, 'salon', 1, NOW(), NOW()),
+                                                                  (1, 'salon', 0, NOW(), NOW()),
                                                                   (2, 'pedicure', 0, NOW(), NOW()),
                                                                   (3, 'manicure', 0, NOW(), NOW()),
                                                                   (4, 'skincare', 0, NOW(), NOW()),
-                                                                  (5, 'yoga', 1, NOW(), NOW()),
+                                                                  (5, 'yoga', 0, NOW(), NOW()),
                                                                   (6, 'massage', 0, NOW(), NOW()),
-                                                                  (7, 'cleaning', 1, NOW(), NOW()),
-                                                                  (8, 'gardening', 1, NOW(), NOW()),
+                                                                  (7, 'cleaning', 0, NOW(), NOW()),
+                                                                  (8, 'gardening', 0, NOW(), NOW()),
                                                                   (9, 'tutoring', 0, NOW(), NOW()),
                                                                   (10, 'math', 0, NOW(), NOW()),
                                                                   (11, 'english', 0, NOW(), NOW()),
                                                                   (12, 'therapy', 0, NOW(), NOW()),
                                                                   (13, 'nutrition', 0, NOW(), NOW()),
-                                                                  (14, 'spa', 1, NOW(), NOW()),
-                                                                  (15, 'personal training', 1, NOW(), NOW());
+                                                                  (14, 'spa', 0, NOW(), NOW()),
+                                                                  (15, 'personal training', 0, NOW(), NOW());
 
 -- Insert Services
 INSERT INTO service (id, name, description, price, discount, is_negotiable, duration, service_type_id, created_at, updated_at)

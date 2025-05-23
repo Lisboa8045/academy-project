@@ -12,6 +12,7 @@ import com.academy.repositories.ServiceRepository;
 import com.academy.repositories.ServiceTypeRepository;
 import jakarta.transaction.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,7 +22,7 @@ public class ServiceService {
     private final ServiceRepository serviceRepository;
     private final ServiceMapper serviceMapper;
     private final TagService tagService;
-    private final ServiceTypeRepository serviceTypeRepository; // TODO should probably change this to service once it's done
+    private final ServiceTypeRepository serviceTypeRepository;
 
     public ServiceService(ServiceRepository serviceRepository, ServiceMapper serviceMapper, TagService tagService, ServiceTypeRepository serviceTypeRepository) {
         this.serviceRepository = serviceRepository;
@@ -38,13 +39,8 @@ public class ServiceService {
                 .orElseThrow(() -> new ServiceTypeNotFoundException(dto.getServiceTypeId()));
 
         Service service = serviceMapper.toEntity(dto);
-        service.setTags(tags);
         service.setServiceType(serviceType);
-
-        // Add the service to each tag's services list
-        for (Tag tag : tags) {
-            tag.getServices().add(service);
-        }
+        linkServiceToTags(service, tags); // Set up the bidirectional link
 
         Service savedService = serviceRepository.save(service);
         return serviceMapper.toDto(savedService);
@@ -56,18 +52,23 @@ public class ServiceService {
         Service existing = serviceRepository.findById(id)
                 .orElseThrow(() -> new ServiceNotFoundException(id));
 
-        List<Tag> tags = tagService.findOrCreateTagsByNames(dto.getTagNames());
+        // Remove existing tag associations
+        for (Tag tag : new ArrayList<>(existing.getTags())) {
+            tag.getServices().remove(existing);
+        }
+        existing.getTags().clear();
+
+        // Prepare new tags and associations
+        List<Tag> newTags = tagService.findOrCreateTagsByNames(dto.getTagNames());
+        linkServiceToTags(existing, newTags);
 
         ServiceType serviceType = serviceTypeRepository.findById(dto.getServiceTypeId())
                 .orElseThrow(() -> new ServiceTypeNotFoundException(dto.getServiceTypeId()));
 
-        Service updated = serviceMapper.toEntity(dto);
-        updated.setId(existing.getId());
-        updated.setTags(tags); // TODO fix the tag association here as well, similar to create
-        updated.setServiceType(serviceType);
+        existing.setServiceType(serviceType);
+        serviceMapper.updateEntityFromDto(dto, existing);
 
-        updated = serviceRepository.save(updated);
-        return serviceMapper.toDto(updated);
+        return serviceMapper.toDto(serviceRepository.save(existing));
     }
 
     // Read all
@@ -92,16 +93,14 @@ public class ServiceService {
         Service service = serviceRepository.findById(id)
                 .orElseThrow(() -> new ServiceNotFoundException(id));
 
-        service.removeAllTags(); // TODO test this functionality, might not be working properly
+        service.removeAllTags();
         serviceRepository.delete(service);
     }
 
-    @Transactional
-    public void dissociateTagFromAllServices(Tag tag) {
-        List<Service> services = serviceRepository.findAllByTagsContaining(tag);
-        for (Service service : services) {
-            service.getTags().remove(tag);
-        } // TODO again, double check this
-        serviceRepository.saveAll(services);
+    private void linkServiceToTags(Service service, List<Tag> tags) {
+        service.setTags(tags);
+        for (Tag tag : tags) {
+            tag.getServices().add(service);
+        }
     }
 }

@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 public class TagRequestDTO {
@@ -14,4 +16,6 @@ public class TagRequestDTO {
 
     @NotNull(message = "Custom tag field must be set")
     private Boolean isCustom;
+
+    private List<Long> serviceIds;
 }

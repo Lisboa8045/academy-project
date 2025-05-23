@@ -40,6 +40,13 @@ public class Tag {
     @JsonIgnore
     private List<Service> services = new ArrayList<>();
 
+    public void removeAllServices() {
+        for (Service service : new ArrayList<>(services)) {
+            service.getTags().remove(this);
+        }
+        services.clear();
+    }
+
     @Override
     public String toString() {
         return "Tag{" +

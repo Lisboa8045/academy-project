@@ -4,10 +4,11 @@ import com.academy.dtos.tag.TagMapper;
 import com.academy.dtos.tag.TagRequestDTO;
 import com.academy.dtos.tag.TagResponseDTO;
 import com.academy.exceptions.TagNotFoundException;
+import com.academy.models.Service;
 import com.academy.models.Tag;
+import com.academy.repositories.ServiceRepository;
 import com.academy.repositories.TagRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.ArrayList;
@@ -18,13 +19,13 @@ import java.util.stream.Collectors;
 public class TagService {
 
     private final TagRepository tagRepository;
+    private final ServiceRepository serviceRepository;
     private final TagMapper tagMapper;
-    private final ServiceService serviceService;
 
-    public TagService(TagRepository tagRepository, TagMapper tagMapper, @Lazy ServiceService serviceService) {
+    public TagService(TagRepository tagRepository, ServiceRepository serviceRepository, TagMapper tagMapper) {
+        this.serviceRepository = serviceRepository;
         this.tagRepository = tagRepository;
         this.tagMapper = tagMapper;
-        this.serviceService = serviceService;
     }
 
     // Create
@@ -32,21 +33,31 @@ public class TagService {
     public TagResponseDTO create(TagRequestDTO dto) {
         Tag tag = tagMapper.toEntity(dto);
 
+        List<Service> services = serviceRepository.findAllById(dto.getServiceIds());
+        linkTagsToService(tag, services);
+
         Tag savedTag = tagRepository.save(tag);
         return tagMapper.toDto(savedTag);
     }
 
-    // Update
     @Transactional
     public TagResponseDTO update(Long id, TagRequestDTO dto) {
         Tag existing = tagRepository.findById(id)
                 .orElseThrow(() -> new TagNotFoundException(id));
 
-        Tag updated = tagMapper.toEntity(dto);
-        updated.setId(existing.getId());  // Retain existing ID
-        updated = tagRepository.save(updated);
+        // Remove existing service associations
+        for (Service service : new ArrayList<>(existing.getServices())) {
+            service.getTags().remove(existing);
+        }
+        existing.getServices().clear();
 
-        return tagMapper.toDto(updated);
+        // Handle associations with services
+        List<Service> newServices = serviceRepository.findAllById(dto.getServiceIds());
+        linkTagsToService(existing, newServices);
+
+        tagMapper.updateEntityFromDto(dto, existing);
+
+        return tagMapper.toDto(tagRepository.save(existing));
     }
 
     // Read all
@@ -71,7 +82,7 @@ public class TagService {
         Tag tag = tagRepository.findById(id)
                 .orElseThrow(() -> new TagNotFoundException(id));
 
-        serviceService.dissociateTagFromAllServices(tag); // Break relationship with services
+        removeTagFromAllServices(tag); // Break relationship with services
         tagRepository.delete(tag);
     }
 
@@ -109,5 +120,19 @@ public class TagService {
         List<Tag> allTags = new ArrayList<>(existingTags);
         allTags.addAll(newTags);
         return allTags;
+    }
+
+    @Transactional
+    public void removeTagFromAllServices(Tag tag) {
+        List<Service> services = new ArrayList<>(tag.getServices());
+        tag.removeAllServices();
+        serviceRepository.saveAll(services);
+    }
+
+    private void linkTagsToService(Tag tag, List<Service> services) {
+        tag.setServices(services);
+        for (Service service : services) {
+            service.getTags().add(tag);
+        }
     }
 }
