@@ -6,6 +6,7 @@ import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
 import com.academy.dtos.service_provider.ServiceProviderResponseDTO;
+import com.academy.exceptions.AuthenticationException;
 import com.academy.exceptions.ServiceNotFoundException;
 import com.academy.models.Member;
 import com.academy.models.service.Service;
@@ -64,6 +65,10 @@ public class ServiceService {
         Member member = memberService.getMemberByUsername(username);
         Service existing = serviceRepository.findById(id)
                 .orElseThrow(() -> new ServiceNotFoundException(id));
+        List<ProviderPermissionEnum> permissions = getPermissionsByProviderUsernameAndServiceId(username, existing.getId());
+        if(permissions == null || !permissions.contains(ProviderPermissionEnum.UPDATE))
+            throw new AuthenticationException("Member doesn't have permission to update service");
+
         Service updated = serviceMapper.toEntity(dto, member.getId());
         updated.setId(existing.getId());  // Retain existing ID
         updated = serviceRepository.save(updated);
@@ -87,14 +92,21 @@ public class ServiceService {
         Service service = serviceRepository.findById(id)
                 .orElseThrow(() -> new ServiceNotFoundException(id));
         String username =  authenticationFacade.getUsername();
+        List<ProviderPermissionEnum> permissions = getPermissionsByProviderUsernameAndServiceId(username, id);
+        if(permissions == null || !permissions.contains(ProviderPermissionEnum.READ))
+            throw new AuthenticationException("Member doesn't have permission to read service");
         return serviceMapper.toDto(service, getPermissionsByProviderUsernameAndServiceId(username, service.getId()));
     }
 
     // Delete
     @Transactional
     public void delete(Long id) {
+        String username =  authenticationFacade.getUsername();
         Service service = serviceRepository.findById(id)
                 .orElseThrow(() -> new ServiceNotFoundException(id));
+        List<ProviderPermissionEnum> permissions = getPermissionsByProviderUsernameAndServiceId(username, id);
+        if(permissions == null || !permissions.contains(ProviderPermissionEnum.DELETE))
+            throw new AuthenticationException("Member doesn't have permission to delete service");
 
         service.removeAllTags(); // Disassociate the tags from the service
         serviceRepository.delete(service);

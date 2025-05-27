@@ -75,7 +75,8 @@ public class Service {
         tags.clear();
     }
 
-    @OneToMany(mappedBy = "service")
+    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ServiceProvider> serviceProviders;
+
 
 }
