@@ -3,8 +3,7 @@ package com.academy.services;
 import com.academy.dtos.service.ServiceMapper;
 import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
-import com.academy.exceptions.ServiceNotFoundException;
-import com.academy.exceptions.ServiceTypeNotFoundException;
+import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.Service;
 import com.academy.models.ServiceType;
 import com.academy.models.Tag;
@@ -36,7 +35,7 @@ public class ServiceService {
     public ServiceResponseDTO create(ServiceRequestDTO dto) {
         List<Tag> tags = tagService.findOrCreateTagsByNames(dto.getTagNames());
         ServiceType serviceType = serviceTypeRepository.findById(dto.getServiceTypeId())
-                .orElseThrow(() -> new ServiceTypeNotFoundException(dto.getServiceTypeId()));
+                .orElseThrow(() -> new EntityNotFoundException(ServiceType.class, dto.getServiceTypeId()));
 
         Service service = serviceMapper.toEntity(dto);
         service.setServiceType(serviceType);
@@ -50,7 +49,7 @@ public class ServiceService {
     @Transactional
     public ServiceResponseDTO update(Long id, ServiceRequestDTO dto) {
         Service existing = serviceRepository.findById(id)
-                .orElseThrow(() -> new ServiceNotFoundException(id));
+                .orElseThrow(() -> new EntityNotFoundException(Service.class, id));
 
         // Remove existing tag associations
         for (Tag tag : new ArrayList<>(existing.getTags())) {
@@ -63,7 +62,7 @@ public class ServiceService {
         linkServiceToTags(existing, newTags);
 
         ServiceType serviceType = serviceTypeRepository.findById(dto.getServiceTypeId())
-                .orElseThrow(() -> new ServiceTypeNotFoundException(dto.getServiceTypeId()));
+                .orElseThrow(() -> new EntityNotFoundException(ServiceType.class, dto.getServiceTypeId()));
 
         existing.setServiceType(serviceType);
         serviceMapper.updateEntityFromDto(dto, existing);
@@ -82,7 +81,7 @@ public class ServiceService {
     // Read one
     public ServiceResponseDTO getById(Long id) {
         Service service = serviceRepository.findById(id)
-                .orElseThrow(() -> new ServiceNotFoundException(id));
+                .orElseThrow(() -> new EntityNotFoundException(Service.class, id));
 
         return serviceMapper.toDto(service);
     }
@@ -91,7 +90,7 @@ public class ServiceService {
     @Transactional
     public void delete(Long id) {
         Service service = serviceRepository.findById(id)
-                .orElseThrow(() -> new ServiceNotFoundException(id));
+                .orElseThrow(() -> new EntityNotFoundException(Service.class, id));
 
         service.removeAllTags();
         serviceRepository.delete(service);

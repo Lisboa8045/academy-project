@@ -3,7 +3,7 @@ package com.academy.services;
 import com.academy.dtos.tag.TagMapper;
 import com.academy.dtos.tag.TagRequestDTO;
 import com.academy.dtos.tag.TagResponseDTO;
-import com.academy.exceptions.TagNotFoundException;
+import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.Service;
 import com.academy.models.Tag;
 import com.academy.repositories.ServiceRepository;
@@ -43,7 +43,7 @@ public class TagService {
     @Transactional
     public TagResponseDTO update(Long id, TagRequestDTO dto) {
         Tag existing = tagRepository.findById(id)
-                .orElseThrow(() -> new TagNotFoundException(id));
+                .orElseThrow(() -> new EntityNotFoundException(Tag.class, id));
 
         // Remove existing service associations
         for (Service service : new ArrayList<>(existing.getServices())) {
@@ -71,7 +71,7 @@ public class TagService {
     // Read one
     public TagResponseDTO getById(Long id) {
         Tag tag = tagRepository.findById(id)
-                .orElseThrow(() -> new TagNotFoundException(id));
+                .orElseThrow(() -> new EntityNotFoundException(Tag.class, id));
 
         return tagMapper.toDto(tag);
     }
@@ -80,7 +80,7 @@ public class TagService {
     @Transactional
     public void delete(Long id) {
         Tag tag = tagRepository.findById(id)
-                .orElseThrow(() -> new TagNotFoundException(id));
+                .orElseThrow(() -> new EntityNotFoundException(Tag.class, id));
 
         removeTagFromAllServices(tag); // Break relationship with services
         tagRepository.delete(tag);

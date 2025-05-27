@@ -2,8 +2,7 @@ package com.academy.services;
 
 import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
-import com.academy.exceptions.ServiceNotFoundException;
-import com.academy.exceptions.ServiceTypeNotFoundException;
+import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.Service;
 import com.academy.models.ServiceType;
 import com.academy.models.Tag;
@@ -81,13 +80,13 @@ public class ServiceIntegrationTests {
     @Test
     public void updateService_serviceNotFound_throwsException() {
         assertThatThrownBy(() -> serviceService.update(999L, new ServiceRequestDTO()))
-                .isInstanceOf(ServiceNotFoundException.class);
+                .isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
     public void deleteService_serviceNotFound_throwsException() {
         assertThatThrownBy(() -> serviceService.delete(999L))
-                .isInstanceOf(ServiceNotFoundException.class);
+                .isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
@@ -99,7 +98,7 @@ public class ServiceIntegrationTests {
         updateRequestDTO.setTagNames(List.of("tag1"));
 
         assertThatThrownBy(() -> serviceService.update(1L, updateRequestDTO))
-                .isInstanceOf(ServiceTypeNotFoundException.class);
+                .isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test

@@ -11,10 +11,10 @@ import java.util.List;
 @Setter
 public class TagRequestDTO {
 
-    @NotBlank(message = "Tag name is required")
+    @NotBlank
     private String name;
 
-    @NotNull(message = "Custom tag field must be set")
+    @NotNull
     private Boolean isCustom;
 
     private List<Long> serviceIds;
