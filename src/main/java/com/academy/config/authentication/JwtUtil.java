@@ -15,16 +15,20 @@ public class JwtUtil {
 
     private final SecretKey secretKey;
 
+    private final Long expirationTime;
+
     // Accepts a base64-encoded secret from application.properties
-    public JwtUtil(@Value("${secret.key}") String secretKeyString) {
+    public JwtUtil(@Value("${secret.key}") String secretKeyString,
+                   @Value("${expiration.time}") Long expirationTime) {
         this.secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKeyString));
+        this.expirationTime = expirationTime;
     }
 
     public String generateToken(UserDetails userDetails) {
         return Jwts.builder()
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hours
+                .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(secretKey, Jwts.SIG.HS256)
                 .compact();
     }
