@@ -21,7 +21,7 @@ public abstract class ServiceMapper {
     protected MemberRepository memberRepository;
 
     @Mapping(source = "tagNames", target = "tags", qualifiedByName = "mapNamesToTags")
-    @Mapping(expression = "java(memberRepository.findById(dto.getOwnerId()).orElseThrow())", target ="owner")
+    @Mapping(expression = "java(memberRepository.findById(dto.ownerId()).orElseThrow())", target ="owner")
     public abstract Service toEntity(ServiceRequestDTO dto);
 
     @Mapping(source = "tags", target = "tagNames", qualifiedByName = "mapTagsToNames")
