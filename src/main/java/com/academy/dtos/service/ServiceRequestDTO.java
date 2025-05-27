@@ -1,35 +1,18 @@
 package com.academy.dtos.service;
 
 import jakarta.validation.constraints.*;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.List;
 
-@Getter
-@Setter
-public class ServiceRequestDTO {
-
-    @NotBlank
-    private String name;
-
-    @NotBlank
-    private String description;
-
-    @Positive
-    private double price;
-
-    @Min(value = 0, message = "cannot be less than 0%")
-    @Max(value = 100, message = "cannot exceed 100%")
-    private int discount;
-
-    private boolean isNegotiable = false; // Default value
-
-    @Positive
-    private int duration;
-
-    @NotNull
-    private Long serviceTypeId;
-
-    private List<String> tagNames;
-}
+public record ServiceRequestDTO(
+        @NotBlank String name,
+        @NotBlank String description,
+        @Positive double price,
+        @Min(value = 0, message = "cannot be less than 0%")
+        @Max(value = 100, message = "cannot exceed 100%")
+        int discount,
+        boolean negotiable,
+        @Positive int duration,
+        @NotNull Long serviceTypeId,
+        List<String> tagNames
+) {}

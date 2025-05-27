@@ -33,7 +33,7 @@ public class TagService {
     public TagResponseDTO create(TagRequestDTO dto) {
         Tag tag = tagMapper.toEntity(dto);
 
-        List<Service> services = serviceRepository.findAllById(dto.getServiceIds());
+        List<Service> services = serviceRepository.findAllById(dto.serviceIds());
         linkTagsToService(tag, services);
 
         Tag savedTag = tagRepository.save(tag);
@@ -52,7 +52,7 @@ public class TagService {
         existing.getServices().clear();
 
         // Handle associations with services
-        List<Service> newServices = serviceRepository.findAllById(dto.getServiceIds());
+        List<Service> newServices = serviceRepository.findAllById(dto.serviceIds());
         linkTagsToService(existing, newServices);
 
         tagMapper.updateEntityFromDto(dto, existing);

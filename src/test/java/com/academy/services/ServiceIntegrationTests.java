@@ -77,9 +77,13 @@ public class ServiceIntegrationTests {
         serviceTypeRepository.deleteAll();
     }
 
+    private ServiceRequestDTO createDTO(String name, String description, Long serviceTypeId, List<String> tags) {
+        return new ServiceRequestDTO(name, description, 80, 20, false, 30, serviceTypeId, tags);
+    }
+
     @Test
     public void updateService_serviceNotFound_throwsException() {
-        assertThatThrownBy(() -> serviceService.update(999L, new ServiceRequestDTO()))
+        assertThatThrownBy(() -> serviceService.update(999L, createDTO("Test Service", "Test Description", 1L, List.of("tag3"))))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
@@ -91,11 +95,7 @@ public class ServiceIntegrationTests {
 
     @Test
     public void updateService_invalidServiceType_throwsException() {
-        ServiceRequestDTO updateRequestDTO = new ServiceRequestDTO();
-        updateRequestDTO.setName("Updated Service");
-        updateRequestDTO.setDescription("Updated Description");
-        updateRequestDTO.setServiceTypeId(999L);
-        updateRequestDTO.setTagNames(List.of("tag1"));
+        ServiceRequestDTO updateRequestDTO = createDTO("Updated Service", "Updated Description", 999L, List.of("tag1"));
 
         assertThatThrownBy(() -> serviceService.update(1L, updateRequestDTO))
                 .isInstanceOf(EntityNotFoundException.class);
@@ -117,61 +117,45 @@ public class ServiceIntegrationTests {
         tag3.setName("tag3");
         tagRepository.save(tag3);
 
-        ServiceRequestDTO serviceRequestDTO = new ServiceRequestDTO();
-        serviceRequestDTO.setName("Test Service");
-        serviceRequestDTO.setDescription("Test Description");
-        serviceRequestDTO.setServiceTypeId(serviceType.getId());
-        serviceRequestDTO.setTagNames(List.of("tag3"));
+        ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", serviceType.getId(), List.of("tag3"));
 
         ServiceResponseDTO responseDTO = serviceService.create(serviceRequestDTO);
 
         assertThatCode(() -> tagService.delete(tag3.getId()))
                 .doesNotThrowAnyException();
 
-        ServiceResponseDTO updatedResponseDTO = serviceService.getById(responseDTO.getId());
+        ServiceResponseDTO updatedResponseDTO = serviceService.getById(responseDTO.id());
 
-        assertThat(updatedResponseDTO.getTagNames()).isEmpty(); // Ensure that tags are empty
+        assertThat(updatedResponseDTO.tagNames()).isEmpty(); // Ensure that tags are empty
     }
 
     @Test
     public void createService_createsTagsAndAssignsServiceType() {
-        ServiceRequestDTO serviceRequestDTO = new ServiceRequestDTO();
-        serviceRequestDTO.setName("Test Service");
-        serviceRequestDTO.setDescription("Test Description");
-        serviceRequestDTO.setServiceTypeId(serviceType.getId());
-        serviceRequestDTO.setTagNames(List.of("tag1", "tag2"));
+        ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", serviceType.getId(), List.of("tag1", "tag2"));
 
         ServiceResponseDTO responseDTO = serviceService.create(serviceRequestDTO);
 
         // Verify that the service was created correctly
         assertThat(responseDTO).isNotNull();
-        assertThat(responseDTO.getName()).isEqualTo("Test Service");
-        assertThat(responseDTO.getDescription()).isEqualTo("Test Description");
-        assertThat(responseDTO.getServiceTypeName()).isEqualTo(serviceType.getName());
-        assertThat(responseDTO.getTagNames()).containsExactlyInAnyOrder("tag1", "tag2"); // Ensure that tags are associated
+        assertThat(responseDTO.name()).isEqualTo("Test Service");
+        assertThat(responseDTO.description()).isEqualTo("Test Description");
+        assertThat(responseDTO.serviceTypeName()).isEqualTo(serviceType.getName());
+        assertThat(responseDTO.tagNames()).containsExactlyInAnyOrder("tag1", "tag2"); // Ensure that tags are associated
     }
 
     @Test
     public void createService_duplicateTags_doesNotCreateDuplicateTags() {
-        ServiceRequestDTO serviceRequestDTO = new ServiceRequestDTO();
-        serviceRequestDTO.setName("Test Service");
-        serviceRequestDTO.setDescription("Test Description");
-        serviceRequestDTO.setServiceTypeId(serviceType.getId());
-        serviceRequestDTO.setTagNames(List.of("tag1", "tag1"));
+        ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", serviceType.getId(), List.of("tag1", "tag1"));
 
         ServiceResponseDTO responseDTO = serviceService.create(serviceRequestDTO);
 
         // Verify that only one tag is created
-        assertThat(responseDTO.getTagNames()).containsExactlyInAnyOrder("tag1");
+        assertThat(responseDTO.tagNames()).containsExactlyInAnyOrder("tag1");
     }
 
     @Test
     public void updateService_updatesServiceTypeAndTags() {
-        ServiceRequestDTO serviceRequestDTO = new ServiceRequestDTO();
-        serviceRequestDTO.setName("Test Service");
-        serviceRequestDTO.setDescription("Test Description");
-        serviceRequestDTO.setServiceTypeId(serviceType.getId());
-        serviceRequestDTO.setTagNames(List.of("tag1", "tag2"));
+        ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", serviceType.getId(), List.of("tag1", "tag2"));
 
         ServiceResponseDTO createdResponse = serviceService.create(serviceRequestDTO);
 
@@ -180,52 +164,40 @@ public class ServiceIntegrationTests {
         newServiceType.setName("New Service Type");
         newServiceType = serviceTypeRepository.save(newServiceType);
 
-        ServiceRequestDTO updateRequestDTO = new ServiceRequestDTO();
-        updateRequestDTO.setName("Updated Service");
-        updateRequestDTO.setDescription("Updated Description");
-        updateRequestDTO.setServiceTypeId(newServiceType.getId());
-        updateRequestDTO.setTagNames(List.of("tag2", "tag3"));
+        ServiceRequestDTO updateRequestDTO = createDTO("Updated Service", "Updated Description", newServiceType.getId(), List.of("tag2", "tag3"));
 
-        ServiceResponseDTO updatedResponse = serviceService.update(createdResponse.getId(), updateRequestDTO);
+        ServiceResponseDTO updatedResponse = serviceService.update(createdResponse.id(), updateRequestDTO);
 
         // Verify that the service was updated with the new serviceType and tags
-        assertThat(updatedResponse.getName()).isEqualTo("Updated Service");
-        assertThat(updatedResponse.getServiceTypeName()).isEqualTo(newServiceType.getName());
-        assertThat(updatedResponse.getTagNames()).containsExactlyInAnyOrder("tag2", "tag3");
+        assertThat(updatedResponse.name()).isEqualTo("Updated Service");
+        assertThat(updatedResponse.serviceTypeName()).isEqualTo(newServiceType.getName());
+        assertThat(updatedResponse.tagNames()).containsExactlyInAnyOrder("tag2", "tag3");
     }
 
     @Test
     public void deleteService_deletesService() {
-        ServiceRequestDTO serviceRequestDTO = new ServiceRequestDTO();
-        serviceRequestDTO.setName("Test Service");
-        serviceRequestDTO.setDescription("Test Description");
-        serviceRequestDTO.setServiceTypeId(serviceType.getId());
-        serviceRequestDTO.setTagNames(List.of("tag1"));
+        ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", serviceType.getId(), List.of("tag1"));
 
         ServiceResponseDTO createdResponse = serviceService.create(serviceRequestDTO);
 
-        serviceService.delete(createdResponse.getId());
+        serviceService.delete(createdResponse.id());
 
         // Verify that the service is deleted
-        assertThat(serviceRepository.findById(createdResponse.getId())).isEmpty();
+        assertThat(serviceRepository.findById(createdResponse.id())).isEmpty();
     }
 
     @Test
     public void deleteService_cascadesCorrectly() {
-        ServiceRequestDTO serviceRequestDTO = new ServiceRequestDTO();
-        serviceRequestDTO.setName("Test Service");
-        serviceRequestDTO.setDescription("Test Description");
-        serviceRequestDTO.setServiceTypeId(serviceType.getId());
-        serviceRequestDTO.setTagNames(List.of("tag1"));
+        ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", serviceType.getId(), List.of("tag1"));
 
         ServiceResponseDTO createdResponse = serviceService.create(serviceRequestDTO);
 
         assertThat(tagRepository.findById(tag1.getId()).get().getServices()).isNotEmpty();
 
-        serviceService.delete(createdResponse.getId());
+        serviceService.delete(createdResponse.id());
 
         // Verify that the service is deleted
-        assertThat(serviceRepository.findById(createdResponse.getId())).isEmpty();
+        assertThat(serviceRepository.findById(createdResponse.id())).isEmpty();
 
         // Verify that associated tag is not deleted
         assertThat(tagRepository.findById(tag1.getId())).isNotEmpty();
@@ -239,11 +211,7 @@ public class ServiceIntegrationTests {
 
     @Test
     public void deleteTag_dissociatesTagFromService() {
-        ServiceRequestDTO serviceRequestDTO = new ServiceRequestDTO();
-        serviceRequestDTO.setName("Test Service");
-        serviceRequestDTO.setDescription("Test Description");
-        serviceRequestDTO.setServiceTypeId(serviceType.getId());
-        serviceRequestDTO.setTagNames(List.of("tag1", "tag2"));
+        ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", serviceType.getId(), List.of("tag1", "tag2"));
 
         ServiceResponseDTO createdResponse = serviceService.create(serviceRequestDTO);
 
@@ -251,7 +219,7 @@ public class ServiceIntegrationTests {
         tagService.delete(tag1.getId());
 
         // Ensure that the tag is dissociated from the service
-        Service updatedService = serviceRepository.findById(createdResponse.getId()).orElseThrow();
+        Service updatedService = serviceRepository.findById(createdResponse.id()).orElseThrow();
         List<String> remainingTags = updatedService.getTags().stream()
                 .map(Tag::getName)
                 .collect(Collectors.toList());
@@ -262,65 +230,53 @@ public class ServiceIntegrationTests {
 
     @Test
     public void updateService_updateTags() {
-        ServiceRequestDTO createServiceDTO = new ServiceRequestDTO();
-        createServiceDTO.setName("Test Service");
-        createServiceDTO.setDescription("Test Description");
-        createServiceDTO.setServiceTypeId(serviceType.getId());
-        createServiceDTO.setTagNames(List.of("tag1", "tag2"));
+        ServiceRequestDTO createServiceDTO = createDTO("Test Service", "Test Description", serviceType.getId(), List.of("tag1", "tag2"));
 
         ServiceResponseDTO createResponseDTO = serviceService.create(createServiceDTO);
 
         // Verify initial tags
-        assertThat(createResponseDTO.getTagNames()).containsExactlyInAnyOrder("tag1", "tag2");
+        assertThat(createResponseDTO.tagNames()).containsExactlyInAnyOrder("tag1", "tag2");
 
         // Verify that the tags have the service in their 'services' list
         Tag tag1 = tagRepository.findByName("tag1").orElseThrow();
         Tag tag2 = tagRepository.findByName("tag2").orElseThrow();
-        assertThat(tag1.getServices()).contains(serviceRepository.findById(createResponseDTO.getId()).get());
-        assertThat(tag2.getServices()).contains(serviceRepository.findById(createResponseDTO.getId()).get());
+        assertThat(tag1.getServices()).contains(serviceRepository.findById(createResponseDTO.id()).get());
+        assertThat(tag2.getServices()).contains(serviceRepository.findById(createResponseDTO.id()).get());
 
         // Prepare new tag list for update (removes "tag2" and adds "tag3" and "tag4")
-        ServiceRequestDTO updateServiceDTO = new ServiceRequestDTO();
-        updateServiceDTO.setName("Test Service Updated");
-        updateServiceDTO.setDescription("Test Description Updated");
-        updateServiceDTO.setServiceTypeId(serviceType.getId());
-        updateServiceDTO.setTagNames(List.of("tag1", "tag3", "tag4"));
+        ServiceRequestDTO updateServiceDTO = createDTO("Updated Service", "Updated Description", serviceType.getId(), List.of("tag1", "tag3", "tag4"));
 
-        ServiceResponseDTO updateResponseDTO = serviceService.update(createResponseDTO.getId(), updateServiceDTO);
+        ServiceResponseDTO updateResponseDTO = serviceService.update(createResponseDTO.id(), updateServiceDTO);
 
         // Verify that the service was updated correctly
         assertThat(updateResponseDTO).isNotNull();
-        assertThat(updateResponseDTO.getName()).isEqualTo("Test Service Updated");
-        assertThat(updateResponseDTO.getDescription()).isEqualTo("Test Description Updated");
-        assertThat(updateResponseDTO.getServiceTypeName()).isEqualTo(serviceType.getName());
+        assertThat(updateResponseDTO.name()).isEqualTo("Updated Service");
+        assertThat(updateResponseDTO.description()).isEqualTo("Updated Description");
+        assertThat(updateResponseDTO.serviceTypeName()).isEqualTo(serviceType.getName());
 
         // Verify that the tags were updated
-        assertThat(updateResponseDTO.getTagNames()).containsExactlyInAnyOrder("tag1", "tag3", "tag4");
-        assertThat(updateResponseDTO.getTagNames()).doesNotContain("tag2");
+        assertThat(updateResponseDTO.tagNames()).containsExactlyInAnyOrder("tag1", "tag3", "tag4");
+        assertThat(updateResponseDTO.tagNames()).doesNotContain("tag2");
 
         // Verify that tag2 no longer has the service in their 'services' list
         tag2 = tagRepository.findByName("tag2").orElseThrow();
-        assertThat(tag2.getServices()).doesNotContain(serviceRepository.findById(createResponseDTO.getId()).get());
+        assertThat(tag2.getServices()).doesNotContain(serviceRepository.findById(createResponseDTO.id()).get());
 
         // Verify that tag1, tag3 and tag4 now have the service in their 'services' list
         tag1 = tagRepository.findByName("tag1").orElseThrow();
         Tag tag3 = tagRepository.findByName("tag3").orElseThrow();
         Tag tag4 = tagRepository.findByName("tag4").orElseThrow();
-        assertThat(tag1.getServices()).contains(serviceRepository.findById(createResponseDTO.getId()).get());
-        assertThat(tag3.getServices()).contains(serviceRepository.findById(createResponseDTO.getId()).get());
-        assertThat(tag4.getServices()).contains(serviceRepository.findById(createResponseDTO.getId()).get());
+        assertThat(tag1.getServices()).contains(serviceRepository.findById(createResponseDTO.id()).get());
+        assertThat(tag3.getServices()).contains(serviceRepository.findById(createResponseDTO.id()).get());
+        assertThat(tag4.getServices()).contains(serviceRepository.findById(createResponseDTO.id()).get());
     }
 
     @Test
     public void deleteService_removesTagAssociations() {
-        ServiceRequestDTO requestDTO = new ServiceRequestDTO();
-        requestDTO.setName("Test Deletion Service");
-        requestDTO.setDescription("To be deleted");
-        requestDTO.setServiceTypeId(serviceType.getId());
-        requestDTO.setTagNames(List.of("delete-tag1", "delete-tag2"));
+        ServiceRequestDTO serviceRequestDTO = createDTO("Test Deletion Service", "To be deleted", serviceType.getId(), List.of("delete-tag1", "delete-tag2"));
 
-        ServiceResponseDTO responseDTO = serviceService.create(requestDTO);
-        Long serviceId = responseDTO.getId();
+        ServiceResponseDTO responseDTO = serviceService.create(serviceRequestDTO);
+        Long serviceId = responseDTO.id();
 
         // Verify tag-service association exists
         Tag tag1 = tagRepository.findByName("delete-tag1").orElseThrow();

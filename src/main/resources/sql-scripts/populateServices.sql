@@ -1,7 +1,7 @@
 -- noinspection SqlNoDataSourceInspectionForFile
 
 -- Insert Service Types
-INSERT INTO service_type (id, name, created_at, updated_at) VALUES
+INSERT IGNORE INTO service_type (id, name, created_at, updated_at) VALUES
                                                                 (1, 'Beauty', NOW(), NOW()),
                                                                 (2, 'Fitness', NOW(), NOW()),
                                                                 (3, 'Education', NOW(), NOW()),
@@ -9,7 +9,7 @@ INSERT INTO service_type (id, name, created_at, updated_at) VALUES
                                                                 (5, 'Wellness', NOW(), NOW());
 
 -- Insert Tags
-INSERT INTO tag (id, name, is_custom, created_at, updated_at) VALUES
+INSERT IGNORE INTO tag (id, name, is_custom, created_at, updated_at) VALUES
                                                                   (1, 'salon', 0, NOW(), NOW()),
                                                                   (2, 'pedicure', 0, NOW(), NOW()),
                                                                   (3, 'manicure', 0, NOW(), NOW()),
@@ -27,8 +27,7 @@ INSERT INTO tag (id, name, is_custom, created_at, updated_at) VALUES
                                                                   (15, 'personal training', 0, NOW(), NOW());
 
 -- Insert Services
-INSERT INTO service (id, name, description, price, discount, is_negotiable, duration, service_type_id, created_at, updated_at)
-VALUES
+INSERT IGNORE INTO service (id, name, description, price, discount, negotiable, duration, service_type_id, created_at, updated_at) VALUES
     (1, 'Math & Tutoring Assistance', 'Supportive math and tutoring sessions designed to help students succeed.', 354.12, 15, 0, 120, 3, NOW(), NOW()),
     (2, 'Academic Coaching with Extras', 'Personalized tutoring and wellness support with spa-like relaxation.', 342.43, 11, 0, 120, 3, NOW(), NOW()),
     (3, 'Salon & Spa Experience', 'Rejuvenating salon treatments paired with a luxurious spa ambiance.', 222.91, 10, 0, 120, 1, NOW(), NOW()),
@@ -53,7 +52,7 @@ VALUES
 
 
 -- Insert Service-Tag Relations
-INSERT INTO service_tag (service_id, tag_id) VALUES
+INSERT IGNORE INTO service_tag (service_id, tag_id) VALUES
                                                  (1, 2), (1, 10), (1, 9),
                                                  (2, 9), (2, 10), (2, 8), (2, 14),
                                                  (3, 14), (3, 1), (3, 7),

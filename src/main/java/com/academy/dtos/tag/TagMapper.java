@@ -13,7 +13,10 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring")
 public abstract class TagMapper {
 
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "services", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     public abstract Tag toEntity(TagRequestDTO dto);
 
     @Mapping(source = "services", target = "serviceIds", qualifiedByName = "mapServicesToIds")
@@ -21,6 +24,8 @@ public abstract class TagMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "services", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     public abstract void updateEntityFromDto(TagRequestDTO dto, @MappingTarget Tag tag);
 
     @Named("mapServicesToIds")

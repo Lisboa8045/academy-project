@@ -35,8 +35,8 @@ public class Service {
     @Column(name="discount")
     private int discount;
 
-    @Column(name="is_negotiable")
-    private boolean isNegotiable = false; // Default value
+    @Column(name="negotiable")
+    private boolean negotiable = false; // Default value
 
     @Column(name="duration")
     private int duration;
@@ -57,7 +57,10 @@ public class Service {
     @JoinTable(
             name = "service_tag",
             joinColumns = @JoinColumn(name = "service_id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id")
+            inverseJoinColumns = @JoinColumn(name = "tag_id"),
+            uniqueConstraints = {
+                    @UniqueConstraint(columnNames = {"service_id", "tag_id"})
+            }
     )
     private List<Tag> tags = new ArrayList<>();
 

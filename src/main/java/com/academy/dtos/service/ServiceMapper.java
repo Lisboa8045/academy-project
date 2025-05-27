@@ -13,8 +13,11 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring")
 public abstract class ServiceMapper {
 
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "tags", ignore = true)
     @Mapping(target = "serviceType", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     public abstract Service toEntity(ServiceRequestDTO dto);
 
     @Mapping(source = "tags", target = "tagNames", qualifiedByName = "mapTagsToNames")
@@ -24,6 +27,8 @@ public abstract class ServiceMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "tags", ignore = true)
     @Mapping(target = "serviceType", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     public abstract void updateEntityFromDto(ServiceRequestDTO dto, @MappingTarget Service service);
 
     @Named("mapTagsToNames")

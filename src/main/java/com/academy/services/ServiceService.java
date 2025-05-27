@@ -33,9 +33,9 @@ public class ServiceService {
     // Create
     @Transactional
     public ServiceResponseDTO create(ServiceRequestDTO dto) {
-        List<Tag> tags = tagService.findOrCreateTagsByNames(dto.getTagNames());
-        ServiceType serviceType = serviceTypeRepository.findById(dto.getServiceTypeId())
-                .orElseThrow(() -> new EntityNotFoundException(ServiceType.class, dto.getServiceTypeId()));
+        List<Tag> tags = tagService.findOrCreateTagsByNames(dto.tagNames());
+        ServiceType serviceType = serviceTypeRepository.findById(dto.serviceTypeId())
+                .orElseThrow(() -> new EntityNotFoundException(ServiceType.class, dto.serviceTypeId()));
 
         Service service = serviceMapper.toEntity(dto);
         service.setServiceType(serviceType);
@@ -58,11 +58,11 @@ public class ServiceService {
         existing.getTags().clear();
 
         // Prepare new tags and associations
-        List<Tag> newTags = tagService.findOrCreateTagsByNames(dto.getTagNames());
+        List<Tag> newTags = tagService.findOrCreateTagsByNames(dto.tagNames());
         linkServiceToTags(existing, newTags);
 
-        ServiceType serviceType = serviceTypeRepository.findById(dto.getServiceTypeId())
-                .orElseThrow(() -> new EntityNotFoundException(ServiceType.class, dto.getServiceTypeId()));
+        ServiceType serviceType = serviceTypeRepository.findById(dto.serviceTypeId())
+                .orElseThrow(() -> new EntityNotFoundException(ServiceType.class, dto.serviceTypeId()));
 
         existing.setServiceType(serviceType);
         serviceMapper.updateEntityFromDto(dto, existing);
