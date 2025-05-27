@@ -17,4 +17,6 @@ public class Role {
 
     @Column(name = "name")
     private String name;
+    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<Member> members;
 }

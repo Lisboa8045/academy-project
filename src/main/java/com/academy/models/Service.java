@@ -29,6 +29,10 @@ public class Service {
     @Column(name="description")
     private String description;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private Member owner;
+
     @Column(name="price")
     private double price;
 

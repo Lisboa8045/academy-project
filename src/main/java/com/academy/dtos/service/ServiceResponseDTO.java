@@ -7,6 +7,7 @@ public record ServiceResponseDTO(
         Long id,
         String name,
         String description,
+        long ownerId,
         double price,
         int discount,
         boolean negotiable,

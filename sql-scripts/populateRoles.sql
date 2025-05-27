@@ -2,6 +2,6 @@
 INSERT INTO `role`
 (id, name)
 values
-    (0, 'ADMIN'),
-    (1, 'CLIENT'),
-    (2, 'WORKER');
+    (1, 'ADMIN'),
+    (2, 'CLIENT'),
+    (3, 'WORKER');

@@ -1,4 +1,4 @@
-package com.academy.services;
+package com.academy.config.authentication;
 
 import com.academy.models.Member;
 import com.academy.repositories.MemberRepository;
@@ -16,7 +16,7 @@ import java.util.List;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private MemberRepository memberRepository;
+    private final MemberRepository memberRepository;
 
     @Autowired
     public CustomUserDetailsService(MemberRepository memberRepository){
@@ -28,7 +28,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
 
-        GrantedAuthority authority = new SimpleGrantedAuthority(member.getRole().getName());
+        GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + member.getRole().getName());
         List<GrantedAuthority> authorities = Collections.singletonList(authority);
 
 
@@ -40,4 +40,5 @@ public class CustomUserDetailsService implements UserDetailsService {
                 authorities
         );
     }
+
 }
