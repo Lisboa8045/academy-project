@@ -48,13 +48,13 @@ public class ServiceProviderService {
     }
 
     public ServiceProviderResponseDTO createServiceProvider(ServiceProviderRequestDTO dto) {
-        Member member = memberRepository.findById(dto.getMemberId())
-                .orElseThrow(() -> new EntityNotFoundException(Member.class, dto.getMemberId()));
+        Member member = memberRepository.findById(dto.memberId())
+                .orElseThrow(() -> new EntityNotFoundException(Member.class, dto.memberId()));
 
-        com.academy.models.Service service = serviceRepository.findById(dto.getServiceId())
-                .orElseThrow(() -> new EntityNotFoundException(com.academy.models.Service.class, dto.getServiceId()));
+        com.academy.models.Service service = serviceRepository.findById(dto.serviceId())
+                .orElseThrow(() -> new EntityNotFoundException(com.academy.models.Service.class, dto.serviceId()));
 
-        ProviderPermission permission = ProviderPermission.values()[dto.getPermission()];
+        ProviderPermission permission = ProviderPermission.values()[dto.permission()];
 
         ServiceProvider serviceProvider = serviceProviderMapper.toEntity(dto);
         serviceProvider.setProvider(member);
@@ -77,14 +77,14 @@ public class ServiceProviderService {
 //            serviceProvider.setProvider(member);
 //        }
 
-        if(details.getServiceId() != null) {
-            com.academy.models.Service service = serviceRepository.findById(details.getServiceId())
-                    .orElseThrow(()-> new EntityNotFoundException(ServiceProvider.class, details.getServiceId()));
+        if(details.serviceId() != null) {
+            com.academy.models.Service service = serviceRepository.findById(details.serviceId())
+                    .orElseThrow(()-> new EntityNotFoundException(ServiceProvider.class, details.serviceId()));
             serviceProvider.setService(service);
         }
 
-        if (details.getPermission() != null) {
-            int ordinal = details.getPermission();
+        if (details.permission() != null) {
+            int ordinal = details.permission();
 
             ProviderPermission[] permissions = ProviderPermission.values();
 

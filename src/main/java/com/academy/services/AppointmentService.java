@@ -1,4 +1,5 @@
 // AppointmentService.java
+
 package com.academy.services;
 
 import com.academy.dtos.appointment.AppointmentMapper;
@@ -15,82 +16,129 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+
 public class AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
+
     private final ServiceProviderRepository serviceProviderRepository;
+
     private final AppointmentMapper appointmentMapper;
+
     private final MemberRepository memberRepository;
 
     @Autowired
+
     public AppointmentService(AppointmentRepository appointmentRepository, ServiceProviderRepository serviceProviderRepository, AppointmentMapper appointmentMapper, MemberRepository memberRepository) {
+
         this.appointmentRepository = appointmentRepository;
+
         this.serviceProviderRepository = serviceProviderRepository;
+
         this.appointmentMapper = appointmentMapper;
+
         this.memberRepository = memberRepository;
+
     }
 
     public List<AppointmentResponseDTO> getAllAppointments() {
+
         return appointmentRepository.findAll().stream()
+
                 .map(appointmentMapper::toResponseDTO)
+
                 .collect(Collectors.toList());
+
     }
 
-    public Optional<AppointmentResponseDTO> getAppointmentById(int id) {
+    public AppointmentResponseDTO getAppointmentById(int id) {
+
         return appointmentRepository.findById(id)
-                .map(appointmentMapper::toResponseDTO);
+
+                .map(appointmentMapper::toResponseDTO)
+
+                .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
+
     }
 
     public AppointmentResponseDTO createAppointment(AppointmentRequestDTO dto) {
-        ServiceProvider serviceProvider = serviceProviderRepository.findById(dto.getServiceProviderId())
-                        .orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, dto.getServiceProviderId()));
 
-        Member member = memberRepository.findById(dto.getMemberId())
-                .orElseThrow(() -> new EntityNotFoundException(Member.class, dto.getMemberId()));
+        ServiceProvider serviceProvider = serviceProviderRepository.findById(dto.serviceProviderId())
+
+                .orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, dto.serviceProviderId()));
+
+        Member member = memberRepository.findById(dto.memberId())
+
+                .orElseThrow(() -> new EntityNotFoundException(Member.class, dto.memberId()));
+
         Appointment appointment = appointmentMapper.toEntity(dto);
 
         appointment.setServiceProvider(serviceProvider);
+
         appointment.setMember(member);
 
         return appointmentMapper.toResponseDTO(appointmentRepository.save(appointment));
+
     }
 
     public AppointmentResponseDTO updateAppointment(int id, AppointmentRequestDTO appointmentDetails) {
+
         Appointment appointment = appointmentRepository.findById(id)
+
                 .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
-        if(appointmentDetails.getMemberId() != null){
-            Member member = memberRepository.findById(appointmentDetails.getMemberId())
-                            .orElseThrow(()-> new EntityNotFoundException(Member.class, appointmentDetails.getMemberId()));
+
+        if(appointmentDetails.memberId() != null){
+
+            Member member = memberRepository.findById(appointmentDetails.memberId())
+
+                    .orElseThrow(()-> new EntityNotFoundException(Member.class, appointmentDetails.memberId()));
+
             appointment.setMember(member);
+
         }
-        if(appointmentDetails.getServiceProviderId() != null) {
-            ServiceProvider serviceProvider = serviceProviderRepository.findById(appointmentDetails.getServiceProviderId())
-                    .orElseThrow(()-> new EntityNotFoundException(ServiceProvider.class, appointmentDetails.getServiceProviderId()));
+
+        if(appointmentDetails.serviceProviderId() != null) {
+
+            ServiceProvider serviceProvider = serviceProviderRepository.findById(appointmentDetails.serviceProviderId())
+
+                    .orElseThrow(()-> new EntityNotFoundException(ServiceProvider.class, appointmentDetails.serviceProviderId()));
+
             appointment.setServiceProvider(serviceProvider);;
+
         }
-        if(appointmentDetails.getRating() != appointment.getRating() )appointment.setRating(appointmentDetails.getRating());
-        if(appointmentDetails.getComment() != null) appointment.setComment(appointmentDetails.getComment());
+
+        if(appointmentDetails.rating() != appointment.getRating() )appointment.setRating(appointmentDetails.rating());
+
+        if(appointmentDetails.comment() != null) appointment.setComment(appointmentDetails.comment());
 
         return appointmentMapper.toResponseDTO(appointmentRepository.save(appointment));
+
     }
 
     public void deleteAppointment(int id) {
+
         if(!appointmentRepository.existsById(id)) throw new EntityNotFoundException(Appointment.class, id);
+
         appointmentRepository.deleteById(id);
+
     }
 
     public void deleteReview(int id){
+
         Appointment appointment = appointmentRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
+
+                .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
 
         appointment.setRating(null);
+
         appointment.setComment(null);
+
         appointmentRepository.save(appointment);
 
     }
 
 }
+

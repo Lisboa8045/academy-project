@@ -1,23 +1,9 @@
 package com.academy.dtos.service_provider;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import jakarta.validation.constraints.*;
 
-
-@Data
-public class ServiceProviderRequestDTO {
-
-
-    @NotNull
-    private Long memberId;
-
-    @NotNull
-    private Long serviceId;
-
-    @Min(0)
-    @Max(3)
-    private Integer permission;
-
-}
+public record ServiceProviderRequestDTO(
+        @NotNull Long memberId,
+        @NotNull Long serviceId,
+        @Min(0) @Max(3) Integer permission
+) {}

@@ -1,13 +1,8 @@
 package com.academy.dtos.appointment;
 
-import lombok.Data;
-
-@Data
-public class AppointmentReviewResponseDTO {
-        private Long id;
-        private Integer rating;
-        private String comment;
-        private String memberUsername;
-
-}
-
+public record AppointmentReviewResponseDTO(
+        Long id,
+        Integer rating,
+        String comment,
+        String memberUsername
+) {}

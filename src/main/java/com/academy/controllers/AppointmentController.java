@@ -3,8 +3,6 @@ package com.academy.controllers;
 
 import com.academy.dtos.appointment.AppointmentRequestDTO;
 import com.academy.dtos.appointment.AppointmentResponseDTO;
-import com.academy.exceptions.EntityNotFoundException;
-import com.academy.models.Appointment;
 import com.academy.services.AppointmentService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -29,9 +27,7 @@ public class AppointmentController {
 
     @GetMapping("/{id}")
     public ResponseEntity<AppointmentResponseDTO> getAppointmentById(@PathVariable int id) {
-        return appointmentService.getAppointmentById(id)
-                .map(ResponseEntity::ok)
-                .orElseThrow(()-> new EntityNotFoundException(Appointment.class, id));
+        return ResponseEntity.ok(appointmentService.getAppointmentById(id));
     }
 
     @PostMapping
@@ -42,8 +38,8 @@ public class AppointmentController {
 
     @PutMapping("/{id}")
     public ResponseEntity<AppointmentResponseDTO> updateAppointment(@PathVariable int id, @RequestBody AppointmentRequestDTO appointmentDetails) {
-            AppointmentResponseDTO updated = appointmentService.updateAppointment(id, appointmentDetails);
-            return ResponseEntity.ok(updated);
+        AppointmentResponseDTO updated = appointmentService.updateAppointment(id, appointmentDetails);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
@@ -63,4 +59,3 @@ public class AppointmentController {
         return ResponseEntity.noContent().build();
     }
 }
-
