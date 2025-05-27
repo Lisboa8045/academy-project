@@ -3,9 +3,8 @@ package com.academy.services;
 import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.exceptions.EntityNotFoundException;
-import com.academy.models.Service;
-import com.academy.models.ServiceType;
-import com.academy.models.Tag;
+import com.academy.models.*;
+import com.academy.repositories.MemberRepository;
 import com.academy.repositories.ServiceRepository;
 import com.academy.repositories.ServiceTypeRepository;
 import com.academy.repositories.TagRepository;
@@ -36,12 +35,15 @@ public class ServiceIntegrationTests {
     private final ServiceRepository serviceRepository;
     private final ServiceTypeRepository serviceTypeRepository;
     private final TagRepository tagRepository;
+    private final MemberRepository memberRepository;
 
     @Autowired
     public ServiceIntegrationTests(ServiceService serviceService,
                                    TagService tagService,
                                    ServiceRepository serviceRepository,
-                                   ServiceTypeRepository serviceTypeRepository, TagRepository tagRepository
+                                   ServiceTypeRepository serviceTypeRepository,
+                                   TagRepository tagRepository,
+                                   MemberRepository memberRepository
     ) {
 
         this.serviceService = serviceService;
@@ -49,6 +51,7 @@ public class ServiceIntegrationTests {
         this.serviceRepository = serviceRepository;
         this.serviceTypeRepository = serviceTypeRepository;
         this.tagRepository = tagRepository;
+        this.memberRepository = memberRepository;
     }
 
     private ServiceType serviceType;
@@ -56,10 +59,21 @@ public class ServiceIntegrationTests {
 
     @BeforeEach
     public void setUp() {
-        // Set up a ServiceType and Tags before each test
+        // Set up a ServiceType, Member and Tags before each test
         serviceType = new ServiceType();
         serviceType.setName("Test Service Type");
         serviceType = serviceTypeRepository.save(serviceType);
+
+        Role role = new Role();
+        role.setId(1);
+        role.setName("Test Owner");
+
+        Member member = new Member();
+        member.setUsername("owner");
+        member.setPassword("password");
+        member.setEmail("owner@email.com");
+        member.setRole(role);
+        memberRepository.save(member);
 
         tag1 = new Tag();
         tag1.setName("tag1");
@@ -78,7 +92,7 @@ public class ServiceIntegrationTests {
     }
 
     private ServiceRequestDTO createDTO(String name, String description, Long serviceTypeId, List<String> tags) {
-        return new ServiceRequestDTO(name, description, 80, 20, false, 30, serviceTypeId, tags);
+        return new ServiceRequestDTO(name, description, 1L,80, 20, false, 30, serviceTypeId, tags);
     }
 
     @Test

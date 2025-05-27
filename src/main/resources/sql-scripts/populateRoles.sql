@@ -1,5 +1,5 @@
 -- Populates role table
-INSERT INTO `role`
+INSERT IGNORE INTO `role`
 (id, name)
 values
     (1, 'ADMIN'),

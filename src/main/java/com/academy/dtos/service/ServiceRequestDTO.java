@@ -13,6 +13,6 @@ public record ServiceRequestDTO(
         int discount,
         boolean negotiable,
         @Positive int duration,
-        @NotNull ServiceType serviceType,
+        @NotNull Long serviceTypeId,
         List<String> tagNames
 ) {}

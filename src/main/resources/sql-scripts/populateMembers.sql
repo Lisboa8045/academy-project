@@ -1,6 +1,6 @@
 -- Populates member table with one of every role, address/postal-code/phone are all equal
 -- Assumes that role table was initialized using populateRoles.sql script
-INSERT INTO `member`
+INSERT IGNORE INTO `member`
 (id, username, password, email, address, postal_code, phone_number, created_at, updated_at, role_id)
 values
     (1, 'admin', 'Admin123@', 'admin@example.com',
