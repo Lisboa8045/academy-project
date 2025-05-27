@@ -1,6 +1,8 @@
 package com.academy.models.task;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -28,9 +30,11 @@ public class Task {
     private String status;
 
     @Column(name = "created_at")
+    @CreationTimestamp
     private LocalTime createdAt;
 
     @Column(name = "update_at")
+    @UpdateTimestamp
     private LocalTime updatedAt;
 
     @Enumerated(EnumType.STRING)
