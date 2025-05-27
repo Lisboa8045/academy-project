@@ -6,7 +6,9 @@ import com.academy.models.log.Log;
 import com.academy.repositories.LogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -16,11 +18,15 @@ public class LogService {
 
     private final LogRepository logRepository;
 
-    public void logAction(Member member, ActionEnum actionEnum, String details){
+    public void logAction(Member member, ActionEnum actionEnum, String details, MultipartFile file) throws IOException {
         Log log = new Log();
         log.setMember(member);
         log.setAction(actionEnum);
         log.setDetails(details);
+
+        if(file != null && !file.isEmpty()) {
+            log.setAttachment(file.getBytes());
+        }
         logRepository.save(log);
     }
 

@@ -21,13 +21,6 @@ import java.time.DayOfWeek;
 
 public class Availability {
 
-    public Availability(Member member, DayOfWeek dayOfWeek, String startDateTime, String endDateTime) {
-        this.setMember(member);
-        this.setStartDateTime(LocalDateTime.parse(startDateTime));
-        this.setEndDateTime(LocalDateTime.parse(endDateTime));
-        this.setDayOfWeek(dayOfWeek);
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="id")
