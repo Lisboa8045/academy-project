@@ -39,8 +39,8 @@ public class Service {
     @Column(name="discount")
     private int discount;
 
-    @Column(name="is_negotiable")
-    private boolean isNegotiable = false; // Default value
+    @Column(name="negotiable")
+    private boolean negotiable = false; // Default value
 
     @Column(name="duration")
     private int duration;
@@ -61,14 +61,17 @@ public class Service {
     @JoinTable(
             name = "service_tag",
             joinColumns = @JoinColumn(name = "service_id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id")
+            inverseJoinColumns = @JoinColumn(name = "tag_id"),
+            uniqueConstraints = {
+                    @UniqueConstraint(columnNames = {"service_id", "tag_id"})
+            }
     )
     private List<Tag> tags = new ArrayList<>();
 
     public void removeAllTags() {
-        for (Tag tag : tags) {
-            tag.getServices().remove(this);
+        for (Tag tag : new ArrayList<>(tags)) {
+            tag.getServices().remove(this); // Remove this service from each associated tag
         }
-        tags.clear();
+        tags.clear(); // Clear the local list
     }
 }

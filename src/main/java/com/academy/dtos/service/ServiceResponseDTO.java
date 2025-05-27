@@ -1,7 +1,6 @@
 package com.academy.dtos.service;
 
-import com.academy.models.ServiceType;
-
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record ServiceResponseDTO(
@@ -13,6 +12,8 @@ public record ServiceResponseDTO(
         int discount,
         boolean negotiable,
         int duration,
-        ServiceType serviceType,
-        List<String> tagNames
+        String serviceTypeName,
+        List<String> tagNames,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 ) {}
