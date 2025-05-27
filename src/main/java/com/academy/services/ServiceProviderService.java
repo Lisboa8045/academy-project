@@ -6,8 +6,8 @@ import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
 import com.academy.dtos.service_provider.ServiceProviderResponseDTO;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.Member;
-import com.academy.models.service_provider.ProviderPermission;
-import com.academy.models.service_provider.ServiceProvider;
+import com.academy.models.service.service_provider.ProviderPermissionEnum;
+import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.MemberRepository;
 import com.academy.repositories.ServiceProviderRepository;
 import com.academy.repositories.ServiceRepository;
@@ -24,15 +24,21 @@ public class ServiceProviderService {
     private final ServiceProviderMapper serviceProviderMapper;
     private final MemberRepository memberRepository;
     private final ServiceRepository serviceRepository;
+    private final ProviderPermissionService providerPermissionService;
 
 
 
     @Autowired
-    public ServiceProviderService(ServiceProviderRepository serviceProviderRepository, ServiceProviderMapper serviceProviderMapper, MemberRepository memberRepository, ServiceRepository serviceRepository) {
+    public ServiceProviderService(ServiceProviderRepository serviceProviderRepository,
+                                  ServiceProviderMapper serviceProviderMapper,
+                                  MemberRepository memberRepository,
+                                  ServiceRepository serviceRepository,
+                                  ProviderPermissionService providerPermissionService) {
         this.serviceProviderRepository = serviceProviderRepository;
         this.serviceProviderMapper = serviceProviderMapper;
         this.memberRepository = memberRepository;
         this.serviceRepository = serviceRepository;
+        this.providerPermissionService = providerPermissionService;
     }
 
     public List<ServiceProviderResponseDTO> getAllServiceProviders() {
@@ -51,17 +57,18 @@ public class ServiceProviderService {
         Member member = memberRepository.findById(dto.memberId())
                 .orElseThrow(() -> new EntityNotFoundException(Member.class, dto.memberId()));
 
-        com.academy.models.Service service = serviceRepository.findById(dto.serviceId())
-                .orElseThrow(() -> new EntityNotFoundException(com.academy.models.Service.class, dto.serviceId()));
+        com.academy.models.service.Service service = serviceRepository.findById(dto.serviceId())
+                .orElseThrow(() -> new EntityNotFoundException(com.academy.models.service.Service.class, dto.serviceId()));
 
-        ProviderPermission permission = ProviderPermission.values()[dto.permission()];
+        //ProviderPermissionEnum permission = ProviderPermissionEnum.values()[dto.permissions()];
 
         ServiceProvider serviceProvider = serviceProviderMapper.toEntity(dto);
         serviceProvider.setProvider(member);
         serviceProvider.setService(service);
-        serviceProvider.setPermission(permission);
 
         ServiceProvider saved = serviceProviderRepository.save(serviceProvider);
+
+        providerPermissionService.createPermissionsViaList(dto.permissions(),saved);
         return serviceProviderMapper.toResponseDTO(saved);
     }
 
@@ -78,23 +85,46 @@ public class ServiceProviderService {
 //        }
 
         if(details.serviceId() != null) {
-            com.academy.models.Service service = serviceRepository.findById(details.serviceId())
+            com.academy.models.service.Service service = serviceRepository.findById(details.serviceId())
                     .orElseThrow(()-> new EntityNotFoundException(ServiceProvider.class, details.serviceId()));
             serviceProvider.setService(service);
         }
 
-        if (details.permission() != null) {
-            int ordinal = details.permission();
-
-            ProviderPermission[] permissions = ProviderPermission.values();
-
-            serviceProvider.setPermission(permissions[ordinal]);
+        serviceProvider = serviceProviderRepository.save(serviceProvider);
+        if (details.permissions() != null) {
+            providerPermissionService.createPermissionsViaList(details.permissions(), serviceProvider);
         }
-        return serviceProviderMapper.toResponseDTO(serviceProviderRepository.save(serviceProvider));
+        return serviceProviderMapper.toResponseDTO(serviceProvider);
     }
 
     public void deleteServiceProvider(long id) {
         if(!serviceProviderRepository.existsById(id)) throw new EntityNotFoundException(ServiceProvider.class, id);
         serviceProviderRepository.deleteById(id);
+    }
+
+    public List<ProviderPermissionEnum> getPermissionsByProviderUsernameAndServiceId(String username, Long serviceId){
+        ServiceProvider serviceProvider= getServiceProviderByProviderIdAndServiceID(username, serviceId);
+        return getPermissions(serviceProvider.getId());
+    }
+
+    private ServiceProvider getServiceProviderByProviderIdAndServiceID(String username, Long serviceId) {
+        Optional<ServiceProvider> optionalServiceProvider =
+                serviceProviderRepository.findByProviderUsernameAndServiceId(username, serviceId);
+        if(optionalServiceProvider.isEmpty())
+            throw new EntityNotFoundException(ServiceProvider.class,
+                    " not found for user " + username + " and serviceId " + serviceId);
+        return optionalServiceProvider.get();
+    }
+
+    private List<ProviderPermissionEnum> getPermissions(Long id){
+        return providerPermissionService.getPermissions(id);
+    }
+
+    public boolean existsByServiceId(Long serviceId) {
+        return serviceProviderRepository.existsByServiceId(serviceId);
+    }
+
+    public boolean existsByServiceIdAndProviderUsername(Long serviceId, String username) {
+        return serviceProviderRepository.existsByServiceIdAndProviderUsername(serviceId, username);
     }
 }

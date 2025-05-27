@@ -1,6 +1,6 @@
 package com.academy.models;
 
-import com.academy.models.service_provider.ServiceProvider;
+import com.academy.models.service.service_provider.ServiceProvider;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

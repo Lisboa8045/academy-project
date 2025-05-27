@@ -1,5 +1,6 @@
 package com.academy.models;
 
+import com.academy.models.service.Service;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

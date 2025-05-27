@@ -1,7 +1,8 @@
 package com.academy.dtos.service;
 
-import com.academy.models.Service;
+import com.academy.models.service.Service;
 import com.academy.models.Tag;
+import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.repositories.MemberRepository;
 import com.academy.repositories.TagRepository;
 import org.mapstruct.Mapper;
@@ -20,9 +21,13 @@ public abstract class ServiceMapper {
     @Autowired
     protected MemberRepository memberRepository;
 
-    @Mapping(source = "tagNames", target = "tags", qualifiedByName = "mapNamesToTags")
-    @Mapping(expression = "java(memberRepository.findById(dto.ownerId()).orElseThrow())", target ="owner")
-    public abstract Service toEntity(ServiceRequestDTO dto);
+    @Mapping(source = "dto.tagNames", target = "tags", qualifiedByName = "mapNamesToTags")
+    @Mapping(expression = "java(memberRepository.findById(ownerId).orElseThrow())", target ="owner")
+    public abstract Service toEntity(ServiceRequestDTO dto, Long ownerId);
+
+    @Mapping(source = "service.tags", target = "tagNames", qualifiedByName = "mapTagsToNames")
+    @Mapping(expression = "java(service.getOwner().getId())", target = "ownerId")
+    public abstract ServiceResponseDTO toDto(Service service, List<ProviderPermissionEnum> permissions);
 
     @Mapping(source = "tags", target = "tagNames", qualifiedByName = "mapTagsToNames")
     @Mapping(expression = "java(service.getOwner().getId())", target = "ownerId")
@@ -45,4 +50,5 @@ public abstract class ServiceMapper {
                 .map(Tag::getName)
                 .collect(Collectors.toList());
     }
+
 }

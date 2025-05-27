@@ -4,7 +4,7 @@ package com.academy.controllers;
 import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
 import com.academy.dtos.service_provider.ServiceProviderResponseDTO;
 import com.academy.exceptions.EntityNotFoundException;
-import com.academy.models.service_provider.ServiceProvider;
+import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.services.ServiceProviderService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/service-providers")
 public class ServiceProviderController {
-    private ServiceProviderService serviceProviderService;
+    private final ServiceProviderService serviceProviderService;
 
     public ServiceProviderController(ServiceProviderService serviceProviderService) {
         this.serviceProviderService = serviceProviderService;

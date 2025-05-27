@@ -1,10 +1,10 @@
-package com.academy.models.service_provider;
+package com.academy.models.service.service_provider;
 
 import com.academy.models.Appointment;
 
 import com.academy.models.Member;
 
-import com.academy.models.Service;
+import com.academy.models.service.Service;
 
 import jakarta.persistence.*;
 
@@ -26,56 +26,37 @@ import java.util.List;
 
 @Entity
 
-@Table(name="service_provider")
-
-@Getter
-
+@Table(name="service_provider",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"member_id", "service_id"}))@Getter
 @Setter
-
 @ToString
-
 public class ServiceProvider {
 
     @Id
-
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-
     @Column(name="service_provider_id")
-
     private long id;
 
     @ManyToOne
-
     @JoinColumn(name="member_id")
-
     private Member provider;
 
     @ManyToOne
-
     @JoinColumn(name="service_id")
-
     private Service service;
 
     @OneToMany(mappedBy = "serviceProvider")
-
     private List<Appointment> appointmentList;
 
-    @Enumerated(EnumType.STRING)
-
-    @Column(name="provider_permission")
-
-    private ProviderPermission permission;
+    @OneToMany(mappedBy="serviceProvider")
+    private List<ProviderPermission> permissions;
 
     @Column(name="created_at", updatable = false)
-
     @CreationTimestamp
-
     private LocalDateTime createdAt;
 
     @Column(name="updated_at")
-
     @UpdateTimestamp
-
     private LocalDateTime updatedAt;
 
 }

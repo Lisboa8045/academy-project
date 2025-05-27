@@ -1,6 +1,7 @@
 package com.academy.dtos.service;
 
-import com.academy.models.ServiceType;
+import com.academy.models.service.ServiceTypeEnum;
+import com.academy.models.service.service_provider.ProviderPermissionEnum;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ public record ServiceResponseDTO(
         int discount,
         boolean negotiable,
         int duration,
-        ServiceType serviceType,
+        List<ProviderPermissionEnum> permissions,
+        ServiceTypeEnum serviceType,
         List<String> tagNames
 ) {}
