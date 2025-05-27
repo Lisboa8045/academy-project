@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "member")
@@ -38,6 +39,9 @@ public class Member {
 
     @Column(name = "phone_number")
     private String phoneNumber;
+
+    @OneToMany(mappedBy = "owner")
+    private List<Service> createdServices;
 
     @Column(name = "created_at")
     @CreationTimestamp
