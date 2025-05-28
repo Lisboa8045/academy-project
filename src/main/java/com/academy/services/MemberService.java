@@ -1,14 +1,13 @@
 package com.academy.services;
 
 import com.academy.config.authentication.JwtUtil;
+import com.academy.dtos.member.MemberRequestDTO;
+import com.academy.dtos.member.MemberResponseDTO;
+import com.academy.dtos.register.LoginRequestDto;
 import com.academy.dtos.register.LoginResponseDto;
 import com.academy.dtos.register.MemberMapper;
-import com.academy.dtos.register.LoginRequestDto;
 import com.academy.dtos.register.RegisterRequestDto;
-import com.academy.exceptions.AuthenticationException;
-import com.academy.exceptions.InvalidArgumentException;
-import com.academy.exceptions.EntityAlreadyExists;
-import com.academy.exceptions.NotFoundException;
+import com.academy.exceptions.*;
 import com.academy.models.Member;
 import com.academy.models.Role;
 import com.academy.repositories.MemberRepository;
@@ -85,5 +84,37 @@ public class MemberService {
         }
         throw new AuthenticationException(messageSource.getMessage("auth.invalid", null, LocaleContextHolder.getLocale()));
 
+    }
+
+    public void deleteMember(long id) {
+        if(!memberRepository.existsById(id)) throw new EntityNotFoundException(Member.class,id);
+
+        memberRepository.deleteById(id);
+    }
+
+    public MemberResponseDTO editMember(long id, MemberRequestDTO memberRequestDTO){
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(Member.class, id));
+
+        if(memberRequestDTO.address() != null){
+            member.setAddress(memberRequestDTO.address());
+        }
+
+        if(memberRequestDTO.postalCode() != null){
+            member.setPostalCode(memberRequestDTO.postalCode());
+        }
+
+        if(memberRequestDTO.phoneNumber() != null){
+            member.setPhoneNumber(memberRequestDTO.phoneNumber());
+        }
+
+        if(memberRequestDTO.email() != null){
+            member.setEmail(memberRequestDTO.email());
+        }
+
+        if(memberRequestDTO.password() != null){
+            member.setPassword(memberRequestDTO.password());
+        }
+        return memberMapper.toResponseDTO(memberRepository.save(member));
     }
 }
