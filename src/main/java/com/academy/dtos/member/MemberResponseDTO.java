@@ -6,5 +6,6 @@ public record MemberResponseDTO(
         String email,
         String address,
         String postalCode,
-        String phoneNumber
+        String phoneNumber,
+        String role
 ) {}

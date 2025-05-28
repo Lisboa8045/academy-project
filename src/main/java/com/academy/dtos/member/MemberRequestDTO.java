@@ -7,5 +7,6 @@ public record MemberRequestDTO(
         String address,
         String postalCode,
         String phoneNumber,
-        @NotNull String password
+        @NotNull String password,
+        @NotNull Long roleId
 ) {}

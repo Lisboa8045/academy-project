@@ -20,7 +20,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class MemberService {
@@ -115,6 +117,24 @@ public class MemberService {
         if(memberRequestDTO.password() != null){
             member.setPassword(memberRequestDTO.password());
         }
+
+        if(memberRequestDTO.roleId() != null){
+            Role newRole = roleRepository.findById(memberRequestDTO.roleId())
+                    .orElseThrow(() -> new EntityNotFoundException(Role.class, memberRequestDTO.roleId()));
+            member.setRole(newRole);
+        }
         return memberMapper.toResponseDTO(memberRepository.save(member));
+    }
+
+    public List<MemberResponseDTO> getAllMembers() {
+        return memberRepository.findAll().stream()
+                .map(memberMapper::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    public MemberResponseDTO getMemberById(long id) {
+        return memberRepository.findById(id)
+                .map(memberMapper::toResponseDTO)
+                .orElseThrow(() -> new EntityNotFoundException(Member.class, id));
     }
 }

@@ -6,6 +6,8 @@ import com.academy.services.MemberService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("auth/members")
 public class MemberController {
@@ -25,5 +27,15 @@ public class MemberController {
     public ResponseEntity<MemberResponseDTO> editMember(@PathVariable long id, @RequestBody MemberRequestDTO memberRequestDTO){
         MemberResponseDTO memberResponseDTO = memberService.editMember(id, memberRequestDTO);
         return ResponseEntity.ok(memberResponseDTO);
+    }
+
+    @GetMapping
+    public List<MemberResponseDTO> getAllMembers() {
+        return memberService.getAllMembers();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<MemberResponseDTO> getMemberById(@PathVariable Long id) {
+        return ResponseEntity.ok(memberService.getMemberById(id));
     }
 }
