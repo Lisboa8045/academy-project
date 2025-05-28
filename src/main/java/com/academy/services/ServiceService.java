@@ -11,6 +11,7 @@ import com.academy.exceptions.ServiceNotFoundException;
 import com.academy.models.Member;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
+import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.ServiceRepository;
 import com.academy.repositories.TagRepository;
 import jakarta.transaction.Transactional;
@@ -71,6 +72,7 @@ public class ServiceService {
 
         Service updated = serviceMapper.toEntity(dto, member.getId());
         updated.setId(existing.getId());  // Retain existing ID
+        updated.setServiceProviders(existing.getServiceProviders());
         updated = serviceRepository.save(updated);
 
         return serviceMapper.toDto(updated, getPermissionsByProviderUsernameAndServiceId(username, updated.getId()));
@@ -119,6 +121,13 @@ public class ServiceService {
     }
     private boolean hasServiceProvider(String username, Long serviceId){
         return serviceProviderService.existsByServiceIdAndProviderUsername(serviceId, username);
+    }
+    @Transactional
+    public ServiceResponseDTO updateMemberPermissions(Long serviceId, Long memberId, List<ProviderPermissionEnum> permissions){
+        ServiceProvider serviceProvider = serviceProviderService.getByServiceIdAndMemberId(serviceId, memberId);
+        serviceProviderService.deleteAllPermissions(serviceProvider);
+        serviceProviderService.addPermissions(serviceProvider, permissions);
+        return getById(serviceId);
     }
 
 }
