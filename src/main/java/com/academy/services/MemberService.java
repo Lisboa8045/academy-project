@@ -1,9 +1,11 @@
 package com.academy.services;
 
 import com.academy.config.authentication.JwtUtil;
+import com.academy.dtos.member.MemberRequestDTO;
+import com.academy.dtos.member.MemberResponseDTO;
+import com.academy.dtos.register.LoginRequestDto;
 import com.academy.dtos.register.LoginResponseDto;
 import com.academy.dtos.register.MemberMapper;
-import com.academy.dtos.register.LoginRequestDto;
 import com.academy.dtos.register.RegisterRequestDto;
 import com.academy.exceptions.*;
 import com.academy.models.Member;
@@ -18,7 +20,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class MemberService {
@@ -89,4 +93,55 @@ public class MemberService {
             throw new MemberNotFoundException(username);
         return optionalMember.get();
     }
+
+    public void deleteMember(long id) {
+        if(!memberRepository.existsById(id)) throw new EntityNotFoundException(Member.class,id);
+
+        memberRepository.deleteById(id);
+    }
+
+    public MemberResponseDTO editMember(long id, MemberRequestDTO memberRequestDTO){
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(Member.class, id));
+
+        if(memberRequestDTO.address() != null){
+            member.setAddress(memberRequestDTO.address());
+        }
+
+        if(memberRequestDTO.postalCode() != null){
+            member.setPostalCode(memberRequestDTO.postalCode());
+        }
+
+        if(memberRequestDTO.phoneNumber() != null){
+            member.setPhoneNumber(memberRequestDTO.phoneNumber());
+        }
+
+        if(memberRequestDTO.email() != null){
+            member.setEmail(memberRequestDTO.email());
+        }
+
+        if(memberRequestDTO.password() != null){
+            member.setPassword(memberRequestDTO.password());
+        }
+
+        if(memberRequestDTO.roleId() != null){
+            Role newRole = roleRepository.findById(memberRequestDTO.roleId())
+                    .orElseThrow(() -> new EntityNotFoundException(Role.class, memberRequestDTO.roleId()));
+            member.setRole(newRole);
+        }
+        return memberMapper.toResponseDTO(memberRepository.save(member));
+    }
+
+    public List<MemberResponseDTO> getAllMembers() {
+        return memberRepository.findAll().stream()
+                .map(memberMapper::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    public MemberResponseDTO getMemberById(long id) {
+        return memberRepository.findById(id)
+                .map(memberMapper::toResponseDTO)
+                .orElseThrow(() -> new EntityNotFoundException(Member.class, id));
+    }
+
 }
