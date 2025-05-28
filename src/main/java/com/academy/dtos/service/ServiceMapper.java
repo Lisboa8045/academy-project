@@ -2,7 +2,6 @@ package com.academy.dtos.service;
 
 import com.academy.models.service.Service;
 import com.academy.models.Tag;
-import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.repositories.MemberRepository;
 import com.academy.repositories.TagRepository;
 import org.mapstruct.Mapper;
@@ -21,7 +20,11 @@ public abstract class ServiceMapper {
     @Autowired
     protected MemberRepository memberRepository;
 
-    @Mapping(source = "dto.tagNames", target = "tags", qualifiedByName = "mapNamesToTags")
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "tags", ignore = true)
+    @Mapping(target = "serviceType", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     @Mapping(expression = "java(memberRepository.findById(ownerId).orElseThrow())", target ="owner")
     public abstract Service toEntity(ServiceRequestDTO dto, Long ownerId);
 
@@ -29,26 +32,20 @@ public abstract class ServiceMapper {
     @Mapping(expression = "java(service.getOwner().getId())", target = "ownerId")
     public abstract ServiceResponseDTO toDto(Service service, List<ProviderPermissionEnum> permissions);
 
-    @Mapping(source = "tags", target = "tagNames", qualifiedByName = "mapTagsToNames")
-    @Mapping(expression = "java(service.getOwner().getId())", target = "ownerId")
-    public abstract ServiceResponseDTO toDto(Service service);
-
-    @Named("mapNamesToTags")
-    protected List<Tag> mapNamesToTags(List<String> tagNames) {
-        if (tagNames == null || tagNames.isEmpty()) {
-            return null;
-        }
-        return tagRepository.findAllByNameIn(tagNames);
-    }
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "tags", ignore = true)
+    @Mapping(target = "serviceType", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    public abstract void updateEntityFromDto(ServiceRequestDTO dto, @MappingTarget Service service);
 
     @Named("mapTagsToNames")
     protected List<String> mapTagsToNames(List<Tag> tags) {
         if (tags == null || tags.isEmpty()) {
-            return null;
+            return List.of();
         }
         return tags.stream()
                 .map(Tag::getName)
                 .collect(Collectors.toList());
     }
-
 }

@@ -12,11 +12,17 @@ import com.academy.models.Member;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
+import com.academy.exceptions.EntityNotFoundException;
+import com.academy.models.Service;
+import com.academy.models.ServiceType;
+import com.academy.models.Tag;
 import com.academy.repositories.ServiceRepository;
+import com.academy.repositories.ServiceTypeRepository;
 import com.academy.repositories.TagRepository;
 import jakarta.transaction.Transactional;
 
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,12 +47,18 @@ public class ServiceService {
         this.serviceProviderService = serviceProviderService;
         this.authenticationFacade = authenticationFacade;
         this.memberService = memberService;
+        this.tagService = tagService;
+        this.serviceTypeRepository = serviceTypeRepository;
     }
 
     // Create
+    @Transactional
     public ServiceResponseDTO create(ServiceRequestDTO dto) {
+        List<Tag> tags = tagService.findOrCreateTagsByNames(dto.tagNames());
         Member member = memberService.getMemberByUsername(authenticationFacade.getUsername());
         Service service = serviceMapper.toEntity(dto, member.getId());
+        linkServiceToTags(service, tags); // Set up the bidirectional link
+
         Service savedService = serviceRepository.save(service);
 
         createOwnerServiceProvider(new ServiceProviderRequestDTO(
@@ -61,6 +73,7 @@ public class ServiceService {
     }
 
     // Update
+    @Transactional
     public ServiceResponseDTO update(Long id, ServiceRequestDTO dto) {
         String username = authenticationFacade.getUsername();
         Member member = memberService.getMemberByUsername(username);
@@ -70,12 +83,25 @@ public class ServiceService {
         if(permissions == null || !permissions.contains(ProviderPermissionEnum.UPDATE))
             throw new AuthenticationException("Member doesn't have permission to update service");
 
-        Service updated = serviceMapper.toEntity(dto, member.getId());
+        // Remove existing tag associations
+        for (Tag tag : new ArrayList<>(existing.getTags())) {
+            tag.getServices().remove(existing);
+        }
+        existing.getTags().clear();
+
+        // Prepare new tags and associations
+        List<Tag> newTags = tagService.findOrCreateTagsByNames(dto.tagNames());
+        linkServiceToTags(existing, newTags);
+
+        Service updated = serviceMapper.toEntity(dto);
         updated.setId(existing.getId());  // Retain existing ID
-        updated.setServiceProviders(existing.getServiceProviders());
+
+        serviceMapper.updateEntityFromDto(dto, existing);
+
+
         updated = serviceRepository.save(updated);
 
-        return serviceMapper.toDto(updated, getPermissionsByProviderUsernameAndServiceId(username, updated.getId()));
+        return serviceMapper.toDto(updated);
     }
 
     // Read all
@@ -103,15 +129,21 @@ public class ServiceService {
     // Delete
     @Transactional
     public void delete(Long id) {
-        String username =  authenticationFacade.getUsername();
         Service service = serviceRepository.findById(id)
-                .orElseThrow(() -> new ServiceNotFoundException(id));
+                .orElseThrow(() -> new EntityNotFoundException(Service.class, id));
         List<ProviderPermissionEnum> permissions = getPermissionsByProviderUsernameAndServiceId(username, id);
         if(permissions == null || !permissions.contains(ProviderPermissionEnum.DELETE))
             throw new AuthenticationException("Member doesn't have permission to delete service");
 
-        service.removeAllTags(); // Disassociate the tags from the service
+        service.removeAllTags();
         serviceRepository.delete(service);
+    }
+
+    private void linkServiceToTags(Service service, List<Tag> tags) {
+        service.setTags(tags);
+        for (Tag tag : tags) {
+            tag.getServices().add(service);
+        }
     }
 
     public List<ProviderPermissionEnum> getPermissionsByProviderUsernameAndServiceId(String username, Long serviceId){
