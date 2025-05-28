@@ -2,10 +2,12 @@ package com.academy.dtos.service;
 
 import com.academy.models.service.Service;
 import com.academy.models.Tag;
+import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.repositories.MemberRepository;
 import com.academy.repositories.TagRepository;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.springframework.beans.factory.annotation.Autowired;
 

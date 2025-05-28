@@ -7,13 +7,12 @@ import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
 import com.academy.dtos.service_provider.ServiceProviderResponseDTO;
 import com.academy.exceptions.AuthenticationException;
-import com.academy.exceptions.ServiceNotFoundException;
+//import com.academy.exceptions.ServiceNotFoundException;
 import com.academy.models.Member;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.exceptions.EntityNotFoundException;
-import com.academy.models.Service;
 import com.academy.models.ServiceType;
 import com.academy.models.Tag;
 import com.academy.repositories.ServiceRepository;
@@ -35,12 +34,16 @@ public class ServiceService {
     private final ServiceMapper serviceMapper;
     private final AuthenticationFacade authenticationFacade;
     private final MemberService memberService;
+    private final TagService tagService;
+    private final ServiceTypeRepository serviceTypeRepository;
     public ServiceService(ServiceRepository serviceRepository,
                           TagRepository tagRepository,
                           ServiceMapper serviceMapper,
                           ServiceProviderService serviceProviderService,
                           AuthenticationFacade authenticationFacade,
-                          MemberService memberService) {
+                          MemberService memberService,
+                          TagService tagService,
+                          ServiceTypeRepository serviceTypeRepository) {
         this.serviceRepository = serviceRepository;
         this.tagRepository = tagRepository;
         this.serviceMapper = serviceMapper;
@@ -54,9 +57,10 @@ public class ServiceService {
     // Create
     @Transactional
     public ServiceResponseDTO create(ServiceRequestDTO dto) {
-        List<Tag> tags = tagService.findOrCreateTagsByNames(dto.tagNames());
         Member member = memberService.getMemberByUsername(authenticationFacade.getUsername());
         Service service = serviceMapper.toEntity(dto, member.getId());
+
+        List<Tag> tags = tagService.findOrCreateTagsByNames(dto.tagNames());
         linkServiceToTags(service, tags); // Set up the bidirectional link
 
         Service savedService = serviceRepository.save(service);
@@ -76,9 +80,9 @@ public class ServiceService {
     @Transactional
     public ServiceResponseDTO update(Long id, ServiceRequestDTO dto) {
         String username = authenticationFacade.getUsername();
-        Member member = memberService.getMemberByUsername(username);
         Service existing = serviceRepository.findById(id)
-                .orElseThrow(() -> new ServiceNotFoundException(id));
+                .orElseThrow(() -> new EntityNotFoundException(Service.class,id));
+
         List<ProviderPermissionEnum> permissions = getPermissionsByProviderUsernameAndServiceId(username, existing.getId());
         if(permissions == null || !permissions.contains(ProviderPermissionEnum.UPDATE))
             throw new AuthenticationException("Member doesn't have permission to update service");
@@ -93,15 +97,9 @@ public class ServiceService {
         List<Tag> newTags = tagService.findOrCreateTagsByNames(dto.tagNames());
         linkServiceToTags(existing, newTags);
 
-        Service updated = serviceMapper.toEntity(dto);
-        updated.setId(existing.getId());  // Retain existing ID
-
         serviceMapper.updateEntityFromDto(dto, existing);
-
-
-        updated = serviceRepository.save(updated);
-
-        return serviceMapper.toDto(updated);
+        serviceRepository.save(existing);
+        return serviceMapper.toDto(existing, permissions);
     }
 
     // Read all
@@ -118,7 +116,7 @@ public class ServiceService {
     // Read one
     public ServiceResponseDTO getById(Long id) {
         Service service = serviceRepository.findById(id)
-                .orElseThrow(() -> new ServiceNotFoundException(id));
+                .orElseThrow(() -> new EntityNotFoundException(Service.class,id));
         String username =  authenticationFacade.getUsername();
         List<ProviderPermissionEnum> permissions = getPermissionsByProviderUsernameAndServiceId(username, id);
         if(permissions == null || !permissions.contains(ProviderPermissionEnum.READ))
@@ -129,6 +127,7 @@ public class ServiceService {
     // Delete
     @Transactional
     public void delete(Long id) {
+        String username =  authenticationFacade.getUsername();
         Service service = serviceRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Service.class, id));
         List<ProviderPermissionEnum> permissions = getPermissionsByProviderUsernameAndServiceId(username, id);
@@ -154,6 +153,7 @@ public class ServiceService {
     private boolean hasServiceProvider(String username, Long serviceId){
         return serviceProviderService.existsByServiceIdAndProviderUsername(serviceId, username);
     }
+    /*
     @Transactional
     public ServiceResponseDTO updateMemberPermissions(Long serviceId, Long memberId, List<ProviderPermissionEnum> permissions){
         ServiceProvider serviceProvider = serviceProviderService.getByServiceIdAndMemberId(serviceId, memberId);
@@ -161,5 +161,7 @@ public class ServiceService {
         serviceProviderService.addPermissions(serviceProvider, permissions);
         return getById(serviceId);
     }
+    */
+
 
 }
