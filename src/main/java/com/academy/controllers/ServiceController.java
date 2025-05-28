@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/auth/services")
+@RequestMapping("/services")
 public class ServiceController {
 
     private final ServiceService serviceService;
+
+
 
     @Autowired
     public ServiceController(ServiceService serviceService) {
@@ -35,7 +37,7 @@ public class ServiceController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ServiceResponseDTO>> getAll() {
+    public ResponseEntity<List<ServiceResponseDTO>> getAll(){
         List<ServiceResponseDTO> responses = serviceService.getAll();
         return ResponseEntity.ok(responses);
     }

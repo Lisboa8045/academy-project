@@ -8,7 +8,7 @@ import com.academy.dtos.appointment.AppointmentResponseDTO;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.Appointment;
 import com.academy.models.Member;
-import com.academy.models.service_provider.ServiceProvider;
+import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.AppointmentRepository;
 import com.academy.repositories.MemberRepository;
 import com.academy.repositories.ServiceProviderRepository;

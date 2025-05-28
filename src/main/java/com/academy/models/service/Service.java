@@ -1,5 +1,8 @@
-package com.academy.models;
+package com.academy.models.service;
 
+import com.academy.models.Member;
+import com.academy.models.Tag;
+import com.academy.models.service.service_provider.ServiceProvider;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -53,9 +56,9 @@ public class Service {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @ManyToOne
-    @JoinColumn(name = "service_type_id", nullable = false)
-    private ServiceType serviceType;
+
+    @Enumerated(EnumType.STRING)
+    private ServiceTypeEnum serviceType;
 
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(
@@ -74,4 +77,9 @@ public class Service {
         }
         tags.clear(); // Clear the local list
     }
+
+    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ServiceProvider> serviceProviders;
+
+
 }
