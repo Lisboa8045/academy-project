@@ -17,7 +17,7 @@ public class AcademyApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(AcademyApplication.class, args);
 	}
-
+/*
 	@Bean
 	CommandLineRunner populateServices(DataSource dataSource) {
 		return args -> {
@@ -32,4 +32,6 @@ public class AcademyApplication {
 			System.out.println("Populated database");
 		};
 	}
+
+ */
 }
