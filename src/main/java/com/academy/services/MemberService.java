@@ -13,6 +13,9 @@ import com.academy.models.Member;
 import com.academy.models.Role;
 import com.academy.repositories.MemberRepository;
 import com.academy.repositories.RoleRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -72,16 +75,30 @@ public class MemberService {
 
     }
 
-    public LoginResponseDto login(LoginRequestDto request) {
-        Optional<Member> member = memberRepository.findByUsername(request.username());
+    public LoginResponseDto login(LoginRequestDto request, HttpServletResponse response) {
+        Optional<Member> member = request.login().contains("@")
+                ? memberRepository.findByEmail(request.login())
+                : memberRepository.findByUsername(request.login());
+
         if(member.isPresent() && passwordEncoder.matches(request.password(), member.get().getPassword())) {
+
             UserDetails userDetails = new org.springframework.security.core.userdetails.User(
                     member.get().getUsername(), member.get().getPassword(), new ArrayList<>()
             );
             String token = jwtUtil.generateToken(userDetails);
+
+            Cookie cookie = new Cookie("token", token);
+            cookie.setHttpOnly(true);
+            cookie.setSecure(true);
+            cookie.setPath("/");
+            cookie.setMaxAge(24 * 60 * 60);
+
+            response.addCookie(cookie);
             return new LoginResponseDto(
                     messageSource.getMessage("user.loggedin", null, LocaleContextHolder.getLocale()),
-                    token, member.get().getId());
+                    member.get().getId(),
+                    member.get().getUsername()
+            );
         }
         throw new AuthenticationException(messageSource.getMessage("auth.invalid", null, LocaleContextHolder.getLocale()));
 

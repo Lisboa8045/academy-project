@@ -5,6 +5,7 @@ import com.academy.dtos.register.LoginResponseDto;
 import com.academy.dtos.register.RegisterRequestDto;
 import com.academy.dtos.register.RegisterResponseDto;
 import com.academy.services.MemberService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -38,8 +39,8 @@ public class AuthController {
         );
     }
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDto> login(@Valid @RequestBody LoginRequestDto request){
-        LoginResponseDto response = memberService.login(request);
+    public ResponseEntity<LoginResponseDto> login(@Valid @RequestBody LoginRequestDto request, HttpServletResponse httpResponse){
+        LoginResponseDto response = memberService.login(request, httpResponse);
         return ResponseEntity.ok(response);
     }
 
