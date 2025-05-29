@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.List;
 @Entity
@@ -27,9 +28,9 @@ public class Appointment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private long id;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
@@ -51,5 +52,14 @@ public class Appointment {
 
     @Column(name="updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "start_date_time")
+    private LocalDateTime startDateTime;
+
+    @Column(name = "end_date_time")
+    private LocalDateTime endDateTime;
+
+    @Column(name = "status")
+    private String status;
 
 }

@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "member")
@@ -16,6 +18,12 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="id")
     private long id;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<Availability> availabilities = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<Appointment> appointments = new ArrayList<>();
 
     @Column(name = "username", unique = true)
     private String username;

@@ -2,10 +2,14 @@ package com.academy.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.academy.dtos.availability.AvailabilityMapper;
+import com.academy.dtos.availability.AvailabilityRequestDTO;
+import com.academy.dtos.availability.AvailabilityResponseDTO;
 import com.academy.exceptions.InvalidArgumentException;
 import com.academy.models.Availability;
 import com.academy.repositories.AvailabilityRepository;
@@ -22,46 +26,49 @@ public class AvailabilityService {
     private final ServiceProviderRepository serviceProviderRepository;
     private final ServiceRepository serviceRepository;
     private final MemberRepository memberRepository;
+    private final AvailabilityMapper availabilityMapper;
 
     @Autowired
-    public AvailabilityService (AvailabilityRepository availabilityRepository, 
-                                    ServiceProviderRepository serviceProviderRepository, 
-                                    MemberRepository memberRepository,
-                                    ServiceRepository serviceRepository) {
+    public AvailabilityService(
+            AvailabilityRepository availabilityRepository,
+            ServiceProviderRepository serviceProviderRepository,
+            MemberRepository memberRepository,
+            ServiceRepository serviceRepository,
+            AvailabilityMapper availabilityMapper) {
 
         this.availabilityRepository = availabilityRepository;
         this.serviceProviderRepository = serviceProviderRepository;
         this.memberRepository = memberRepository;
         this.serviceRepository = serviceRepository;
+        this.availabilityMapper = availabilityMapper;
     }
 
     // Get all availabilities for a specific member by their ID
-    public List<Availability> getAvailabilitiesByMemberId(Long memberId) {
+    public List<AvailabilityResponseDTO> getAvailabilitiesByMemberId(Long memberId) {
         if (memberId == null) {
             throw new InvalidArgumentException("Member ID cannot be null");
         }
         if (!memberRepository.existsById(memberId)) {
             throw new InvalidArgumentException("Member with ID " + memberId + " does not exist.");
         }
-        return availabilityRepository.findByMember_Id(memberId);
+        List<Availability> availabilities = availabilityRepository.findByMember_Id(memberId);
+        return availabilities.stream()
+                .map(availabilityMapper::toResponseDTO)
+                .collect(Collectors.toList());
     }
 
     // Get all availabilities for a specific service by its ID
-    public List<Availability> getAvailabilitiesByServiceId(Long serviceId) {
-
+    public List<AvailabilityResponseDTO> getAvailabilitiesByServiceId(Long serviceId) {
         if (serviceId == null) {
             throw new InvalidArgumentException("Service ID cannot be null");
         }
         if (!serviceRepository.existsById(serviceId)) {
             throw new InvalidArgumentException("Service with ID " + serviceId + " does not exist.");
         }
-   
+
         List<Long> memberIds = serviceProviderRepository.findMemberIdsByServiceId(serviceId);
 
-        System.out.println("Member IDs: " + memberIds);
-
-        // Collect all availabilities for the members
-        List<Availability> availabilities = new ArrayList<>();
+        List<AvailabilityResponseDTO> availabilities = new ArrayList<>();
         for (Long memberId : memberIds) {
             availabilities.addAll(getAvailabilitiesByMemberId(memberId));
         }
@@ -70,33 +77,36 @@ public class AvailabilityService {
     }
 
     // Get a specific availability by its ID
-    public Availability getAvailabilityById(Long availabilityId) {
+    public AvailabilityResponseDTO getAvailabilityById(Long availabilityId) {
         if (availabilityId == null) {
             throw new InvalidArgumentException("Availability ID cannot be null");
         }
         if (!availabilityRepository.existsById(availabilityId)) {
             throw new InvalidArgumentException("Availability with ID " + availabilityId + " does not exist.");
         }
-        return availabilityRepository.findById(availabilityId).orElse(null);
+        Availability availability = availabilityRepository.findById(availabilityId).orElse(null);
+        return availabilityMapper.toResponseDTO(availability);
     }
 
-    
-    @Transactional
     // Create a new availability
-    public Availability createAvailability(Availability availability) {
-        return availabilityRepository.save(availability);
+    @Transactional
+    public AvailabilityResponseDTO createAvailability(AvailabilityRequestDTO requestDTO) {
+        Availability availability = availabilityMapper.toEntityWithMember(requestDTO);
+        Availability saved = availabilityRepository.save(availability);
+        return availabilityMapper.toResponseDTO(saved);
     }
 
-    // Update an existing availability
     @Transactional
-    public Availability updateAvailability(Availability availability) {
-        if (availability == null) {
+    public AvailabilityResponseDTO updateAvailability(AvailabilityRequestDTO requestDTO) {
+        if (requestDTO == null) {
             throw new InvalidArgumentException("Availability cannot be null");
-        }	
-        if (!availabilityRepository.existsById((Long)availability.getId())) {
-            throw new InvalidArgumentException("Availability with ID " + availability.getId() + " does not exist.");
         }
-        return availabilityRepository.save(availability);
+        if (!availabilityRepository.existsById(requestDTO.getId())) {
+            throw new InvalidArgumentException("Availability with ID " + requestDTO.getId() + " does not exist.");
+        }
+        Availability availability = availabilityMapper.toEntityWithMember(requestDTO);
+        Availability saved = availabilityRepository.save(availability);
+        return availabilityMapper.toResponseDTO(saved);
     }
 
     // Delete an availability by its ID
@@ -112,7 +122,10 @@ public class AvailabilityService {
     }
 
     // Get all availabilities
-    public List<Availability> getAllAvailabilities() {
-        return availabilityRepository.findAll();
+    public List<AvailabilityResponseDTO> getAllAvailabilities() {
+        return availabilityRepository.findAll()
+                .stream()
+                .map(availabilityMapper::toResponseDTO)
+                .collect(Collectors.toList());
     }
 }
