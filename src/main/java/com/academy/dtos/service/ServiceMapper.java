@@ -1,7 +1,8 @@
 package com.academy.dtos.service;
 
-import com.academy.models.Service;
 import com.academy.models.Tag;
+import com.academy.models.service.Service;
+import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.repositories.MemberRepository;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -23,13 +24,12 @@ public abstract class ServiceMapper {
     @Mapping(target = "serviceType", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(expression = "java(memberRepository.findById(dto.ownerId()).orElseThrow())", target ="owner")
-    public abstract Service toEntity(ServiceRequestDTO dto);
+    @Mapping(expression = "java(memberRepository.findById(ownerId).orElseThrow())", target ="owner")
+    public abstract Service toEntity(ServiceRequestDTO dto, Long ownerId);
 
-    @Mapping(source = "tags", target = "tagNames", qualifiedByName = "mapTagsToNames")
-    @Mapping(source = "serviceType.name", target = "serviceTypeName")
+    @Mapping(source = "service.tags", target = "tagNames", qualifiedByName = "mapTagsToNames")
     @Mapping(expression = "java(service.getOwner().getId())", target = "ownerId")
-    public abstract ServiceResponseDTO toDto(Service service);
+    public abstract ServiceResponseDTO toDto(Service service, List<ProviderPermissionEnum> permissions);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "tags", ignore = true)

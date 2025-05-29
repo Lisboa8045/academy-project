@@ -5,10 +5,7 @@ import com.academy.dtos.register.LoginResponseDto;
 import com.academy.dtos.register.MemberMapper;
 import com.academy.dtos.register.LoginRequestDto;
 import com.academy.dtos.register.RegisterRequestDto;
-import com.academy.exceptions.AuthenticationException;
-import com.academy.exceptions.InvalidArgumentException;
-import com.academy.exceptions.EntityAlreadyExists;
-import com.academy.exceptions.NotFoundException;
+import com.academy.exceptions.*;
 import com.academy.models.Member;
 import com.academy.models.Role;
 import com.academy.repositories.MemberRepository;
@@ -101,6 +98,12 @@ public class MemberService {
             );
         }
         throw new AuthenticationException(messageSource.getMessage("auth.invalid", null, LocaleContextHolder.getLocale()));
+    }
 
+    public Member getMemberByUsername(String username){
+        Optional<Member> optionalMember = memberRepository.findByUsername(username);
+        if(optionalMember.isEmpty())
+            throw new MemberNotFoundException(username);
+        return optionalMember.get();
     }
 }

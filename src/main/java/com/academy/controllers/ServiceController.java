@@ -5,14 +5,15 @@ import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.services.ServiceService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/auth/services")
+@RequestMapping("/services")
 public class ServiceController {
 
     private final ServiceService serviceService;
@@ -35,7 +36,7 @@ public class ServiceController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ServiceResponseDTO>> getAll() {
+    public ResponseEntity<List<ServiceResponseDTO>> getAll(){
         List<ServiceResponseDTO> responses = serviceService.getAll();
         return ResponseEntity.ok(responses);
     }
@@ -44,6 +45,18 @@ public class ServiceController {
     public ResponseEntity<ServiceResponseDTO> getById(@PathVariable Long id) {
         ServiceResponseDTO response = serviceService.getById(id);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<ServiceResponseDTO>> search(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) List<String> tags,
+            @RequestParam(required = false) Double priceMin,
+            @RequestParam(required = false) Double priceMax,
+            Pageable pageable
+    ) {
+        Page<ServiceResponseDTO> responses = serviceService.searchServices(name, priceMin, priceMax, tags, pageable);
+        return ResponseEntity.ok(responses);
     }
 
     @DeleteMapping("/{id}")

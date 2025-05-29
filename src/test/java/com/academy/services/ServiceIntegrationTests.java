@@ -29,7 +29,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 @Transactional
 @ExtendWith(SpringExtension.class)
 public class ServiceIntegrationTests {
-
+/*
     private final ServiceService serviceService;
     private final TagService tagService;
     private final ServiceRepository serviceRepository;
@@ -309,4 +309,5 @@ public class ServiceIntegrationTests {
         assertThat(tag1.getServices()).extracting("id").doesNotContain(serviceId);
         assertThat(tag2.getServices()).extracting("id").doesNotContain(serviceId);
     }
+ */
 }

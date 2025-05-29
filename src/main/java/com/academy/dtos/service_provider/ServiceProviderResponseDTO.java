@@ -1,6 +1,8 @@
 package com.academy.dtos.service_provider;
 
 import com.academy.dtos.appointment.AppointmentReviewResponseDTO;
+import com.academy.models.service.service_provider.ProviderPermissionEnum;
+
 import java.util.List;
 
 public record ServiceProviderResponseDTO(
@@ -8,5 +10,5 @@ public record ServiceProviderResponseDTO(
         String memberName,
         long serviceId,
         List<AppointmentReviewResponseDTO> appointmentReviewList,
-        String permission
+        List<ProviderPermissionEnum> permissions
 ) {}

@@ -9,6 +9,11 @@ public class EntityNotFoundException extends RuntimeException {
         this.entityClass = entityClass;
         this.id = id;
     }
+    public EntityNotFoundException(Class<?> entityClass, String message) {
+        super(entityClass.getSimpleName() + message);
+        this.entityClass = entityClass;
+        this.id = -1;
+    }
 
     public Class<?> getEntityClass() {
         return entityClass;
