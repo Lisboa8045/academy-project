@@ -7,27 +7,26 @@ import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
 import com.academy.dtos.service_provider.ServiceProviderResponseDTO;
 import com.academy.exceptions.AuthenticationException;
-//import com.academy.exceptions.ServiceNotFoundException;
+import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.Member;
+import com.academy.models.Tag;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
-import com.academy.models.service.service_provider.ServiceProvider;
-import com.academy.exceptions.EntityNotFoundException;
-import com.academy.models.ServiceType;
-import com.academy.models.Tag;
 import com.academy.repositories.ServiceRepository;
 import com.academy.repositories.ServiceTypeRepository;
 import com.academy.repositories.TagRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.context.annotation.Lazy;
 
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
 public class ServiceService {
 
+    @Lazy
     private final ServiceProviderService serviceProviderService;
     private final ServiceRepository serviceRepository;
     private final TagRepository tagRepository;
@@ -39,7 +38,7 @@ public class ServiceService {
     public ServiceService(ServiceRepository serviceRepository,
                           TagRepository tagRepository,
                           ServiceMapper serviceMapper,
-                          ServiceProviderService serviceProviderService,
+                          @Lazy ServiceProviderService serviceProviderService,
                           AuthenticationFacade authenticationFacade,
                           MemberService memberService,
                           TagService tagService,
@@ -162,6 +161,8 @@ public class ServiceService {
         return getById(serviceId);
     }
     */
-
+    public Service getServiceById(Long id) {
+        return serviceRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(Service.class, id));
+    }
 
 }

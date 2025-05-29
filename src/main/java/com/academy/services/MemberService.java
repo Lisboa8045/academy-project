@@ -10,6 +10,7 @@ import com.academy.dtos.register.RegisterRequestDto;
 import com.academy.exceptions.*;
 import com.academy.models.Member;
 import com.academy.models.Role;
+import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.MemberRepository;
 import com.academy.repositories.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -144,4 +145,7 @@ public class MemberService {
                 .orElseThrow(() -> new EntityNotFoundException(Member.class, id));
     }
 
+    public Member getMemberId(long id){
+        return memberRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
+    }
 }

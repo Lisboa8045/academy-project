@@ -8,9 +8,7 @@ import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.Member;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
-import com.academy.repositories.MemberRepository;
 import com.academy.repositories.ServiceProviderRepository;
-import com.academy.repositories.ServiceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,8 +20,8 @@ public class ServiceProviderService {
 
     private final ServiceProviderRepository serviceProviderRepository;
     private final ServiceProviderMapper serviceProviderMapper;
-    private final MemberRepository memberRepository;
-    private final ServiceRepository serviceRepository;
+    private final MemberService memberService;
+    private final ServiceService serviceService;
     private final ProviderPermissionService providerPermissionService;
 
 
@@ -31,13 +29,13 @@ public class ServiceProviderService {
     @Autowired
     public ServiceProviderService(ServiceProviderRepository serviceProviderRepository,
                                   ServiceProviderMapper serviceProviderMapper,
-                                  MemberRepository memberRepository,
-                                  ServiceRepository serviceRepository,
+                                  MemberService memberService,
+                                  ServiceService serviceService,
                                   ProviderPermissionService providerPermissionService) {
         this.serviceProviderRepository = serviceProviderRepository;
         this.serviceProviderMapper = serviceProviderMapper;
-        this.memberRepository = memberRepository;
-        this.serviceRepository = serviceRepository;
+        this.memberService = memberService;
+        this.serviceService = serviceService;
         this.providerPermissionService = providerPermissionService;
     }
 
@@ -54,11 +52,8 @@ public class ServiceProviderService {
     }
 
     public ServiceProviderResponseDTO createServiceProvider(ServiceProviderRequestDTO dto) {
-        Member member = memberRepository.findById(dto.memberId())
-                .orElseThrow(() -> new EntityNotFoundException(Member.class, dto.memberId()));
-
-        com.academy.models.service.Service service = serviceRepository.findById(dto.serviceId())
-                .orElseThrow(() -> new EntityNotFoundException(com.academy.models.service.Service.class, dto.serviceId()));
+        Member member = memberService.getMemberId(dto.memberId());
+        com.academy.models.service.Service service = serviceService.getServiceById(dto.serviceId());
 
         //ProviderPermissionEnum permission = ProviderPermissionEnum.values()[dto.permissions()];
 
@@ -85,8 +80,7 @@ public class ServiceProviderService {
 //        }
 
         if(details.serviceId() != null) {
-            com.academy.models.service.Service service = serviceRepository.findById(details.serviceId())
-                    .orElseThrow(()-> new EntityNotFoundException(ServiceProvider.class, details.serviceId()));
+            com.academy.models.service.Service service = serviceService.getServiceById(details.serviceId());
             serviceProvider.setService(service);
         }
 
@@ -126,5 +120,9 @@ public class ServiceProviderService {
 
     public boolean existsByServiceIdAndProviderUsername(Long serviceId, String username) {
         return serviceProviderRepository.existsByServiceIdAndProviderUsername(serviceId, username);
+    }
+
+    public ServiceProvider getByServiceProviderById(long id){
+        return serviceProviderRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
     }
 }

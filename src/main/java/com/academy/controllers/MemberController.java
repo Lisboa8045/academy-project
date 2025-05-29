@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("auth/members")
+@RequestMapping("members")
 public class MemberController {
 
     private final MemberService memberService;
