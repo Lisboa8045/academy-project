@@ -26,6 +26,10 @@ public class ServiceType {
     @Column(name="name")
     private String name;
 
+    @NotBlank
+    @Column(name="icon")
+    private String icon;
+
     @Column(name="created_at", updatable=false)
     @CreationTimestamp
     private LocalDateTime createdAt;
