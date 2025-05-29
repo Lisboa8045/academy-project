@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.academy.models.Member;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -88,13 +89,17 @@ public class AvailabilityService {
         return availabilityMapper.toResponseDTO(availability);
     }
 
-    // Create a new availability
     @Transactional
     public AvailabilityResponseDTO createAvailability(AvailabilityRequestDTO requestDTO) {
-        Availability availability = availabilityMapper.toEntityWithMember(requestDTO);
+        Member member = memberRepository.findById(requestDTO.getMemberId())
+                .orElseThrow(() -> new InvalidArgumentException("Member not found"));
+
+        Availability availability = availabilityMapper.toEntity(requestDTO);
+        availability.setMember(member);
         Availability saved = availabilityRepository.save(availability);
         return availabilityMapper.toResponseDTO(saved);
     }
+
 
     @Transactional
     public AvailabilityResponseDTO updateAvailability(AvailabilityRequestDTO requestDTO) {

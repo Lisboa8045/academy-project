@@ -1,5 +1,6 @@
 package com.academy.dtos.availability;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
@@ -13,20 +14,20 @@ import jakarta.validation.constraints.NotBlank;
 @Setter
 public class AvailabilityResponseDTO {
     
-    @NotBlank
+    @NotNull
     private long id;
 
-    @NotBlank
+    @NotNull
     private long memberId;
 
-    @NotBlank
+    @NotNull
     private DayOfWeek dayOfWeek;
 
-    @NotBlank
+    @NotNull
     @FutureOrPresent(message = "End date and time must be in the future or present")
     private LocalDateTime startDateTime;
 
-    @NotBlank
+    @NotNull
     @FutureOrPresent(message = "End date and time must be in the future or present")
     private LocalDateTime endDateTime;
 }
