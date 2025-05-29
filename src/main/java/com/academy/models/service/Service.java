@@ -1,6 +1,7 @@
 package com.academy.models.service;
 
 import com.academy.models.Member;
+import com.academy.models.ServiceType;
 import com.academy.models.Tag;
 import com.academy.models.service.service_provider.ServiceProvider;
 import jakarta.persistence.*;
@@ -56,9 +57,9 @@ public class Service {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-
-    @Enumerated(EnumType.STRING)
-    private ServiceTypeEnum serviceType;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "service_type_id", nullable = false)
+    private ServiceType serviceType;
 
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(

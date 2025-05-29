@@ -9,12 +9,11 @@ import com.academy.dtos.service_provider.ServiceProviderResponseDTO;
 import com.academy.exceptions.AuthenticationException;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.Member;
+import com.academy.models.ServiceType;
 import com.academy.models.Tag;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.repositories.ServiceRepository;
-import com.academy.repositories.ServiceTypeRepository;
-import com.academy.repositories.TagRepository;
 import com.academy.specifications.ServiceSpecifications;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
@@ -32,28 +31,26 @@ public class ServiceService {
 
     private final ServiceProviderService serviceProviderService;
     private final ServiceRepository serviceRepository;
-    private final TagRepository tagRepository;
     private final ServiceMapper serviceMapper;
     private final AuthenticationFacade authenticationFacade;
     private final MemberService memberService;
     private final TagService tagService;
-    private final ServiceTypeRepository serviceTypeRepository;
+    private final ServiceTypeService serviceTypeService;
+
     public ServiceService(ServiceRepository serviceRepository,
-                          TagRepository tagRepository,
                           ServiceMapper serviceMapper,
                           ServiceProviderService serviceProviderService,
                           AuthenticationFacade authenticationFacade,
                           MemberService memberService,
                           TagService tagService,
-                          ServiceTypeRepository serviceTypeRepository) {
+                          ServiceTypeService serviceTypeService) {
         this.serviceRepository = serviceRepository;
-        this.tagRepository = tagRepository;
         this.serviceMapper = serviceMapper;
         this.serviceProviderService = serviceProviderService;
         this.authenticationFacade = authenticationFacade;
         this.memberService = memberService;
         this.tagService = tagService;
-        this.serviceTypeRepository = serviceTypeRepository;
+        this.serviceTypeService = serviceTypeService;
     }
 
     // Create
@@ -61,6 +58,9 @@ public class ServiceService {
     public ServiceResponseDTO create(ServiceRequestDTO dto) {
         Member member = memberService.getMemberByUsername(authenticationFacade.getUsername());
         Service service = serviceMapper.toEntity(dto, member.getId());
+
+        ServiceType type = serviceTypeService.findByNameOrThrow(dto.serviceTypeName());
+        linkServiceToType(service, type);
 
         List<Tag> tags = tagService.findOrCreateTagsByNames(dto.tagNames());
         linkServiceToTags(service, tags); // Set up the bidirectional link
@@ -88,6 +88,9 @@ public class ServiceService {
         List<ProviderPermissionEnum> permissions = getPermissionsByProviderUsernameAndServiceId(username, existing.getId());
         if(permissions == null || !permissions.contains(ProviderPermissionEnum.UPDATE))
             throw new AuthenticationException("Member doesn't have permission to update service");
+
+        ServiceType type = serviceTypeService.findByNameOrThrow(dto.serviceTypeName());
+        linkServiceToType(existing, type);
 
         // Remove existing tag associations
         for (Tag tag : new ArrayList<>(existing.getTags())) {
@@ -145,6 +148,11 @@ public class ServiceService {
         for (Tag tag : tags) {
             tag.getServices().add(service);
         }
+    }
+
+    private void linkServiceToType(Service service, ServiceType type) {
+        service.setServiceType(type);
+        type.getServices().add(service);
     }
 
     public List<ProviderPermissionEnum> getPermissionsByProviderUsernameAndServiceId(String username, Long serviceId){

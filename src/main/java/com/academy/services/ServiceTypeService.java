@@ -65,4 +65,9 @@ public class ServiceTypeService {
                 .orElseThrow(() -> new EntityNotFoundException(ServiceType.class, id));
         serviceTypeRepository.delete(serviceType);
     }
+
+    public ServiceType findByNameOrThrow(String name) {
+        return serviceTypeRepository.findByName(name)
+                .orElseThrow(() -> new EntityNotFoundException(ServiceType.class, name));
+    }
 }

@@ -1,5 +1,6 @@
 package com.academy.models;
 
+import com.academy.models.service.Service;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -9,6 +10,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name="service_type")
@@ -23,12 +26,15 @@ public class ServiceType {
     private long id;
 
     @NotBlank
-    @Column(name="name")
+    @Column(name="name", unique = true)
     private String name;
 
     @NotBlank
     @Column(name="icon")
     private String icon;
+
+    @OneToMany(mappedBy = "serviceType", fetch = FetchType.LAZY)
+    private List<Service> services = new ArrayList<>();
 
     @Column(name="created_at", updatable=false)
     @CreationTimestamp
