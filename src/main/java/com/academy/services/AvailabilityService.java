@@ -24,23 +24,23 @@ import jakarta.transaction.Transactional;
 public class AvailabilityService {
 
     private final AvailabilityRepository availabilityRepository;
-    private final ServiceProviderRepository serviceProviderRepository;
-    private final ServiceRepository serviceRepository;
-    private final MemberRepository memberRepository;
+    private final ServiceProviderService serviceProviderService;
+    private final ServiceService serviceService;
+    private final MemberService memberService;
     private final AvailabilityMapper availabilityMapper;
 
     @Autowired
     public AvailabilityService(
             AvailabilityRepository availabilityRepository,
-            ServiceProviderRepository serviceProviderRepository,
-            MemberRepository memberRepository,
-            ServiceRepository serviceRepository,
+            ServiceProviderService serviceProviderService,
+            MemberService memberService,
+            ServiceService serviceService,
             AvailabilityMapper availabilityMapper) {
 
         this.availabilityRepository = availabilityRepository;
-        this.serviceProviderRepository = serviceProviderRepository;
-        this.memberRepository = memberRepository;
-        this.serviceRepository = serviceRepository;
+        this.serviceProviderService = serviceProviderService;
+        this.memberService = memberService;
+        this.serviceService = serviceService;
         this.availabilityMapper = availabilityMapper;
     }
 
@@ -49,12 +49,12 @@ public class AvailabilityService {
         if (memberId == null) {
             throw new InvalidArgumentException("Member ID cannot be null");
         }
-        if (!memberRepository.existsById(memberId)) {
+        if (!memberService.existsById(memberId)) {
             throw new InvalidArgumentException("Member with ID " + memberId + " does not exist.");
         }
         List<Availability> availabilities = availabilityRepository.findByMember_Id(memberId);
         return availabilities.stream()
-                .map(availabilityMapper::toResponseDTO)
+                .map(availabilityMapper::toResponseDTOWithMember)
                 .collect(Collectors.toList());
     }
 
@@ -63,11 +63,11 @@ public class AvailabilityService {
         if (serviceId == null) {
             throw new InvalidArgumentException("Service ID cannot be null");
         }
-        if (!serviceRepository.existsById(serviceId)) {
+        if (!serviceService.existsById(serviceId)) {
             throw new InvalidArgumentException("Service with ID " + serviceId + " does not exist.");
         }
 
-        List<Long> memberIds = serviceProviderRepository.findMemberIdsByServiceId(serviceId);
+        List<Long> memberIds = serviceProviderService.findMemberIdsByServiceId(serviceId);
 
         List<AvailabilityResponseDTO> availabilities = new ArrayList<>();
         for (Long memberId : memberIds) {
@@ -86,18 +86,31 @@ public class AvailabilityService {
             throw new InvalidArgumentException("Availability with ID " + availabilityId + " does not exist.");
         }
         Availability availability = availabilityRepository.findById(availabilityId).orElse(null);
-        return availabilityMapper.toResponseDTO(availability);
+        return availabilityMapper.toResponseDTOWithMember(availability);
     }
 
     @Transactional
     public AvailabilityResponseDTO createAvailability(AvailabilityRequestDTO requestDTO) {
-        Member member = memberRepository.findById(requestDTO.getMemberId())
+        
+        Member member = memberService.findbyId(requestDTO.getMemberId())
                 .orElseThrow(() -> new InvalidArgumentException("Member not found"));
+
+        boolean exists = availabilityRepository
+        .findByMember_IdAndDayOfWeekAndStartDateTimeAndEndDateTime(
+            requestDTO.getMemberId(),
+            requestDTO.getDayOfWeek(),
+            requestDTO.getStartDateTime(),
+            requestDTO.getEndDateTime()
+        ).isPresent();
+
+        if (exists) {
+            throw new InvalidArgumentException("Availability already exists for this member at the specified time and day.");
+        }
 
         Availability availability = availabilityMapper.toEntity(requestDTO);
         availability.setMember(member);
         Availability saved = availabilityRepository.save(availability);
-        return availabilityMapper.toResponseDTO(saved);
+        return availabilityMapper.toResponseDTOWithMember(saved);
     }
 
 
@@ -111,7 +124,7 @@ public class AvailabilityService {
         }
         Availability availability = availabilityMapper.toEntityWithMember(requestDTO);
         Availability saved = availabilityRepository.save(availability);
-        return availabilityMapper.toResponseDTO(saved);
+        return availabilityMapper.toResponseDTOWithMember(saved);
     }
 
     // Delete an availability by its ID
@@ -130,7 +143,7 @@ public class AvailabilityService {
     public List<AvailabilityResponseDTO> getAllAvailabilities() {
         return availabilityRepository.findAll()
                 .stream()
-                .map(availabilityMapper::toResponseDTO)
+                .map(availabilityMapper::toResponseDTOWithMember)
                 .collect(Collectors.toList());
     }
 }

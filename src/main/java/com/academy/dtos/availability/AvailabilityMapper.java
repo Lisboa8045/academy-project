@@ -6,7 +6,8 @@ import com.academy.models.Availability;
 @Mapper(componentModel = "spring")
 public abstract class AvailabilityMapper {
 
-    public abstract AvailabilityResponseDTO toResponseDTO(Availability availability);
+    @Mapping(target = "memberId", source = "member.id")
+    public abstract AvailabilityResponseDTO toResponseDTOWithMember(Availability availability);
 
     public abstract Availability toEntity(AvailabilityRequestDTO requestDTO);
 

@@ -83,6 +83,7 @@ public class AppointmentService {
 
     }
 
+    
     public AppointmentResponseDTO updateAppointment(int id, AppointmentRequestDTO appointmentDetails) {
 
         Appointment appointment = appointmentRepository.findById(id)

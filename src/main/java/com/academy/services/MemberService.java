@@ -6,6 +6,7 @@ import com.academy.dtos.register.MemberMapper;
 import com.academy.dtos.register.LoginRequestDto;
 import com.academy.dtos.register.RegisterRequestDto;
 import com.academy.exceptions.*;
+import com.academy.models.Availability;
 import com.academy.models.Member;
 import com.academy.models.Role;
 import com.academy.repositories.MemberRepository;
@@ -88,5 +89,16 @@ public class MemberService {
         if(optionalMember.isEmpty())
             throw new MemberNotFoundException(username);
         return optionalMember.get();
+    }
+    
+    public boolean existsById(Long memberId) {
+        return memberRepository.existsById(memberId);
+    }
+
+    public Optional<Member> findbyId(long memberId) {
+        if (!memberRepository.existsById(memberId)) {
+            throw new EntityNotFoundException(Member.class, memberId);
+        }
+        return memberRepository.findById(memberId);
     }
 }
