@@ -7,22 +7,24 @@ import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
 import com.academy.dtos.service_provider.ServiceProviderResponseDTO;
 import com.academy.exceptions.AuthenticationException;
-//import com.academy.exceptions.ServiceNotFoundException;
+import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.Member;
+import com.academy.models.Tag;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
-import com.academy.models.service.service_provider.ServiceProvider;
-import com.academy.exceptions.EntityNotFoundException;
-import com.academy.models.ServiceType;
-import com.academy.models.Tag;
 import com.academy.repositories.ServiceRepository;
 import com.academy.repositories.ServiceTypeRepository;
 import com.academy.repositories.TagRepository;
+import com.academy.specifications.ServiceSpecifications;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
@@ -152,6 +154,26 @@ public class ServiceService {
     }
     private boolean hasServiceProvider(String username, Long serviceId){
         return serviceProviderService.existsByServiceIdAndProviderUsername(serviceId, username);
+    }
+
+    public Page<ServiceResponseDTO> searchServices(String name, Double priceMin, Double priceMax, List<String> tagNames, Pageable pageable) {
+        String username = authenticationFacade.getUsername();
+
+        Specification<Service> spec = Specification.where(null); // start with no specifications, add each specification after if not null/empty
+
+        spec = addIfPresent(spec, name != null && !name.isBlank(), () -> ServiceSpecifications.hasNameLike(name));
+        spec = addIfPresent(spec, tagNames != null && !tagNames.isEmpty(), () -> ServiceSpecifications.hasAnyTagNameLike(tagNames));
+        spec = addIfPresent(spec, priceMin != null, () -> ServiceSpecifications.hasPriceGreaterThanOrEqual(priceMin));
+        spec = addIfPresent(spec, priceMax != null, () -> ServiceSpecifications.hasPriceLessThanOrEqual(priceMax));
+
+        return serviceRepository.findAll(spec, pageable)
+                .map(service ->  serviceMapper.toDto(service,
+                        getPermissionsByProviderUsernameAndServiceId(username, service.getId())
+                ));
+    }
+
+    private Specification<Service> addIfPresent(Specification<Service> spec, boolean condition, Supplier<Specification<Service>> supplier) {
+        return condition ? spec.and(supplier.get()) : spec; // add specification on supplier, if the condition is met
     }
     /*
     @Transactional
