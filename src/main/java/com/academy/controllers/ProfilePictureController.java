@@ -21,7 +21,6 @@ public class ProfilePictureController {
     @PostMapping("/upload")
     public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) {
         try {
-
             String filename = StringUtils.cleanPath(file.getOriginalFilename());
             Path uploadPath = Paths.get(uploadDir);
 
