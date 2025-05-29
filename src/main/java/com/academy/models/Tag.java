@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -19,7 +18,6 @@ import java.util.List;
 @Table(name="tag")
 @Getter
 @Setter
-@ToString
 public class Tag {
 
     @Column(name="id")
@@ -32,8 +30,8 @@ public class Tag {
     private String name;
 
     @NotNull
-    @Column(name="is_custom")
-    private Boolean isCustom;
+    @Column(name="custom")
+    private Boolean custom;
 
     @Column(name="created_at", updatable=false)
     @CreationTimestamp
@@ -59,7 +57,7 @@ public class Tag {
         return "Tag{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", isCustom=" + isCustom +
+                ", custom=" + custom +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
                 '}';

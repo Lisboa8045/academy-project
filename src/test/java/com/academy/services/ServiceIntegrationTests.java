@@ -3,7 +3,11 @@ package com.academy.services;
 import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.exceptions.EntityNotFoundException;
-import com.academy.models.*;
+import com.academy.models.Member;
+import com.academy.models.Role;
+import com.academy.models.ServiceType;
+import com.academy.models.Tag;
+import com.academy.models.service.Service;
 import com.academy.repositories.MemberRepository;
 import com.academy.repositories.ServiceRepository;
 import com.academy.repositories.ServiceTypeRepository;
@@ -16,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,8 +33,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 @SpringBootTest
 @Transactional
 @ExtendWith(SpringExtension.class)
+@WithMockUser
 public class ServiceIntegrationTests {
-/*
     private final ServiceService serviceService;
     private final TagService tagService;
     private final ServiceRepository serviceRepository;
@@ -62,6 +67,7 @@ public class ServiceIntegrationTests {
         // Set up a ServiceType, Member and Tags before each test
         serviceType = new ServiceType();
         serviceType.setName("Test Service Type");
+        serviceType.setIcon("Test Icon.png");
         serviceType = serviceTypeRepository.save(serviceType);
 
         Role role = new Role();
@@ -77,10 +83,12 @@ public class ServiceIntegrationTests {
 
         tag1 = new Tag();
         tag1.setName("tag1");
+        tag1.setCustom(false);
         tag1 = tagRepository.save(tag1);
 
         Tag tag2 = new Tag();
         tag2.setName("tag2");
+        tag2.setCustom(false);
         tagRepository.save(tag2);
     }
 
@@ -91,13 +99,13 @@ public class ServiceIntegrationTests {
         serviceTypeRepository.deleteAll();
     }
 
-    private ServiceRequestDTO createDTO(String name, String description, Long serviceTypeId, List<String> tags) {
-        return new ServiceRequestDTO(name, description, 1L,80, 20, false, 30, serviceTypeId, tags);
+    private ServiceRequestDTO createDTO(String name, String description, String serviceTypeName, List<String> tags) {
+        return new ServiceRequestDTO(name, description, 80, 20, false, 30, serviceTypeName, tags);
     }
 
     @Test
     public void updateService_serviceNotFound_throwsException() {
-        assertThatThrownBy(() -> serviceService.update(999L, createDTO("Test Service", "Test Description", 1L, List.of("tag3"))))
+        assertThatThrownBy(() -> serviceService.update(999L, createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag3"))))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
@@ -109,7 +117,7 @@ public class ServiceIntegrationTests {
 
     @Test
     public void updateService_invalidServiceType_throwsException() {
-        ServiceRequestDTO updateRequestDTO = createDTO("Updated Service", "Updated Description", 999L, List.of("tag1"));
+        ServiceRequestDTO updateRequestDTO = createDTO("Updated Service", "Updated Description", "Non-Existing Type", List.of("tag1"));
 
         assertThatThrownBy(() -> serviceService.update(1L, updateRequestDTO))
                 .isInstanceOf(EntityNotFoundException.class);
@@ -131,7 +139,7 @@ public class ServiceIntegrationTests {
         tag3.setName("tag3");
         tagRepository.save(tag3);
 
-        ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", serviceType.getId(), List.of("tag3"));
+        ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag3"));
 
         ServiceResponseDTO responseDTO = serviceService.create(serviceRequestDTO);
 
@@ -145,7 +153,7 @@ public class ServiceIntegrationTests {
 
     @Test
     public void createService_createsTagsAndAssignsServiceType() {
-        ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", serviceType.getId(), List.of("tag1", "tag2"));
+        ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1", "tag2"));
 
         ServiceResponseDTO responseDTO = serviceService.create(serviceRequestDTO);
 
@@ -159,7 +167,7 @@ public class ServiceIntegrationTests {
 
     @Test
     public void createService_duplicateTags_doesNotCreateDuplicateTags() {
-        ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", serviceType.getId(), List.of("tag1", "tag1"));
+        ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1", "tag1"));
 
         ServiceResponseDTO responseDTO = serviceService.create(serviceRequestDTO);
 
@@ -169,7 +177,7 @@ public class ServiceIntegrationTests {
 
     @Test
     public void updateService_updatesServiceTypeAndTags() {
-        ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", serviceType.getId(), List.of("tag1", "tag2"));
+        ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1", "tag2"));
 
         ServiceResponseDTO createdResponse = serviceService.create(serviceRequestDTO);
 
@@ -178,7 +186,7 @@ public class ServiceIntegrationTests {
         newServiceType.setName("New Service Type");
         newServiceType = serviceTypeRepository.save(newServiceType);
 
-        ServiceRequestDTO updateRequestDTO = createDTO("Updated Service", "Updated Description", newServiceType.getId(), List.of("tag2", "tag3"));
+        ServiceRequestDTO updateRequestDTO = createDTO("Updated Service", "Updated Description", "New Service Type", List.of("tag2", "tag3"));
 
         ServiceResponseDTO updatedResponse = serviceService.update(createdResponse.id(), updateRequestDTO);
 
@@ -190,7 +198,7 @@ public class ServiceIntegrationTests {
 
     @Test
     public void deleteService_deletesService() {
-        ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", serviceType.getId(), List.of("tag1"));
+        ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1"));
 
         ServiceResponseDTO createdResponse = serviceService.create(serviceRequestDTO);
 
@@ -202,7 +210,7 @@ public class ServiceIntegrationTests {
 
     @Test
     public void deleteService_cascadesCorrectly() {
-        ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", serviceType.getId(), List.of("tag1"));
+        ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1"));
 
         ServiceResponseDTO createdResponse = serviceService.create(serviceRequestDTO);
 
@@ -225,7 +233,7 @@ public class ServiceIntegrationTests {
 
     @Test
     public void deleteTag_dissociatesTagFromService() {
-        ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", serviceType.getId(), List.of("tag1", "tag2"));
+        ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1", "tag2"));
 
         ServiceResponseDTO createdResponse = serviceService.create(serviceRequestDTO);
 
@@ -244,7 +252,7 @@ public class ServiceIntegrationTests {
 
     @Test
     public void updateService_updateTags() {
-        ServiceRequestDTO createServiceDTO = createDTO("Test Service", "Test Description", serviceType.getId(), List.of("tag1", "tag2"));
+        ServiceRequestDTO createServiceDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1", "tag2"));
 
         ServiceResponseDTO createResponseDTO = serviceService.create(createServiceDTO);
 
@@ -258,7 +266,7 @@ public class ServiceIntegrationTests {
         assertThat(tag2.getServices()).contains(serviceRepository.findById(createResponseDTO.id()).get());
 
         // Prepare new tag list for update (removes "tag2" and adds "tag3" and "tag4")
-        ServiceRequestDTO updateServiceDTO = createDTO("Updated Service", "Updated Description", serviceType.getId(), List.of("tag1", "tag3", "tag4"));
+        ServiceRequestDTO updateServiceDTO = createDTO("Updated Service", "Updated Description", "Test Service Type", List.of("tag1", "tag3", "tag4"));
 
         ServiceResponseDTO updateResponseDTO = serviceService.update(createResponseDTO.id(), updateServiceDTO);
 
@@ -287,7 +295,7 @@ public class ServiceIntegrationTests {
 
     @Test
     public void deleteService_removesTagAssociations() {
-        ServiceRequestDTO serviceRequestDTO = createDTO("Test Deletion Service", "To be deleted", serviceType.getId(), List.of("delete-tag1", "delete-tag2"));
+        ServiceRequestDTO serviceRequestDTO = createDTO("Test Deletion Service", "To be deleted", "Test Service Type", List.of("delete-tag1", "delete-tag2"));
 
         ServiceResponseDTO responseDTO = serviceService.create(serviceRequestDTO);
         Long serviceId = responseDTO.id();
@@ -309,5 +317,4 @@ public class ServiceIntegrationTests {
         assertThat(tag1.getServices()).extracting("id").doesNotContain(serviceId);
         assertThat(tag2.getServices()).extracting("id").doesNotContain(serviceId);
     }
- */
 }

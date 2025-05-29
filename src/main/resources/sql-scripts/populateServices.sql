@@ -9,7 +9,7 @@ INSERT IGNORE INTO service_type (id, name, created_at, updated_at) VALUES
                                                                 (5, 'Wellness', NOW(), NOW());
 
 -- Insert Tags
-INSERT IGNORE INTO tag (id, name, is_custom, created_at, updated_at) VALUES
+INSERT IGNORE INTO tag (id, name, custom, created_at, updated_at) VALUES
                                                                   (1, 'salon', 0, NOW(), NOW()),
                                                                   (2, 'pedicure', 0, NOW(), NOW()),
                                                                   (3, 'manicure', 0, NOW(), NOW()),
