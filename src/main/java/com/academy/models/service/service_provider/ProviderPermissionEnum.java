@@ -1,0 +1,5 @@
+package com.academy.models.service.service_provider;
+
+public enum ProviderPermissionEnum {
+    READ, UPDATE, DELETE, SERVE, OWNER
+}

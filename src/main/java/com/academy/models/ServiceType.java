@@ -1,9 +1,12 @@
 package com.academy.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -19,12 +22,15 @@ public class ServiceType {
     @Id
     private long id;
 
+    @NotBlank
     @Column(name="name")
     private String name;
 
-    @Column(name="created_at")
+    @Column(name="created_at", updatable=false)
+    @CreationTimestamp
     private LocalDateTime createdAt;
 
     @Column(name="updated_at")
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
 }

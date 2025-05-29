@@ -1,17 +1,9 @@
 package com.academy.dtos.appointment;
+import jakarta.validation.constraints.*;
 
-import lombok.Getter;
-import lombok.Setter;
-import java.time.LocalDateTime;
-
-@Getter
-@Setter
-public class AppointmentRequestDTO {
-    private Long memberId;
-    private Long serviceProviderId;
-    private LocalDateTime startDateTime;
-    private LocalDateTime endDateTime;
-    private String status;
-    private Integer rating;
-    private String comment;
-}
+public record AppointmentRequestDTO(
+        @NotNull Long serviceProviderId,
+        @NotNull Long memberId,
+        @Min(0) @Max(5) Integer rating,
+        @Size(max = 400) String comment
+) {}

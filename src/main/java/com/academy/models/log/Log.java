@@ -4,6 +4,7 @@ import com.academy.models.Member;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -32,11 +33,13 @@ public class Log {
     private String details;
 
     @Column(name = "created_at", nullable = false)
+    @CreationTimestamp
     private LocalDateTime createdAt;
 
-
+    //LOB -> large object como texto longo e ficheiros binários
+    @Lob
+    @Column(name = "attachemnt")
+    private byte[] attachment;
+    
     // nao tem updated_at porque este campo nunca é alterado
-
-
-
 }

@@ -1,50 +1,143 @@
+// AppointmentService.java
+
 package com.academy.services;
 
-import java.util.List;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-
+import com.academy.dtos.appointment.AppointmentMapper;
+import com.academy.dtos.appointment.AppointmentRequestDTO;
+import com.academy.dtos.appointment.AppointmentResponseDTO;
+import com.academy.exceptions.EntityNotFoundException;
+import com.academy.models.Appointment;
+import com.academy.models.Member;
+import com.academy.models.service.service_provider.ServiceProvider;
+import com.academy.repositories.AppointmentRepository;
+import com.academy.repositories.MemberRepository;
+import com.academy.repositories.ServiceProviderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.academy.repositories.AppointmentRepository;
-import com.academy.repositories.MemberRepository;
-
-import com.academy.dtos.appointment.AppointmentResponseDTO;
-import com.academy.exceptions.InvalidArgumentException;
-import com.academy.models.Appointment;
-import com.academy.dtos.appointment.AppointmentMapper;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AppointmentService {
 
-    AppointmentRepository appointmentRepository;
-    MemberRepository memberRepository;
-    AppointmentMapper appointmentMapper;
-    
+    private final AppointmentRepository appointmentRepository;
+
+    private final ServiceProviderRepository serviceProviderRepository;
+
+    private final AppointmentMapper appointmentMapper;
+
+    private final MemberRepository memberRepository;
 
     @Autowired
-    public AppointmentService(AppointmentRepository appointmentRepository, MemberRepository memberRepository, AppointmentMapper appointmentMapper) {
-        this.appointmentMapper = appointmentMapper;
-        this.memberRepository = memberRepository;
+
+    public AppointmentService(AppointmentRepository appointmentRepository, ServiceProviderRepository serviceProviderRepository, AppointmentMapper appointmentMapper, MemberRepository memberRepository) {
+
         this.appointmentRepository = appointmentRepository;
-        // Constructor for dependency injection
+
+        this.serviceProviderRepository = serviceProviderRepository;
+
+        this.appointmentMapper = appointmentMapper;
+
+        this.memberRepository = memberRepository;
+
     }
 
-    // Get all appointments for a specific member by their ID
-    public List<AppointmentResponseDTO> getAppointmentsByMemberId(Long memberId) {
-        if (memberId == null) {
-            throw new InvalidArgumentException("Member ID cannot be null");
-        }
-        if(memberRepository.existsById(memberId)) {
-            throw new InvalidArgumentException("Member with ID " + memberId + " does not exist.");
-        }
+    public List<AppointmentResponseDTO> getAllAppointments() {
 
-        List<Appointment> appointments = appointmentRepository.findByMember_Id(memberId);
-        return appointments.stream()
+        return appointmentRepository.findAll().stream()
+
                 .map(appointmentMapper::toResponseDTO)
+
                 .collect(Collectors.toList());
+
     }
 
-    
+    public AppointmentResponseDTO getAppointmentById(int id) {
+
+        return appointmentRepository.findById(id)
+
+                .map(appointmentMapper::toResponseDTO)
+
+                .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
+
+    }
+
+    public AppointmentResponseDTO createAppointment(AppointmentRequestDTO dto) {
+
+        ServiceProvider serviceProvider = serviceProviderRepository.findById(dto.serviceProviderId())
+
+                .orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, dto.serviceProviderId()));
+
+        Member member = memberRepository.findById(dto.memberId())
+
+                .orElseThrow(() -> new EntityNotFoundException(Member.class, dto.memberId()));
+
+        Appointment appointment = appointmentMapper.toEntity(dto);
+
+        appointment.setServiceProvider(serviceProvider);
+
+        appointment.setMember(member);
+
+        return appointmentMapper.toResponseDTO(appointmentRepository.save(appointment));
+
+    }
+
+    public AppointmentResponseDTO updateAppointment(int id, AppointmentRequestDTO appointmentDetails) {
+
+        Appointment appointment = appointmentRepository.findById(id)
+
+                .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
+
+        if(appointmentDetails.memberId() != null){
+
+            Member member = memberRepository.findById(appointmentDetails.memberId())
+
+                    .orElseThrow(()-> new EntityNotFoundException(Member.class, appointmentDetails.memberId()));
+
+            appointment.setMember(member);
+
+        }
+
+        if(appointmentDetails.serviceProviderId() != null) {
+
+            ServiceProvider serviceProvider = serviceProviderRepository.findById(appointmentDetails.serviceProviderId())
+
+                    .orElseThrow(()-> new EntityNotFoundException(ServiceProvider.class, appointmentDetails.serviceProviderId()));
+
+            appointment.setServiceProvider(serviceProvider);;
+
+        }
+
+        if(appointmentDetails.rating() != appointment.getRating() )appointment.setRating(appointmentDetails.rating());
+
+        if(appointmentDetails.comment() != null) appointment.setComment(appointmentDetails.comment());
+
+        return appointmentMapper.toResponseDTO(appointmentRepository.save(appointment));
+
+    }
+
+    public void deleteAppointment(int id) {
+
+        if(!appointmentRepository.existsById(id)) throw new EntityNotFoundException(Appointment.class, id);
+
+        appointmentRepository.deleteById(id);
+
+    }
+
+    public void deleteReview(int id){
+
+        Appointment appointment = appointmentRepository.findById(id)
+
+                .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
+
+        appointment.setRating(null);
+
+        appointment.setComment(null);
+
+        appointmentRepository.save(appointment);
+
+    }
+
 }
+

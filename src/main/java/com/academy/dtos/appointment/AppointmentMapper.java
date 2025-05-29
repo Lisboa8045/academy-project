@@ -1,18 +1,23 @@
 package com.academy.dtos.appointment;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 import com.academy.models.Appointment;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 
 @Mapper(componentModel = "spring")
 public abstract class AppointmentMapper {
-
-    @Mapping(source = "member.id", target = "memberId")
-    @Mapping(source = "serviceProvider.id", target = "serviceProviderId")
+    @Mappings ({
+            @Mapping(source= "serviceProvider.id", target = "serviceProviderId"),
+            @Mapping(source= "member.id", target = "memberId")
+    })
     public abstract AppointmentResponseDTO toResponseDTO(Appointment appointment);
 
-    @Mapping(source = "memberId", target = "member.id")
-    @Mapping(source = "serviceProviderId", target = "serviceProvider.id")
-    public abstract Appointment toEntity(AppointmentRequestDTO requestDTO);
+
+    public abstract Appointment toEntity(AppointmentRequestDTO appointmentRequestDTO);
+
+    @Mapping(source="member.username", target = "memberUsername")
+    public abstract AppointmentReviewResponseDTO toReviewResponseDTO(Appointment appointment);
+
 }
