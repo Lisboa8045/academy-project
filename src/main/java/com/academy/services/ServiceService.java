@@ -17,12 +17,14 @@ import com.academy.repositories.ServiceTypeRepository;
 import com.academy.repositories.TagRepository;
 import com.academy.specifications.ServiceSpecifications;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
@@ -154,19 +156,24 @@ public class ServiceService {
         return serviceProviderService.existsByServiceIdAndProviderUsername(serviceId, username);
     }
 
-    public List<ServiceResponseDTO> searchServices(String name, double priceMin, double priceMax, List<String> tagNames, Pageable pageable) {
+    public Page<ServiceResponseDTO> searchServices(String name, Double priceMin, Double priceMax, List<String> tagNames, Pageable pageable) {
         String username = authenticationFacade.getUsername();
-        Specification<Service> spec = Specification.where(ServiceSpecifications.hasNameLike(name))
-                .and(ServiceSpecifications.hasAnyTagNameLike(tagNames))
-                .and(ServiceSpecifications.hasPriceGreaterThanOrEqual(priceMin))
-                .and(ServiceSpecifications.hasPriceLessThanOrEqual(priceMax));
+
+        Specification<Service> spec = Specification.where(null); // start with no specifications, add each specification after if not null/empty
+
+        spec = addIfPresent(spec, name != null && !name.isBlank(), () -> ServiceSpecifications.hasNameLike(name));
+        spec = addIfPresent(spec, tagNames != null && !tagNames.isEmpty(), () -> ServiceSpecifications.hasAnyTagNameLike(tagNames));
+        spec = addIfPresent(spec, priceMin != null, () -> ServiceSpecifications.hasPriceGreaterThanOrEqual(priceMin));
+        spec = addIfPresent(spec, priceMax != null, () -> ServiceSpecifications.hasPriceLessThanOrEqual(priceMax));
 
         return serviceRepository.findAll(spec, pageable)
-                .stream()
                 .map(service ->  serviceMapper.toDto(service,
                         getPermissionsByProviderUsernameAndServiceId(username, service.getId())
-                ))
-                .collect(Collectors.toList());
+                ));
+    }
+
+    private Specification<Service> addIfPresent(Specification<Service> spec, boolean condition, Supplier<Specification<Service>> supplier) {
+        return condition ? spec.and(supplier.get()) : spec; // add specification on supplier, if the condition is met
     }
     /*
     @Transactional
