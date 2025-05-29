@@ -68,6 +68,6 @@ public class ServiceTypeService {
 
     public ServiceType findByNameOrThrow(String name) {
         return serviceTypeRepository.findByName(name)
-                .orElseThrow(() -> new EntityNotFoundException(ServiceType.class, name));
+                .orElseThrow(() -> new EntityNotFoundException(ServiceType.class, " with name " + name + " not found"));
     }
 }

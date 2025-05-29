@@ -8,10 +8,7 @@ import com.academy.models.Role;
 import com.academy.models.ServiceType;
 import com.academy.models.Tag;
 import com.academy.models.service.Service;
-import com.academy.repositories.MemberRepository;
-import com.academy.repositories.ServiceRepository;
-import com.academy.repositories.ServiceTypeRepository;
-import com.academy.repositories.TagRepository;
+import com.academy.repositories.*;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,8 +16,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,7 +31,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 @SpringBootTest
 @Transactional
 @ExtendWith(SpringExtension.class)
-@WithMockUser
+@WithMockUser(username = "owner")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ServiceIntegrationTests {
     private final ServiceService serviceService;
     private final TagService tagService;
@@ -41,6 +40,9 @@ public class ServiceIntegrationTests {
     private final ServiceTypeRepository serviceTypeRepository;
     private final TagRepository tagRepository;
     private final MemberRepository memberRepository;
+    private final RoleRepository roleRepository;
+    private final ServiceProviderRepository serviceProviderRepository;
+    private final ProviderPermissionRepository providerPermissionRepository;
 
     @Autowired
     public ServiceIntegrationTests(ServiceService serviceService,
@@ -48,7 +50,10 @@ public class ServiceIntegrationTests {
                                    ServiceRepository serviceRepository,
                                    ServiceTypeRepository serviceTypeRepository,
                                    TagRepository tagRepository,
-                                   MemberRepository memberRepository
+                                   MemberRepository memberRepository,
+                                   RoleRepository roleRepository,
+                                   ServiceProviderRepository serviceProviderRepository,
+                                   ProviderPermissionRepository providerPermissionRepository
     ) {
 
         this.serviceService = serviceService;
@@ -57,6 +62,9 @@ public class ServiceIntegrationTests {
         this.serviceTypeRepository = serviceTypeRepository;
         this.tagRepository = tagRepository;
         this.memberRepository = memberRepository;
+        this.roleRepository = roleRepository;
+        this.serviceProviderRepository = serviceProviderRepository;
+        this.providerPermissionRepository = providerPermissionRepository;
     }
 
     private ServiceType serviceType;
@@ -72,7 +80,8 @@ public class ServiceIntegrationTests {
 
         Role role = new Role();
         role.setId(1);
-        role.setName("Test Owner");
+        role.setName("ADMIN");
+        roleRepository.save(role);
 
         Member member = new Member();
         member.setUsername("owner");
@@ -94,9 +103,29 @@ public class ServiceIntegrationTests {
 
     @AfterEach
     void tearDown() {
-        serviceRepository.deleteAll();
-        tagRepository.deleteAll();
-        serviceTypeRepository.deleteAll();
+        /*
+        providerPermissionRepository.deleteAllInBatch();
+        serviceProviderRepository.deleteAllInBatch();
+
+        List<Service> services = serviceRepository.findAll();
+        List<Tag> tags = tagRepository.findAll();
+
+        for (Service service : services) {
+            List<Tag> serviceTags = new ArrayList<>(service.getTags());
+            for (Tag tag : serviceTags) {
+                tag.getServices().remove(service);
+            }
+            service.getTags().clear();
+        }
+        serviceRepository.saveAll(services);
+        tagRepository.saveAll(tags);
+
+        serviceRepository.deleteAllInBatch();
+        tagRepository.deleteAllInBatch();
+        serviceTypeRepository.deleteAllInBatch();
+        memberRepository.deleteAllInBatch();
+        roleRepository.deleteAllInBatch();
+        */
     }
 
     private ServiceRequestDTO createDTO(String name, String description, String serviceTypeName, List<String> tags) {
@@ -117,9 +146,13 @@ public class ServiceIntegrationTests {
 
     @Test
     public void updateService_invalidServiceType_throwsException() {
+        ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1", "tag2"));
+
+        ServiceResponseDTO createdResponse = serviceService.create(serviceRequestDTO);
+
         ServiceRequestDTO updateRequestDTO = createDTO("Updated Service", "Updated Description", "Non-Existing Type", List.of("tag1"));
 
-        assertThatThrownBy(() -> serviceService.update(1L, updateRequestDTO))
+        assertThatThrownBy(() -> serviceService.update(createdResponse.id(), updateRequestDTO))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
@@ -127,6 +160,7 @@ public class ServiceIntegrationTests {
     public void deleteTag_notAssociatedWithAnyService_doesNotThrowException() {
         Tag tag3 = new Tag();
         tag3.setName("tag3");
+        tag3.setCustom(true);
         tagRepository.save(tag3);  // A tag that is not used in any service
 
         assertThatCode(() -> tagService.delete(tag3.getId()))
@@ -137,6 +171,7 @@ public class ServiceIntegrationTests {
     public void deleteTag_associatedWithService() {
         Tag tag3 = new Tag();
         tag3.setName("tag3");
+        tag3.setCustom(true);
         tagRepository.save(tag3);
 
         ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag3"));
@@ -184,6 +219,7 @@ public class ServiceIntegrationTests {
         // Update the service with a new serviceType and tags
         ServiceType newServiceType = new ServiceType();
         newServiceType.setName("New Service Type");
+        newServiceType.setIcon("New icon.png");
         newServiceType = serviceTypeRepository.save(newServiceType);
 
         ServiceRequestDTO updateRequestDTO = createDTO("Updated Service", "Updated Description", "New Service Type", List.of("tag2", "tag3"));
