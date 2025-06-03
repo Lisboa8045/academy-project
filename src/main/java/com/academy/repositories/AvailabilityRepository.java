@@ -6,7 +6,6 @@ import com.academy.models.Availability;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,4 +19,7 @@ public interface AvailabilityRepository extends JpaRepository<Availability, Long
     
     Optional<Availability> findByMember_IdAndDayOfWeekAndStartDateTimeAndEndDateTime(
     Long memberId, DayOfWeek dayOfWeek, LocalDateTime startDateTime, LocalDateTime endDateTime);
+
+    List<Availability> findByMember_IdAndStartDateTimeBetween(Long providerId, LocalDateTime now,
+            LocalDateTime in30Days);
 }

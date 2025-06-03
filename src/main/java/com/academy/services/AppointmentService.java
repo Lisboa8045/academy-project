@@ -13,8 +13,11 @@ import com.academy.repositories.AppointmentRepository;
 import com.academy.repositories.MemberRepository;
 import com.academy.repositories.ServiceProviderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,6 +31,9 @@ public class AppointmentService {
     private final AppointmentMapper appointmentMapper;
 
     private final MemberRepository memberRepository;
+
+    @Value("${slot.window.days:30}")
+    private int slotWindowDays;
 
     @Autowired
 
@@ -140,5 +146,13 @@ public class AppointmentService {
 
     }
 
+    public List<Appointment> getAppointmentsForProvider(Long providerId) {
+    if (providerId == null) {
+        throw new IllegalArgumentException("Provider ID cannot be null");
+    }
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime end = now.plusDays(slotWindowDays);
+        return appointmentRepository.findByServiceProvider_Provider_IdAndStartDateTimeBetween(providerId, now, end);
+    }
 }
 
