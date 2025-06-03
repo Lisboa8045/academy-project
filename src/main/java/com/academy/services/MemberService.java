@@ -46,6 +46,15 @@ public class MemberService {
         this.jwtUtil = jwtUtil;
         this.messageSource = messageSource;
     }
+    public void logout(HttpServletResponse response){
+        System.out.println("Backend 2 logout");
+        Cookie cookie = new Cookie("token", null);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+    }
+
 
     public long register(RegisterRequestDto request) {
         if (memberRepository.findByUsername(request.username()).isPresent()
@@ -83,16 +92,16 @@ public class MemberService {
                     member.get().getUsername(), member.get().getPassword(), new ArrayList<>()
             );
             String token = jwtUtil.generateToken(userDetails);
-
+            System.out.println("Token generated:" + token);
             Cookie cookie = new Cookie("token", token);
             cookie.setHttpOnly(true);
-            cookie.setSecure(true);
+            cookie.setSecure(true); // Only if you're using HTTPS
             cookie.setPath("/");
-            cookie.setMaxAge(24 * 60 * 60);
-
+            cookie.setMaxAge(60 * 60 * 24); // 1 day
             response.addCookie(cookie);
             return new LoginResponseDto(
                     messageSource.getMessage("user.loggedin", null, LocaleContextHolder.getLocale()),
+                    token,
                     member.get().getId(),
                     member.get().getUsername()
             );
