@@ -5,9 +5,9 @@
 }
 
 .content {
-  flex: 1 0 auto; /* grow and take up space */
+  flex: 1 0 auto;
 }
 
 app-footer {
-  flex-shrink: 0; /* don’t collapse */
+  flex-shrink: 0;
 }

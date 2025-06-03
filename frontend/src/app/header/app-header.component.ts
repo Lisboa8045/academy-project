@@ -1,7 +1,7 @@
 import {Component, inject, Input, signal} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import {AuthStore} from '../shared/auth.store';
+import {AuthStore} from '../auth/auth.store';
 
 @Component({
   selector: 'app-header',
