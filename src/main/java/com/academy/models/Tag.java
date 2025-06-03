@@ -1,9 +1,13 @@
 package com.academy.models;
 
+import com.academy.models.service.Service;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -15,6 +19,7 @@ import java.util.List;
 @Table(name="tag")
 @Getter
 @Setter
+@ToString
 public class Tag {
 
     @Column(name="id")
@@ -22,9 +27,11 @@ public class Tag {
     @Id
     private long id;
 
+    @NotBlank
     @Column(name="name", unique = true)
     private String name;
 
+    @NotNull
     @Column(name="is_custom")
     private Boolean isCustom;
 

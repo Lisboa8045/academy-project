@@ -18,8 +18,11 @@
       </div>
 
       <input type="text" formControlName="username" placeholder="Username" required/>
-      <div class="validation-error" *ngIf="authForm.get('username')?.invalid && authForm.get('username')?.touched">
+      <div class="validation-error" *ngIf="authForm.get('username')?.errors?.['required'] && authForm.get('username')?.touched">
         Username is required.
+      </div>
+      <div class="validation-error" *ngIf="authForm.get('username')?.errors?.['specialCharsNotAllowed'] && authForm.get('username')?.touched">
+        Special characters are not allowed in the username.
       </div>
     }
 

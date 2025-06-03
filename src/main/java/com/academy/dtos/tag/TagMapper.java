@@ -1,7 +1,7 @@
 package com.academy.dtos.tag;
 
-import com.academy.models.Service;
 import com.academy.models.Tag;
+import com.academy.models.service.Service;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;

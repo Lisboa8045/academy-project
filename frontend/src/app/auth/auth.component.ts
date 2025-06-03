@@ -11,6 +11,7 @@ import {
 import { AuthService } from '../shared/auth.service';
 import { Router } from '@angular/router';
 import {strongPasswordValidator} from '../shared/validators/password.validator';
+import {noSpecialCharsValidator} from '../shared/validators/no-special-chars.validator';
 
 @Component({
   selector: 'app-auth',
@@ -45,7 +46,7 @@ export class AuthComponent{
     } else {
       this.authForm = this.fb.group({
         email: ['', [Validators.required, Validators.email]],
-        username: ['', [Validators.required]],
+        username: ['', [Validators.required, noSpecialCharsValidator()]],
         password: ['', [Validators.required, strongPasswordValidator()]],
         confirmPassword: ['', [Validators.required]]
       }, { validators: this.passwordsMatchValidator });
