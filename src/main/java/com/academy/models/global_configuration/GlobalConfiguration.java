@@ -1,4 +1,4 @@
-package com.academy.models.configuration;
+package com.academy.models.global_configuration;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,7 +13,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-public class Configuration {
+public class GlobalConfiguration {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="id")
@@ -27,7 +27,7 @@ public class Configuration {
 
     @Enumerated(EnumType.STRING)
     @Column(name="configType")
-    private ConfigurationType configType;
+    private GlobalConfigurationType configType;
 
     // Getters and Setters
 }
