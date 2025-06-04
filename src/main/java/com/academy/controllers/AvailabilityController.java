@@ -51,13 +51,20 @@ public class AvailabilityController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    // Update an existing availability
-    @PutMapping("/{availabilityId}")
+  @PutMapping("/{availabilityId}")
     public ResponseEntity<AvailabilityResponseDTO> updateAvailability(
             @PathVariable long availabilityId,
             @Valid @RequestBody AvailabilityRequestDTO availabilityRequestDTO) {
-        availabilityRequestDTO.setId(availabilityId);
-        AvailabilityResponseDTO response = availabilityService.updateAvailability(availabilityRequestDTO);
+
+        AvailabilityRequestDTO dtoWithId = new AvailabilityRequestDTO(
+            availabilityId,
+            availabilityRequestDTO.memberId(),
+            availabilityRequestDTO.dayOfWeek(),
+            availabilityRequestDTO.startDateTime(),
+            availabilityRequestDTO.endDateTime()
+        );
+
+        AvailabilityResponseDTO response = availabilityService.updateAvailability(dtoWithId);
         return ResponseEntity.ok(response);
     }
 

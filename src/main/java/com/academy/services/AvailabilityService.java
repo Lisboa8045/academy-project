@@ -93,31 +93,28 @@ public class AvailabilityService {
     // Create a new availability
     @Transactional
     public AvailabilityResponseDTO createAvailability(AvailabilityRequestDTO requestDTO) {
-        if (requestDTO == null) {
-            throw new InvalidArgumentException("Availability request cannot be null.");
-        }
-        Long memberId = requestDTO.getMemberId();
+        Long memberId = requestDTO.memberId();
         if (memberId == null || memberId <= 0) {
             throw new InvalidArgumentException("Member ID must be positive, non-zero and non-null.");
-}
-        if (requestDTO.getDayOfWeek() == null) {
+        }
+        if (requestDTO.dayOfWeek() == null) {
             throw new InvalidArgumentException("DayOfWeek cannot be null.");
         }
-        if (requestDTO.getStartDateTime() == null || requestDTO.getEndDateTime() == null) {
+        if (requestDTO.startDateTime() == null || requestDTO.endDateTime() == null) {
             throw new InvalidArgumentException("StartDateTime and EndDateTime cannot be null.");
         }
-        if (!requestDTO.getStartDateTime().isBefore(requestDTO.getEndDateTime())) {
+        if (!requestDTO.startDateTime().isBefore(requestDTO.endDateTime())) {
             throw new InvalidArgumentException("StartDateTime must be before EndDateTime.");
         }
 
-        Member member = memberService.findbyId(requestDTO.getMemberId())
+        Member member = memberService.findbyId(memberId)
                 .orElseThrow(() -> new InvalidArgumentException("Member not found"));
 
         boolean overlaps = availabilityRepository.existsByMember_IdAndDayOfWeekAndTimeOverlap(
-                requestDTO.getMemberId(),
-                requestDTO.getDayOfWeek(),
-                requestDTO.getStartDateTime(),
-                requestDTO.getEndDateTime()
+                memberId,
+                requestDTO.dayOfWeek(),
+                requestDTO.startDateTime(),
+                requestDTO.endDateTime()
         );
 
         if (overlaps) {
@@ -136,8 +133,8 @@ public class AvailabilityService {
         if (requestDTO == null) {
             throw new InvalidArgumentException("Availability cannot be null");
         }
-        if (!availabilityRepository.existsById(requestDTO.getId())) {
-            throw new InvalidArgumentException("Availability with ID " + requestDTO.getId() + " does not exist.");
+        if (!availabilityRepository.existsById(requestDTO.id())) {
+            throw new InvalidArgumentException("Availability with ID " + requestDTO.id() + " does not exist.");
         }
         Availability availability = availabilityMapper.toEntityWithMember(requestDTO);
         Availability saved = availabilityRepository.save(availability);
