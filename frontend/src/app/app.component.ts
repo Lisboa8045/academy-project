@@ -14,7 +14,6 @@ import {AuthStore} from './auth/auth.store';
 })
 export class AppComponent implements OnInit {
   constructor(private http: HttpClient, private authStore: AuthStore) {}
-  login = false;
   ngOnInit(): void {
     this.http.get<{ username: string }>('http://localhost:8080/auth/me', {
       withCredentials: true
