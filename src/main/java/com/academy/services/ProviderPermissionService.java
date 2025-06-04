@@ -7,6 +7,7 @@ import com.academy.repositories.ProviderPermissionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -25,13 +26,20 @@ public class ProviderPermissionService {
         return providerPermissionRepository.findAllByServiceProviderId(serviceProviderId).stream()
                 .map(ProviderPermission::getPermission).toList();
     }
-    public void createPermissionsViaList(List<ProviderPermissionEnum> permissions, ServiceProvider serviceProvider){
+    public ServiceProvider createPermissionsViaList(List<ProviderPermissionEnum> permissions, ServiceProvider serviceProvider){
+        List<ProviderPermission> providerPermissions = new ArrayList<>();
         for(ProviderPermissionEnum permission : permissions){
             ProviderPermission providerPermission = new ProviderPermission();
             providerPermission.setPermission(permission);
             providerPermission.setServiceProvider(serviceProvider);
             providerPermissionRepository.save(providerPermission);
+            providerPermissions.add(providerPermission);
         }
+        serviceProvider.setPermissions(providerPermissions);
+        return serviceProvider;
+    }
 
+    public void deleteAllByServiceProvider(ServiceProvider serviceProvider) {
+        providerPermissionRepository.deleteAll(serviceProvider.getPermissions());
     }
 }

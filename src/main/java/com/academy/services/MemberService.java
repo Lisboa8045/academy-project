@@ -89,4 +89,11 @@ public class MemberService {
             throw new MemberNotFoundException(username);
         return optionalMember.get();
     }
+
+    public Member getMemberById(Long id){
+        Optional<Member> optionalMember = memberRepository.findById(id);
+        if(optionalMember.isEmpty())
+            throw new EntityNotFoundException(Member.class, id);
+        return optionalMember.get();
+    }
 }

@@ -17,19 +17,21 @@ public class AcademyApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(AcademyApplication.class, args);
 	}
-
+/*
 	@Bean
 	CommandLineRunner populateServices(DataSource dataSource) {
 		return args -> {
-			Resource resource = new ClassPathResource("sql-scripts/populateRoles.sql");
-			Resource resource2 = new ClassPathResource("sql-scripts/populateMembers.sql");
-			Resource resource3 = new ClassPathResource("sql-scripts/populateServices.sql");
-			try (Connection conn = dataSource.getConnection()) {
-				ScriptUtils.executeSqlScript(conn, resource);
-				ScriptUtils.executeSqlScript(conn, resource2);
-				ScriptUtils.executeSqlScript(conn, resource3);
-			}
+			//Resource resource = new ClassPathResource("sql-scripts/populateRoles.sql");
+			//Resource resource2 = new ClassPathResource("sql-scripts/populateMembers.sql");
+			//Resource resource3 = new ClassPathResource("sql-scripts/populateServices.sql");
+			//try (Connection conn = dataSource.getConnection()) {
+			//	ScriptUtils.executeSqlScript(conn, resource);
+			//	ScriptUtils.executeSqlScript(conn, resource2);
+			//	ScriptUtils.executeSqlScript(conn, resource3);
+			//}
 			System.out.println("Populated database");
 		};
 	}
+
+ */
 }
