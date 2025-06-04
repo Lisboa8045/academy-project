@@ -19,14 +19,14 @@ public class GlobalConfiguration {
     @Column(name="id")
     private Long id;
 
-    @Column(name="configKey")
+    @Column(name="config_key")
     private String configKey;
 
-    @Column(name="configValue")
+    @Column(name="config_value")
     private String configValue;
 
     @Enumerated(EnumType.STRING)
-    @Column(name="configType")
+    @Column(name="config_type")
     private GlobalConfigurationType configType;
 
     // Getters and Setters
