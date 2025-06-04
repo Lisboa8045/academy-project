@@ -11,7 +11,7 @@ export const authErrorInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError(error => {
       if (error.status === 403) {
-        router.navigate(['/dont-have-permission']);
+        router.navigate(['/unauthorized']);
       }
       return throwError(() => error);
     })

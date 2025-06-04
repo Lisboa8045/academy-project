@@ -8,7 +8,7 @@ export function noSpecialCharsValidator(): ValidatorFn {
       return null;
     }
 
-    const isValid = /^[a-zA-Z0-9]+$/.test(value);
+    const isValid = /^[a-zA-Z0-9_]+$/.test(value);
 
     return isValid ? null : { specialCharsNotAllowed: true };
   };

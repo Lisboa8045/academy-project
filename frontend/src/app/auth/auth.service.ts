@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {Observable, tap} from 'rxjs';
-import {AppHeaderComponent} from '../header/app-header.component';
 import {AuthStore} from './auth.store';
+import {LoginResponseDto} from './login-response-dto.model';
 
 @Injectable({
   providedIn: 'root'
@@ -35,8 +35,4 @@ export class AuthService {
   }
 }
 
-export interface LoginResponseDto {
-  message: string;
-  memberId: number;
-  username: string;
-}
+
