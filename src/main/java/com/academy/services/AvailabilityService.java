@@ -173,7 +173,7 @@ public class AvailabilityService {
             throw new InvalidArgumentException("Provider ID cannot be null");
         }
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime in30Days = now.plusDays(slotWindowDays);
-        return availabilityRepository.findByMember_IdAndStartDateTimeBetween(providerId, now, in30Days);
+        LocalDateTime days = now.plusDays(slotWindowDays);
+        return availabilityRepository.findByMember_IdAndStartDateTimeBetween(providerId, now, days);
     }
 }
