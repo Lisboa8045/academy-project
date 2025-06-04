@@ -1,6 +1,8 @@
 package com.academy.dtos.availability;
 
-import org.mapstruct.*;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
 import com.academy.models.Availability;
 
 @Mapper(componentModel = "spring")

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.academy.dtos.availability.AvailabilityMapper;
 import com.academy.dtos.availability.AvailabilityRequestDTO;
 import com.academy.dtos.availability.AvailabilityResponseDTO;
+import com.academy.exceptions.EntityNotFoundException;
 import com.academy.exceptions.InvalidArgumentException;
 import com.academy.models.Availability;
 import com.academy.repositories.AvailabilityRepository;
@@ -89,22 +90,38 @@ public class AvailabilityService {
         return availabilityMapper.toResponseDTOWithMember(availability);
     }
 
+    // Create a new availability
     @Transactional
     public AvailabilityResponseDTO createAvailability(AvailabilityRequestDTO requestDTO) {
-        
+        if (requestDTO == null) {
+            throw new InvalidArgumentException("Availability request cannot be null.");
+        }
+        Long memberId = requestDTO.getMemberId();
+        if (memberId == null || memberId <= 0) {
+            throw new InvalidArgumentException("Member ID must be positive, non-zero and non-null.");
+}
+        if (requestDTO.getDayOfWeek() == null) {
+            throw new InvalidArgumentException("DayOfWeek cannot be null.");
+        }
+        if (requestDTO.getStartDateTime() == null || requestDTO.getEndDateTime() == null) {
+            throw new InvalidArgumentException("StartDateTime and EndDateTime cannot be null.");
+        }
+        if (!requestDTO.getStartDateTime().isBefore(requestDTO.getEndDateTime())) {
+            throw new InvalidArgumentException("StartDateTime must be before EndDateTime.");
+        }
+
         Member member = memberService.findbyId(requestDTO.getMemberId())
                 .orElseThrow(() -> new InvalidArgumentException("Member not found"));
 
-        boolean exists = availabilityRepository
-        .findByMember_IdAndDayOfWeekAndStartDateTimeAndEndDateTime(
-            requestDTO.getMemberId(),
-            requestDTO.getDayOfWeek(),
-            requestDTO.getStartDateTime(),
-            requestDTO.getEndDateTime()
-        ).isPresent();
+        boolean overlaps = availabilityRepository.existsByMember_IdAndDayOfWeekAndTimeOverlap(
+                requestDTO.getMemberId(),
+                requestDTO.getDayOfWeek(),
+                requestDTO.getStartDateTime(),
+                requestDTO.getEndDateTime()
+        );
 
-        if (exists) {
-            throw new InvalidArgumentException("Availability already exists for this member at the specified time and day.");
+        if (overlaps) {
+            throw new InvalidArgumentException("Availability overlaps with existing availability for this member.");
         }
 
         Availability availability = availabilityMapper.toEntity(requestDTO);
@@ -113,7 +130,7 @@ public class AvailabilityService {
         return availabilityMapper.toResponseDTOWithMember(saved);
     }
 
-
+    // Update an existing availability
     @Transactional
     public AvailabilityResponseDTO updateAvailability(AvailabilityRequestDTO requestDTO) {
         if (requestDTO == null) {
@@ -127,17 +144,18 @@ public class AvailabilityService {
         return availabilityMapper.toResponseDTOWithMember(saved);
     }
 
-    // Delete an availability by its ID
     @Transactional
     public void deleteAvailabilityById(Long availabilityId) {
         if (availabilityId == null) {
             throw new InvalidArgumentException("Availability ID cannot be null");
         }
         if (!availabilityRepository.existsById(availabilityId)) {
-            throw new InvalidArgumentException("Availability with ID " + availabilityId + " does not exist.");
+            throw new EntityNotFoundException(Availability.class, " with ID " + availabilityId + " does not exist.");
         }
         availabilityRepository.deleteById(availabilityId);
     }
+
+
 
     // Get all availabilities
     public List<AvailabilityResponseDTO> getAllAvailabilities() {
