@@ -1,0 +1,18 @@
+<footer class="footer">
+  <h2>Who made the project ?</h2>
+
+  <div class="avatar-group">
+    <a *ngFor="let user of users"
+       [href]="user.html_url"
+       target="_blank"
+       rel="noopener noreferrer"
+       class="avatar-link">
+      <img [src]="user.avatar_url" [alt]="user.login" />
+      <div class="username">{{ user.login }}</div>
+    </a>
+  </div>
+
+  <p class="copyright">
+    ©2025 Polarising Champions Academy. All rights reserved.
+  </p>
+</footer>
