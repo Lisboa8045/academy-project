@@ -1,0 +1,35 @@
+.header {
+  background: linear-gradient(90deg, #3b2ff5 0%, #00d4ff 100%);
+  border-bottom: none; /* gradient edge looks better without a solid line */
+  padding: 1.5rem 1.5rem;
+  font-family: 'Poppins', sans-serif;
+  color: white;
+}
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-item {
+  text-decoration: none;
+  color: white;
+  margin-left: 1rem;
+  font-weight: 500;
+  transition: transform 0.25s ease, color 0.2s ease-in-out;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+
+}
+
+.nav-item:hover {
+  transition: transform 0.25s ease;
+  color: #e0f7ff;
+  transform: scale(1.08)
+}
+
+
+.right-links {
+  display: flex;
+  align-items: center;
+}
