@@ -5,7 +5,6 @@ import com.academy.dtos.service.ServiceMapper;
 import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
-import com.academy.dtos.service_provider.ServiceProviderResponseDTO;
 import com.academy.exceptions.AuthenticationException;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.Member;
@@ -13,15 +12,20 @@ import com.academy.models.ServiceType;
 import com.academy.models.Tag;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
+import com.academy.models.service.service_provider.ServiceProvider;
+import com.academy.repositories.ProviderPermissionRepository;
+import com.academy.repositories.ServiceProviderRepository;
 import com.academy.repositories.ServiceRepository;
 import com.academy.specifications.ServiceSpecifications;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -36,6 +40,11 @@ public class ServiceService {
     private final MemberService memberService;
     private final TagService tagService;
     private final ServiceTypeService serviceTypeService;
+
+    @Autowired
+    private ProviderPermissionRepository providerPermissionRepository;
+    @Autowired
+    private ServiceProviderRepository serviceProviderRepository;
 
     public ServiceService(ServiceRepository serviceRepository,
                           ServiceMapper serviceMapper,
@@ -67,14 +76,16 @@ public class ServiceService {
 
         Service savedService = serviceRepository.save(service);
 
-        createOwnerServiceProvider(new ServiceProviderRequestDTO(
+        ServiceProvider owner = createOwnerServiceProvider(new ServiceProviderRequestDTO(
                 member.getId(),
                 savedService.getId(),
                 Arrays.asList(ProviderPermissionEnum.values())
         ));
+        linkServiceToOwnerAsProvider(service, owner);
         return serviceMapper.toDto(savedService, getPermissionsByProviderUsernameAndServiceId(member.getUsername(), savedService.getId()));
     }
-    private ServiceProviderResponseDTO createOwnerServiceProvider(ServiceProviderRequestDTO request) {
+
+    private ServiceProvider createOwnerServiceProvider(ServiceProviderRequestDTO request) {
         return serviceProviderService.createServiceProvider(request);
     }
 
@@ -139,7 +150,8 @@ public class ServiceService {
         if(permissions == null || !permissions.contains(ProviderPermissionEnum.DELETE))
             throw new AuthenticationException("Member doesn't have permission to delete service");
 
-        service.removeAllTags();
+        service.removeAllLinks();
+        deleteServiceProviders(service);
         serviceRepository.delete(service);
     }
 
@@ -155,9 +167,14 @@ public class ServiceService {
         type.getServices().add(service);
     }
 
+    private void linkServiceToOwnerAsProvider(Service service, ServiceProvider owner) {
+        service.getServiceProviders().add(owner);
+        owner.setService(service);
+    }
+
     public List<ProviderPermissionEnum> getPermissionsByProviderUsernameAndServiceId(String username, Long serviceId){
         if(!hasServiceProvider(username, serviceId))
-            return null;
+            return Collections.emptyList();
         return serviceProviderService.getPermissionsByProviderUsernameAndServiceId(username, serviceId);
     }
     private boolean hasServiceProvider(String username, Long serviceId){
@@ -183,6 +200,16 @@ public class ServiceService {
     private Specification<Service> addIfPresent(Specification<Service> spec, boolean condition, Supplier<Specification<Service>> supplier) {
         return condition ? spec.and(supplier.get()) : spec; // add specification on supplier, if the condition is met
     }
+
+    @Transactional
+    public void deleteServiceProviders(Service service) {
+        List<ServiceProvider> providers = new ArrayList<>(service.getServiceProviders());
+
+        for (ServiceProvider provider : providers) {
+            serviceProviderService.deleteServiceProvider(provider.getId());
+        }
+    }
+
     /*
     @Transactional
     public ServiceResponseDTO updateMemberPermissions(Long serviceId, Long memberId, List<ProviderPermissionEnum> permissions){

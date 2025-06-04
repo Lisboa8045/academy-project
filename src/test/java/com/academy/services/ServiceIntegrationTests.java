@@ -8,7 +8,13 @@ import com.academy.models.Role;
 import com.academy.models.ServiceType;
 import com.academy.models.Tag;
 import com.academy.models.service.Service;
-import com.academy.repositories.*;
+import com.academy.repositories.MemberRepository;
+import com.academy.repositories.ProviderPermissionRepository;
+import com.academy.repositories.RoleRepository;
+import com.academy.repositories.ServiceProviderRepository;
+import com.academy.repositories.ServiceRepository;
+import com.academy.repositories.ServiceTypeRepository;
+import com.academy.repositories.TagRepository;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +39,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 @ExtendWith(SpringExtension.class)
 @WithMockUser(username = "owner")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class ServiceIntegrationTests {
+class ServiceIntegrationTests {
     private final ServiceService serviceService;
     private final TagService tagService;
     private final ServiceRepository serviceRepository;
@@ -71,7 +77,7 @@ public class ServiceIntegrationTests {
     private Tag tag1;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         // Set up a ServiceType, Member and Tags before each test
         serviceType = new ServiceType();
         serviceType.setName("Test Service Type");
@@ -133,19 +139,19 @@ public class ServiceIntegrationTests {
     }
 
     @Test
-    public void updateService_serviceNotFound_throwsException() {
+    void updateService_serviceNotFound_throwsException() {
         assertThatThrownBy(() -> serviceService.update(999L, createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag3"))))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
-    public void deleteService_serviceNotFound_throwsException() {
+    void deleteService_serviceNotFound_throwsException() {
         assertThatThrownBy(() -> serviceService.delete(999L))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
-    public void updateService_invalidServiceType_throwsException() {
+    void updateService_invalidServiceType_throwsException() {
         ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1", "tag2"));
 
         ServiceResponseDTO createdResponse = serviceService.create(serviceRequestDTO);
@@ -157,7 +163,7 @@ public class ServiceIntegrationTests {
     }
 
     @Test
-    public void deleteTag_notAssociatedWithAnyService_doesNotThrowException() {
+    void deleteTag_notAssociatedWithAnyService_doesNotThrowException() {
         Tag tag3 = new Tag();
         tag3.setName("tag3");
         tag3.setCustom(true);
@@ -168,7 +174,7 @@ public class ServiceIntegrationTests {
     }
 
     @Test
-    public void deleteTag_associatedWithService() {
+    void deleteTag_associatedWithService() {
         Tag tag3 = new Tag();
         tag3.setName("tag3");
         tag3.setCustom(true);
@@ -187,7 +193,7 @@ public class ServiceIntegrationTests {
     }
 
     @Test
-    public void createService_createsTagsAndAssignsServiceType() {
+    void createService_createsTagsAndAssignsServiceType() {
         ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1", "tag2"));
 
         ServiceResponseDTO responseDTO = serviceService.create(serviceRequestDTO);
@@ -201,7 +207,7 @@ public class ServiceIntegrationTests {
     }
 
     @Test
-    public void createService_duplicateTags_doesNotCreateDuplicateTags() {
+    void createService_duplicateTags_doesNotCreateDuplicateTags() {
         ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1", "tag1"));
 
         ServiceResponseDTO responseDTO = serviceService.create(serviceRequestDTO);
@@ -211,7 +217,7 @@ public class ServiceIntegrationTests {
     }
 
     @Test
-    public void updateService_updatesServiceTypeAndTags() {
+    void updateService_updatesServiceTypeAndTags() {
         ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1", "tag2"));
 
         ServiceResponseDTO createdResponse = serviceService.create(serviceRequestDTO);
@@ -233,7 +239,7 @@ public class ServiceIntegrationTests {
     }
 
     @Test
-    public void deleteService_deletesService() {
+    void deleteService_deletesService() {
         ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1"));
 
         ServiceResponseDTO createdResponse = serviceService.create(serviceRequestDTO);
@@ -245,7 +251,7 @@ public class ServiceIntegrationTests {
     }
 
     @Test
-    public void deleteService_cascadesCorrectly() {
+    void deleteService_cascadesCorrectly() {
         ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1"));
 
         ServiceResponseDTO createdResponse = serviceService.create(serviceRequestDTO);
@@ -268,7 +274,7 @@ public class ServiceIntegrationTests {
     }
 
     @Test
-    public void deleteTag_dissociatesTagFromService() {
+    void deleteTag_dissociatesTagFromService() {
         ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1", "tag2"));
 
         ServiceResponseDTO createdResponse = serviceService.create(serviceRequestDTO);
@@ -287,7 +293,7 @@ public class ServiceIntegrationTests {
     }
 
     @Test
-    public void updateService_updateTags() {
+    void updateService_updateTags() {
         ServiceRequestDTO createServiceDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1", "tag2"));
 
         ServiceResponseDTO createResponseDTO = serviceService.create(createServiceDTO);
@@ -330,27 +336,29 @@ public class ServiceIntegrationTests {
     }
 
     @Test
-    public void deleteService_removesTagAssociations() {
+    void deleteService_removesTagAssociations() {
         ServiceRequestDTO serviceRequestDTO = createDTO("Test Deletion Service", "To be deleted", "Test Service Type", List.of("delete-tag1", "delete-tag2"));
 
         ServiceResponseDTO responseDTO = serviceService.create(serviceRequestDTO);
         Long serviceId = responseDTO.id();
 
         // Verify tag-service association exists
-        Tag tag1 = tagRepository.findByName("delete-tag1").orElseThrow();
-        Tag tag2 = tagRepository.findByName("delete-tag2").orElseThrow();
-        assertThat(tag1.getServices()).extracting("id").contains(serviceId);
+        Tag tag2 = tagRepository.findByName("delete-tag1").orElseThrow();
+        Tag tag3 = tagRepository.findByName("delete-tag2").orElseThrow();
         assertThat(tag2.getServices()).extracting("id").contains(serviceId);
+        assertThat(tag3.getServices()).extracting("id").contains(serviceId);
 
         serviceService.delete(serviceId);
 
         // Verify that service is deleted
         assertThat(serviceRepository.findById(serviceId)).isEmpty();
 
+        serviceTypeRepository.findAll();
+
         // Verify that tags no longer reference the deleted service
-        tag1 = tagRepository.findByName("delete-tag1").orElseThrow();
-        tag2 = tagRepository.findByName("delete-tag2").orElseThrow();
-        assertThat(tag1.getServices()).extracting("id").doesNotContain(serviceId);
+        tag2 = tagRepository.findByName("delete-tag1").orElseThrow();
+        tag3 = tagRepository.findByName("delete-tag2").orElseThrow();
         assertThat(tag2.getServices()).extracting("id").doesNotContain(serviceId);
+        assertThat(tag3.getServices()).extracting("id").doesNotContain(serviceId);
     }
 }

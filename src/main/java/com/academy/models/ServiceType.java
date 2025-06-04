@@ -17,7 +17,7 @@ import java.util.List;
 @Table(name="service_type")
 @Getter
 @Setter
-@ToString
+@ToString(exclude="services")
 public class ServiceType {
 
     @Column(name="id")

@@ -6,18 +6,19 @@ import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
 import com.academy.dtos.service_provider.ServiceProviderResponseDTO;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.Member;
+import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.MemberRepository;
 import com.academy.repositories.ServiceProviderRepository;
 import com.academy.repositories.ServiceRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
-@Service
+@org.springframework.stereotype.Service
 public class ServiceProviderService {
 
     private final ServiceProviderRepository serviceProviderRepository;
@@ -53,12 +54,17 @@ public class ServiceProviderService {
                 .map(serviceProviderMapper::toResponseDTO);
     }
 
-    public ServiceProviderResponseDTO createServiceProvider(ServiceProviderRequestDTO dto) {
+    public ServiceProviderResponseDTO createServiceProviderWithDTO(ServiceProviderRequestDTO dto) {
+        ServiceProvider serviceProvider = createServiceProvider(dto);
+        return serviceProviderMapper.toResponseDTO(serviceProvider);
+    }
+
+    public ServiceProvider createServiceProvider(ServiceProviderRequestDTO dto) {
         Member member = memberRepository.findById(dto.memberId())
                 .orElseThrow(() -> new EntityNotFoundException(Member.class, dto.memberId()));
 
-        com.academy.models.service.Service service = serviceRepository.findById(dto.serviceId())
-                .orElseThrow(() -> new EntityNotFoundException(com.academy.models.service.Service.class, dto.serviceId()));
+        Service service = serviceRepository.findById(dto.serviceId())
+                .orElseThrow(() -> new EntityNotFoundException(Service.class, dto.serviceId()));
 
         //ProviderPermissionEnum permission = ProviderPermissionEnum.values()[dto.permissions()];
 
@@ -67,9 +73,9 @@ public class ServiceProviderService {
         serviceProvider.setService(service);
 
         ServiceProvider saved = serviceProviderRepository.save(serviceProvider);
-
         providerPermissionService.createPermissionsViaList(dto.permissions(),saved);
-        return serviceProviderMapper.toResponseDTO(saved);
+
+        return serviceProviderRepository.save(saved);
     }
 
 
@@ -85,7 +91,7 @@ public class ServiceProviderService {
 //        }
 
         if(details.serviceId() != null) {
-            com.academy.models.service.Service service = serviceRepository.findById(details.serviceId())
+            Service service = serviceRepository.findById(details.serviceId())
                     .orElseThrow(()-> new EntityNotFoundException(ServiceProvider.class, details.serviceId()));
             serviceProvider.setService(service);
         }
@@ -97,9 +103,14 @@ public class ServiceProviderService {
         return serviceProviderMapper.toResponseDTO(serviceProvider);
     }
 
+    @Transactional
     public void deleteServiceProvider(long id) {
-        if(!serviceProviderRepository.existsById(id)) throw new EntityNotFoundException(ServiceProvider.class, id);
-        serviceProviderRepository.deleteById(id);
+        ServiceProvider serviceProvider = serviceProviderRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
+
+        providerPermissionService.deletePermissionsFromServiceProvider(serviceProvider);
+
+        serviceProviderRepository.delete(serviceProvider);
     }
 
     public List<ProviderPermissionEnum> getPermissionsByProviderUsernameAndServiceId(String username, Long serviceId){

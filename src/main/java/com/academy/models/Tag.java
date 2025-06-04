@@ -2,9 +2,14 @@ package com.academy.models;
 
 import com.academy.models.service.Service;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -29,11 +34,10 @@ public class Tag {
     @Column(name="name", unique = true)
     private String name;
 
-    @NotNull
-    @Column(name="custom")
+    @Column(name="custom", nullable = false)
     private Boolean custom;
 
-    @Column(name="created_at", updatable=false)
+    @Column(name="created_at", updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
 
