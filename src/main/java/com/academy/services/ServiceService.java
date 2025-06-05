@@ -17,9 +17,11 @@ import com.academy.repositories.ServiceTypeRepository;
 import com.academy.repositories.TagRepository;
 import com.academy.specifications.ServiceSpecifications;
 import jakarta.transaction.Transactional;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,6 +32,7 @@ import java.util.stream.Collectors;
 @org.springframework.stereotype.Service
 public class ServiceService {
 
+    @Lazy
     private final ServiceProviderService serviceProviderService;
     private final ServiceRepository serviceRepository;
     private final TagRepository tagRepository;
@@ -41,7 +44,7 @@ public class ServiceService {
     public ServiceService(ServiceRepository serviceRepository,
                           TagRepository tagRepository,
                           ServiceMapper serviceMapper,
-                          ServiceProviderService serviceProviderService,
+                          @Lazy ServiceProviderService serviceProviderService,
                           AuthenticationFacade authenticationFacade,
                           MemberService memberService,
                           TagService tagService,
@@ -184,9 +187,12 @@ public class ServiceService {
         return getById(serviceId);
     }
     */
+    public Service getServiceEntityById(Long id) {
+        return serviceRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(Service.class, id));
+    }
 
-   public boolean existsById(Long serviceId) {
-    return serviceRepository.existsById(serviceId);
-}
+    public boolean existsById(Long serviceId) {
+        return serviceRepository.existsById(serviceId);
+    }
 
 }
