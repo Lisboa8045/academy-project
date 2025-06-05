@@ -15,8 +15,8 @@ import java.util.List;
 @Service
 public class GlobalConfigurationService {
 
-    private GlobalConfigurationRepository configurationRepository;
-    private GlobalConfigurationMapper globalConfigurationMapper;
+    private final GlobalConfigurationRepository configurationRepository;
+    private final GlobalConfigurationMapper globalConfigurationMapper;
 
     @Autowired
     public GlobalConfigurationService(GlobalConfigurationRepository configurationRepository, GlobalConfigurationMapper globalConfigurationMapper) {
