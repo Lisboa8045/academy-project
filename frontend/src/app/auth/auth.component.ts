@@ -8,7 +8,7 @@ import {
   AbstractControl,
   ValidationErrors
 } from '@angular/forms';
-import { AuthService } from '../shared/auth.service';
+import { AuthService } from './auth.service';
 import { Router } from '@angular/router';
 import {strongPasswordValidator} from '../shared/validators/password.validator';
 import {noSpecialCharsValidator} from '../shared/validators/no-special-chars.validator';
@@ -61,7 +61,7 @@ export class AuthComponent{
   }
 
   submit(): void {
-    const { login, email, username, password, confirmPassword } = this.authForm.value;
+    const { login, email, username, password } = this.authForm.value;
 
     if (!this.authForm.valid) return;
 
@@ -71,11 +71,6 @@ export class AuthComponent{
         error: (err) => console.error('Login failed:', err)
       });
     } else {
-      if (password !== confirmPassword) {
-        alert('Passwords do not match!');
-        return;
-      }
-
       this.authService.signup(email!, username!, "2", password!).subscribe({
         next: () => {
           alert('Signup successful! Please log in.');

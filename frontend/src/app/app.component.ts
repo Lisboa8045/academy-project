@@ -4,7 +4,7 @@ import {AppHeaderComponent} from './header/app-header.component';
 import {AppFooterComponent} from './footer/app-footer.component';
 import {LoadingComponent} from './loading/loading.component';
 import {HttpClient} from '@angular/common/http';
-import {AuthStore} from './shared/auth.store';
+import {AuthStore} from './auth/auth.store';
 
 @Component({
   selector: 'app-root',
@@ -14,7 +14,6 @@ import {AuthStore} from './shared/auth.store';
 })
 export class AppComponent implements OnInit {
   constructor(private http: HttpClient, private authStore: AuthStore) {}
-
   ngOnInit(): void {
     this.http.get<{ username: string }>('http://localhost:8080/auth/me', {
       withCredentials: true

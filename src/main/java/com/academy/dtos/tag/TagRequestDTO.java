@@ -7,6 +7,6 @@ import java.util.List;
 
 public record TagRequestDTO(
         @NotBlank String name,
-        @NotNull Boolean isCustom,
+        @NotNull Boolean custom,
         List<Long> serviceIds
 ) {}

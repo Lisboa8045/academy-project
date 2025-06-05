@@ -1,13 +1,18 @@
 package com.academy.services;
 
 import com.academy.config.authentication.JwtUtil;
+import com.academy.dtos.member.MemberRequestDTO;
+import com.academy.dtos.member.MemberResponseDTO;
+import com.academy.dtos.register.LoginRequestDto;
 import com.academy.dtos.register.LoginResponseDto;
 import com.academy.dtos.register.MemberMapper;
 import com.academy.dtos.register.LoginRequestDto;
 import com.academy.dtos.register.RegisterRequestDto;
 import com.academy.exceptions.*;
+import com.academy.models.Availability;
 import com.academy.models.Member;
 import com.academy.models.Role;
+import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.MemberRepository;
 import com.academy.repositories.RoleRepository;
 import jakarta.servlet.http.Cookie;
@@ -21,7 +26,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class MemberService {
@@ -87,7 +94,6 @@ public class MemberService {
                 : memberRepository.findByUsername(request.login());
 
         if(member.isPresent() && passwordEncoder.matches(request.password(), member.get().getPassword())) {
-
             UserDetails userDetails = new org.springframework.security.core.userdetails.User(
                     member.get().getUsername(), member.get().getPassword(), new ArrayList<>()
             );
@@ -95,9 +101,9 @@ public class MemberService {
             System.out.println("Token generated:" + token);
             Cookie cookie = new Cookie("token", token);
             cookie.setHttpOnly(true);
-            cookie.setSecure(true); // Only if you're using HTTPS
+            cookie.setSecure(true);
             cookie.setPath("/");
-            cookie.setMaxAge(60 * 60 * 24); // 1 day
+            cookie.setMaxAge(60 * 60 * 24);
             response.addCookie(cookie);
             return new LoginResponseDto(
                     messageSource.getMessage("user.loggedin", null, LocaleContextHolder.getLocale()),
@@ -114,5 +120,70 @@ public class MemberService {
         if(optionalMember.isEmpty())
             throw new MemberNotFoundException(username);
         return optionalMember.get();
+    }
+
+    public boolean existsById(Long memberId) {
+        return memberRepository.existsById(memberId);
+    }
+
+    public Optional<Member> findbyId(long memberId) {
+        if (!memberRepository.existsById(memberId)) {
+            throw new EntityNotFoundException(Member.class, memberId);
+        }
+        return memberRepository.findById(memberId);
+    }
+
+    public void deleteMember(long id) {
+        if(!memberRepository.existsById(id)) throw new EntityNotFoundException(Member.class,id);
+
+        memberRepository.deleteById(id);
+    }
+
+    public MemberResponseDTO editMember(long id, MemberRequestDTO memberRequestDTO){
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(Member.class, id));
+
+        if(memberRequestDTO.address() != null){
+            member.setAddress(memberRequestDTO.address());
+        }
+
+        if(memberRequestDTO.postalCode() != null){
+            member.setPostalCode(memberRequestDTO.postalCode());
+        }
+
+        if(memberRequestDTO.phoneNumber() != null){
+            member.setPhoneNumber(memberRequestDTO.phoneNumber());
+        }
+
+        if(memberRequestDTO.email() != null){
+            member.setEmail(memberRequestDTO.email());
+        }
+
+        if(memberRequestDTO.password() != null){
+            member.setPassword(memberRequestDTO.password());
+        }
+
+        if(memberRequestDTO.roleId() != null){
+            Role newRole = roleRepository.findById(memberRequestDTO.roleId())
+                    .orElseThrow(() -> new EntityNotFoundException(Role.class, memberRequestDTO.roleId()));
+            member.setRole(newRole);
+        }
+        return memberMapper.toResponseDTO(memberRepository.save(member));
+    }
+
+    public List<MemberResponseDTO> getAllMembers() {
+        return memberRepository.findAll().stream()
+                .map(memberMapper::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    public MemberResponseDTO getMemberById(long id) {
+        return memberRepository.findById(id)
+                .map(memberMapper::toResponseDTO)
+                .orElseThrow(() -> new EntityNotFoundException(Member.class, id));
+    }
+
+    public Member getMemberEntityById(long id){
+        return memberRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
     }
 }
