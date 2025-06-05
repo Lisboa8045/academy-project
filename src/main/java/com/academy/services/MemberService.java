@@ -54,7 +54,6 @@ public class MemberService {
         this.messageSource = messageSource;
     }
     public void logout(HttpServletResponse response){
-        System.out.println("Backend 2 logout");
         Cookie cookie = new Cookie("token", null);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
@@ -109,7 +108,8 @@ public class MemberService {
                     messageSource.getMessage("user.loggedin", null, LocaleContextHolder.getLocale()),
                     token,
                     member.get().getId(),
-                    member.get().getUsername()
+                    member.get().getUsername(),
+                    member.get().getProfilePicture()
             );
         }
         throw new AuthenticationException(messageSource.getMessage("auth.invalid", null, LocaleContextHolder.getLocale()));
@@ -185,5 +185,16 @@ public class MemberService {
 
     public Member getMemberEntityById(long id){
         return memberRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
+    }
+
+    public Member saveProfilePic(Long id, String filename) {
+        memberRepository.findById(id)
+                .map(m -> {
+                    m.setProfilePicture(filename);
+                    memberRepository.save(m);
+                    return m;
+                })
+                .orElseThrow(() -> new EntityNotFoundException(Member.class, id));
+        return null;
     }
 }

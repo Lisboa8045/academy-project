@@ -6,7 +6,16 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   border-radius: 20px;
   background-color: #fff;
+}
+  .image-wrapper {
+    text-align: center;
+    position: relative;
+  }
 
+.upload-wrapper input[type="file"] {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
   .avatar {
     margin-bottom: 1rem;
 
@@ -46,4 +55,3 @@
       background-color: #d32f2f;
     }
   }
-}

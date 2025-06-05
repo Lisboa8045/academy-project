@@ -3,11 +3,20 @@
     <a class="nav-item" routerLink="/">🏠 Home</a>
 
     <div class="right-links">
+      <div class="user-profile">
       @if (username()) {
-        <a class="nav-item" routerLink="/profile">👤 {{ username() }}</a>
+        <a class="nav-item" routerLink="/profile">
+          <span class = "username">{{ username() }}</span>
+          @if (imageUrl()){
+            <img class="profile-picture" [src]="imageUrl()" alt="Profile">
+          }@else{
+            🧑
+          }
+        </a>
       } @else {
         <a class="nav-item" routerLink="/auth">🔐 Login</a>
       }
+      </div>
     </div>
   </nav>
 </header>

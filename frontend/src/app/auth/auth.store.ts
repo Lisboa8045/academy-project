@@ -1,20 +1,40 @@
-import { Injectable, signal } from '@angular/core';
+import {effect, Injectable, signal} from '@angular/core';
+import {UserProfileService} from '../profile/user-profile.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthStore {
   readonly username = signal<string>("");
   readonly id = signal<number>(-1);
+  readonly profilePicture = signal<string>("");
+
+  constructor(private userProfileService: UserProfileService,) {
+    effect(() => {
+      const fileName = this.profilePicture();
+      if (fileName) {
+        this.userProfileService.loadImage(fileName);
+      } else {
+        this.userProfileService.revoke(); // Clean up when cleared
+      }
+    });
+  }
 
   setUsername(name: string) {
     this.username.set(name);
   }
 
   setId(id:number){
+    console.debug("setId", id);
     this.id.set(id)
+  }
+
+  setProfilePicture(profilePicture: string) {
+    console.debug("setProfilePicture", profilePicture);
+    this.profilePicture.set(profilePicture);
   }
 
   clear() {
     this.username.set("");
     this.id.set(-1);
+    this.profilePicture.set("");
   }
 }

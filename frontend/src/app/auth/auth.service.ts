@@ -18,7 +18,10 @@ export class AuthService {
       { login, password },
       { withCredentials: true }
     ).pipe(
-      tap(res => {this.authStore.setUsername(res.username); this.authStore.setId(res.memberId)})
+      tap(res => {this.authStore.setUsername(res.username);
+        this.authStore.setId(res.memberId);
+        this.authStore.setProfilePicture(res.profilePicture);
+      })
     );
   }
 
