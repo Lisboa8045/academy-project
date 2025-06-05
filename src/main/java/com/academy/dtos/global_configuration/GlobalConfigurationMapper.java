@@ -7,5 +7,4 @@ import org.mapstruct.Mapper;
 public abstract class GlobalConfigurationMapper {
 
     public abstract GlobalConfigurationResponseDTO toDTO(GlobalConfiguration globalConfiguration);
-    public abstract GlobalConfiguration toGlobalConfiguration(GlobalConfigurationRequestDTO globalConfigurationRequestDTO);
 }
