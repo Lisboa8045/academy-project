@@ -1,5 +1,4 @@
 package com.academy.dtos.appointment;
-
 import jakarta.validation.constraints.*;
 
 public record AppointmentRequestDTO(

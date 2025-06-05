@@ -1,41 +1,30 @@
 package com.academy.dtos.availability;
 
-import lombok.Getter;
-import lombok.Setter;
-
-import java.time.LocalDateTime;
 import java.time.DayOfWeek;
+import java.time.LocalDateTime;
 
-import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.AssertTrue;	
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.AssertTrue;
 
-@Getter
-@Setter
-public class AvailabilityRequestDTO {
+public record AvailabilityRequestDTO(
 
-    @NotBlank
-    private long id;
+    @NotNull(message = "MemberId cannot be null")
+    Long memberId,
 
-    @NotBlank
-    private long memberId;
+    @NotNull(message = "DayOfWeek cannot be null")
+    DayOfWeek dayOfWeek,
 
-    @NotBlank
-    private DayOfWeek dayOfWeek;
-    
-    @NotBlank
-    @FutureOrPresent(message = "Start date and time must be in the future or present")
-    private LocalDateTime startDateTime;
-    
-    @NotBlank
-    @FutureOrPresent(message = "End date and time must be in the future or present")
-    private LocalDateTime endDateTime;
+    @NotNull(message = "StartDateTime cannot be null")
+    LocalDateTime startDateTime,
 
-    @AssertTrue(message = "End date and time must be after start date and time")
-    private boolean validate() {
-        if (startDateTime != null && endDateTime != null) {
-            return endDateTime.isAfter(startDateTime); 
+    @NotNull(message = "EndDateTime cannot be null")
+    LocalDateTime endDateTime
+) {
+    @AssertTrue(message = "EndDateTime must be after StartDateTime")
+    public boolean isEndAfterStart() {
+        if (startDateTime == null || endDateTime == null) {
+            return true; // deixa o @NotNull tratar destes casos
         }
-        return true; 
+        return endDateTime.isAfter(startDateTime);
     }
 }

@@ -2,66 +2,72 @@ package com.academy.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
+import com.academy.models.Member;
+import com.academy.models.service.Service;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
+import com.academy.dtos.availability.AvailabilityMapper;
+import com.academy.dtos.availability.AvailabilityRequestDTO;
+import com.academy.dtos.availability.AvailabilityResponseDTO;
+import com.academy.exceptions.EntityNotFoundException;
 import com.academy.exceptions.InvalidArgumentException;
 import com.academy.models.Availability;
 import com.academy.repositories.AvailabilityRepository;
-import com.academy.repositories.MemberRepository;
-import com.academy.repositories.ServiceProviderRepository;
-import com.academy.repositories.ServiceRepository;
-
 import jakarta.transaction.Transactional;
 
-@Service
+@org.springframework.stereotype.Service
 public class AvailabilityService {
 
     private final AvailabilityRepository availabilityRepository;
-    private final ServiceProviderRepository serviceProviderRepository;
-    private final ServiceRepository serviceRepository;
-    private final MemberRepository memberRepository;
+    private final ServiceProviderService serviceProviderService;
+    private final ServiceService serviceService;
+    private final MemberService memberService;
+    private final AvailabilityMapper availabilityMapper;
 
     @Autowired
-    public AvailabilityService (AvailabilityRepository availabilityRepository, 
-                                    ServiceProviderRepository serviceProviderRepository, 
-                                    MemberRepository memberRepository,
-                                    ServiceRepository serviceRepository) {
+    public AvailabilityService(
+            AvailabilityRepository availabilityRepository,
+            ServiceProviderService serviceProviderService,
+            MemberService memberService,
+            ServiceService serviceService,
+            AvailabilityMapper availabilityMapper) {
 
         this.availabilityRepository = availabilityRepository;
-        this.serviceProviderRepository = serviceProviderRepository;
-        this.memberRepository = memberRepository;
-        this.serviceRepository = serviceRepository;
+        this.serviceProviderService = serviceProviderService;
+        this.memberService = memberService;
+        this.serviceService = serviceService;
+        this.availabilityMapper = availabilityMapper;
     }
 
     // Get all availabilities for a specific member by their ID
-    public List<Availability> getAvailabilitiesByMemberId(Long memberId) {
+    public List<AvailabilityResponseDTO> getAvailabilitiesByMemberId(Long memberId) {
         if (memberId == null) {
             throw new InvalidArgumentException("Member ID cannot be null");
         }
-        if (!memberRepository.existsById(memberId)) {
-            throw new InvalidArgumentException("Member with ID " + memberId + " does not exist.");
+        if (!memberService.existsById(memberId)) {
+            throw new EntityNotFoundException(Member.class, " with ID " + memberId + " does not exist.");
         }
-        return availabilityRepository.findByMember_Id(memberId);
+        List<Availability> availabilities = availabilityRepository.findByMember_Id(memberId);
+        return availabilities.stream()
+                .map(availabilityMapper::toResponseDTOWithMember)
+                .collect(Collectors.toList());
     }
 
     // Get all availabilities for a specific service by its ID
-    public List<Availability> getAvailabilitiesByServiceId(Long serviceId) {
-
+    public List<AvailabilityResponseDTO> getAvailabilitiesByServiceId(Long serviceId) {
         if (serviceId == null) {
             throw new InvalidArgumentException("Service ID cannot be null");
         }
-        if (!serviceRepository.existsById(serviceId)) {
-            throw new InvalidArgumentException("Service with ID " + serviceId + " does not exist.");
+        if (!serviceService.existsById(serviceId)) {
+            throw new EntityNotFoundException(Service.class, " with ID " + serviceId + " does not exist.");
         }
-   
-        List<Long> memberIds = serviceProviderRepository.findMemberIdsByServiceId(serviceId);
 
-        System.out.println("Member IDs: " + memberIds);
+        List<Long> memberIds = serviceProviderService.findMemberIdsByServiceId(serviceId);
 
-        // Collect all availabilities for the members
-        List<Availability> availabilities = new ArrayList<>();
+        List<AvailabilityResponseDTO> availabilities = new ArrayList<>();
         for (Long memberId : memberIds) {
             availabilities.addAll(getAvailabilitiesByMemberId(memberId));
         }
@@ -70,49 +76,84 @@ public class AvailabilityService {
     }
 
     // Get a specific availability by its ID
-    public Availability getAvailabilityById(Long availabilityId) {
+    public AvailabilityResponseDTO getAvailabilityById(Long availabilityId) {
         if (availabilityId == null) {
             throw new InvalidArgumentException("Availability ID cannot be null");
         }
         if (!availabilityRepository.existsById(availabilityId)) {
-            throw new InvalidArgumentException("Availability with ID " + availabilityId + " does not exist.");
+            throw new EntityNotFoundException(Availability.class, " with ID " + availabilityId + " does not exist.");
         }
-        return availabilityRepository.findById(availabilityId).orElse(null);
+        Availability availability = availabilityRepository.findById(availabilityId).orElse(null);
+        return availabilityMapper.toResponseDTOWithMember(availability);
     }
 
-    
-    @Transactional
     // Create a new availability
-    public Availability createAvailability(Availability availability) {
-        return availabilityRepository.save(availability);
+    @Transactional
+    public AvailabilityResponseDTO createAvailability(AvailabilityRequestDTO requestDTO) {
+        Long memberId = requestDTO.memberId();
+        Member member = memberService.findbyId(memberId)
+                .orElseThrow(() -> new EntityNotFoundException(Member.class, " with ID " + memberId + " not found."));
+
+        boolean overlaps = availabilityRepository.existsByMember_IdAndDayOfWeekAndTimeOverlap(
+                memberId,
+                requestDTO.dayOfWeek(),
+                requestDTO.startDateTime(),
+                requestDTO.endDateTime()
+        );
+
+        if (overlaps) {
+            throw new InvalidArgumentException("Availability overlaps with existing availability for this member.");
+        }
+
+        Availability availability = availabilityMapper.toEntity(requestDTO);
+        availability.setMember(member);
+        Availability saved = availabilityRepository.save(availability);
+        return availabilityMapper.toResponseDTOWithMember(saved);
     }
 
     // Update an existing availability
     @Transactional
-    public Availability updateAvailability(Availability availability) {
-        if (availability == null) {
+    public AvailabilityResponseDTO updateAvailability(Long availabilityId, AvailabilityRequestDTO requestDTO) {
+        if (requestDTO == null) {
             throw new InvalidArgumentException("Availability cannot be null");
-        }	
-        if (!availabilityRepository.existsById((Long)availability.getId())) {
-            throw new InvalidArgumentException("Availability with ID " + availability.getId() + " does not exist.");
         }
-        return availabilityRepository.save(availability);
+
+        Availability availability = availabilityRepository.findById(availabilityId)
+                .orElseThrow(() -> new EntityNotFoundException(Availability.class, " with ID " + availabilityId + " does not exist."));
+
+        // Atualiza campos simples
+        availability.setDayOfWeek(requestDTO.dayOfWeek());
+        availability.setStartDateTime(requestDTO.startDateTime());
+        availability.setEndDateTime(requestDTO.endDateTime());
+
+        // Verifica se é necessário atualizar o membro associado
+        if (availability.getMember().getId() != requestDTO.memberId()) {
+            Member newMember = memberService.findbyId(requestDTO.memberId())
+                    .orElseThrow(() -> new EntityNotFoundException(Member.class, " with ID " + requestDTO.memberId() + " not found."));
+            availability.setMember(newMember);
+        }
+
+        return availabilityMapper.toResponseDTOWithMember(availability);
     }
 
-    // Delete an availability by its ID
     @Transactional
     public void deleteAvailabilityById(Long availabilityId) {
         if (availabilityId == null) {
             throw new InvalidArgumentException("Availability ID cannot be null");
         }
         if (!availabilityRepository.existsById(availabilityId)) {
-            throw new InvalidArgumentException("Availability with ID " + availabilityId + " does not exist.");
+            throw new EntityNotFoundException(Availability.class, " with ID " + availabilityId + " does not exist.");
         }
         availabilityRepository.deleteById(availabilityId);
     }
 
+
+
     // Get all availabilities
-    public List<Availability> getAllAvailabilities() {
-        return availabilityRepository.findAll();
+    public List<AvailabilityResponseDTO> getAllAvailabilities() {
+        return availabilityRepository.findAll()
+                .stream()
+                .map(availabilityMapper::toResponseDTOWithMember)
+                .collect(Collectors.toList());
     }
 }

@@ -15,7 +15,7 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
     @Query("SELECT sp.provider.id FROM ServiceProvider sp WHERE sp.service.id = :serviceId")
     List<Long> findMemberIdsByServiceId(Long serviceId);
     Optional<ServiceProvider> findByProviderUsernameAndServiceId(String username, Long serviceId);
-
+    
     List<ServiceProvider> service(Service service);
 
     boolean existsByServiceId(Long serviceId);

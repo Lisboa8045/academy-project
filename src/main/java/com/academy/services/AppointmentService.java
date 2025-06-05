@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-
 public class AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
@@ -84,6 +83,7 @@ public class AppointmentService {
 
     }
 
+    
     public AppointmentResponseDTO updateAppointment(int id, AppointmentRequestDTO appointmentDetails) {
 
         Appointment appointment = appointmentRepository.findById(id)

@@ -127,4 +127,8 @@ public class ServiceProviderService {
     public boolean existsByServiceIdAndProviderUsername(Long serviceId, String username) {
         return serviceProviderRepository.existsByServiceIdAndProviderUsername(serviceId, username);
     }
+
+    public List<Long> findMemberIdsByServiceId(Long serviceId) {
+        return serviceProviderRepository.findMemberIdsByServiceId(serviceId);
+    }
 }

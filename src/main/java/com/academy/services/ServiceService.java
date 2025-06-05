@@ -185,5 +185,8 @@ public class ServiceService {
     }
     */
 
+   public boolean existsById(Long serviceId) {
+    return serviceRepository.existsById(serviceId);
+}
 
 }
