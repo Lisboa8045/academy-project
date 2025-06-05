@@ -37,7 +37,7 @@ public class SchedulingService {
         this.memberService = memberService;
     }
 
-   public List<SlotDTO> getFreeSlotsForService(Long serviceId) {
+    public List<SlotDTO> getFreeSlotsForService(Long serviceId) {
         if (serviceId == null) {
             throw new IllegalArgumentException("Service ID cannot be null");
         }
@@ -66,12 +66,12 @@ public class SchedulingService {
             System.out.println("[DEBUG] Appointments for provider " + providerId + ": " + appointments.size());
 
             for (Availability availability : availabilities) {
-                List<SlotDTO> slots = SlotUtils.generateSlots(
-                    providerId,
-                    providerName,
-                    availability.getStartDateTime(),
-                    availability.getEndDateTime(),
-                    slotDurationMinutes
+                List<SlotDTO> slots = SlotUtils.generateCompleteSlots(
+                        providerId,
+                        providerName,
+                        availability.getStartDateTime(),
+                        availability.getEndDateTime(),
+                        slotDurationMinutes
                 );
                 for (SlotDTO slot : slots) {
                     // Only consider slots that start in the future
@@ -79,7 +79,7 @@ public class SchedulingService {
                         continue;
                     }
                     boolean occupied = appointments.stream().anyMatch(app ->
-                        app.getStartDateTime().isBefore(slot.getEnd()) && app.getEndDateTime().isAfter(slot.getStart())
+                            app.getStartDateTime().isBefore(slot.getEnd()) && app.getEndDateTime().isAfter(slot.getStart())
                     );
                     if (!occupied) {
                         allFreeSlots.add(slot);
@@ -90,4 +90,5 @@ public class SchedulingService {
         System.out.println("[DEBUG] Total free slots found: " + allFreeSlots.size());
         return allFreeSlots;
     }
+
 }

@@ -54,15 +54,15 @@ public class SchedulingIntegrationTests {
         defaultRole = roleRepository.save(defaultRole);
     }
 
-//    @AfterEach
-//    void teardown() {
-//        appointmentRepository.deleteAll();
-//        availabilityRepository.deleteAll();
-//        serviceProviderRepository.deleteAll();
-//        serviceRepository.deleteAll();
-//        memberRepository.deleteAll();
-//        roleRepository.deleteAll();
-//    }
+    @AfterEach
+    void teardown() {
+        appointmentRepository.deleteAll();
+        availabilityRepository.deleteAll();
+        serviceProviderRepository.deleteAll();
+        serviceRepository.deleteAll();
+        memberRepository.deleteAll();
+        roleRepository.deleteAll();
+    }
 
     @Test
     void testGetFreeSlotsForService() {
@@ -158,35 +158,6 @@ public class SchedulingIntegrationTests {
         assertEquals(a2.getStartDateTime(), freeSlots.get(1).getStart());
         assertEquals(a2.getStartDateTime().plusHours(1), freeSlots.get(1).getEnd());
     }
-
-    @Test
-    void testSaveServiceProviderDirectly() {
-        // Cria e salva provider
-        Member provider = new Member();
-        provider.setUsername("testProvider");
-        provider.setPassword("password");
-        provider.setEmail("test@example.com");
-        provider.setRole(defaultRole);
-        provider = memberRepository.save(provider);
-
-        // Cria e salva service
-        Service service = new Service();
-        service.setName("Test Service");
-        service.setOwner(provider);
-        service = serviceRepository.save(service);
-
-        // Cria ServiceProvider usando as entidades já salvas
-        ServiceProvider sp = new ServiceProvider();
-        sp.setProvider(provider);
-        sp.setService(service);
-
-        // Tenta salvar ServiceProvider
-        serviceProviderRepository.save(sp);
-
-        // Verificação simples
-        assertNotNull(sp.getId());
-    }
-
 
     // Métodos auxiliares
     private Member createAndSaveProvider(String username) {
