@@ -7,7 +7,6 @@ import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
 import com.academy.dtos.service_provider.ServiceProviderResponseDTO;
 import com.academy.exceptions.AuthenticationException;
-//import com.academy.exceptions.ServiceNotFoundException;
 import com.academy.models.Member;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
@@ -21,9 +20,6 @@ import com.academy.utils.Utils;
 import jakarta.transaction.Transactional;
 import org.apache.coyote.BadRequestException;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -152,7 +148,6 @@ public class ServiceService {
             return new ArrayList<ProviderPermissionEnum>();
         return serviceProviderService.getPermissionsByProviderUsernameAndServiceId(username, serviceId);
     }
-    //TODO ver isto que nao esta a ser usado
     public List<ProviderPermissionEnum> getPermissionsByProviderIdAndServiceId(Long id, Long serviceId){
         if(!hasServiceProvider(id, serviceId))
             return new ArrayList<ProviderPermissionEnum>();
