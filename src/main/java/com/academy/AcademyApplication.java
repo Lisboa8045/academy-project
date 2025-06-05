@@ -17,9 +17,10 @@ public class AcademyApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(AcademyApplication.class, args);
 	}
-/*
+
+
 	@Bean
-	CommandLineRunner populateServices(DataSource dataSource) {
+	CommandLineRunner populateData(DataSource dataSource) {
 		return args -> {
 			Resource resource = new ClassPathResource("sql-scripts/populateRoles.sql");
 			Resource resource2 = new ClassPathResource("sql-scripts/populateMembers.sql");
@@ -33,5 +34,5 @@ public class AcademyApplication {
 		};
 	}
 
- */
+
 }

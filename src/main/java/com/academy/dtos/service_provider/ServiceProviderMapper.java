@@ -22,6 +22,7 @@ public abstract class ServiceProviderMapper {
     })
     public abstract ServiceProviderResponseDTO toResponseDTO(ServiceProvider serviceProvider);
 
+    @Mapping(target = "permissions", ignore = true)
     public abstract ServiceProvider toEntity(ServiceProviderRequestDTO ServiceProviderRequestDTO);
 
 

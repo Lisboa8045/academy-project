@@ -103,7 +103,7 @@ public class TagService {
                 .map(name -> {
                     Tag tag = new Tag();
                     tag.setName(name);
-                    tag.setIsCustom(true);
+                    tag.setCustom(true);
                     return tag;
                 })
                 .toList();

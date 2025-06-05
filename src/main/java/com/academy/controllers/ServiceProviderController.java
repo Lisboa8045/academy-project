@@ -34,7 +34,7 @@ public class ServiceProviderController {
 
     @PostMapping
     public ServiceProviderResponseDTO createServiceProvider(@Valid @RequestBody ServiceProviderRequestDTO serviceProvider) {
-        return serviceProviderService.createServiceProvider(serviceProvider);
+        return serviceProviderService.createServiceProviderWithDTO(serviceProvider);
     }
 
     @PutMapping("/{id}")
