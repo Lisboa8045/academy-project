@@ -1,1 +1,32 @@
-<p>schedule works!</p>
+<div class="schedule-container">
+  <h2>Agendar Marcação</h2>
+  <!-- Lista de serviços clicável -->
+  <div *ngIf="services && services.length > 0">
+    <h3>Escolher serviço</h3>
+    <ul>
+      <li *ngFor="let s of services"
+          (click)="selectService(s)"
+          [class.selected]="s.id === form.get('serviceId')?.value">
+        {{ s.name }} - {{ s.description }} - {{ s.price }}€
+      </li>
+    </ul>
+  </div>
+
+  <!-- Slots disponíveis -->
+  <div *ngIf="slots && slots.length > 0">
+    <h3>Escolher horário</h3>
+    <ul>
+      <li *ngFor="let slot of slots"
+          (click)="selectSlot(slot)"
+          [class.selected]="slot === selectedSlot">
+        {{ slot.start | date:'short' }} - {{ slot.providerName }}
+      </li>
+    </ul>
+  </div>
+
+  <button
+    [disabled]="!selectedSlot || !form.get('serviceId')?.value"
+    (click)="confirmAppointment()">
+    Confirmar
+  </button>
+</div>

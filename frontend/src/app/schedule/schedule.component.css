@@ -1,0 +1,23 @@
+.schedule-container {
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  cursor: pointer;
+  padding: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 4px;
+  border-radius: 4px;
+}
+
+li.selected {
+  background-color: #cce5ff;
+  border-color: #004085;
+}
