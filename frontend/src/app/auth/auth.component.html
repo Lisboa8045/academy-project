@@ -62,7 +62,9 @@
         Passwords do not match.
       </div>
     }
-
+    <div class="validation-error" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
     <button type="submit" [disabled]="authForm.invalid">
       {{ isLoginMode() ? 'Login' : 'Create Account' }}
     </button>

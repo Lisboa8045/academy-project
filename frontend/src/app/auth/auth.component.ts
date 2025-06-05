@@ -26,6 +26,7 @@ export class AuthComponent{
   authForm!: FormGroup;
   private fb = inject(FormBuilder);
 
+  errorMessage = '';
 
   constructor(private authService: AuthService, private router: Router) {
     this.buildForm()
@@ -33,7 +34,8 @@ export class AuthComponent{
 
 
   toggleMode(): void {
-    this.isLoginMode.update(mode => !mode);
+    this.isLoginMode.update(mode => !mode)
+    this.errorMessage = ''
     this.buildForm()
   }
 
@@ -51,6 +53,10 @@ export class AuthComponent{
         confirmPassword: ['', [Validators.required, Validators.maxLength(64)]]
       }, { validators: this.passwordsMatchValidator });
     }
+
+    this.authForm.valueChanges.subscribe(() => {
+      this.errorMessage = '';
+    });
   }
 
   private passwordsMatchValidator(group: AbstractControl): ValidationErrors | null {
@@ -68,7 +74,10 @@ export class AuthComponent{
     if (this.isLoginMode()) {
       this.authService.login(login!, password!).subscribe({
         next: () => this.router.navigate(['/']),
-        error: (err) => console.error('Login failed:', err)
+        error: (err) => {
+          console.error('Login failed:', err);
+          this.errorMessage = err?.error || 'Login failed. Please try again.';
+        }
       });
     } else {
       this.authService.signup(email!, username!, "2", password!).subscribe({
@@ -76,10 +85,11 @@ export class AuthComponent{
           alert('Signup successful! Please log in.');
           this.toggleMode()
         },
-        error: (err) => console.error('Signup failed:', err)
+        error: (err) => {
+          console.error('Signup failed:', err);
+          this.errorMessage = err?.error || 'Signup failed. Please try again.';
+        }
       });
     }
   }
-
-
 }
