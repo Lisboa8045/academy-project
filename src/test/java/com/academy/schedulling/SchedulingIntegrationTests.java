@@ -9,6 +9,7 @@ import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.*;
 import com.academy.services.SchedulingService;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -48,58 +49,166 @@ public class SchedulingIntegrationTests {
 
     @BeforeEach
     void setup() {
-        appointmentRepository.deleteAll();
-        availabilityRepository.deleteAll();
-        serviceProviderRepository.deleteAll();
-        serviceRepository.deleteAll();
-        memberRepository.deleteAll();
-        roleRepository.deleteAll();
-
-        // Criar um Role obrigatório para os membros
         defaultRole = new Role();
         defaultRole.setName("USER");
-        roleRepository.save(defaultRole);
+        defaultRole = roleRepository.save(defaultRole);
     }
+
+//    @AfterEach
+//    void teardown() {
+//        appointmentRepository.deleteAll();
+//        availabilityRepository.deleteAll();
+//        serviceProviderRepository.deleteAll();
+//        serviceRepository.deleteAll();
+//        memberRepository.deleteAll();
+//        roleRepository.deleteAll();
+//    }
 
     @Test
     void testGetFreeSlotsForService() {
-        // Criar um membro (prestador) com role
-        Member provider = new Member();
-        provider.setUsername("provider1");
-        provider.setPassword("password");
-        provider.setEmail("provider1@example.com");
-        provider.setRole(defaultRole);  // ESSENCIAL para não dar erro
-        memberRepository.save(provider);
+        Member provider = createAndSaveProvider("provider1");
+        Service service = createAndSaveService(provider);
+        createAndSaveServiceProvider(provider, service);
 
-        // Criar um serviço e associar ao provider
-        Service service = new Service();
-        service.setName("Test Service");
-        service.setOwner(provider);
-        serviceRepository.save(service);
-
-        // Associar o prestador ao serviço
-        ServiceProvider sp = new ServiceProvider();
-        sp.setProvider(provider);
-        sp.setService(service);
-        serviceProviderRepository.save(sp);
-
-        // Criar uma disponibilidade para o provider
         Availability availability = new Availability();
         availability.setMember(provider);
         availability.setStartDateTime(LocalDateTime.now().plusHours(1));
         availability.setEndDateTime(LocalDateTime.now().plusHours(3));
         availabilityRepository.save(availability);
 
-        // Nenhuma marcação criada - todos os slots devem estar livres
         List<SlotDTO> freeSlots = schedulingService.getFreeSlotsForService(service.getId());
+
         assertNotNull(freeSlots);
         assertFalse(freeSlots.isEmpty());
 
-        // Verificar se os slots têm o ID do provider e o username correto
         for (SlotDTO slot : freeSlots) {
             assertEquals(provider.getId(), slot.getProviderId());
             assertEquals(provider.getUsername(), slot.getProviderName());
             assertTrue(slot.getStart().isAfter(LocalDateTime.now()));
         }
+    }
+
+    @Test
+    void testAvailabilityShorterThanSlotDuration() {
+        Member provider = createAndSaveProvider("shortSlotTest");
+        Service service = createAndSaveService(provider);
+        createAndSaveServiceProvider(provider, service);
+
+        Availability availability = new Availability();
+        availability.setMember(provider);
+        availability.setStartDateTime(LocalDateTime.now().plusHours(1));
+        availability.setEndDateTime(LocalDateTime.now().plusMinutes(30));
+        availabilityRepository.save(availability);
+
+        List<SlotDTO> freeSlots = schedulingService.getFreeSlotsForService(service.getId());
+
+        assertNotNull(freeSlots);
+        assertTrue(freeSlots.isEmpty());
+    }
+
+    @Test
+    void testAvailabilityNotMultipleOfSlotDuration() {
+        Member provider = createAndSaveProvider("nonMultipleSlotTest");
+        Service service = createAndSaveService(provider);
+        createAndSaveServiceProvider(provider, service);
+
+        LocalDateTime start = LocalDateTime.now().plusHours(1);
+        Availability availability = new Availability();
+        availability.setMember(provider);
+        availability.setStartDateTime(start);
+        availability.setEndDateTime(start.plusMinutes(105)); // 1h45m
+        availabilityRepository.save(availability);
+
+        List<SlotDTO> freeSlots = schedulingService.getFreeSlotsForService(service.getId());
+
+        assertNotNull(freeSlots);
+        assertEquals(1, freeSlots.size());
+        assertEquals(start, freeSlots.get(0).getStart());
+        assertEquals(start.plusHours(1), freeSlots.get(0).getEnd());
+    }
+
+    @Test
+    void testMultipleIrregularAvailabilities() {
+        Member provider = createAndSaveProvider("irregularSlotsTest");
+        Service service = createAndSaveService(provider);
+        createAndSaveServiceProvider(provider, service);
+
+        LocalDateTime now = LocalDateTime.now().withSecond(0).withNano(0).plusHours(1);
+
+        Availability a1 = new Availability();
+        a1.setMember(provider);
+        a1.setStartDateTime(now.withHour(14).withMinute(15));
+        a1.setEndDateTime(now.withHour(15).withMinute(45));
+        availabilityRepository.save(a1);
+
+        Availability a2 = new Availability();
+        a2.setMember(provider);
+        a2.setStartDateTime(now.withHour(16).withMinute(0));
+        a2.setEndDateTime(now.withHour(17).withMinute(59));
+        availabilityRepository.save(a2);
+
+        List<SlotDTO> freeSlots = schedulingService.getFreeSlotsForService(service.getId());
+
+        assertNotNull(freeSlots);
+        assertEquals(2, freeSlots.size());
+
+        assertEquals(a1.getStartDateTime(), freeSlots.get(0).getStart());
+        assertEquals(a1.getStartDateTime().plusHours(1), freeSlots.get(0).getEnd());
+
+        assertEquals(a2.getStartDateTime(), freeSlots.get(1).getStart());
+        assertEquals(a2.getStartDateTime().plusHours(1), freeSlots.get(1).getEnd());
+    }
+
+    @Test
+    void testSaveServiceProviderDirectly() {
+        // Cria e salva provider
+        Member provider = new Member();
+        provider.setUsername("testProvider");
+        provider.setPassword("password");
+        provider.setEmail("test@example.com");
+        provider.setRole(defaultRole);
+        provider = memberRepository.save(provider);
+
+        // Cria e salva service
+        Service service = new Service();
+        service.setName("Test Service");
+        service.setOwner(provider);
+        service = serviceRepository.save(service);
+
+        // Cria ServiceProvider usando as entidades já salvas
+        ServiceProvider sp = new ServiceProvider();
+        sp.setProvider(provider);
+        sp.setService(service);
+
+        // Tenta salvar ServiceProvider
+        serviceProviderRepository.save(sp);
+
+        // Verificação simples
+        assertNotNull(sp.getId());
+    }
+
+
+    // Métodos auxiliares
+    private Member createAndSaveProvider(String username) {
+        Member provider = new Member();
+        provider.setUsername(username);
+        provider.setPassword("password");
+        provider.setEmail(username + "@example.com");
+        provider.setRole(defaultRole);
+        return memberRepository.save(provider);
+    }
+
+    private Service createAndSaveService(Member owner) {
+        Service service = new Service();
+        service.setName("Service for " + owner.getUsername());
+        service.setOwner(owner);
+        return serviceRepository.save(service);
+    }
+
+    private void createAndSaveServiceProvider(Member provider, Service service) {
+        ServiceProvider sp = new ServiceProvider();
+        sp.setProvider(provider);
+        sp.setService(service);
+        serviceProviderRepository.save(sp);
     }
 }

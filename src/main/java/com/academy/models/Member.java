@@ -23,7 +23,7 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="id")
-    private long id;
+    private Long id;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Availability> availabilities = new ArrayList<>();
