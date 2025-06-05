@@ -87,7 +87,19 @@ export class AuthComponent{
         },
         error: (err) => {
           console.error('Signup failed:', err);
-          this.errorMessage = err?.error || 'Signup failed. Please try again.';
+
+          this.errorMessage = '';
+
+          if (err?.error?.errors) {
+            const errors = err.error.errors;
+            for (const field in errors) {
+              if (this.authForm.controls[field]) {
+                this.authForm.get(field)?.setErrors({ serverError: errors[field] });
+              }
+            }
+          } else {
+            this.errorMessage = 'Signup failed. Please try again.'; // Fallback error message
+          }
         }
       });
     }

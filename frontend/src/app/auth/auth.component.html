@@ -22,6 +22,9 @@
       <div class="validation-error" *ngIf="authForm.get('email')?.errors?.['maxlength'] && authForm.get('email')?.touched">
         Email must be at most 254 characters.
       </div>
+      <div class="validation-error" *ngIf="authForm.get('email')?.errors?.['serverError']" >
+        {{ authForm.get('email')?.errors?.['serverError'] }}
+      </div>
 
       <input type="text" formControlName="username" placeholder="Username" required/>
       <div class="validation-error" *ngIf="authForm.get('username')?.errors?.['required'] && authForm.get('username')?.touched">
@@ -32,6 +35,9 @@
       </div>
       <div class="validation-error" *ngIf="authForm.get('username')?.errors?.['specialCharsNotAllowed'] && authForm.get('username')?.touched">
         Special characters are not allowed in the username.
+      </div>
+      <div class="validation-error" *ngIf="authForm.get('username')?.errors?.['serverError']" >
+        {{ authForm.get('username')?.errors?.['serverError'] }}
       </div>
     }
 

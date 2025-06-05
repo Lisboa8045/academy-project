@@ -6,17 +6,19 @@ import com.academy.dtos.member.MemberResponseDTO;
 import com.academy.dtos.register.LoginRequestDto;
 import com.academy.dtos.register.LoginResponseDto;
 import com.academy.dtos.register.MemberMapper;
-import com.academy.dtos.register.LoginRequestDto;
 import com.academy.dtos.register.RegisterRequestDto;
-import com.academy.exceptions.*;
-import com.academy.models.Availability;
+import com.academy.exceptions.AuthenticationException;
+import com.academy.exceptions.EntityNotFoundException;
+import com.academy.exceptions.InvalidArgumentException;
+import com.academy.exceptions.MemberNotFoundException;
+import com.academy.exceptions.NotFoundException;
+import com.academy.exceptions.RegistrationConflictException;
 import com.academy.models.Member;
 import com.academy.models.Role;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.MemberRepository;
 import com.academy.repositories.RoleRepository;
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -26,7 +28,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -64,9 +68,19 @@ public class MemberService {
 
 
     public long register(RegisterRequestDto request) {
-        if (memberRepository.findByUsername(request.username()).isPresent()
-                || memberRepository.findByEmail(request.email()).isPresent())
-            throw new EntityAlreadyExists(messageSource.getMessage("user.exists", null, LocaleContextHolder.getLocale()));
+        Map<String, String> errors = new HashMap<>();
+        if (memberRepository.findByUsername(request.username()).isPresent()) {
+            String message = messageSource.getMessage("username.exists", null, LocaleContextHolder.getLocale());
+            errors.put("username", message);
+        }
+        if (memberRepository.findByEmail(request.email()).isPresent()) {
+            String message = messageSource.getMessage("email.exists", null, LocaleContextHolder.getLocale());
+            errors.put("email", message);
+        }
+        if (!errors.isEmpty()) {
+            throw new RegistrationConflictException(errors);
+        }
+
         if (!isValidPassword(request.password()))
             throw new InvalidArgumentException(messageSource.getMessage("register.invalidpassword", null, LocaleContextHolder.getLocale()));
         Optional<Role> optionalRole = roleRepository.findById(request.roleId());
