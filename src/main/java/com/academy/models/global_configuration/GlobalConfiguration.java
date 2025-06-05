@@ -33,7 +33,7 @@ public class GlobalConfiguration {
     @Column(name="config_type")
     private GlobalConfigurationTypeEnum configType;
 
-    @Column(name="created_at")
+    @Column(name="created_at", updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
 
