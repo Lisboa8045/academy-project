@@ -64,9 +64,9 @@ public class AppointmentService {
 
     public AppointmentResponseDTO createAppointment(AppointmentRequestDTO dto) {
 
-        ServiceProvider serviceProvider = serviceProviderService.getByServiceProviderById(dto.serviceProviderId());
+        ServiceProvider serviceProvider = serviceProviderService.getServiceProviderEntityById(dto.serviceProviderId());
 
-        Member member = memberService.getMemberId(dto.memberId());
+        Member member = memberService.getMemberEntityById(dto.memberId());
         Appointment appointment = appointmentMapper.toEntity(dto);
 
         appointment.setServiceProvider(serviceProvider);
@@ -84,13 +84,13 @@ public class AppointmentService {
                 .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
 
         if(appointmentDetails.memberId() != null){
-            Member member = memberService.getMemberId(appointmentDetails.memberId());
+            Member member = memberService.getMemberEntityById(appointmentDetails.memberId());
             appointment.setMember(member);
 
         }
 
         if(appointmentDetails.serviceProviderId() != null) {
-            ServiceProvider serviceProvider = serviceProviderService.getByServiceProviderById(appointmentDetails.serviceProviderId());
+            ServiceProvider serviceProvider = serviceProviderService.getServiceProviderEntityById(appointmentDetails.serviceProviderId());
             appointment.setServiceProvider(serviceProvider);
         }
 

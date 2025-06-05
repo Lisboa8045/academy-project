@@ -52,8 +52,8 @@ public class ServiceProviderService {
     }
 
     public ServiceProviderResponseDTO createServiceProvider(ServiceProviderRequestDTO dto) {
-        Member member = memberService.getMemberId(dto.memberId());
-        com.academy.models.service.Service service = serviceService.getServiceById(dto.serviceId());
+        Member member = memberService.getMemberEntityById(dto.memberId());
+        com.academy.models.service.Service service = serviceService.getServiceEntityById(dto.serviceId());
 
         //ProviderPermissionEnum permission = ProviderPermissionEnum.values()[dto.permissions()];
 
@@ -80,7 +80,7 @@ public class ServiceProviderService {
 //        }
 
         if(details.serviceId() != null) {
-            com.academy.models.service.Service service = serviceService.getServiceById(details.serviceId());
+            com.academy.models.service.Service service = serviceService.getServiceEntityById(details.serviceId());
             serviceProvider.setService(service);
         }
 
@@ -122,7 +122,7 @@ public class ServiceProviderService {
         return serviceProviderRepository.existsByServiceIdAndProviderUsername(serviceId, username);
     }
 
-    public ServiceProvider getByServiceProviderById(long id){
+    public ServiceProvider getServiceProviderEntityById(long id){
         return serviceProviderRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
     }
 }

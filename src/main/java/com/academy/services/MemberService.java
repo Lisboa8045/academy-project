@@ -145,7 +145,7 @@ public class MemberService {
                 .orElseThrow(() -> new EntityNotFoundException(Member.class, id));
     }
 
-    public Member getMemberId(long id){
+    public Member getMemberEntityById(long id){
         return memberRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
     }
 }

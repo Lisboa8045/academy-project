@@ -161,7 +161,7 @@ public class ServiceService {
         return getById(serviceId);
     }
     */
-    public Service getServiceById(Long id) {
+    public Service getServiceEntityById(Long id) {
         return serviceRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(Service.class, id));
     }
 
