@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/global_configurations")
+@RequestMapping("/admin/global_configurations")
 public class GlobalConfigurationController {
     private final GlobalConfigurationService globalConfigurationService;
 
