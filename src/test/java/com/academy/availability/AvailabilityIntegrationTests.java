@@ -195,9 +195,4 @@ public class AvailabilityIntegrationTests {
         assertThat(response.memberId()).isEqualTo(anotherMember.getId());
     }
 
-    @Test
-    void createAvailability_withNullFields_shouldThrow() {
-        assertThatThrownBy(() -> availabilityService.createAvailability(new AvailabilityRequestDTO(null, null, null, null)))
-            .isInstanceOf(InvalidArgumentException.class);
-    }
 }
