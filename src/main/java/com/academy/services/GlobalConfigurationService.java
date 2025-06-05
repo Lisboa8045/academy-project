@@ -1,9 +1,12 @@
 package com.academy.services;
 
+import com.academy.dtos.global_configuration.GlobalConfigurationMapper;
+import com.academy.dtos.global_configuration.GlobalConfigurationRequestDTO;
+import com.academy.dtos.global_configuration.GlobalConfigurationResponseDTO;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.global_configuration.GlobalConfiguration;
-import com.academy.models.global_configuration.GlobalConfigurationType;
 import com.academy.repositories.GlobalConfigurationRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,28 +16,34 @@ import java.util.List;
 public class GlobalConfigurationService {
 
     private GlobalConfigurationRepository configurationRepository;
+    private GlobalConfigurationMapper globalConfigurationMapper;
 
     @Autowired
-    public GlobalConfigurationService(GlobalConfigurationRepository configurationRepository) {
+    public GlobalConfigurationService(GlobalConfigurationRepository configurationRepository, GlobalConfigurationMapper globalConfigurationMapper) {
         this.configurationRepository = configurationRepository;
+        this.globalConfigurationMapper = globalConfigurationMapper;
     }
 
-    public List<GlobalConfiguration> getAllConfigs() {
-        return configurationRepository.findAll();
+    public List<GlobalConfigurationResponseDTO> getAllConfigs() {
+        return configurationRepository.findAll()
+                .stream().map(globalConfigurationMapper::toDTO)
+                .toList();
     }
 
-    public GlobalConfiguration getConfig(String configKey) {
-        return configurationRepository.findByConfigKey(configKey)
-                .orElseThrow(() -> new EntityNotFoundException(GlobalConfiguration.class, "No configuration for: " + configKey));
-    }
-
-    public void updateConfigValue(String configKey, String configValue, GlobalConfigurationType configType) {
+    public GlobalConfigurationResponseDTO getConfig(String configKey) {
         GlobalConfiguration config = configurationRepository.findByConfigKey(configKey)
                 .orElseThrow(() -> new EntityNotFoundException(GlobalConfiguration.class, "No configuration for: " + configKey));
+        return globalConfigurationMapper.toDTO(config);
+    }
 
-        config.setConfigValue(configValue);
-        config.setConfigType(configType);
-        configurationRepository.save(config);
+    @Transactional
+    public void updateConfigValue(long id, GlobalConfigurationRequestDTO request) {
+        GlobalConfiguration oldConfig = configurationRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(GlobalConfiguration.class, id));
+
+        GlobalConfiguration newConfig = globalConfigurationMapper.toGlobalConfiguration(request);
+        newConfig.setId(oldConfig.getId());
+        configurationRepository.save(newConfig);
     }
 
 
