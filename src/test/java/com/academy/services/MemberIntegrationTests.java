@@ -102,20 +102,34 @@ public class MemberIntegrationTests {
     }
 
     @Test
-    void getMemberById_shouldReturnCorrectMember() {
-        MemberResponseDTO response = memberService.getMemberById(member.getId());
-
-        assertThat(response.email()).isEqualTo(member.getEmail());
-        assertThat(response.address()).isEqualTo(member.getAddress());
+    void editMember_roleNotFound_throwsException(){
+        MemberRequestDTO memberRequestDTO = createMemberRequestDTO(
+                "donatello@example.com",
+                "Esgoto", "0000-100",
+                "987654321",
+                "pizza4EverEnjoyer!",
+                99L);
+        assertThatThrownBy(() -> memberService.editMember(member.getId(), memberRequestDTO))
+                .isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
-    void editMember_roleNotFound_throwsException(){
-        MemberRequestDTO memberRequestDTO = createMemberRequestDTO("donatello@example.com",
-                "Esgoto", "0000-100",
-                "987654321", "pizza4EverEnjoyer!", 99L);
-        assertThatThrownBy(() -> memberService.editMember(member.getId(), memberRequestDTO))
-                .isInstanceOf(EntityNotFoundException.class);
+    void editMember_withSameData_shouldUpdateSuccessfully(){
+        MemberRequestDTO request = createMemberRequestDTO(
+                member.getEmail(),
+                member.getAddress(),
+                member.getPostalCode(),
+                member.getPhoneNumber(),
+                member.getPassword(),
+                member.getRole().getId()
+        );
+        MemberResponseDTO memberResponseDTO = memberService.editMember(member.getId(), request);
+
+        assertThat(memberResponseDTO.address()).isEqualTo(member.getAddress());
+        assertThat(memberResponseDTO.email()).isEqualTo(member.getEmail());
+        assertThat(memberResponseDTO.postalCode()).isEqualTo(member.getPostalCode());
+        assertThat(memberResponseDTO.phoneNumber()).isEqualTo(member.getPhoneNumber());
+        assertThat(memberResponseDTO.role()).isEqualTo(member.getRole());
     }
 
     @Test
@@ -140,4 +154,20 @@ public class MemberIntegrationTests {
         MemberResponseDTO response = memberService.editMember(member.getId(), memberRequestDTO);
         assertThat(response.role()).isEqualTo("CLIENT");
     }
+
+    @Test
+    void getMemberById_shouldReturnCorrectMember() {
+        MemberResponseDTO response = memberService.getMemberById(member.getId());
+
+        assertThat(response.email()).isEqualTo(member.getEmail());
+        assertThat(response.address()).isEqualTo(member.getAddress());
+    }
+
+    @Test
+    void getMember_invalidId_throwsException() {
+        assertThatThrownBy(() -> memberService.getMemberById(999))
+                .isInstanceOf(EntityNotFoundException.class);
+    }
+
+
 }
