@@ -40,15 +40,15 @@ export class AuthComponent{
   private buildForm(): void {
     if (this.isLoginMode()) {
       this.authForm = this.fb.group({
-        login: ['', [Validators.required]],
-        password: ['', [Validators.required]]
+        login: ['', [Validators.required, Validators.maxLength(254)]],
+        password: ['', [Validators.required, Validators.maxLength(64)]]
       });
     } else {
       this.authForm = this.fb.group({
-        email: ['', [Validators.required, Validators.email]],
-        username: ['', [Validators.required, noSpecialCharsValidator()]],
-        password: ['', [Validators.required, strongPasswordValidator()]],
-        confirmPassword: ['', [Validators.required]]
+        email: ['', [Validators.required, Validators.email, Validators.maxLength(254)]],
+        username: ['', [Validators.required, noSpecialCharsValidator(), Validators.minLength(4), Validators.maxLength(20)]],
+        password: ['', [Validators.required, strongPasswordValidator(), Validators.minLength(8), Validators.maxLength(64)]],
+        confirmPassword: ['', [Validators.required, Validators.maxLength(64)]]
       }, { validators: this.passwordsMatchValidator });
     }
   }
