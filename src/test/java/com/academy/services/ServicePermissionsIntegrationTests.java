@@ -6,6 +6,7 @@ import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
 import com.academy.exceptions.AuthenticationException;
 import com.academy.models.Member;
+import com.academy.models.ServiceType;
 import com.academy.models.service.Service;
 import com.academy.models.service.ServiceTypeEnum;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;

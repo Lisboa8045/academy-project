@@ -8,14 +8,15 @@ import com.academy.dtos.service_provider.ServiceProviderResponseDTO;
 import com.academy.exceptions.AuthenticationException;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.Member;
+import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.MemberRepository;
-import com.academy.repositories.ServiceProviderRepository;
-import com.academy.repositories.ServiceRepository;
 import com.academy.utils.Utils;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import com.academy.repositories.ServiceProviderRepository;
+import jakarta.transaction.Transactional;
+import com.academy.repositories.ServiceRepository;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,16 +25,16 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
-@Service
+@org.springframework.stereotype.Service
 public class ServiceProviderService {
 
     private final ServiceProviderRepository serviceProviderRepository;
     private final ServiceProviderMapper serviceProviderMapper;
-    private final MemberRepository memberRepository;
-    private final ServiceRepository serviceRepository;
-    private final ProviderPermissionService providerPermissionService;
     private final MemberService memberService;
+    private final ServiceService serviceService;
     private final AuthenticationFacade authenticationFacade;
+    private final ProviderPermissionService providerPermissionService;
+
 
 
     @Autowired
@@ -41,13 +42,11 @@ public class ServiceProviderService {
                                   ServiceProviderMapper serviceProviderMapper,
                                   MemberRepository memberRepository,
                                   ServiceRepository serviceRepository,
-                                  ProviderPermissionService providerPermissionService,
-                                  MemberService memberService,
-                                  AuthenticationFacade authenticationFacade) {
+                                  ProviderPermissionService providerPermissionService) {
         this.serviceProviderRepository = serviceProviderRepository;
         this.serviceProviderMapper = serviceProviderMapper;
-        this.memberRepository = memberRepository;
-        this.serviceRepository = serviceRepository;
+        this.memberService = memberService;
+        this.serviceService = serviceService;
         this.providerPermissionService = providerPermissionService;
         this.memberService = memberService;
         this.authenticationFacade = authenticationFacade;
@@ -75,15 +74,15 @@ public class ServiceProviderService {
                 .map(serviceProviderMapper::toResponseDTO);
     }
 
+    public ServiceProviderResponseDTO createServiceProviderWithDTO(ServiceProviderRequestDTO dto) throws BadRequestException {
+        ServiceProvider serviceProvider = createServiceProvider(dto);
+        return serviceProviderMapper.toResponseDTO(serviceProvider);
+    }
     @Transactional
-    public ServiceProviderResponseDTO createServiceProvider(ServiceProviderRequestDTO dto) throws AuthenticationException, BadRequestException {
-        Member member = memberRepository.findById(dto.memberId())
-                .orElseThrow(() -> new EntityNotFoundException(Member.class, dto.memberId()));
+    public ServiceProviderResponseDTO createServiceProvider(ServiceProviderRequestDTO dto) throws BadRequestException {
+        Member member = memberService.getMemberEntityById(dto.memberId());
 
-        com.academy.models.service.Service service = serviceRepository.findById(dto.serviceId())
-                .orElseThrow(() -> new EntityNotFoundException(com.academy.models.service.Service.class, dto.serviceId()));
-        String username = authenticationFacade.getUsername();
-        Member loggedMember = memberService.getMemberByUsername(username);
+        Service service = serviceService.getServiceEntityById(dto.serviceId());
 
         if(!checkIfHasPermissionToAddServiceProvider(loggedMember, service, dto.isServiceCreation()))
             throw new AuthenticationException("You do not have permission to create a Service Provider");
@@ -96,11 +95,16 @@ public class ServiceProviderService {
 
         validatePermissions(dto.permissions(), dto.isServiceCreation());
 
+        /*
+                ServiceProvider saved = serviceProviderRepository.save(serviceProvider);
+        providerPermissionService.createPermissionsViaList(dto.permissions(),saved);
+
+        return serviceProviderRepository.save(saved);
+         */
         ServiceProvider serviceProviderWithPermissions = providerPermissionService.createPermissionsViaList(dto.permissions(),saved);
         serviceProviderRepository.save(serviceProviderWithPermissions);
         return serviceProviderMapper.toResponseDTO(serviceProviderWithPermissions);
     }
-
     private boolean checkIfHasPermissionToAddServiceProvider(Member loggedMember, com.academy.models.service.Service service, boolean isServiceCreation){
         if(isServiceCreation)
             return true;
@@ -121,7 +125,6 @@ public class ServiceProviderService {
             throw new BadRequestException("Can't give the Owner permission to a new worker!");
     }
 
-
     public ServiceProviderResponseDTO updateServiceProvider(long id, ServiceProviderRequestDTO details) {
         ServiceProvider serviceProvider = serviceProviderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
@@ -134,8 +137,7 @@ public class ServiceProviderService {
 //        }
 
         if(details.serviceId() != null) {
-            com.academy.models.service.Service service = serviceRepository.findById(details.serviceId())
-                    .orElseThrow(()-> new EntityNotFoundException(ServiceProvider.class, details.serviceId()));
+            Service service = serviceService.getServiceEntityById(details.serviceId());
             serviceProvider.setService(service);
         }
 
@@ -146,9 +148,14 @@ public class ServiceProviderService {
         return serviceProviderMapper.toResponseDTO(serviceProvider);
     }
 
+    @Transactional
     public void deleteServiceProvider(long id) {
-        if(!serviceProviderRepository.existsById(id)) throw new EntityNotFoundException(ServiceProvider.class, id);
-        serviceProviderRepository.deleteById(id);
+        ServiceProvider serviceProvider = serviceProviderRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
+
+        providerPermissionService.deletePermissionsFromServiceProvider(serviceProvider);
+
+        serviceProviderRepository.delete(serviceProvider);
     }
 
     public List<ProviderPermissionEnum> getPermissionsByProviderUsernameAndServiceId(String username, Long serviceId){
@@ -205,7 +212,13 @@ public class ServiceProviderService {
     }
 
     public void addPermissions(ServiceProvider serviceProvider,List<ProviderPermissionEnum> permissions){
-            providerPermissionService.createPermissionsViaList(permissions, serviceProvider);
+        providerPermissionService.createPermissionsViaList(permissions, serviceProvider);
+    }
+    public List<Long> findMemberIdsByServiceId(Long serviceId) {
+        return serviceProviderRepository.findMemberIdsByServiceId(serviceId);
     }
 
+    public ServiceProvider getServiceProviderEntityById(long id){
+        return serviceProviderRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
+    }
 }

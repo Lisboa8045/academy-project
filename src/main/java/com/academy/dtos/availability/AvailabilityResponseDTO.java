@@ -1,33 +1,12 @@
 package com.academy.dtos.availability;
 
-import lombok.Getter;
-import lombok.Setter;
-import java.time.LocalDateTime;
 import java.time.DayOfWeek;
-import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.NotBlank;
+import java.time.LocalDateTime;
 
-
-
-@Getter
-@Setter
-public class AvailabilityResponseDTO {
-    
-    @NotBlank
-    private long id;
-
-    @NotBlank
-    private long memberId;
-
-    @NotBlank
-    private DayOfWeek dayOfWeek;
-
-    @NotBlank
-    @FutureOrPresent(message = "End date and time must be in the future or present")
-    private LocalDateTime startDateTime;
-
-    @NotBlank
-    @FutureOrPresent(message = "End date and time must be in the future or present")
-    private LocalDateTime endDateTime;
-}
-    
+public record AvailabilityResponseDTO(
+    Long id,
+    Long memberId,
+    DayOfWeek dayOfWeek,
+    LocalDateTime startDateTime,
+    LocalDateTime endDateTime
+) {}

@@ -10,8 +10,6 @@ import com.academy.models.Appointment;
 import com.academy.models.Member;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.AppointmentRepository;
-import com.academy.repositories.MemberRepository;
-import com.academy.repositories.ServiceProviderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,28 +17,27 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-
 public class AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
 
-    private final ServiceProviderRepository serviceProviderRepository;
+    private final ServiceProviderService serviceProviderService;
 
     private final AppointmentMapper appointmentMapper;
 
-    private final MemberRepository memberRepository;
+    private final MemberService memberService;
 
     @Autowired
 
-    public AppointmentService(AppointmentRepository appointmentRepository, ServiceProviderRepository serviceProviderRepository, AppointmentMapper appointmentMapper, MemberRepository memberRepository) {
+    public AppointmentService(AppointmentRepository appointmentRepository, ServiceProviderService serviceProviderService, AppointmentMapper appointmentMapper, MemberService memberService) {
 
         this.appointmentRepository = appointmentRepository;
 
-        this.serviceProviderRepository = serviceProviderRepository;
+        this.serviceProviderService = serviceProviderService;
 
         this.appointmentMapper = appointmentMapper;
 
-        this.memberRepository = memberRepository;
+        this.memberService = memberService;
 
     }
 
@@ -66,14 +63,9 @@ public class AppointmentService {
 
     public AppointmentResponseDTO createAppointment(AppointmentRequestDTO dto) {
 
-        ServiceProvider serviceProvider = serviceProviderRepository.findById(dto.serviceProviderId())
+        ServiceProvider serviceProvider = serviceProviderService.getServiceProviderEntityById(dto.serviceProviderId());
 
-                .orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, dto.serviceProviderId()));
-
-        Member member = memberRepository.findById(dto.memberId())
-
-                .orElseThrow(() -> new EntityNotFoundException(Member.class, dto.memberId()));
-
+        Member member = memberService.getMemberEntityById(dto.memberId());
         Appointment appointment = appointmentMapper.toEntity(dto);
 
         appointment.setServiceProvider(serviceProvider);
@@ -84,6 +76,7 @@ public class AppointmentService {
 
     }
 
+    
     public AppointmentResponseDTO updateAppointment(int id, AppointmentRequestDTO appointmentDetails) {
 
         Appointment appointment = appointmentRepository.findById(id)
@@ -91,23 +84,14 @@ public class AppointmentService {
                 .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
 
         if(appointmentDetails.memberId() != null){
-
-            Member member = memberRepository.findById(appointmentDetails.memberId())
-
-                    .orElseThrow(()-> new EntityNotFoundException(Member.class, appointmentDetails.memberId()));
-
+            Member member = memberService.getMemberEntityById(appointmentDetails.memberId());
             appointment.setMember(member);
 
         }
 
         if(appointmentDetails.serviceProviderId() != null) {
-
-            ServiceProvider serviceProvider = serviceProviderRepository.findById(appointmentDetails.serviceProviderId())
-
-                    .orElseThrow(()-> new EntityNotFoundException(ServiceProvider.class, appointmentDetails.serviceProviderId()));
-
-            appointment.setServiceProvider(serviceProvider);;
-
+            ServiceProvider serviceProvider = serviceProviderService.getServiceProviderEntityById(appointmentDetails.serviceProviderId());
+            appointment.setServiceProvider(serviceProvider);
         }
 
         if(appointmentDetails.rating() != appointment.getRating() )appointment.setRating(appointmentDetails.rating());

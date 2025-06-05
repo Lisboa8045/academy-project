@@ -9,19 +9,18 @@ import jakarta.validation.Valid;
 import org.apache.coyote.BadRequestException;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/services")
+@RequestMapping("services")
 public class ServiceController {
 
     private final ServiceService serviceService;
-
-
 
     @Autowired
     public ServiceController(ServiceService serviceService) {
@@ -53,6 +52,18 @@ public class ServiceController {
     public ResponseEntity<ServiceResponseDTO> getById(@PathVariable Long id) {
         ServiceResponseDTO response = serviceService.getById(id);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<ServiceResponseDTO>> search(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) List<String> tags,
+            @RequestParam(required = false) Double priceMin,
+            @RequestParam(required = false) Double priceMax,
+            Pageable pageable
+    ) {
+        Page<ServiceResponseDTO> responses = serviceService.searchServices(name, priceMin, priceMax, tags, pageable);
+        return ResponseEntity.ok(responses);
     }
 
     @DeleteMapping("/{id}")

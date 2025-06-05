@@ -1,9 +1,23 @@
 package com.academy.models.service;
 
 import com.academy.models.Member;
+import com.academy.models.ServiceType;
 import com.academy.models.Tag;
 import com.academy.models.service.service_provider.ServiceProvider;
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -18,7 +32,7 @@ import java.util.List;
 @Table(name="service")
 @Getter
 @Setter
-@ToString
+@ToString(exclude = "serviceProviders")
 public class Service {
 
     @Column(name="id")
@@ -56,9 +70,9 @@ public class Service {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-
-    @Enumerated(EnumType.STRING)
-    private ServiceTypeEnum serviceType;
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "service_type_id", nullable = false)
+    private ServiceType serviceType;
 
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(
@@ -71,15 +85,22 @@ public class Service {
     )
     private List<Tag> tags = new ArrayList<>();
 
-    public void removeAllTags() {
+    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ServiceProvider> serviceProviders = new ArrayList<>();
+
+    private void removeAllTags() {
         for (Tag tag : new ArrayList<>(tags)) {
-            tag.getServices().remove(this); // Remove this service from each associated tag
+            tag.getServices().remove(this);
         }
-        tags.clear(); // Clear the local list
+        tags.clear();
     }
 
-    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ServiceProvider> serviceProviders;
+    private void removeServiceTypeLink() {
+        serviceType.getServices().remove(this);
+    }
 
-
+    public void removeAllLinks() {
+        removeAllTags();
+        removeServiceTypeLink();
+    }
 }
