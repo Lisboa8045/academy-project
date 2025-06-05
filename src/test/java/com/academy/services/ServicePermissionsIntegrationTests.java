@@ -4,11 +4,12 @@ import com.academy.config.authentication.AuthenticationFacade;
 import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
+import com.academy.dtos.service_type.ServiceTypeRequestDTO;
+import com.academy.dtos.service_type.ServiceTypeResponseDTO;
 import com.academy.exceptions.AuthenticationException;
 import com.academy.models.Member;
 import com.academy.models.ServiceType;
 import com.academy.models.service.Service;
-import com.academy.models.service.ServiceTypeEnum;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.MemberRepository;
@@ -46,12 +47,13 @@ public class ServicePermissionsIntegrationTests {
     private Member memberOwnerOfService;
     private Member memberWithPermissionToUpdateService;
     private Member memberWithPermissionToUpdatePermissions;
-    private Long createdServiceId;
+    private ServiceType serviceType;
 
     @Autowired private RoleRepository roleRepository;
     @Autowired private MemberRepository memberRepository;
     @Autowired private ServiceService serviceService;
     @Autowired private ServiceProviderService serviceProviderService;
+    @Autowired private ServiceTypeService serviceTypeService;
 
     @MockBean
     private AuthenticationFacade authenticationFacade; // ✅ MockBean, not Autowired constructor
@@ -83,6 +85,13 @@ public class ServicePermissionsIntegrationTests {
         memberWithPermissionToUpdatePermissions.setEmail("username3@teste.com");
         memberRepository.save(memberWithPermissionToUpdatePermissions);
 
+        ServiceTypeResponseDTO response = serviceTypeService.create(new ServiceTypeRequestDTO(
+                "name",
+                "icon"
+        ));
+
+        serviceType = serviceTypeService.getEntityById(response.id());
+
     }
 
     @Test
@@ -98,7 +107,7 @@ public class ServicePermissionsIntegrationTests {
                 1,
                 false,
                 100,
-                ServiceTypeEnum.TYPE,
+                serviceType.getName(),
                 new ArrayList<>()
         );
 
@@ -107,7 +116,6 @@ public class ServicePermissionsIntegrationTests {
         assertEquals("Service", response.name());
 
         Service service = serviceService.getEntityById(response.id());
-        createdServiceId = service.getId();
         assertNotNull(service);
         assertEquals("Service", service.getName());
 
@@ -141,7 +149,7 @@ public class ServicePermissionsIntegrationTests {
                                 1,
                                 false,
                                 100,
-                                ServiceTypeEnum.TYPE,
+                                serviceType.getName(),
                                 new ArrayList<>()
                         )
                 )
@@ -165,7 +173,7 @@ public class ServicePermissionsIntegrationTests {
                                 1,
                                 false,
                                 100,
-                                ServiceTypeEnum.TYPE,
+                                serviceType.getName(),
                                 new ArrayList<>()
                         )
                 )
@@ -188,7 +196,7 @@ public class ServicePermissionsIntegrationTests {
                                 1,
                                 false,
                                 100,
-                                ServiceTypeEnum.TYPE,
+                                serviceType.getName(),
                                 new ArrayList<>()
                         )
         );
@@ -294,7 +302,7 @@ public class ServicePermissionsIntegrationTests {
                 1,
                 false,
                 100,
-                ServiceTypeEnum.TYPE,
+                serviceType.getName(),
                 new ArrayList<>()
         );
         return serviceService.create(dto).id();

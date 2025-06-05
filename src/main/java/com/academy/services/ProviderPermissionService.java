@@ -43,7 +43,6 @@ public class ProviderPermissionService {
         return serviceProvider;
     }
 
-    }
     @Transactional
     public void deletePermissionsFromServiceProvider(ServiceProvider serviceProvider) {
         List<ProviderPermission> permissionsToDelete = new ArrayList<>(serviceProvider.getPermissions());

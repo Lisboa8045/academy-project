@@ -19,7 +19,6 @@ import jakarta.transaction.Transactional;
 import com.academy.repositories.ServiceRepository;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,13 +41,15 @@ public class ServiceProviderService {
                                   ServiceProviderMapper serviceProviderMapper,
                                   MemberRepository memberRepository,
                                   ServiceRepository serviceRepository,
-                                  ProviderPermissionService providerPermissionService) {
+                                  ProviderPermissionService providerPermissionService,
+                                  MemberService memberService,
+                                  ServiceService serviceService,
+                                  AuthenticationFacade authenticationFacade) {
         this.serviceProviderRepository = serviceProviderRepository;
         this.serviceProviderMapper = serviceProviderMapper;
         this.memberService = memberService;
         this.serviceService = serviceService;
         this.providerPermissionService = providerPermissionService;
-        this.memberService = memberService;
         this.authenticationFacade = authenticationFacade;
     }
 
@@ -79,10 +80,13 @@ public class ServiceProviderService {
         return serviceProviderMapper.toResponseDTO(serviceProvider);
     }
     @Transactional
-    public ServiceProviderResponseDTO createServiceProvider(ServiceProviderRequestDTO dto) throws BadRequestException {
+    public ServiceProvider createServiceProvider(ServiceProviderRequestDTO dto) throws BadRequestException {
         Member member = memberService.getMemberEntityById(dto.memberId());
 
         Service service = serviceService.getServiceEntityById(dto.serviceId());
+
+        String loggedUsername = authenticationFacade.getUsername();
+        Member loggedMember = memberService.getMemberByUsername(loggedUsername);
 
         if(!checkIfHasPermissionToAddServiceProvider(loggedMember, service, dto.isServiceCreation()))
             throw new AuthenticationException("You do not have permission to create a Service Provider");
@@ -95,15 +99,8 @@ public class ServiceProviderService {
 
         validatePermissions(dto.permissions(), dto.isServiceCreation());
 
-        /*
-                ServiceProvider saved = serviceProviderRepository.save(serviceProvider);
-        providerPermissionService.createPermissionsViaList(dto.permissions(),saved);
-
-        return serviceProviderRepository.save(saved);
-         */
         ServiceProvider serviceProviderWithPermissions = providerPermissionService.createPermissionsViaList(dto.permissions(),saved);
-        serviceProviderRepository.save(serviceProviderWithPermissions);
-        return serviceProviderMapper.toResponseDTO(serviceProviderWithPermissions);
+        return serviceProviderRepository.save(serviceProviderWithPermissions);
     }
     private boolean checkIfHasPermissionToAddServiceProvider(Member loggedMember, com.academy.models.service.Service service, boolean isServiceCreation){
         if(isServiceCreation)

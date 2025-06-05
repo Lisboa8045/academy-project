@@ -35,7 +35,7 @@ public class ServiceProviderController {
 
     @PostMapping
     public ServiceProviderResponseDTO createServiceProvider(@Valid @RequestBody ServiceProviderRequestDTO serviceProvider) throws BadRequestException {
-        return serviceProviderService.createServiceProvider(serviceProvider);
+        return serviceProviderService.createServiceProviderWithDTO(serviceProvider);
     }
 
     @PutMapping("/{id}")

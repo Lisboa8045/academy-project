@@ -22,6 +22,7 @@ import com.academy.specifications.ServiceSpecifications;
 import com.academy.utils.Utils;
 import jakarta.transaction.Transactional;
 import org.apache.coyote.BadRequestException;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -54,7 +55,7 @@ public class ServiceService {
                           AuthenticationFacade authenticationFacade,
                           MemberService memberService,
                           TagService tagService,
-                          ServiceTypeRepository serviceTypeRepository) {
+                          ServiceTypeService serviceTypeService) {
         this.serviceRepository = serviceRepository;
         this.tagRepository = tagRepository;
         this.serviceMapper = serviceMapper;
@@ -82,9 +83,6 @@ public class ServiceService {
         ServiceProvider owner = createOwnerServiceProvider(member.getId(), service.getId());
         linkServiceToOwnerAsProvider(service, owner);
         return serviceMapper.toDto(savedService, getPermissionsByProviderUsernameAndServiceId(member.getUsername(), savedService.getId()));
-    }
-    private ServiceProvider createOwnerServiceProvider(ServiceProviderRequestDTO request) {
-        return serviceProviderService.createServiceProvider(request);
     }
 
     // Update
@@ -222,7 +220,7 @@ public class ServiceService {
         }catch(EntityNotFoundException e){
             throw new BadRequestException("The service with id " +  serviceId + " does not have a Service Provider with the id " +memberToBeUpdatedId);
         }
-        Member memberToBeUpdated =  memberService.getMemberById(memberToBeUpdatedId);
+        Member memberToBeUpdated =  memberService.getMemberByEntityId(memberToBeUpdatedId);
         List<ProviderPermissionEnum> oldPermissions = getPermissionsByProviderUsernameAndServiceId(memberToBeUpdated.getUsername(), serviceId);
         List<ProviderPermissionEnum> updaterPermissions = getPermissionsByProviderUsernameAndServiceId(updaterUsername, serviceId);
 
@@ -232,7 +230,7 @@ public class ServiceService {
         serviceProviderService.addPermissions(serviceProvider, newPermissions);
         return getById(serviceId);
     }
-    private ServiceProviderResponseDTO createOwnerServiceProvider(Long memberId, Long serviceId) throws AuthenticationException, BadRequestException {
+    private ServiceProvider createOwnerServiceProvider(Long memberId, Long serviceId) throws AuthenticationException, BadRequestException {
         return serviceProviderService.createServiceProvider(new ServiceProviderRequestDTO(
                 memberId,
                 serviceId,
