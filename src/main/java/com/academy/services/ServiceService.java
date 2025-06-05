@@ -18,10 +18,11 @@ import com.academy.repositories.ServiceProviderRepository;
 import com.academy.repositories.ServiceRepository;
 import com.academy.specifications.ServiceSpecifications;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
 @org.springframework.stereotype.Service
 public class ServiceService {
 
+    @Lazy
     private final ServiceProviderService serviceProviderService;
     private final ServiceRepository serviceRepository;
     private final ServiceMapper serviceMapper;
@@ -41,14 +43,9 @@ public class ServiceService {
     private final TagService tagService;
     private final ServiceTypeService serviceTypeService;
 
-    @Autowired
-    private ProviderPermissionRepository providerPermissionRepository;
-    @Autowired
-    private ServiceProviderRepository serviceProviderRepository;
-
     public ServiceService(ServiceRepository serviceRepository,
                           ServiceMapper serviceMapper,
-                          ServiceProviderService serviceProviderService,
+                          @Lazy ServiceProviderService serviceProviderService,
                           AuthenticationFacade authenticationFacade,
                           MemberService memberService,
                           TagService tagService,
@@ -219,6 +216,12 @@ public class ServiceService {
         return getById(serviceId);
     }
     */
+    public Service getServiceEntityById(Long id) {
+        return serviceRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(Service.class, id));
+    }
 
+    public boolean existsById(Long serviceId) {
+        return serviceRepository.existsById(serviceId);
+    }
 
 }

@@ -1,0 +1,22 @@
+<div class="search-bar">
+  <input
+    type="text"
+    [value]="searchTerm()"
+    placeholder="Search services..."
+  />
+</div>
+@if (loading()) {
+  <app-loading/>
+} @else {
+  <div class="card-grid">
+    <div class="card" *ngFor="let service of services()">
+      <h3>{{ service.name }}</h3>
+      <p>{{ service.description }}</p>
+      <p><strong>Price:</strong> ${{ service.price }}</p>
+      <p><strong>Tags:</strong> {{ service.tagNames.join(', ') }}</p>
+      <p><strong>Negotiable:</strong> {{ service.negotiable ? 'Yes' : 'No' }}</p>
+      <small>Updated at: {{ service.updatedAt | date }}</small>
+    </div>
+  </div>
+}
+
