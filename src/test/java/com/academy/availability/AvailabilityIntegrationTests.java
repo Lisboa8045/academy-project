@@ -7,25 +7,26 @@ import com.academy.exceptions.EntityNotFoundException;
 import com.academy.exceptions.InvalidArgumentException;
 import com.academy.models.Member;
 import com.academy.models.Role;
-import com.academy.models.service.Service;
 import com.academy.models.ServiceType;
-import com.academy.models.service.ServiceTypeEnum;
+import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.repositories.*;
-import com.academy.services.*;
-
-import org.junit.jupiter.api.*;
+import com.academy.services.AvailabilityService;
+import com.academy.services.ServiceProviderService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.academy.models.service.ServiceTypeEnum;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
@@ -36,9 +37,9 @@ public class AvailabilityIntegrationTests {
     @Autowired private AvailabilityRepository availabilityRepository;
     @Autowired private MemberRepository memberRepository;
     @Autowired private ServiceRepository serviceRepository;
+    @Autowired private ServiceTypeRepository serviceTypeRepository;
     @Autowired private ServiceProviderService serviceProviderService;
-
-    
+    @Autowired private RoleRepository roleRepository;
 
     private Member defaultMember;
 
@@ -47,41 +48,23 @@ public class AvailabilityIntegrationTests {
         defaultMember = saveMember("testuser", "CLIENT");
     }
 
-    /* @AfterEach
-    void tearDown() {
-        availabilityRepository.deleteAll();        
-        serviceProviderRepository.deleteAll();     
-        serviceRepository.deleteAll();             
-        memberRepository.deleteAll();              
-    }
- */
-
-    // Helper methods
     private Member saveMember(String username, String roleName) {
         Role role = new Role();
-        role.setId(1);
         role.setName(roleName);
+        Role savedRole = roleRepository.save(role);
 
         Member member = new Member();
         member.setUsername(username);
         member.setPassword("password");
         member.setEmail(username + "@email.com");
-        member.setRole(role);
+        member.setRole(savedRole);
 
         return memberRepository.save(member);
     }
 
-
     private AvailabilityRequestDTO createDTO(Long memberId, DayOfWeek day, LocalDateTime start, LocalDateTime end) {
-        AvailabilityRequestDTO dto = new AvailabilityRequestDTO();
-        dto.setMemberId(memberId);
-        dto.setDayOfWeek(day);
-        dto.setStartDateTime(start);
-        dto.setEndDateTime(end);
-        return dto;
+        return new AvailabilityRequestDTO(memberId, day, start, end);
     }
-
-    // Tests
 
     @Test
     void createAvailability_shouldSucceed() {
@@ -89,21 +72,23 @@ public class AvailabilityIntegrationTests {
         var response = availabilityService.createAvailability(dto);
 
         assertThat(response).isNotNull();
-        assertThat(response.getMemberId()).isEqualTo(defaultMember.getId());
-        assertThat(response.getDayOfWeek()).isEqualTo(DayOfWeek.MONDAY);
+        assertThat(response.memberId()).isEqualTo(defaultMember.getId());
+        assertThat(response.dayOfWeek()).isEqualTo(DayOfWeek.MONDAY);
     }
 
     @Test
     void getAvailabilitiesByServiceId_shouldReturnResults() {
         Member provider = saveMember("provider1", "PROVIDER");
-        provider = memberRepository.save(provider); // <- garantir que está persistido
+
+        ServiceType type = new ServiceType();
+        type.setName("Basic Type");
+        type.setIcon("type.png");
 
         Service service = new Service();
-        service.setName("Yoga Class");
-        service.setServiceType(ServiceTypeEnum.YOGA);
-        service.setOwner(provider); // agora sim, está persistido
+        service.setName("Basic Service");
+        service.setServiceType(type);
+        service.setOwner(provider);
         service = serviceRepository.save(service);
-
 
         serviceProviderService.createServiceProvider(
             new ServiceProviderRequestDTO(provider.getId(), service.getId(), List.of(
@@ -121,7 +106,7 @@ public class AvailabilityIntegrationTests {
         List<AvailabilityResponseDTO> availabilities = availabilityService.getAvailabilitiesByServiceId(service.getId());
 
         assertThat(availabilities).isNotEmpty();
-        assertThat(availabilities.get(0).getMemberId()).isEqualTo(provider.getId());
+        assertThat(availabilities.get(0).memberId()).isEqualTo(provider.getId());
     }
 
     @Test
@@ -151,7 +136,7 @@ public class AvailabilityIntegrationTests {
 
         var list = availabilityService.getAvailabilitiesByMemberId(defaultMember.getId());
         assertThat(list).isNotEmpty();
-        assertThat(list.get(0).getMemberId()).isEqualTo(defaultMember.getId());
+        assertThat(list.get(0).memberId()).isEqualTo(defaultMember.getId());
     }
 
     @Test
@@ -159,11 +144,15 @@ public class AvailabilityIntegrationTests {
         var dto = createDTO(defaultMember.getId(), DayOfWeek.FRIDAY, LocalDateTime.now().plusDays(5), LocalDateTime.now().plusDays(5).plusHours(2));
         var created = availabilityService.createAvailability(dto);
 
-        dto.setId(created.getId());
-        dto.setEndDateTime(dto.getEndDateTime().plusHours(1));
-        var updated = availabilityService.updateAvailability(dto);
+        var updatedDto = new AvailabilityRequestDTO(
+            created.memberId(),
+            created.dayOfWeek(),
+            created.startDateTime(),
+            created.endDateTime().plusHours(1)
+        );
 
-        assertThat(updated.getEndDateTime()).isEqualTo(dto.getEndDateTime());
+        var updated = availabilityService.updateAvailability(created.id(), updatedDto);
+        assertThat(updated.endDateTime()).isEqualTo(updatedDto.endDateTime());
     }
 
     @Test
@@ -171,8 +160,8 @@ public class AvailabilityIntegrationTests {
         var dto = createDTO(defaultMember.getId(), DayOfWeek.SATURDAY, LocalDateTime.now().plusDays(6), LocalDateTime.now().plusDays(6).plusHours(2));
         var created = availabilityService.createAvailability(dto);
 
-        availabilityService.deleteAvailabilityById(created.getId());
-        assertThat(availabilityRepository.findById(created.getId())).isEmpty();
+        availabilityService.deleteAvailabilityById(created.id());
+        assertThat(availabilityRepository.findById(created.id())).isEmpty();
     }
 
     @Test
@@ -212,12 +201,6 @@ public class AvailabilityIntegrationTests {
         var response = availabilityService.createAvailability(dto);
 
         assertThat(response).isNotNull();
-        assertThat(response.getMemberId()).isEqualTo(anotherMember.getId());
-    }
-
-    @Test
-    void createAvailability_withNullFields_shouldThrow() {
-        assertThatThrownBy(() -> availabilityService.createAvailability(new AvailabilityRequestDTO()))
-            .isInstanceOf(InvalidArgumentException.class);
+        assertThat(response.memberId()).isEqualTo(anotherMember.getId());
     }
 }

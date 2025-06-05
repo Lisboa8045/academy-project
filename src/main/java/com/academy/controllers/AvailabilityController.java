@@ -51,13 +51,12 @@ public class AvailabilityController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    // Update an existing availability
     @PutMapping("/{availabilityId}")
     public ResponseEntity<AvailabilityResponseDTO> updateAvailability(
             @PathVariable long availabilityId,
             @Valid @RequestBody AvailabilityRequestDTO availabilityRequestDTO) {
-        availabilityRequestDTO.setId(availabilityId);
-        AvailabilityResponseDTO response = availabilityService.updateAvailability(availabilityRequestDTO);
+
+        AvailabilityResponseDTO response = availabilityService.updateAvailability(availabilityId, availabilityRequestDTO);
         return ResponseEntity.ok(response);
     }
 

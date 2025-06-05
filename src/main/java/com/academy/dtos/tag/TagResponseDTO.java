@@ -6,7 +6,7 @@ import java.util.List;
 public record TagResponseDTO(
         Long id,
         String name,
-        Boolean isCustom,
+        Boolean custom,
         List<Long> serviceIds,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
