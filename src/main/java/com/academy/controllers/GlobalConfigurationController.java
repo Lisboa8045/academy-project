@@ -36,9 +36,9 @@ public class GlobalConfigurationController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<GlobalConfigurationResponseDTO> updateConfig(@PathVariable long id, @RequestBody GlobalConfigurationRequestDTO request) {
-        GlobalConfigurationResponseDTO response = globalConfigurationService.updateConfigValue(id, request);
+    @PutMapping("/{configKey}")
+    public ResponseEntity<GlobalConfigurationResponseDTO> updateConfig(@PathVariable String configKey, @RequestBody GlobalConfigurationRequestDTO request) {
+        GlobalConfigurationResponseDTO response = globalConfigurationService.updateConfigValue(configKey, request);
         return ResponseEntity.ok(response);
     }
 }
