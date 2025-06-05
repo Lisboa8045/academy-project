@@ -112,8 +112,8 @@ class GlobalConfigurationTests {
 
     @Test
     void testUpdateGlobalConfiguration_wrongType() {
-        GlobalConfigurationRequestDTO request = new GlobalConfigurationRequestDTO(null, "true", null);
+        GlobalConfigurationRequestDTO request = new GlobalConfigurationRequestDTO(null, "grega", null);
         assertThrows(InvalidArgumentException.class,
-                () -> globalConfigurationService.updateConfigValue("configKey_int", request));
+                () -> globalConfigurationService.updateConfigValue("configKey_boolean", request));
     }
 }
