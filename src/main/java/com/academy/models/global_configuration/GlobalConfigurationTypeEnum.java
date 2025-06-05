@@ -1,5 +1,5 @@
 package com.academy.models.global_configuration;
 
-public enum GlobalConfigurationType {
+public enum GlobalConfigurationTypeEnum {
     STRING, INT, BOOLEAN
 }
