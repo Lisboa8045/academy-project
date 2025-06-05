@@ -7,6 +7,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -23,14 +24,16 @@ public class GlobalConfiguration {
     @Column(name="id")
     private Long id;
 
-    @Column(name="config_key")
+    @Column(name="config_key", unique = true, nullable = false)
+    @NotBlank
     private String configKey;
 
-    @Column(name="config_value")
+    @Column(name="config_value", nullable = false)
+    @NotBlank
     private String configValue;
 
     @Enumerated(EnumType.STRING)
-    @Column(name="config_type")
+    @Column(name="config_type", nullable = false)
     private GlobalConfigurationTypeEnum configType;
 
     @Column(name="created_at", updatable = false)

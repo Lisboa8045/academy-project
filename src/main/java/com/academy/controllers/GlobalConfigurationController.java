@@ -3,6 +3,7 @@ package com.academy.controllers;
 import com.academy.dtos.global_configuration.GlobalConfigurationRequestDTO;
 import com.academy.dtos.global_configuration.GlobalConfigurationResponseDTO;
 import com.academy.services.GlobalConfigurationService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,7 +38,7 @@ public class GlobalConfigurationController {
     }
 
     @PatchMapping("/{configKey}")
-    public ResponseEntity<GlobalConfigurationResponseDTO> updateConfig(@PathVariable String configKey, @RequestBody GlobalConfigurationRequestDTO request) {
+    public ResponseEntity<GlobalConfigurationResponseDTO> updateConfig(@PathVariable String configKey, @Valid @RequestBody GlobalConfigurationRequestDTO request) {
         GlobalConfigurationResponseDTO response = globalConfigurationService.updateConfigValue(configKey, request);
         return ResponseEntity.ok(response);
     }

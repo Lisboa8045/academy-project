@@ -1,9 +1,10 @@
 package com.academy.dtos.global_configuration;
 
 import com.academy.models.global_configuration.GlobalConfigurationTypeEnum;
+import jakarta.validation.constraints.NotBlank;
 
 public record GlobalConfigurationRequestDTO(
     String configKey,
-    String configValue,
+    @NotBlank String configValue,
     GlobalConfigurationTypeEnum configType) {
 }
