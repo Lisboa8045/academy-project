@@ -1,4 +1,4 @@
-import {Component, inject, OnInit, signal} from '@angular/core';
+import {Component, inject, signal} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ReactiveFormsModule,
@@ -27,15 +27,30 @@ export class AuthComponent{
   private fb = inject(FormBuilder);
 
   errorMessage = '';
+  passwordVisible = false;
+  confirmPasswordVisible = false;
 
   constructor(private authService: AuthService, private router: Router) {
     this.buildForm()
   }
 
+  togglePasswordVisibility(event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.passwordVisible = !this.passwordVisible;
+  }
+
+  toggleConfirmPasswordVisibility(event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.confirmPasswordVisible = !this.confirmPasswordVisible;
+  }
 
   toggleMode(): void {
     this.isLoginMode.update(mode => !mode)
     this.errorMessage = ''
+    this.passwordVisible = false;
+    this.confirmPasswordVisible = false;
     this.buildForm()
   }
 

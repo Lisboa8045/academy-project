@@ -42,13 +42,30 @@
     }
 
     @if (isLoginMode()){
-      <input type="password" formControlName="password" placeholder="Password" required maxlength="65" />
+      <div class="password-wrapper">
+        <label class="password-label">
+          <input [type]="passwordVisible ? 'text' : 'password'" formControlName="password" placeholder="Password" required />
+          <span class="toggle-password" (click)="togglePasswordVisibility($event)" style="cursor:pointer;">
+            <span class="material-symbols-outlined" *ngIf="passwordVisible">visibility_off</span>
+            <span class="material-symbols-outlined" *ngIf="!passwordVisible">visibility</span>
+        </span>
+        </label>
+      </div>
       <div class="validation-error" *ngIf="authForm.get('password')?.errors?.['maxlength'] && authForm.get('password')?.touched">
         Please insert 64 characters or less.
       </div>
     }
     @else {
-      <input type="password" formControlName="password" placeholder="Password" required />
+      <div class="password-wrapper">
+        <label class="password-label">
+          <input [type]="passwordVisible ? 'text' : 'password'" formControlName="password" placeholder="Password" required />
+          <span class="toggle-password" (click)="togglePasswordVisibility($event)" style="cursor:pointer;">
+            <span class="material-symbols-outlined" *ngIf="passwordVisible">visibility_off</span>
+            <span class="material-symbols-outlined" *ngIf="!passwordVisible">visibility</span>
+        </span>
+        </label>
+      </div>
+
       <div class="validation-error" *ngIf="authForm.get('password')?.errors?.['weakPassword'] && authForm.get('password')?.touched">
         Password must include uppercase, lowercase, digit, and special character.
       </div>
@@ -62,8 +79,16 @@
 
 
     @if (!isLoginMode()){
+      <div class="password-wrapper">
+        <label class="password-label">
+          <input [type]="confirmPasswordVisible ? 'text' : 'password'" formControlName="confirmPassword" placeholder="Confirm Password" [class.ng-invalid]="authForm.hasError('passwordsMismatch') && authForm.get('confirmPassword')?.touched" required />
+          <span class="toggle-password" (click)="toggleConfirmPasswordVisibility($event)" style="cursor:pointer;">
+            <span class="material-symbols-outlined" *ngIf="confirmPasswordVisible">visibility_off</span>
+            <span class="material-symbols-outlined" *ngIf="!confirmPasswordVisible">visibility</span>
+          </span>
 
-      <input type="password" formControlName="confirmPassword" placeholder="Confirm Password" [class.ng-invalid]="authForm.hasError('passwordsMismatch') && authForm.get('confirmPassword')?.touched" required />
+        </label>
+      </div>
       <div class="validation-error" *ngIf="authForm.hasError('passwordsMismatch') && authForm.get('confirmPassword')?.touched">
         Passwords do not match.
       </div>
