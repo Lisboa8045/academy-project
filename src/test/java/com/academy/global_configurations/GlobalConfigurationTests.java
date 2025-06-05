@@ -1,6 +1,9 @@
 package com.academy.global_configurations;
 
+import com.academy.dtos.global_configuration.GlobalConfigurationRequestDTO;
 import com.academy.dtos.global_configuration.GlobalConfigurationResponseDTO;
+import com.academy.exceptions.EntityNotFoundException;
+import com.academy.exceptions.InvalidArgumentException;
 import com.academy.models.global_configuration.GlobalConfiguration;
 import com.academy.models.global_configuration.GlobalConfigurationTypeEnum;
 import com.academy.repositories.GlobalConfigurationRepository;
@@ -17,6 +20,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Transactional
@@ -76,5 +80,40 @@ class GlobalConfigurationTests {
         assertEquals("configKey_boolean", config.configKey());
         assertEquals("true", config.configValue());
         assertEquals(GlobalConfigurationTypeEnum.BOOLEAN, config.configType());
+    }
+
+    @Test
+    void testGetConfigByConfigKey() {
+        GlobalConfigurationResponseDTO config = this.globalConfigurationService.getConfig("configKey_string");
+        assertEquals("configKey_string", config.configKey());
+        assertEquals("configValue", config.configValue());
+        assertEquals(GlobalConfigurationTypeEnum.STRING, config.configType());
+    }
+
+    @Test
+    void testGetConfigByConfigKey_notFound() {
+        assertThrows(EntityNotFoundException.class,
+                () -> this.globalConfigurationService.getConfig("Non_existent_config_key"));
+    }
+
+    @Test
+    void testUpdateGlobalConfiguration() {
+        GlobalConfigurationRequestDTO request = new GlobalConfigurationRequestDTO(null, "454", null);
+        GlobalConfigurationResponseDTO config = globalConfigurationService.updateConfigValue("configKey_int", request);
+        assertEquals("454", config.configValue());
+    }
+
+    @Test
+    void testUpdateGlobalConfiguration_notFound() {
+        GlobalConfigurationRequestDTO request = new GlobalConfigurationRequestDTO(null, "454", null);
+        assertThrows(EntityNotFoundException.class,
+        () -> globalConfigurationService.updateConfigValue("Non_existent_config_key", request));
+    }
+
+    @Test
+    void testUpdateGlobalConfiguration_wrongType() {
+        GlobalConfigurationRequestDTO request = new GlobalConfigurationRequestDTO(null, "true", null);
+        assertThrows(InvalidArgumentException.class,
+                () -> globalConfigurationService.updateConfigValue("configKey_int", request));
     }
 }
