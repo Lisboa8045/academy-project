@@ -58,6 +58,7 @@ public class Service {
 
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "service_type", nullable = false)
     private ServiceTypeEnum serviceType;
 
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })

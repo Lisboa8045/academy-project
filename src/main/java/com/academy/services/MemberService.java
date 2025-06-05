@@ -6,13 +6,18 @@ import com.academy.dtos.member.MemberResponseDTO;
 import com.academy.dtos.register.LoginRequestDto;
 import com.academy.dtos.register.LoginResponseDto;
 import com.academy.dtos.register.MemberMapper;
+import com.academy.dtos.register.LoginRequestDto;
 import com.academy.dtos.register.RegisterRequestDto;
 import com.academy.exceptions.*;
+import com.academy.models.Availability;
 import com.academy.models.Member;
 import com.academy.models.Role;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.MemberRepository;
 import com.academy.repositories.RoleRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -48,6 +53,15 @@ public class MemberService {
         this.jwtUtil = jwtUtil;
         this.messageSource = messageSource;
     }
+    public void logout(HttpServletResponse response){
+        System.out.println("Backend 2 logout");
+        Cookie cookie = new Cookie("token", null);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+    }
+
 
     public long register(RegisterRequestDto request) {
         if (memberRepository.findByUsername(request.username()).isPresent()
@@ -74,16 +88,29 @@ public class MemberService {
 
     }
 
-    public LoginResponseDto login(LoginRequestDto request) {
-        Optional<Member> member = memberRepository.findByUsername(request.username());
+    public LoginResponseDto login(LoginRequestDto request, HttpServletResponse response) {
+        Optional<Member> member = request.login().contains("@")
+                ? memberRepository.findByEmail(request.login())
+                : memberRepository.findByUsername(request.login());
+
         if(member.isPresent() && passwordEncoder.matches(request.password(), member.get().getPassword())) {
             UserDetails userDetails = new org.springframework.security.core.userdetails.User(
                     member.get().getUsername(), member.get().getPassword(), new ArrayList<>()
             );
             String token = jwtUtil.generateToken(userDetails);
+            System.out.println("Token generated:" + token);
+            Cookie cookie = new Cookie("token", token);
+            cookie.setHttpOnly(true);
+            cookie.setSecure(true);
+            cookie.setPath("/");
+            cookie.setMaxAge(60 * 60 * 24);
+            response.addCookie(cookie);
             return new LoginResponseDto(
                     messageSource.getMessage("user.loggedin", null, LocaleContextHolder.getLocale()),
-                    token, member.get().getId());
+                    token,
+                    member.get().getId(),
+                    member.get().getUsername()
+            );
         }
         throw new AuthenticationException(messageSource.getMessage("auth.invalid", null, LocaleContextHolder.getLocale()));
     }
@@ -93,6 +120,17 @@ public class MemberService {
         if(optionalMember.isEmpty())
             throw new MemberNotFoundException(username);
         return optionalMember.get();
+    }
+
+    public boolean existsById(Long memberId) {
+        return memberRepository.existsById(memberId);
+    }
+
+    public Optional<Member> findbyId(long memberId) {
+        if (!memberRepository.existsById(memberId)) {
+            throw new EntityNotFoundException(Member.class, memberId);
+        }
+        return memberRepository.findById(memberId);
     }
 
     public void deleteMember(long id) {

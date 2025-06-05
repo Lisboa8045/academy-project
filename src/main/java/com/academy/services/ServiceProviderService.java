@@ -122,7 +122,12 @@ public class ServiceProviderService {
         return serviceProviderRepository.existsByServiceIdAndProviderUsername(serviceId, username);
     }
 
+    public List<Long> findMemberIdsByServiceId(Long serviceId) {
+        return serviceProviderRepository.findMemberIdsByServiceId(serviceId);
+    }
+
     public ServiceProvider getServiceProviderEntityById(long id){
         return serviceProviderRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
     }
+
 }
