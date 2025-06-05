@@ -1,28 +1,9 @@
 package com.academy.services;
 
-import com.academy.dtos.service.ServiceRequestDTO;
-import com.academy.dtos.service.ServiceResponseDTO;
-import com.academy.exceptions.EntityNotFoundException;
-import com.academy.models.*;
-import com.academy.repositories.MemberRepository;
-import com.academy.repositories.ServiceRepository;
-import com.academy.repositories.ServiceTypeRepository;
-import com.academy.repositories.TagRepository;
 import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @SpringBootTest
@@ -91,7 +72,7 @@ public class ServiceIntegrationTests {
         serviceTypeRepository.deleteAll();
     }
 
-    private ServiceRequestDTO createDTO(String name, String description, Long serviceTypeId, List<String> tags) {
+    private ServiceRequestDTO createDTO(String name, String description, Long serviceTypeId, List<String> -) {
         return new ServiceRequestDTO(name, description, 1L,80, 20, false, 30, serviceTypeId, tags);
     }
 
