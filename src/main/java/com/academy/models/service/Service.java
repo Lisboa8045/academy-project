@@ -4,6 +4,7 @@ import com.academy.models.Member;
 import com.academy.models.ServiceType;
 import com.academy.models.Tag;
 import com.academy.models.service.service_provider.ServiceProvider;
+import com.academy.util.FieldLengths;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,6 +14,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -40,9 +42,10 @@ public class Service {
     @Id
     private long id;
 
-    @Column(name="name")
+    @Column(name="name", length = FieldLengths.SERVICE_TITLE_MAX, nullable = false)
     private String name;
 
+    @Lob
     @Column(name="description")
     private String description;
 

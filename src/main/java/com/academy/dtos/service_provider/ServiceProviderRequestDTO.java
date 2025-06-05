@@ -1,7 +1,7 @@
 package com.academy.dtos.service_provider;
 
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 

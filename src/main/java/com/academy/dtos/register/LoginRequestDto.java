@@ -1,8 +1,10 @@
 package com.academy.dtos.register;
 
+import com.academy.util.FieldLengths;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 public record LoginRequestDto(
-        @NotBlank String login,
-        @NotBlank String password) {
+        @NotBlank @Size(max = FieldLengths.EMAIL_MAX) String login,
+        @NotBlank @Size(max = FieldLengths.PASSWORD_MAX) String password) {
 }

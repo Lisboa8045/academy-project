@@ -1,6 +1,7 @@
 package com.academy.models;
 
 import com.academy.models.service.Service;
+import com.academy.util.FieldLengths;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,22 +32,22 @@ public class Member {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Appointment> appointments = new ArrayList<>();
 
-    @Column(name = "username", unique = true, nullable = false)
+    @Column(name = "username", unique = true, nullable = false, length = FieldLengths.USERNAME_MAX)
     private String username;
 
-    @Column(name  = "password", nullable = false)
+    @Column(name  = "password", nullable = false) // don't use password_max here, the stored password can be bigger due to hashing/salting
     private String password;
 
-    @Column(name = "email", nullable = false)
+    @Column(name = "email", nullable = false, length = FieldLengths.EMAIL_MAX)
     private String email;
 
-    @Column(name = "address")
+    @Column(name = "address", length = FieldLengths.ADDRESS_MAX)
     private String address;
 
-    @Column(name = "postal_code")
+    @Column(name = "postal_code", length = FieldLengths.POSTAL_CODE_MAX)
     private String postalCode;
 
-    @Column(name = "phone_number")
+    @Column(name = "phone_number", length = FieldLengths.PHONE_NUMBER_MAX)
     private String phoneNumber;
 
     @OneToMany(mappedBy = "owner")
