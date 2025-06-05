@@ -56,8 +56,7 @@ public class ServiceProviderService {
     }
 
     public ServiceProvider createServiceProvider(ServiceProviderRequestDTO dto) {
-        Member member = memberRepository.findById(dto.memberId())
-                .orElseThrow(() -> new EntityNotFoundException(Member.class, dto.memberId()));
+        Member member = memberService.getMemberEntityById(dto.memberId());
 
         Service service = serviceService.getServiceEntityById(dto.serviceId());
 
