@@ -11,7 +11,6 @@ import com.academy.models.Member;
 import com.academy.models.service.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 import com.academy.dtos.availability.AvailabilityMapper;
 import com.academy.dtos.availability.AvailabilityRequestDTO;

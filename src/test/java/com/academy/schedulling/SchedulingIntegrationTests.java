@@ -4,10 +4,12 @@ import com.academy.dtos.SlotDTO;
 import com.academy.models.Member;
 import com.academy.models.Role;
 import com.academy.models.Availability;
+import com.academy.models.ServiceType;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.*;
 import com.academy.services.SchedulingService;
+import com.academy.repositories.ServiceProviderRepository;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,12 +17,16 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Transactional
 @SpringBootTest
 public class SchedulingIntegrationTests {
 
@@ -45,25 +51,37 @@ public class SchedulingIntegrationTests {
     @Autowired
     private AppointmentRepository appointmentRepository;
 
+    @Autowired
+    private ServiceTypeRepository  serviceTypeRepository;
+
     private Role defaultRole;
+    private ServiceType defaultServiceType;
 
     @BeforeEach
     void setup() {
         defaultRole = new Role();
         defaultRole.setName("USER");
         defaultRole = roleRepository.save(defaultRole);
+
+        defaultServiceType = new ServiceType();
+        defaultServiceType.setName("Mecanico");
+        defaultServiceType.setIcon("Icon");
+        defaultServiceType = serviceTypeRepository.save(defaultServiceType);
     }
 
-    @AfterEach
-    void teardown() {
-        appointmentRepository.deleteAll();
-        availabilityRepository.deleteAll();
-        serviceProviderRepository.deleteAll();
-        serviceRepository.deleteAll();
-        memberRepository.deleteAll();
-        roleRepository.deleteAll();
-    }
 
+        @AfterEach
+        void teardown() {
+            appointmentRepository.deleteAll();
+            availabilityRepository.deleteAll();
+            serviceProviderRepository.deleteAll();
+            serviceRepository.deleteAll();
+            serviceTypeRepository.deleteAll();
+            memberRepository.deleteAll();
+            roleRepository.deleteAll();
+        }
+
+    // Teste principal
     @Test
     void testGetFreeSlotsForService() {
         Member provider = createAndSaveProvider("provider1");
@@ -163,18 +181,27 @@ public class SchedulingIntegrationTests {
     private Member createAndSaveProvider(String username) {
         Member provider = new Member();
         provider.setUsername(username);
-        provider.setPassword("password");
         provider.setEmail(username + "@example.com");
+        provider.setPassword("password");
         provider.setRole(defaultRole);
         return memberRepository.save(provider);
     }
 
-    private Service createAndSaveService(Member owner) {
+    private Service createAndSaveService(Member provider) {
         Service service = new Service();
-        service.setName("Service for " + owner.getUsername());
-        service.setOwner(owner);
+        service.setName("Consulta Geral");
+        service.setDescription("Consulta médica geral.");
+        service.setDuration(30); // int, em minutos
+        service.setPrice(50.0);  // double
+        service.setDiscount(0);
+        service.setNegotiable(false);
+        service.setOwner(provider);
+        service.setServiceType(defaultServiceType); // Usar o default
+
         return serviceRepository.save(service);
     }
+
+
 
     private void createAndSaveServiceProvider(Member provider, Service service) {
         ServiceProvider sp = new ServiceProvider();

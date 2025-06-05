@@ -21,7 +21,7 @@ public class SchedulingService {
     private final ServiceProviderService serviceProviderService;
     private final MemberService memberService;
 
-    @Value("${slot.duration.minutes:30}")
+    @Value("${slot.duration.minutes:60}")
     private int slotDurationMinutes;
 
     @Autowired
@@ -50,20 +50,15 @@ public class SchedulingService {
         List<SlotDTO> allFreeSlots = new ArrayList<>();
         List<Long> providerIds = serviceProviderService.findMemberIdsByServiceId(serviceId);
 
-        System.out.println("[DEBUG] Providers for service " + serviceId + ": " + providerIds);
-
         for (Long providerId : providerIds) {
             Optional<Member> memberOpt = memberService.findbyId(providerId);
             String providerName = memberOpt.isPresent() ? memberOpt.get().getUsername() : "Unknown";
-            System.out.println("[DEBUG] Processing provider: " + providerId + " (" + providerName + ")");
 
             // Fetch all future availabilities for this provider
             List<Availability> availabilities = availabilityService.getAvailabilitiesForProvider(providerId);
-            System.out.println("[DEBUG] Availabilities for provider " + providerId + ": " + availabilities.size());
 
             // Fetch all future appointments for this provider
             List<Appointment> appointments = appointmentService.getAppointmentsForProvider(providerId);
-            System.out.println("[DEBUG] Appointments for provider " + providerId + ": " + appointments.size());
 
             for (Availability availability : availabilities) {
                 List<SlotDTO> slots = SlotUtils.generateCompleteSlots(
