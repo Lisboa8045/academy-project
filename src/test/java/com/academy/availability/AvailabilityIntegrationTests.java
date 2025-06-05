@@ -58,10 +58,8 @@ public class AvailabilityIntegrationTests {
     }
 
     private AvailabilityRequestDTO createDTO(Long memberId, DayOfWeek day, LocalDateTime start, LocalDateTime end) {
-        return new AvailabilityRequestDTO(null, memberId, day, start, end);
+        return new AvailabilityRequestDTO(memberId, day, start, end);
     }
-
-    // Tests
 
     @Test
     void createAvailability_shouldSucceed() {
@@ -78,8 +76,8 @@ public class AvailabilityIntegrationTests {
         Member provider = saveMember("provider1", "PROVIDER");
 
         Service service = new Service();
-        service.setName("Yoga Class");
-        service.setServiceType(ServiceTypeEnum.YOGA);
+        service.setName("Basic Service");
+        service.setServiceType(ServiceTypeEnum.SERVICE);
         service.setOwner(provider);
         service = serviceRepository.save(service);
 
@@ -137,17 +135,15 @@ public class AvailabilityIntegrationTests {
         var dto = createDTO(defaultMember.getId(), DayOfWeek.FRIDAY, LocalDateTime.now().plusDays(5), LocalDateTime.now().plusDays(5).plusHours(2));
         var created = availabilityService.createAvailability(dto);
 
-        var updatedDTO = new AvailabilityRequestDTO(
-            created.id(),
-            dto.memberId(),
-            dto.dayOfWeek(),
-            dto.startDateTime(),
-            dto.endDateTime().plusHours(1)
+        var updatedDto = new AvailabilityRequestDTO(
+            created.memberId(),
+            created.dayOfWeek(),
+            created.startDateTime(),
+            created.endDateTime().plusHours(1)
         );
 
-        var updated = availabilityService.updateAvailability(updatedDTO);
-
-        assertThat(updated.endDateTime()).isEqualTo(updatedDTO.endDateTime());
+        var updated = availabilityService.updateAvailability(created.id(), updatedDto);
+        assertThat(updated.endDateTime()).isEqualTo(updatedDto.endDateTime());
     }
 
     @Test
@@ -201,8 +197,7 @@ public class AvailabilityIntegrationTests {
 
     @Test
     void createAvailability_withNullFields_shouldThrow() {
-        assertThatThrownBy(() -> availabilityService.createAvailability(
-            new AvailabilityRequestDTO(null, null, null, null, null)))
+        assertThatThrownBy(() -> availabilityService.createAvailability(new AvailabilityRequestDTO(null, null, null, null)))
             .isInstanceOf(InvalidArgumentException.class);
     }
 }

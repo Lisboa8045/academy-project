@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.AssertTrue;
 
 public record AvailabilityRequestDTO(
-    Long id,
 
     @NotNull(message = "MemberId cannot be null")
     Long memberId,
