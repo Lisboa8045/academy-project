@@ -43,9 +43,8 @@ public class GlobalConfigurationService {
         GlobalConfiguration config = configurationRepository.findByConfigKey(configKey)
                 .orElseThrow(() -> new EntityNotFoundException(GlobalConfiguration.class, "No configuration for: " + configKey));
 
-        // Verificar concordância de tipo value <=> type
         String newValue = request.configValue();
-        if(isNotValidValue(newValue, config.getConfigType())){
+        if(isNotAValidValue(newValue, config.getConfigType())){
             throw new InvalidArgumentException(newValue + " is not a valid value for type " + config.getConfigType());
         }
 
@@ -53,15 +52,15 @@ public class GlobalConfigurationService {
         return globalConfigurationMapper.toDTO(configurationRepository.save(config));
     }
 
-    private boolean isNotValidValue(String value, GlobalConfigurationTypeEnum type) {
+    private boolean isNotAValidValue(String value, GlobalConfigurationTypeEnum type) {
         try {
             switch (type) {
                 case INT:
                     Integer.parseInt(value);
                     break;
                 case BOOLEAN:
-                    if ("true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value)) {
-                        return false;
+                    if (!"true".equalsIgnoreCase(value) && !"false".equalsIgnoreCase(value)) {
+                        return true;
                     }
                     break;
                 case STRING:
