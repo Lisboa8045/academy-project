@@ -1,6 +1,5 @@
 package com.academy.dtos.service;
 
-import com.academy.models.service.ServiceTypeEnum;
 import jakarta.validation.constraints.*;
 import java.util.List;
 
@@ -13,6 +12,6 @@ public record ServiceRequestDTO(
         int discount,
         boolean negotiable,
         @Positive int duration,
-        @NotNull ServiceTypeEnum serviceType,
+        @NotNull String serviceTypeName,
         List<String> tagNames
 ) {}

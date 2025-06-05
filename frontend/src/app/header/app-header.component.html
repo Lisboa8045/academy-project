@@ -1,0 +1,13 @@
+<header class="header">
+  <nav class="nav">
+    <a class="nav-item" routerLink="/">🏠 Home</a>
+
+    <div class="right-links">
+      @if (username()) {
+        <a class="nav-item" routerLink="/profile">👤 {{ username() }}</a>
+      } @else {
+        <a class="nav-item" routerLink="/auth">🔐 Login</a>
+      }
+    </div>
+  </nav>
+</header>

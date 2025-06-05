@@ -4,10 +4,7 @@ import com.academy.models.Tag;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.repositories.MemberRepository;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.Named;
+import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -28,7 +25,9 @@ public abstract class ServiceMapper {
     public abstract Service toEntity(ServiceRequestDTO dto, Long ownerId);
 
     @Mapping(source = "service.tags", target = "tagNames", qualifiedByName = "mapTagsToNames")
+    @Mapping(source = "service.serviceType.name", target = "serviceTypeName")
     @Mapping(expression = "java(service.getOwner().getId())", target = "ownerId")
+    @Mapping(expression = "java(permissions)", target = "permissions")
     public abstract ServiceResponseDTO toDto(Service service, List<ProviderPermissionEnum> permissions);
 
     @Mapping(target = "id", ignore = true)
@@ -45,6 +44,13 @@ public abstract class ServiceMapper {
         }
         return tags.stream()
                 .map(Tag::getName)
+                .collect(Collectors.toList());
+    }
+
+    @Named("mapServicesToDTOs")
+    public List<ServiceResponseDTO> mapServicesToDTOs(List<Service> services) {
+        return services.stream()
+                .map(service -> toDto(service, null))
                 .collect(Collectors.toList());
     }
 }

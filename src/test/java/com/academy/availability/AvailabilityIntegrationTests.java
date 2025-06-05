@@ -7,8 +7,8 @@ import com.academy.exceptions.EntityNotFoundException;
 import com.academy.exceptions.InvalidArgumentException;
 import com.academy.models.Member;
 import com.academy.models.Role;
+import com.academy.models.ServiceType;
 import com.academy.models.service.Service;
-import com.academy.models.service.ServiceTypeEnum;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.repositories.*;
 import com.academy.services.*;
@@ -33,6 +33,7 @@ public class AvailabilityIntegrationTests {
     @Autowired private AvailabilityRepository availabilityRepository;
     @Autowired private MemberRepository memberRepository;
     @Autowired private ServiceRepository serviceRepository;
+    @Autowired private ServiceTypeRepository serviceTypeRepository;
     @Autowired private ServiceProviderService serviceProviderService;
     @Autowired private RoleRepository roleRepository;
 
@@ -75,9 +76,13 @@ public class AvailabilityIntegrationTests {
     void getAvailabilitiesByServiceId_shouldReturnResults() {
         Member provider = saveMember("provider1", "PROVIDER");
 
+        ServiceType type = new ServiceType();
+        type.setName("Basic Type");
+        type.setIcon("type.png");
+
         Service service = new Service();
         service.setName("Basic Service");
-        service.setServiceType(ServiceTypeEnum.SERVICE);
+        service.setServiceType(type);
         service.setOwner(provider);
         service = serviceRepository.save(service);
 
@@ -195,4 +200,9 @@ public class AvailabilityIntegrationTests {
         assertThat(response.memberId()).isEqualTo(anotherMember.getId());
     }
 
+    @Test
+    void createAvailability_withNullFields_shouldThrow() {
+        assertThatThrownBy(() -> availabilityService.createAvailability(new AvailabilityRequestDTO(null, null, null, null)))
+            .isInstanceOf(InvalidArgumentException.class);
+    }
 }

@@ -4,9 +4,11 @@ import com.academy.models.service.service_provider.ProviderPermission;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.ProviderPermissionRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -26,12 +28,26 @@ public class ProviderPermissionService {
                 .map(ProviderPermission::getPermission).toList();
     }
     public void createPermissionsViaList(List<ProviderPermissionEnum> permissions, ServiceProvider serviceProvider){
+        List<ProviderPermission> permissionsCreated = new ArrayList<>();
         for(ProviderPermissionEnum permission : permissions){
             ProviderPermission providerPermission = new ProviderPermission();
             providerPermission.setPermission(permission);
             providerPermission.setServiceProvider(serviceProvider);
+            permissionsCreated.add(providerPermission);
             providerPermissionRepository.save(providerPermission);
         }
+        serviceProvider.setPermissions(permissionsCreated);
+    }
 
+    @Transactional
+    public void deletePermissionsFromServiceProvider(ServiceProvider serviceProvider) {
+        List<ProviderPermission> permissionsToDelete = new ArrayList<>(serviceProvider.getPermissions());
+
+        for (ProviderPermission permission : permissionsToDelete) {
+            permission.setServiceProvider(null);
+            serviceProvider.getPermissions().remove(permission);
+
+            providerPermissionRepository.delete(permission);
+        }
     }
 }
