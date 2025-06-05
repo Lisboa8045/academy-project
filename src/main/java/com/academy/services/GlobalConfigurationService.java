@@ -37,13 +37,13 @@ public class GlobalConfigurationService {
     }
 
     @Transactional
-    public void updateConfigValue(long id, GlobalConfigurationRequestDTO request) {
+    public GlobalConfigurationResponseDTO updateConfigValue(long id, GlobalConfigurationRequestDTO request) {
         GlobalConfiguration oldConfig = configurationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(GlobalConfiguration.class, id));
 
         GlobalConfiguration newConfig = globalConfigurationMapper.toGlobalConfiguration(request);
         newConfig.setId(oldConfig.getId());
-        configurationRepository.save(newConfig);
+        return globalConfigurationMapper.toDTO(configurationRepository.save(newConfig));
     }
 
 
