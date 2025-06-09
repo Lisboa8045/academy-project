@@ -1,6 +1,6 @@
 package com.academy.config.authentication;
 
-import com.academy.models.Member;
+import com.academy.models.member.Member;
 import com.academy.repositories.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -35,7 +35,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(
                 member.getUsername(),
                 member.getPassword(),
-                true,
+                member.isEnabled(),
                 true, true, true,
                 authorities
         );

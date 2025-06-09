@@ -2,10 +2,9 @@ package com.academy.services;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.academy.models.Member;
+import com.academy.models.member.Member;
 import com.academy.models.service.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 

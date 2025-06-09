@@ -1,9 +1,6 @@
 package com.academy.controllers;
 
-import com.academy.dtos.register.LoginRequestDto;
-import com.academy.dtos.register.LoginResponseDto;
-import com.academy.dtos.register.RegisterRequestDto;
-import com.academy.dtos.register.RegisterResponseDto;
+import com.academy.dtos.register.*;
 import com.academy.services.MemberService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -40,6 +37,11 @@ public class AuthController {
                         memberId
                 )
         );
+    }
+    @PostMapping("/confirm-email")
+    public ResponseEntity<ConfirmEmailResponseDto> confirmEmail(@RequestBody ConfirmEmailRequestDto request) throws Exception {
+       memberService.confirmEmail(request.token());
+       return  ResponseEntity.ok(new ConfirmEmailResponseDto("Email confirmed successfully"));
     }
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@Valid @RequestBody LoginRequestDto request, HttpServletResponse httpResponse){

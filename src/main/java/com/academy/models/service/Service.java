@@ -1,6 +1,6 @@
 package com.academy.models.service;
 
-import com.academy.models.Member;
+import com.academy.models.member.Member;
 import com.academy.models.ServiceType;
 import com.academy.models.Tag;
 import com.academy.models.service.service_provider.ServiceProvider;

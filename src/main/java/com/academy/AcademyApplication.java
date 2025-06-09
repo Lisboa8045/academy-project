@@ -10,7 +10,7 @@ public class AcademyApplication {
 		SpringApplication.run(AcademyApplication.class, args);
 	}
 
-
+/*
 	@Bean
 	CommandLineRunner populateData(DataSource dataSource) {
 		return args -> {
@@ -27,6 +27,8 @@ public class AcademyApplication {
 			System.out.println("Populated database");
 		};
 	}
+	
+ */
 
 
 }

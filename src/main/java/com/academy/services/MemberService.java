@@ -6,18 +6,17 @@ import com.academy.dtos.member.MemberResponseDTO;
 import com.academy.dtos.register.LoginRequestDto;
 import com.academy.dtos.register.LoginResponseDto;
 import com.academy.dtos.register.MemberMapper;
-import com.academy.dtos.register.LoginRequestDto;
 import com.academy.dtos.register.RegisterRequestDto;
 import com.academy.exceptions.*;
-import com.academy.models.Availability;
-import com.academy.models.Member;
+import com.academy.models.member.Member;
 import com.academy.models.Role;
+import com.academy.models.member.MemberStatusEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.MemberRepository;
 import com.academy.repositories.RoleRepository;
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -25,9 +24,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -67,16 +69,63 @@ public class MemberService {
         if (memberRepository.findByUsername(request.username()).isPresent()
                 || memberRepository.findByEmail(request.email()).isPresent())
             throw new EntityAlreadyExists(messageSource.getMessage("user.exists", null, LocaleContextHolder.getLocale()));
+
         if (!isValidPassword(request.password()))
             throw new InvalidArgumentException(messageSource.getMessage("register.invalidpassword", null, LocaleContextHolder.getLocale()));
         Optional<Role> optionalRole = roleRepository.findById(request.roleId());
+
         if(optionalRole.isEmpty())
             throw new NotFoundException(messageSource.getMessage("role.notfound", null, LocaleContextHolder.getLocale()));
+
+        return createMember(request, optionalRole.get()).getId();
+
+    }
+    private Member createMember(RegisterRequestDto request, Role role){
         Member member = memberMapper.toMember(request);
         member.setPassword(passwordEncoder.encode(request.password()));
-        member.setRole(optionalRole.get());
+        member.setRole(role);
+        member.setEnabled(false);
+        member.setStatus(MemberStatusEnum.WAITING_FOR_EMAIL_APPROVAL);
+        String confirmationToken = generateUniqueConfirmationToken();
+        member.setConfirmationToken(passwordEncoder.encode(confirmationToken));
+        member.setTokenExpiry(LocalDateTime.now().plusMinutes(30));
         memberRepository.save(member);
-        return member.getId();
+
+        sendConfirmationEmail(confirmationToken);
+        return member;
+    }
+
+    private void sendConfirmationEmail(String confirmationToken) {
+
+    }
+
+    private String generateUniqueConfirmationToken(){
+        String rawToken;
+        String encodedToken;
+
+        do {
+            rawToken = generateEncodedToken();
+            encodedToken = passwordEncoder.encode(rawToken);
+        } while (memberRepository.existsByConfirmationToken(encodedToken));
+
+        return rawToken;
+    }
+
+    private String generateEncodedToken(){
+        return UUID.randomUUID().toString();
+    }
+    @Transactional
+    public void confirmEmail(String confirmationToken) throws Exception {
+        Member member = memberRepository.findByConfirmationToken(confirmationToken)
+                .orElseThrow(() -> new NotFoundException("Confirmation Token not found"));
+
+        if (member.getTokenExpiry().isBefore(LocalDateTime.now()))
+            throw new AuthenticationException("Confirmation Token has Expired");
+
+        member.setTokenExpiry(null);
+        member.setEnabled(true);
+        member.setStatus(MemberStatusEnum.ACTIVE);
+        memberRepository.save(member);
     }
 
     private boolean isValidPassword(String password) {
@@ -89,13 +138,16 @@ public class MemberService {
     }
 
     public LoginResponseDto login(LoginRequestDto request, HttpServletResponse response) {
-        Optional<Member> member = request.login().contains("@")
+        Optional<Member> optionalMember = request.login().contains("@")
                 ? memberRepository.findByEmail(request.login())
                 : memberRepository.findByUsername(request.login());
 
-        if(member.isPresent() && passwordEncoder.matches(request.password(), member.get().getPassword())) {
+        if(optionalMember.isPresent() && passwordEncoder.matches(request.password(), optionalMember.get().getPassword())) {
+            Member member = optionalMember.get();
+            if(!member.isEnabled())
+                throw new InactiveUserException(member.getStatus());
             UserDetails userDetails = new org.springframework.security.core.userdetails.User(
-                    member.get().getUsername(), member.get().getPassword(), new ArrayList<>()
+                    member.getUsername(), member.getPassword(), new ArrayList<>()
             );
             String token = jwtUtil.generateToken(userDetails);
             System.out.println("Token generated:" + token);
@@ -108,8 +160,8 @@ public class MemberService {
             return new LoginResponseDto(
                     messageSource.getMessage("user.loggedin", null, LocaleContextHolder.getLocale()),
                     token,
-                    member.get().getId(),
-                    member.get().getUsername()
+                    member.getId(),
+                    member.getUsername()
             );
         }
         throw new AuthenticationException(messageSource.getMessage("auth.invalid", null, LocaleContextHolder.getLocale()));

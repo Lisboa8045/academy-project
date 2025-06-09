@@ -1,10 +1,6 @@
 package com.academy.controllers;
 
-import com.academy.exceptions.AuthenticationException;
-import com.academy.exceptions.InvalidArgumentException;
-import com.academy.exceptions.EntityAlreadyExists;
-import com.academy.exceptions.NotFoundException;
-import com.academy.exceptions.EntityNotFoundException;
+import com.academy.exceptions.*;
 
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
@@ -63,6 +59,10 @@ public class ExceptionController {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Object> handleInvalidValue(NotFoundException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+    @ExceptionHandler(InactiveUserException.class)
+    public ResponseEntity<Object> handleInvalidValue(InactiveUserException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)

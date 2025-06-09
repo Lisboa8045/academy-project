@@ -1,5 +1,8 @@
-package com.academy.models;
+package com.academy.models.member;
 
+import com.academy.models.Appointment;
+import com.academy.models.Availability;
+import com.academy.models.Role;
 import com.academy.models.service.Service;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -39,6 +42,19 @@ public class Member {
 
     @Column(name = "email", nullable = false)
     private String email;
+
+    @Column(name = "enabled", nullable = false)
+    private boolean enabled;
+
+    @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private MemberStatusEnum status;
+
+    @Column(name = "confirmation_token")
+    private String confirmationToken;
+
+    @Column(name = "token_expiry")
+    private LocalDateTime tokenExpiry;
 
     @Column(name = "address")
     private String address;

@@ -6,7 +6,7 @@ import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
 import com.academy.exceptions.AuthenticationException;
-import com.academy.models.Member;
+import com.academy.models.member.Member;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
