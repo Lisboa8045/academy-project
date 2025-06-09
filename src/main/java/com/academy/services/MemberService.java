@@ -20,10 +20,13 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -40,20 +43,22 @@ public class MemberService {
     private final MemberMapper memberMapper;
     private final JwtUtil jwtUtil;
     private final MessageSource messageSource;
+    private final EmailService emailService;
 
     @Autowired
     public MemberService(MemberRepository memberRepository,
                          PasswordEncoder passwordEncoder,
                          RoleRepository roleRepository,
-                MemberMapper memberMapper,
+                         MemberMapper memberMapper,
                          JwtUtil jwtUtil,
-                         MessageSource messageSource) {
+                         MessageSource messageSource, EmailService emailService) {
         this.memberRepository = memberRepository;
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
         this.memberMapper = memberMapper;
         this.jwtUtil = jwtUtil;
         this.messageSource = messageSource;
+        this.emailService = emailService;
     }
     public void logout(HttpServletResponse response){
         System.out.println("Backend 2 logout");
@@ -86,37 +91,65 @@ public class MemberService {
         member.setRole(role);
         member.setEnabled(false);
         member.setStatus(MemberStatusEnum.WAITING_FOR_EMAIL_APPROVAL);
-        String confirmationToken = generateUniqueConfirmationToken();
-        member.setConfirmationToken(passwordEncoder.encode(confirmationToken));
+        String rawConfirmationToken = generateUniqueConfirmationToken();
+        member.setConfirmationToken(passwordEncoder.encode(rawConfirmationToken));
         member.setTokenExpiry(LocalDateTime.now().plusMinutes(30));
         memberRepository.save(member);
 
-        sendConfirmationEmail(confirmationToken);
+        sendConfirmationEmail(member, rawConfirmationToken);
         return member;
     }
 
-    private void sendConfirmationEmail(String confirmationToken) {
+    private void sendConfirmationEmail(Member member, String rawToken) {
+        String html = loadVerificationEmailHtml()
+                .replace("[User Name]", member.getUsername())
+                .replace("[CONFIRMATION_LINK]", "http://localhost:8080/auth/confirm-email/" + rawToken) //TODO trocar isto para pegar o caminho da app
+                .replace("[App Name]", "Academy Project"); //TODO trocar para isto ser algo que vem da Global table(nome da aplicação)
 
+        emailService.send(
+                member.getEmail(),
+                "Confirm your account",
+                "Clique no link para confirmar: " + "http://localhost:8080/auth/confirm-email/" + rawToken,
+                html
+        );
     }
 
-    private String generateUniqueConfirmationToken(){
+    private String loadVerificationEmailHtml(){
+            try {
+                ClassPathResource resource = new ClassPathResource("templates/verification-email.html");
+                byte[] bytes = Files.readAllBytes(resource.getFile().toPath());
+                return new String(bytes, StandardCharsets.UTF_8);
+            } catch (Exception e) { //TODO Exception melhor
+                throw new RuntimeException("Erro ao carregar template de e-mail", e);
+            }
+    }
+
+    private String generateUniqueConfirmationToken() {
         String rawToken;
-        String encodedToken;
+        Optional<Member> optionalMember;
 
         do {
             rawToken = generateEncodedToken();
-            encodedToken = passwordEncoder.encode(rawToken);
-        } while (memberRepository.existsByConfirmationToken(encodedToken));
+            String finalRawToken = rawToken;
+            optionalMember = memberRepository.findAll().stream()
+                    .filter(m -> m.getConfirmationToken() != null &&
+                            passwordEncoder.matches(finalRawToken, m.getConfirmationToken()))
+                    .findFirst();
+        } while (optionalMember.isPresent());
 
         return rawToken;
     }
+
 
     private String generateEncodedToken(){
         return UUID.randomUUID().toString();
     }
     @Transactional
-    public void confirmEmail(String confirmationToken) throws Exception {
-        Member member = memberRepository.findByConfirmationToken(confirmationToken)
+    public void confirmEmail(String confirmationToken) {
+        Member member = memberRepository.findAll().stream()
+                .filter(m -> m.getConfirmationToken() != null &&
+                        passwordEncoder.matches(confirmationToken, m.getConfirmationToken()))
+                .findFirst()
                 .orElseThrow(() -> new NotFoundException("Confirmation Token not found"));
 
         if (member.getTokenExpiry().isBefore(LocalDateTime.now()))
