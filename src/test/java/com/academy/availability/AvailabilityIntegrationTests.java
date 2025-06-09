@@ -13,6 +13,7 @@ import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.repositories.*;
 import com.academy.services.AvailabilityService;
 import com.academy.services.ServiceProviderService;
+import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -77,7 +78,7 @@ public class AvailabilityIntegrationTests {
     }
 
     @Test
-    void getAvailabilitiesByServiceId_shouldReturnResults() {
+    void getAvailabilitiesByServiceId_shouldReturnResults() throws BadRequestException {
         Member provider = saveMember("provider1", "PROVIDER");
 
         ServiceType type = new ServiceType();
@@ -90,13 +91,13 @@ public class AvailabilityIntegrationTests {
         service.setOwner(provider);
         service = serviceRepository.save(service);
 
-        serviceProviderService.createServiceProvider(
+        serviceProviderService.createServiceProviderWithDTO(
             new ServiceProviderRequestDTO(provider.getId(), service.getId(), List.of(
                 ProviderPermissionEnum.READ,
                 ProviderPermissionEnum.UPDATE,
                 ProviderPermissionEnum.DELETE,
                 ProviderPermissionEnum.SERVE
-            ))
+            ), false)
         );
 
         availabilityService.createAvailability(
