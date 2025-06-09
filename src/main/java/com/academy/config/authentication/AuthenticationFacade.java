@@ -14,4 +14,5 @@ public class AuthenticationFacade {
     public String getUsername(){
         return getAuthentication().getName();
     }
+
 }

@@ -16,6 +16,7 @@ import com.academy.repositories.ServiceRepository;
 import com.academy.repositories.ServiceTypeRepository;
 import com.academy.repositories.TagRepository;
 import jakarta.transaction.Transactional;
+import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,7 +39,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 @Transactional
 @ExtendWith(SpringExtension.class)
 @WithMockUser(username = "owner")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class ServiceIntegrationTests {
     private final ServiceService serviceService;
     private final TagService tagService;
@@ -151,7 +151,7 @@ class ServiceIntegrationTests {
     }
 
     @Test
-    void updateService_invalidServiceType_throwsException() {
+    void updateService_invalidServiceType_throwsException() throws BadRequestException {
         ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1", "tag2"));
 
         ServiceResponseDTO createdResponse = serviceService.create(serviceRequestDTO);
@@ -174,7 +174,7 @@ class ServiceIntegrationTests {
     }
 
     @Test
-    void deleteTag_associatedWithService() {
+    void deleteTag_associatedWithService() throws BadRequestException {
         Tag tag3 = new Tag();
         tag3.setName("tag3");
         tag3.setCustom(true);
@@ -193,7 +193,7 @@ class ServiceIntegrationTests {
     }
 
     @Test
-    void createService_createsTagsAndAssignsServiceType() {
+    void createService_createsTagsAndAssignsServiceType() throws BadRequestException {
         ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1", "tag2"));
 
         ServiceResponseDTO responseDTO = serviceService.create(serviceRequestDTO);
@@ -207,7 +207,7 @@ class ServiceIntegrationTests {
     }
 
     @Test
-    void createService_duplicateTags_doesNotCreateDuplicateTags() {
+    void createService_duplicateTags_doesNotCreateDuplicateTags() throws BadRequestException {
         ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1", "tag1"));
 
         ServiceResponseDTO responseDTO = serviceService.create(serviceRequestDTO);
@@ -217,7 +217,7 @@ class ServiceIntegrationTests {
     }
 
     @Test
-    void updateService_updatesServiceTypeAndTags() {
+    void updateService_updatesServiceTypeAndTags() throws BadRequestException {
         ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1", "tag2"));
 
         ServiceResponseDTO createdResponse = serviceService.create(serviceRequestDTO);
@@ -239,7 +239,7 @@ class ServiceIntegrationTests {
     }
 
     @Test
-    void deleteService_deletesService() {
+    void deleteService_deletesService() throws BadRequestException {
         ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1"));
 
         ServiceResponseDTO createdResponse = serviceService.create(serviceRequestDTO);
@@ -251,7 +251,7 @@ class ServiceIntegrationTests {
     }
 
     @Test
-    void deleteService_cascadesCorrectly() {
+    void deleteService_cascadesCorrectly() throws BadRequestException {
         ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1"));
 
         ServiceResponseDTO createdResponse = serviceService.create(serviceRequestDTO);
@@ -274,7 +274,7 @@ class ServiceIntegrationTests {
     }
 
     @Test
-    void deleteTag_dissociatesTagFromService() {
+    void deleteTag_dissociatesTagFromService() throws BadRequestException {
         ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1", "tag2"));
 
         ServiceResponseDTO createdResponse = serviceService.create(serviceRequestDTO);
@@ -293,7 +293,7 @@ class ServiceIntegrationTests {
     }
 
     @Test
-    void updateService_updateTags() {
+    void updateService_updateTags() throws BadRequestException {
         ServiceRequestDTO createServiceDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1", "tag2"));
 
         ServiceResponseDTO createResponseDTO = serviceService.create(createServiceDTO);
@@ -336,7 +336,7 @@ class ServiceIntegrationTests {
     }
 
     @Test
-    void deleteService_removesTagAssociations() {
+    void deleteService_removesTagAssociations() throws BadRequestException {
         ServiceRequestDTO serviceRequestDTO = createDTO("Test Deletion Service", "To be deleted", "Test Service Type", List.of("delete-tag1", "delete-tag2"));
 
         ServiceResponseDTO responseDTO = serviceService.create(serviceRequestDTO);
