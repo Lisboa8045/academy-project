@@ -6,6 +6,7 @@ import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.ProviderPermissionRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,7 +19,8 @@ public class ProviderPermissionService {
     private final ServiceProviderService serviceProviderService;
 
     @Autowired
-    public ProviderPermissionService(ProviderPermissionRepository providerPermissionRepository, ServiceProviderService serviceProviderService) {
+    public ProviderPermissionService(ProviderPermissionRepository providerPermissionRepository,
+                                     @Lazy ServiceProviderService serviceProviderService) {
         this.providerPermissionRepository = providerPermissionRepository;
         this.serviceProviderService = serviceProviderService;
     }
