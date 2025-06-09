@@ -17,7 +17,7 @@ import java.util.ArrayList;
 @Table(name = "member")
 @Getter
 @Setter
-@ToString
+@ToString(exclude = {"availabilities", "appointments", "createdServices", "role"})
 public class Member {
 
     @Id
