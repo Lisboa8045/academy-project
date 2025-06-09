@@ -16,14 +16,12 @@ import com.academy.repositories.ServiceRepository;
 import com.academy.repositories.ServiceTypeRepository;
 import com.academy.repositories.TagRepository;
 import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
@@ -38,8 +36,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 @Transactional
 @ExtendWith(SpringExtension.class)
 @WithMockUser(username = "owner")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-class ServiceIntegrationTests {
+public class ServiceIntegrationTests {
     private final ServiceService serviceService;
     private final TagService tagService;
     private final ServiceRepository serviceRepository;
@@ -47,8 +44,6 @@ class ServiceIntegrationTests {
     private final TagRepository tagRepository;
     private final MemberRepository memberRepository;
     private final RoleRepository roleRepository;
-    private final ServiceProviderRepository serviceProviderRepository;
-    private final ProviderPermissionRepository providerPermissionRepository;
 
     @Autowired
     public ServiceIntegrationTests(ServiceService serviceService,
@@ -69,8 +64,6 @@ class ServiceIntegrationTests {
         this.tagRepository = tagRepository;
         this.memberRepository = memberRepository;
         this.roleRepository = roleRepository;
-        this.serviceProviderRepository = serviceProviderRepository;
-        this.providerPermissionRepository = providerPermissionRepository;
     }
 
     private ServiceType serviceType;
@@ -105,33 +98,6 @@ class ServiceIntegrationTests {
         tag2.setName("tag2");
         tag2.setCustom(false);
         tagRepository.save(tag2);
-    }
-
-    @AfterEach
-    void tearDown() {
-        /*
-        providerPermissionRepository.deleteAllInBatch();
-        serviceProviderRepository.deleteAllInBatch();
-
-        List<Service> services = serviceRepository.findAll();
-        List<Tag> tags = tagRepository.findAll();
-
-        for (Service service : services) {
-            List<Tag> serviceTags = new ArrayList<>(service.getTags());
-            for (Tag tag : serviceTags) {
-                tag.getServices().remove(service);
-            }
-            service.getTags().clear();
-        }
-        serviceRepository.saveAll(services);
-        tagRepository.saveAll(tags);
-
-        serviceRepository.deleteAllInBatch();
-        tagRepository.deleteAllInBatch();
-        serviceTypeRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-        roleRepository.deleteAllInBatch();
-        */
     }
 
     private ServiceRequestDTO createDTO(String name, String description, String serviceTypeName, List<String> tags) {
