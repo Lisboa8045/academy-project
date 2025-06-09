@@ -1,0 +1,4 @@
+<div class="profile-pic-wrapper" (click)="toggleMenu()">
+  <img src="your-profile-pic.jpg" class="profile-pic">
+</div>
+<app-menu *ngIf="showMenu()" [items]="menuItems"></app-menu>
