@@ -9,8 +9,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import org.springframework.validation.FieldError;
 
-import org.springframework.web.bind.MethodArgumentNotValidException;
-
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -60,8 +58,8 @@ public class ExceptionController {
     public ResponseEntity<Object> handleInvalidValue(NotFoundException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }
-    @ExceptionHandler(InactiveUserException.class)
-    public ResponseEntity<Object> handleInvalidValue(InactiveUserException e) {
+    @ExceptionHandler(UnavailableUserException.class)
+    public ResponseEntity<Object> handleInvalidValue(UnavailableUserException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
     }
 

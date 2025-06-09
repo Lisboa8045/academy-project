@@ -27,7 +27,6 @@ import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -178,7 +177,7 @@ public class MemberService {
         if(optionalMember.isPresent() && passwordEncoder.matches(request.password(), optionalMember.get().getPassword())) {
             Member member = optionalMember.get();
             if(!member.isEnabled())
-                throw new InactiveUserException(member.getStatus());
+                throw new UnavailableUserException(member.getStatus());
             UserDetails userDetails = new org.springframework.security.core.userdetails.User(
                     member.getUsername(), member.getPassword(), new ArrayList<>()
             );
