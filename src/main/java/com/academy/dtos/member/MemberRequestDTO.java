@@ -1,12 +1,14 @@
 package com.academy.dtos.member;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record MemberRequestDTO(
-        @NotNull String email,
+        @NotBlank String username,
+        @NotBlank String email,
         String address,
         String postalCode,
         String phoneNumber,
-        @NotNull String password,
+        @NotBlank String password,
         @NotNull Long roleId
 ) {}

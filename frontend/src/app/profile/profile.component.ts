@@ -8,6 +8,7 @@ import {MemberResponseDTO} from '../auth/member-response-dto.model';
 import {UserProfileService} from './user-profile.service';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {NgIf} from '@angular/common';
+import {AppConfigService} from '../shared/app-config.service';
 
 @Component({
   selector: 'app-profile',
@@ -29,7 +30,7 @@ export class ProfileComponent{
   selectedFile:File | null = null;
 
 
-  constructor(private fb: FormBuilder, private router: Router, protected authStore: AuthStore, private authService :AuthService, private profileService: ProfileService, private userProfileService:UserProfileService) {
+  constructor(private fb: FormBuilder, private router: Router, protected authStore: AuthStore, private authService :AuthService, private profileService: ProfileService, private userProfileService:UserProfileService, private appConfigService:AppConfigService) {
     effect(() => {
       this.loading.set(true);
       if(this.authStore.id() > -1)
@@ -38,6 +39,7 @@ export class ProfileComponent{
   }
 
   getMember(id: number) {
+    console.log("Getting member for id " + id);
     this.profileService.getMemberById(id).subscribe({
       next: (res: MemberResponseDTO) => {
         this.loading.set(false)
@@ -61,6 +63,7 @@ export class ProfileComponent{
       postalCode: [user.postalCode],
       phoneNumber: [user.phoneNumber]
     });
+    this.profileForm.disable();
   }
 
   onFileSelected(event: Event): void {
@@ -69,32 +72,25 @@ export class ProfileComponent{
 
     const file = input.files[0];
     this.selectedFile = file;
+    const { maxSizeMB, maxWidth, maxHeight } = this.appConfigService.imageUploadConfig;
 
-    const maxSizeMB = 2;
-    if (file.size > maxSizeMB * 3000 * 3000) {
-      alert(`File is too large. Max allowed size is ${maxSizeMB}MB.`);
-      input.value = '';
-      return;
+    if (file.size > maxSizeMB * 1024 * 1024) {
+      alert(this.appConfigService.messages.fileTooLarge(maxSizeMB));
     }
 
     const img = new Image();
     const objectUrl = URL.createObjectURL(file);
     img.src = objectUrl;
-
     img.onload = () => {
-      const maxWidth = 3000;
-      const maxHeight = 3000;
 
       if (img.width > maxWidth || img.height > maxHeight) {
-        alert(`Image too large. Max dimensions are ${maxWidth}x${maxHeight}px.`);
+        alert(this.appConfigService.messages.imageTooBig(maxWidth, maxHeight));
         input.value = '';
         URL.revokeObjectURL(objectUrl);
         return;
       }
-
       this.tempImageUrl.set(objectUrl);
     }
-
   }
 
   toggleEdit(){
@@ -116,7 +112,6 @@ export class ProfileComponent{
         formData.append('file', this.selectedFile!);
         this.profileService.uploadProfilePicture(formData, this.authStore.id()).subscribe({
           next: (res) => {
-            this.user!.profilePicture = res.imageUrl;
             console.log('Uploaded', res);
           },
           error: (err) => {
@@ -125,9 +120,21 @@ export class ProfileComponent{
           }
         });
       }
-      console.log('Updated user info WIP:', updatedUser);
+
+      this.profileService.updateMember(updatedUser, this.authStore.id()).subscribe({
+        next: (res) => {
+          console.log('Member Update Succesfull', res);
+          this.getMember(this.authStore.id())
+          this.toggleEdit()
+        },
+        error: (err) => {
+          alert('Member Update failed.');
+          console.error(err);
+        }
+      })
     }
   }
+
   logout() {
     this.authService.logout().subscribe({
       next: () => {

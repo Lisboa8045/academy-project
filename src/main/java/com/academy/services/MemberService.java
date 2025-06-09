@@ -1,5 +1,6 @@
 package com.academy.services;
 
+import com.academy.config.authentication.JwtCookieUtil;
 import com.academy.config.authentication.JwtUtil;
 import com.academy.dtos.member.MemberRequestDTO;
 import com.academy.dtos.member.MemberResponseDTO;
@@ -38,27 +39,26 @@ public class MemberService {
     private final MemberMapper memberMapper;
     private final JwtUtil jwtUtil;
     private final MessageSource messageSource;
+    private final JwtCookieUtil jwtCookieUtil;
 
     @Autowired
     public MemberService(MemberRepository memberRepository,
                          PasswordEncoder passwordEncoder,
                          RoleRepository roleRepository,
-                MemberMapper memberMapper,
+                         MemberMapper memberMapper,
                          JwtUtil jwtUtil,
-                         MessageSource messageSource) {
+                         MessageSource messageSource, JwtCookieUtil jwtCookieUtil) {
         this.memberRepository = memberRepository;
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
         this.memberMapper = memberMapper;
         this.jwtUtil = jwtUtil;
         this.messageSource = messageSource;
+        this.jwtCookieUtil = jwtCookieUtil;
     }
+
     public void logout(HttpServletResponse response){
-        Cookie cookie = new Cookie("token", null);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
+        jwtCookieUtil.clearJwtCookie(response);
     }
 
 
@@ -98,12 +98,7 @@ public class MemberService {
             );
             String token = jwtUtil.generateToken(userDetails);
             System.out.println("Token generated:" + token);
-            Cookie cookie = new Cookie("token", token);
-            cookie.setHttpOnly(true);
-            cookie.setSecure(true);
-            cookie.setPath("/");
-            cookie.setMaxAge(60 * 60 * 24);
-            response.addCookie(cookie);
+            jwtCookieUtil.addJwtCookie(response, token);
             return new LoginResponseDto(
                     messageSource.getMessage("user.loggedin", null, LocaleContextHolder.getLocale()),
                     token,
@@ -155,8 +150,8 @@ public class MemberService {
             member.setPhoneNumber(memberRequestDTO.phoneNumber());
         }
 
-        if(memberRequestDTO.email() != null){
-            member.setEmail(memberRequestDTO.email());
+        if(memberRequestDTO.username() != null){
+            member.setUsername(memberRequestDTO.username());
         }
 
         if(memberRequestDTO.password() != null){

@@ -9,8 +9,12 @@ export class AuthStore {
 
   constructor(private userProfileService: UserProfileService,) {
     effect(() => {
+
       const fileName = this.profilePicture();
+      console.log(fileName);
+
       if (fileName) {
+        console.log(fileName);
         this.userProfileService.loadImage(fileName);
       } else {
         this.userProfileService.revoke(); // Clean up when cleared

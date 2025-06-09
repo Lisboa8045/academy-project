@@ -15,7 +15,6 @@ export class ProfileService {
   getMemberById(id: number){
     return this.http.get<MemberResponseDTO>(
       `${this.apiUrl}/${id}`,
-      { withCredentials: true }
     );
   }
 
@@ -26,6 +25,9 @@ export class ProfileService {
     );
   }
 
+  updateMember(updatedUser: Partial<MemberResponseDTO>, id:number) {
+    return this.http.put(`${this.apiUrl}/${id}`, updatedUser);
+  }
 }
 
 
