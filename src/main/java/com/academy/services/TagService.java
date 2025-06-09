@@ -6,9 +6,9 @@ import com.academy.dtos.tag.TagResponseDTO;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.Tag;
 import com.academy.models.service.Service;
-import com.academy.repositories.ServiceRepository;
 import com.academy.repositories.TagRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.ArrayList;
@@ -19,13 +19,13 @@ import java.util.stream.Collectors;
 public class TagService {
 
     private final TagRepository tagRepository;
-    private final ServiceRepository serviceRepository;
     private final TagMapper tagMapper;
+    private final ServiceService serviceService;
 
-    public TagService(TagRepository tagRepository, ServiceRepository serviceRepository, TagMapper tagMapper) {
-        this.serviceRepository = serviceRepository;
+    public TagService(TagRepository tagRepository, TagMapper tagMapper, @Lazy ServiceService serviceService) {
         this.tagRepository = tagRepository;
         this.tagMapper = tagMapper;
+        this.serviceService = serviceService;
     }
 
     // Create
@@ -33,7 +33,7 @@ public class TagService {
     public TagResponseDTO create(TagRequestDTO dto) {
         Tag tag = tagMapper.toEntity(dto);
 
-        List<Service> services = serviceRepository.findAllById(dto.serviceIds());
+        List<Service> services = serviceService.getServiceEntitiesByIds(dto.serviceIds());
         linkTagsToService(tag, services);
 
         Tag savedTag = tagRepository.save(tag);
@@ -52,7 +52,7 @@ public class TagService {
         existing.getServices().clear();
 
         // Handle associations with services
-        List<Service> newServices = serviceRepository.findAllById(dto.serviceIds());
+        List<Service> newServices = serviceService.getServiceEntitiesByIds(dto.serviceIds());
         linkTagsToService(existing, newServices);
 
         tagMapper.updateEntityFromDto(dto, existing);
@@ -124,9 +124,11 @@ public class TagService {
 
     @Transactional
     public void removeTagFromAllServices(Tag tag) {
-        List<Service> services = new ArrayList<>(tag.getServices());
-        tag.removeAllServices();
-        serviceRepository.saveAll(services);
+        for (Service service : new ArrayList<>(tag.getServices())) {
+            service.getTags().remove(tag);
+        }
+        tag.getServices().clear();
+        tagRepository.save(tag);
     }
 
     private void linkTagsToService(Tag tag, List<Service> services) {

@@ -13,8 +13,6 @@ import com.academy.models.Tag;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
-import com.academy.repositories.ProviderPermissionRepository;
-import com.academy.repositories.ServiceProviderRepository;
 import com.academy.repositories.ServiceRepository;
 import com.academy.specifications.ServiceSpecifications;
 import jakarta.transaction.Transactional;
@@ -22,7 +20,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -218,6 +215,10 @@ public class ServiceService {
     */
     public Service getServiceEntityById(Long id) {
         return serviceRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(Service.class, id));
+    }
+
+    public List<Service> getServiceEntitiesByIds(List<Long> ids) {
+        return serviceRepository.findAllById(ids);
     }
 
     public boolean existsById(Long serviceId) {
