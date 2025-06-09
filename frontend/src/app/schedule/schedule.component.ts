@@ -5,6 +5,7 @@ import { ServiceApiService } from '../shared/service-api.service';
 import { ScheduleApiService } from './schedule.service';
 import { SlotModel } from '../schedule/slot.model';
 import { ServiceModel } from '../service/service.model';
+import { AppointmentModel } from './appointment.model';
 
 @Component({
   selector: 'app-schedule',
@@ -66,19 +67,15 @@ export class ScheduleComponent implements OnInit {
   }
 
   confirmAppointment() {
-    // const serviceId = this.form.value.serviceId;
-    // if (!this.selectedSlot || !serviceId) return;
-    //
-    // const dto: AppointmentDTO = {
-    //   serviceId,
-    //   providerId: this.selectedSlot.providerId,
-    //   startDateTime: this.selectedSlot.start,
-    //   endDateTime: this.selectedSlot.end
-    // };
-    //
-    // this.schedulingService.confirmAppointment(dto).subscribe({
-    //   next: () => alert('Marcação efetuada com sucesso!'),
-    //   error: err => alert('Erro ao marcar: ' + err.message)
-    // });
+
+    const selectedServiceId = this.form.value.serviceId;
+    const selectedSlot = this.form.value.slot;
+
+    if (!this.selectedSlot || !this.selectedSlot) return;
+
+    this.scheduleApi.confirmAppointment().subscribe({
+      next: () => alert('Marcação efetuada com sucesso!'),
+      error: err => alert('Erro ao marcar: ' + err.message)
+    });
   }
 }

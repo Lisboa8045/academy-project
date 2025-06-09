@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { SlotModel } from './slot.model';
+import { AppointmentModel } from './appointment.model';
 
 
 @Injectable({
