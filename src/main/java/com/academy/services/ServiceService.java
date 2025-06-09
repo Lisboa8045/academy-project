@@ -5,9 +5,7 @@ import com.academy.dtos.service.ServiceMapper;
 import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
-import com.academy.dtos.service_provider.ServiceProviderResponseDTO;
 import com.academy.exceptions.AuthenticationException;
-//import com.academy.exceptions.ServiceNotFoundException;
 import com.academy.models.Member;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
@@ -16,7 +14,6 @@ import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.ServiceType;
 import com.academy.models.Tag;
 import com.academy.repositories.ServiceRepository;
-import com.academy.repositories.ServiceTypeRepository;
 import com.academy.repositories.TagRepository;
 import com.academy.specifications.ServiceSpecifications;
 import com.academy.utils.Utils;
@@ -41,7 +38,6 @@ public class ServiceService {
     @Lazy
     private final ServiceProviderService serviceProviderService;
     private final ServiceRepository serviceRepository;
-    private final TagRepository tagRepository;
     private final ServiceMapper serviceMapper;
     private final AuthenticationFacade authenticationFacade;
     private final MemberService memberService;
@@ -49,7 +45,6 @@ public class ServiceService {
     private final ServiceTypeService serviceTypeService;
 
     public ServiceService(ServiceRepository serviceRepository,
-                          TagRepository tagRepository,
                           ServiceMapper serviceMapper,
                           @Lazy ServiceProviderService serviceProviderService,
                           AuthenticationFacade authenticationFacade,
@@ -57,7 +52,6 @@ public class ServiceService {
                           TagService tagService,
                           ServiceTypeService serviceTypeService) {
         this.serviceRepository = serviceRepository;
-        this.tagRepository = tagRepository;
         this.serviceMapper = serviceMapper;
         this.serviceProviderService = serviceProviderService;
         this.authenticationFacade = authenticationFacade;
@@ -173,10 +167,11 @@ public class ServiceService {
             return Collections.emptyList();
         return serviceProviderService.getPermissionsByProviderUsernameAndServiceId(username, serviceId);
     }
-    public List<ProviderPermissionEnum> getPermissionsByProviderIdAndServiceId(Long id, Long serviceId){
-        if(!hasServiceProvider(id, serviceId))
-            return Collections.emptyList();
-        return serviceProviderService.getPermissionsByProviderIdAndServiceId(id, serviceId);
+    public List<ProviderPermissionEnum> getPermissionsByProviderIdAndServiceId(Long providerId, Long serviceId){
+        return hasServiceProvider(providerId, serviceId) ?
+                serviceProviderService.getPermissionsByProviderIdAndServiceId(providerId, serviceId)
+        :
+                Collections.emptyList();
     }
     private boolean hasServiceProvider(String username, Long serviceId){
         return serviceProviderService.existsByServiceIdAndProviderUsername(serviceId, username);
@@ -220,13 +215,13 @@ public class ServiceService {
         }catch(EntityNotFoundException e){
             throw new BadRequestException("The service with id " +  serviceId + " does not have a Service Provider with the id " +memberToBeUpdatedId);
         }
-        Member memberToBeUpdated =  memberService.getMemberByEntityId(memberToBeUpdatedId);
+        Member memberToBeUpdated =  memberService.getMemberEntityById(memberToBeUpdatedId);
         List<ProviderPermissionEnum> oldPermissions = getPermissionsByProviderUsernameAndServiceId(memberToBeUpdated.getUsername(), serviceId);
         List<ProviderPermissionEnum> updaterPermissions = getPermissionsByProviderUsernameAndServiceId(updaterUsername, serviceId);
 
         validateUpdateOfPermissions(updaterPermissions, oldPermissions, newPermissions, updaterId, memberToBeUpdatedId);
 
-        serviceProviderService.deleteAllPermissions(serviceProvider);
+        serviceProviderService.deleteAllPermissions(serviceProvider.getId());
         serviceProviderService.addPermissions(serviceProvider, newPermissions);
         return getById(serviceId);
     }

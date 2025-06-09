@@ -182,11 +182,6 @@ public class MemberService {
                 .map(memberMapper::toResponseDTO)
                 .orElseThrow(() -> new EntityNotFoundException(Member.class, id));
     }
-    public Member getMemberByEntityId(long id) {
-        return memberRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(Member.class, id));
-    }
-
     public Member getMemberEntityById(long id){
         return memberRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
     }

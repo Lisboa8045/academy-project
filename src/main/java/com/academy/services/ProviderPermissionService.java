@@ -5,11 +5,9 @@ import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.ProviderPermissionRepository;
 import jakarta.transaction.Transactional;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,10 +15,12 @@ import java.util.List;
 public class ProviderPermissionService {
 
     private final ProviderPermissionRepository providerPermissionRepository;
+    private final ServiceProviderService serviceProviderService;
 
     @Autowired
-    public ProviderPermissionService(ProviderPermissionRepository providerPermissionRepository) {
+    public ProviderPermissionService(ProviderPermissionRepository providerPermissionRepository, ServiceProviderService serviceProviderService) {
         this.providerPermissionRepository = providerPermissionRepository;
+        this.serviceProviderService = serviceProviderService;
     }
     public boolean hasPermission(Long serviceProviderId, String permission){
         return providerPermissionRepository.existsByServiceProviderIdAndPermission(serviceProviderId, permission);
@@ -54,7 +54,8 @@ public class ProviderPermissionService {
             providerPermissionRepository.delete(permission);
         }
     }
-    public void deleteAllByServiceProvider(ServiceProvider serviceProvider) {
+    public void deleteAllByServiceProvider(Long serviceProviderId) {
+        ServiceProvider serviceProvider = serviceProviderService.getServiceProviderEntityById(serviceProviderId);
         providerPermissionRepository.deleteAll(serviceProvider.getPermissions());
     }
 }

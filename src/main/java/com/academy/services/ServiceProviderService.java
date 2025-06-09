@@ -13,7 +13,6 @@ import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.MemberRepository;
 import com.academy.utils.Utils;
-import lombok.extern.slf4j.Slf4j;
 import com.academy.repositories.ServiceProviderRepository;
 import jakarta.transaction.Transactional;
 import com.academy.repositories.ServiceRepository;
@@ -23,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Optional;
 
-@Slf4j
 @org.springframework.stereotype.Service
 public class ServiceProviderService {
 
@@ -34,13 +32,9 @@ public class ServiceProviderService {
     private final AuthenticationFacade authenticationFacade;
     private final ProviderPermissionService providerPermissionService;
 
-
-
     @Autowired
     public ServiceProviderService(ServiceProviderRepository serviceProviderRepository,
                                   ServiceProviderMapper serviceProviderMapper,
-                                  MemberRepository memberRepository,
-                                  ServiceRepository serviceRepository,
                                   ProviderPermissionService providerPermissionService,
                                   MemberService memberService,
                                   ServiceService serviceService,
@@ -63,18 +57,12 @@ public class ServiceProviderService {
                 .map(serviceProviderMapper::toResponseDTO)
                 .toList();
     }
-    public ServiceProvider getById(Long id){
-        Optional<ServiceProvider> serviceProvider = serviceProviderRepository.findById(id);
-        if(serviceProvider.isEmpty())
-            throw new EntityNotFoundException(ServiceProvider.class, id);
-        return serviceProvider.get();
-    }
 
+    //TODO refactor deste método para dar return de um não Optional
     public Optional<ServiceProviderResponseDTO> getServiceProviderById(long id) {
         return serviceProviderRepository.findById(id)
                 .map(serviceProviderMapper::toResponseDTO);
     }
-
     public ServiceProviderResponseDTO createServiceProviderWithDTO(ServiceProviderRequestDTO dto) throws BadRequestException {
         ServiceProvider serviceProvider = createServiceProvider(dto);
         return serviceProviderMapper.toResponseDTO(serviceProvider);
@@ -204,8 +192,9 @@ public class ServiceProviderService {
     }
 
 
-    public void deleteAllPermissions(ServiceProvider serviceProvider) {
-        providerPermissionService.deleteAllByServiceProvider(serviceProvider);
+    public void deleteAllPermissions(Long serviceProviderId) {
+        ServiceProvider serviceProvider = getServiceProviderEntityById(serviceProviderId);
+        providerPermissionService.deleteAllByServiceProvider(serviceProvider.getId());
     }
 
     public void addPermissions(ServiceProvider serviceProvider,List<ProviderPermissionEnum> permissions){
