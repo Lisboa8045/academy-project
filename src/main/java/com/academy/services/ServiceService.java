@@ -16,7 +16,6 @@ import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.ServiceRepository;
 import com.academy.specifications.ServiceSpecifications;
 import jakarta.transaction.Transactional;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -31,7 +30,6 @@ import java.util.stream.Collectors;
 @org.springframework.stereotype.Service
 public class ServiceService {
 
-    @Lazy
     private final ServiceProviderService serviceProviderService;
     private final ServiceRepository serviceRepository;
     private final ServiceMapper serviceMapper;
@@ -42,7 +40,7 @@ public class ServiceService {
 
     public ServiceService(ServiceRepository serviceRepository,
                           ServiceMapper serviceMapper,
-                          @Lazy ServiceProviderService serviceProviderService,
+                          ServiceProviderService serviceProviderService,
                           AuthenticationFacade authenticationFacade,
                           MemberService memberService,
                           TagService tagService,
@@ -62,20 +60,12 @@ public class ServiceService {
         Member member = memberService.getMemberByUsername(authenticationFacade.getUsername());
         Service service = serviceMapper.toEntity(dto, member.getId());
 
-        ServiceType type = serviceTypeService.findByNameOrThrow(dto.serviceTypeName());
-        linkServiceToType(service, type);
-
-        List<Tag> tags = tagService.findOrCreateTagsByNames(dto.tagNames());
-        linkServiceToTags(service, tags); // Set up the bidirectional link
+        linkServiceToType(service, dto.serviceTypeName());
+        linkServiceToTags(service, dto.tagNames());
 
         Service savedService = serviceRepository.save(service);
+        createAndLinkServiceOwner(savedService, member.getId());
 
-        ServiceProvider owner = createOwnerServiceProvider(new ServiceProviderRequestDTO(
-                member.getId(),
-                savedService.getId(),
-                Arrays.asList(ProviderPermissionEnum.values())
-        ));
-        linkServiceToOwnerAsProvider(service, owner);
         return serviceMapper.toDto(savedService, getPermissionsByProviderUsernameAndServiceId(member.getUsername(), savedService.getId()));
     }
 
@@ -87,25 +77,14 @@ public class ServiceService {
     @Transactional
     public ServiceResponseDTO update(Long id, ServiceRequestDTO dto) {
         String username = authenticationFacade.getUsername();
-        Service existing = serviceRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(Service.class,id));
+        Service existing = getServiceEntityById(id);
 
         List<ProviderPermissionEnum> permissions = getPermissionsByProviderUsernameAndServiceId(username, existing.getId());
         if(permissions == null || !permissions.contains(ProviderPermissionEnum.UPDATE))
             throw new AuthenticationException("Member doesn't have permission to update service");
 
-        ServiceType type = serviceTypeService.findByNameOrThrow(dto.serviceTypeName());
-        linkServiceToType(existing, type);
-
-        // Remove existing tag associations
-        for (Tag tag : new ArrayList<>(existing.getTags())) {
-            tag.getServices().remove(existing);
-        }
-        existing.getTags().clear();
-
-        // Prepare new tags and associations
-        List<Tag> newTags = tagService.findOrCreateTagsByNames(dto.tagNames());
-        linkServiceToTags(existing, newTags);
+        linkServiceToType(existing, dto.serviceTypeName());
+        linkServiceToTags(existing, dto.tagNames());
 
         serviceMapper.updateEntityFromDto(dto, existing);
         serviceRepository.save(existing);
@@ -125,8 +104,7 @@ public class ServiceService {
 
     // Read one
     public ServiceResponseDTO getById(Long id) {
-        Service service = serviceRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(Service.class,id));
+        Service service = getServiceEntityById(id);
         String username =  authenticationFacade.getUsername();
         List<ProviderPermissionEnum> permissions = getPermissionsByProviderUsernameAndServiceId(username, id);
         if(permissions == null || !permissions.contains(ProviderPermissionEnum.READ))
@@ -138,30 +116,42 @@ public class ServiceService {
     @Transactional
     public void delete(Long id) {
         String username =  authenticationFacade.getUsername();
-        Service service = serviceRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(Service.class, id));
+        Service service = getServiceEntityById(id);
         List<ProviderPermissionEnum> permissions = getPermissionsByProviderUsernameAndServiceId(username, id);
         if(permissions == null || !permissions.contains(ProviderPermissionEnum.DELETE))
             throw new AuthenticationException("Member doesn't have permission to delete service");
 
-        service.removeAllLinks();
-        deleteServiceProviders(service);
+        cleanUpService(service);
         serviceRepository.delete(service);
     }
 
-    private void linkServiceToTags(Service service, List<Tag> tags) {
+    private void linkServiceToTags(Service service, List<String> tagNames) {
+        removeAllTagLinks(service);
+
+        List<Tag> tags = tagService.findOrCreateTagsByNames(tagNames);
         service.setTags(tags);
         for (Tag tag : tags) {
             tag.getServices().add(service);
         }
     }
 
-    private void linkServiceToType(Service service, ServiceType type) {
+    private void linkServiceToType(Service service, String serviceTypeName) {
+        ServiceType previousType = service.getServiceType();
+        if (previousType != null) {
+            removeServiceTypeLink(service);
+        }
+
+        ServiceType type = serviceTypeService.getServiceTypeEntityByName(serviceTypeName);
         service.setServiceType(type);
         type.getServices().add(service);
     }
 
-    private void linkServiceToOwnerAsProvider(Service service, ServiceProvider owner) {
+    private void createAndLinkServiceOwner(Service service, Long memberId) {
+        ServiceProvider owner = createOwnerServiceProvider(new ServiceProviderRequestDTO(
+                memberId,
+                service.getId(),
+                Arrays.asList(ProviderPermissionEnum.values())
+        ));
         service.getServiceProviders().add(owner);
         owner.setService(service);
     }
@@ -194,16 +184,6 @@ public class ServiceService {
     private Specification<Service> addIfPresent(Specification<Service> spec, boolean condition, Supplier<Specification<Service>> supplier) {
         return condition ? spec.and(supplier.get()) : spec; // add specification on supplier, if the condition is met
     }
-
-    @Transactional
-    public void deleteServiceProviders(Service service) {
-        List<ServiceProvider> providers = new ArrayList<>(service.getServiceProviders());
-
-        for (ServiceProvider provider : providers) {
-            serviceProviderService.deleteServiceProvider(provider.getId());
-        }
-    }
-
     /*
     @Transactional
     public ServiceResponseDTO updateMemberPermissions(Long serviceId, Long memberId, List<ProviderPermissionEnum> permissions){
@@ -225,4 +205,27 @@ public class ServiceService {
         return serviceRepository.existsById(serviceId);
     }
 
+    private void removeAllTagLinks(Service service) {
+        for (Tag tag : new ArrayList<>(service.getTags())) {
+            tag.getServices().remove(service);
+        }
+        service.getTags().clear();
+    }
+
+    private void removeServiceTypeLink(Service service) {
+        service.getServiceType().getServices().remove(service);
+    }
+
+    private void deleteServiceProviders(Service service) {
+        List<ServiceProvider> providers = new ArrayList<>(service.getServiceProviders());
+
+        for (ServiceProvider provider : providers) {
+            serviceProviderService.deleteServiceProvider(provider.getId());
+        }
+    }
+    private void cleanUpService(Service service) {
+        removeAllTagLinks(service);
+        removeServiceTypeLink(service);
+        deleteServiceProviders(service);
+    }
 }

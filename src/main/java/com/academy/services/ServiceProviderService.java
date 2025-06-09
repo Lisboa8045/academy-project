@@ -1,4 +1,3 @@
-// ServiceProviderService.java
 package com.academy.services;
 
 import com.academy.dtos.service_provider.ServiceProviderMapper;
@@ -12,6 +11,7 @@ import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.ServiceProviderRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +29,7 @@ public class ServiceProviderService {
     public ServiceProviderService(ServiceProviderRepository serviceProviderRepository,
                                   ServiceProviderMapper serviceProviderMapper,
                                   MemberService memberService,
-                                  ServiceService serviceService,
+                                  @Lazy ServiceService serviceService,
                                   ProviderPermissionService providerPermissionService) {
         this.serviceProviderRepository = serviceProviderRepository;
         this.serviceProviderMapper = serviceProviderMapper;
