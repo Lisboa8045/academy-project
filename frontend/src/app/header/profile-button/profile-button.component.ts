@@ -33,6 +33,7 @@ export class ProfileButtonComponent implements OnInit {
       },
       {
         label: 'Logout',
+        command: () => {console.log("Logging out, this is totally working amirite?")}
       },
     ];
   }

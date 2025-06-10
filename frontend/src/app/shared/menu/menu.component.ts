@@ -9,4 +9,13 @@ import {MenuItem} from './menu.model';
 })
 export class MenuComponent {
   items = input.required<MenuItem[]>();
+
+  onClickedItem(item: MenuItem) {
+    if (item.command) {
+      item.command();
+    }
+    else {
+      console.log("No command for " + item.label);
+    }
+  }
 }
