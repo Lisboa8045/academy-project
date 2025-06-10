@@ -1,5 +1,4 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
-import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
 import {NgIf} from '@angular/common';
 import {MenuComponent} from '../../shared/menu/menu.component';
 import {MenuItem} from '../../shared/menu/menu.model';
