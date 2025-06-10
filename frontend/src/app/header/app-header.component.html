@@ -4,7 +4,7 @@
 
     <div class="right-links">
       @if (username()) {
-        <app-profile-button />
+        <app-profile-button>{{ username() }}</app-profile-button>
       } @else {
         <a class="nav-item" routerLink="/auth">🔐 Login</a>
       }
