@@ -90,7 +90,15 @@ export class ProfileComponent{
         return;
       }
       this.tempImageUrl.set(objectUrl);
+      if(!this.editMode)
+        this.toggleEdit()
     }
+  }
+
+  clearImage(){
+    this.tempImageUrl.set("");
+    if(!this.profileForm.dirty)
+      this.toggleEdit()
   }
 
   toggleEdit(){
@@ -99,8 +107,8 @@ export class ProfileComponent{
       this.profileForm.enable();
     } else {
       this.profileForm.disable();
-      this.profileForm.patchValue(this.user!);
       this.tempImageUrl.set("");
+      this.profileForm.patchValue(this.user!);
     }
   }
 

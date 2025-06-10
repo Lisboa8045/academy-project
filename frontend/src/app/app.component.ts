@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import {Router, RouterOutlet} from '@angular/router';
 import {AppHeaderComponent} from './header/app-header.component';
 import {AppFooterComponent} from './footer/app-footer.component';
 import {LoadingComponent} from './loading/loading.component';
@@ -15,7 +15,7 @@ import {MemberResponseDTO} from "./auth/member-response-dto.model";
   styleUrl: './app.component.css'
 })
 export class AppComponent implements OnInit {
-  constructor(private http: HttpClient, private authStore: AuthStore) {}
+  constructor(private http: HttpClient, private authStore: AuthStore, private router: Router) {}
   ngOnInit(): void {
     this.http.get<MemberResponseDTO>('http://localhost:8080/auth/me', {
       withCredentials: true
@@ -28,6 +28,7 @@ export class AppComponent implements OnInit {
       },  error: err => {
         console.warn('Auto-login failed', err.status, err.message);
         this.authStore.clear();
+        this.router.navigate(['/auth']);
       }
     });
   }
