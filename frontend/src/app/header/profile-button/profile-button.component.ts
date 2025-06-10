@@ -1,8 +1,10 @@
-import {Component, OnInit, signal} from '@angular/core';
+import {Component, inject, OnInit, signal} from '@angular/core';
 import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
 import {NgIf} from '@angular/common';
 import {MenuComponent} from '../../shared/menu/menu.component';
 import {MenuItem} from '../../shared/menu/menu.model';
+import {AuthService} from '../../auth/auth.service';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-profile-button',
@@ -15,6 +17,8 @@ import {MenuItem} from '../../shared/menu/menu.model';
 })
 export class ProfileButtonComponent implements OnInit {
   showMenu = signal(false);
+  authService = inject(AuthService);
+  router = inject(Router);
   menuItems: MenuItem[] = [];
 
   ngOnInit() {
@@ -33,7 +37,12 @@ export class ProfileButtonComponent implements OnInit {
       },
       {
         label: 'Logout',
-        command: () => {console.log("Logging out, this is totally working amirite?")}
+        command: () => {
+          this.authService.logout().subscribe({
+            next: () => this.router.navigate(['/']),
+            error: (err) => console.error('Logout failed:', err)
+          });
+        }
       },
     ];
   }
