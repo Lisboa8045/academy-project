@@ -80,8 +80,7 @@ public class ServiceService {
         Service existing = getServiceEntityById(id);
 
         List<ProviderPermissionEnum> permissions = getPermissionsByProviderUsernameAndServiceId(username, existing.getId());
-        if(permissions == null || !permissions.contains(ProviderPermissionEnum.UPDATE))
-            throw new AuthenticationException("Member doesn't have permission to update service");
+        checkPermission(permissions, ProviderPermissionEnum.UPDATE, "update");
 
         linkServiceToType(existing, dto.serviceTypeName());
         linkServiceToTags(existing, dto.tagNames());
@@ -107,8 +106,7 @@ public class ServiceService {
         Service service = getServiceEntityById(id);
         String username =  authenticationFacade.getUsername();
         List<ProviderPermissionEnum> permissions = getPermissionsByProviderUsernameAndServiceId(username, id);
-        if(permissions == null || !permissions.contains(ProviderPermissionEnum.READ))
-            throw new AuthenticationException("Member doesn't have permission to read service");
+        checkPermission(permissions, ProviderPermissionEnum.READ, "read");
         return serviceMapper.toDto(service, getPermissionsByProviderUsernameAndServiceId(username, service.getId()));
     }
 
@@ -118,8 +116,7 @@ public class ServiceService {
         String username =  authenticationFacade.getUsername();
         Service service = getServiceEntityById(id);
         List<ProviderPermissionEnum> permissions = getPermissionsByProviderUsernameAndServiceId(username, id);
-        if(permissions == null || !permissions.contains(ProviderPermissionEnum.DELETE))
-            throw new AuthenticationException("Member doesn't have permission to delete service");
+        checkPermission(permissions, ProviderPermissionEnum.DELETE, "delete");
 
         cleanUpService(service);
         serviceRepository.delete(service);
@@ -193,6 +190,12 @@ public class ServiceService {
         return getById(serviceId);
     }
     */
+
+    private void checkPermission(List<ProviderPermissionEnum> permissions, ProviderPermissionEnum requestedPermission, String permissionName) {
+        if(permissions == null || !permissions.contains(requestedPermission))
+            throw new AuthenticationException("Member doesn't have permission to " + permissionName + " service");
+    }
+
     public Service getServiceEntityById(Long id) {
         return serviceRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(Service.class, id));
     }
