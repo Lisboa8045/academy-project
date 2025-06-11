@@ -7,6 +7,7 @@ import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.services.ServiceProviderService;
 import jakarta.validation.Valid;
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,8 +34,8 @@ public class ServiceProviderController {
     }
 
     @PostMapping
-    public ServiceProviderResponseDTO createServiceProvider(@Valid @RequestBody ServiceProviderRequestDTO serviceProvider) {
-        return serviceProviderService.createServiceProvider(serviceProvider);
+    public ServiceProviderResponseDTO createServiceProvider(@Valid @RequestBody ServiceProviderRequestDTO serviceProvider) throws BadRequestException {
+        return serviceProviderService.createServiceProviderWithDTO(serviceProvider);
     }
 
     @PutMapping("/{id}")

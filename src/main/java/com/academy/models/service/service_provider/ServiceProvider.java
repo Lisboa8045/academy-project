@@ -20,16 +20,17 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
+import java.util.ArrayList;
 import java.util.List;
 
-// TODO Appointment
 
 @Entity
 
 @Table(name="service_provider",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"member_id", "service_id"}))@Getter
+        uniqueConstraints = @UniqueConstraint(columnNames = {"member_id", "service_id"}))
+@Getter
 @Setter
-@ToString
+@ToString(exclude = "service")
 public class ServiceProvider {
 
     @Id
@@ -45,11 +46,11 @@ public class ServiceProvider {
     @JoinColumn(name="service_id")
     private Service service;
 
-    @OneToMany(mappedBy = "serviceProvider")
-    private List<Appointment> appointmentList;
+    @OneToMany(mappedBy = "serviceProvider", fetch = FetchType.EAGER)
+    private List<Appointment> appointmentList = new ArrayList<>();
 
-    @OneToMany(mappedBy="serviceProvider")
-    private List<ProviderPermission> permissions;
+    @OneToMany(mappedBy = "serviceProvider")
+    private List<ProviderPermission> permissions = new ArrayList<>();
 
     @Column(name="created_at", updatable = false)
     @CreationTimestamp

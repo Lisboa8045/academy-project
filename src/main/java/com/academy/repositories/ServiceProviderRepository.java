@@ -16,9 +16,14 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
     List<Long> findMemberIdsByServiceId(Long serviceId);
     Optional<ServiceProvider> findByProviderUsernameAndServiceId(String username, Long serviceId);
 
+    Optional<ServiceProvider> findByProviderIdAndServiceId(Long id, Long serviceId);
     List<ServiceProvider> service(Service service);
 
     boolean existsByServiceId(Long serviceId);
 
     boolean existsByServiceIdAndProviderUsername(Long serviceId, String username);
+
+    boolean existsByServiceIdAndProviderId(Long serviceId, Long id);
+
+    Optional<ServiceProvider> findByServiceIdAndProviderId(Long serviceId, Long providerId);
 }

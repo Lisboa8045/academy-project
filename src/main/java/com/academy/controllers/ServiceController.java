@@ -2,22 +2,25 @@ package com.academy.controllers;
 
 import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
+import com.academy.dtos.service.UpdatePermissionsRequestDto;
+import com.academy.exceptions.AuthenticationException;
 import com.academy.services.ServiceService;
 import jakarta.validation.Valid;
+import org.apache.coyote.BadRequestException;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/services")
+@RequestMapping("services")
 public class ServiceController {
 
     private final ServiceService serviceService;
-
-
 
     @Autowired
     public ServiceController(ServiceService serviceService) {
@@ -25,7 +28,7 @@ public class ServiceController {
     }
 
     @PostMapping
-    public ResponseEntity<ServiceResponseDTO> create(@Valid @RequestBody ServiceRequestDTO dto) {
+    public ResponseEntity<ServiceResponseDTO> create(@Valid @RequestBody ServiceRequestDTO dto) throws AuthenticationException, BadRequestException {
         return ResponseEntity.ok(serviceService.create(dto));
     }
 
@@ -37,9 +40,12 @@ public class ServiceController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ServiceResponseDTO>> getAll(){
+    public ResponseEntity<List<ServiceResponseDTO>> getAll() throws BadRequestException {
+
         List<ServiceResponseDTO> responses = serviceService.getAll();
         return ResponseEntity.ok(responses);
+
+
     }
 
     @GetMapping("/{id}")
@@ -48,9 +54,28 @@ public class ServiceController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<Page<ServiceResponseDTO>> search(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) List<String> tags,
+            @RequestParam(required = false) Double priceMin,
+            @RequestParam(required = false) Double priceMax,
+            Pageable pageable
+    ) {
+        Page<ServiceResponseDTO> responses = serviceService.searchServices(name, priceMin, priceMax, tags, pageable);
+        return ResponseEntity.ok(responses);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         serviceService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<ServiceResponseDTO> updatePermissions(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdatePermissionsRequestDto request) throws AuthenticationException, BadRequestException {
+        return ResponseEntity.ok(serviceService.updateMemberPermissions(id, request.memberId(), request.permissions()));
     }
 }
