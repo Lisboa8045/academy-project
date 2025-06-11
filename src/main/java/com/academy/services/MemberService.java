@@ -68,7 +68,7 @@ public class MemberService {
         response.addCookie(cookie);
     }
 
-
+    @Transactional
     public long register(RegisterRequestDto request) {
         if (memberRepository.findByUsername(request.username()).isPresent()
                 || memberRepository.findByEmail(request.email()).isPresent())

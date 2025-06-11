@@ -46,7 +46,7 @@ public class AuthController {
         );
     }
     @GetMapping("/confirm-email/{token}")
-    public ResponseEntity<ConfirmEmailResponseDto> confirmEmail(@PathVariable String token) throws Exception {
+    public ResponseEntity<ConfirmEmailResponseDto> confirmEmail(@PathVariable String token) {
        memberService.confirmEmail(token);
        return  ResponseEntity.ok(new ConfirmEmailResponseDto("Email confirmed successfully"));
     }
@@ -62,26 +62,6 @@ public class AuthController {
         memberService.logout(response);
         return ResponseEntity.ok().build();
     }
-    @PostMapping("/send")
-    public String sendEmail(){
-       /* String html = loadTemplate()
-                .replace("[User Name]", "João")
-                .replace("[CONFIRMATION_LINK]", "https://google.com")
-                .replace("[App Name]", "Academy Project");
-
-        emailService.send(
-                "adriano.l.a.queiroz@gmail.com",
-                "Confirme sua conta",
-                "Clique no link para confirmar: " + "https://google.com",
-                html
-        );
-        return "Email Sent";
-
-        */
-        return "";
-    }
-
-
 
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(HttpServletRequest request) {
