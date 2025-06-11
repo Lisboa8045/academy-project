@@ -1,12 +1,27 @@
 <div class="schedule-container">
   <h2>Agendar Marcação</h2>
 
-  <div *ngIf="currentStep === 'service' && serviceTypes.length > 0" class="service-type-filter">
-    <label for="serviceTypeSelect">Filtrar por tipo de serviço:</label>
-    <select id="serviceTypeSelect" (change)="onServiceTypeChange($event)">
-      <option value="">Todos</option>
-      <option *ngFor="let type of serviceTypes" [value]="type.id">{{ type.name }}</option>
-    </select>
+  <!-- Pesquisa e filtro -->
+  <div *ngIf="currentStep === 'service' && serviceTypes.length > 0">
+    <div class="search-bar">
+      <input type="text" placeholder="Procurar serviços..." (input)="onSearchChange($event)" />
+    </div>
+
+    <div class="service-type-scroll">
+      <button
+        class="type-button"
+        [class.active]="!selectedServiceTypeId"
+        (click)="filterByType(null)">
+        Todos
+      </button>
+      <button
+        *ngFor="let type of serviceTypes"
+        class="type-button"
+        [class.active]="selectedServiceTypeId === type.id"
+        (click)="filterByType(type.id)">
+        {{ type.name }}
+      </button>
+    </div>
   </div>
 
   <!-- Lista de serviços (filtrados) -->
@@ -20,7 +35,6 @@
       </li>
     </ul>
   </div>
-
 
   <!-- Passo 2: Slots -->
   <div *ngIf="currentStep === 'slots' && slots.length > 0">
