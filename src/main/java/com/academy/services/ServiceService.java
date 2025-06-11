@@ -6,15 +6,14 @@ import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
 import com.academy.exceptions.AuthenticationException;
+import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.Member;
+import com.academy.models.ServiceType;
+import com.academy.models.Tag;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
-import com.academy.exceptions.EntityNotFoundException;
-import com.academy.models.ServiceType;
-import com.academy.models.Tag;
 import com.academy.repositories.ServiceRepository;
-import com.academy.repositories.TagRepository;
 import com.academy.specifications.ServiceSpecifications;
 import com.academy.utils.Utils;
 import jakarta.transaction.Transactional;
@@ -23,7 +22,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -184,8 +182,7 @@ public class ServiceService {
 
         Specification<Service> spec = Specification.where(null); // start with no specifications, add each specification after if not null/empty
 
-        spec = addIfPresent(spec, name != null && !name.isBlank(), () -> ServiceSpecifications.hasNameLike(name));
-        spec = addIfPresent(spec, tagNames != null && !tagNames.isEmpty(), () -> ServiceSpecifications.hasAnyTagNameLike(tagNames));
+        spec = addIfPresent(spec, name != null && !name.isBlank(), () -> ServiceSpecifications.nameOrTagMatches(name));
         spec = addIfPresent(spec, priceMin != null, () -> ServiceSpecifications.hasPriceGreaterThanOrEqual(priceMin));
         spec = addIfPresent(spec, priceMax != null, () -> ServiceSpecifications.hasPriceLessThanOrEqual(priceMax));
 
