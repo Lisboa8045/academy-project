@@ -9,8 +9,6 @@
   overflow: hidden; /* Ensure content stays within rounded corners */
 
   position: absolute;
-  width: 10%;
-  transform: translate(-45%);
 }
 
 .app-menu li {
