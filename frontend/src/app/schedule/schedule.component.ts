@@ -7,6 +7,7 @@
   import { ServiceModel } from '../service/service.model';
   import { AppointmentModel } from './appointment.model';
   import {ServiceTypeModel} from './service-type.model';
+  import { addDays, startOfWeek, endOfWeek, isSameDay } from 'date-fns';
 
   @Component({
     selector: 'app-schedule',
@@ -23,12 +24,21 @@
     selectedSlot?: SlotModel;
     selectedServiceId?: number;
     showConfirmationModal = false;
-    currentStep: 'service' | 'slots' | 'confirmation' = 'service';
+    currentStep: 'service' | 'slots' | 'provider' | 'confirmation' = 'service';
     serviceTypes: ServiceTypeModel[] = [];
     filteredServices: ServiceModel[] = [];
     selectedServiceTypeId: number | null = null;
     searchTerm = '';
-
+    providerSearchTerm = '';
+    filteredSlots: SlotModel[] = [];
+    providers: string[] = [];
+    selectedProvider: string | null = null;
+    currentWeekStart: Date = startOfWeek(new Date(), { weekStartsOn: 1 }); // Segunda-feira
+    currentWeekEnd: Date = endOfWeek(new Date(), { weekStartsOn: 1 });
+    weekDays: Date[] = [];
+    weeklySlots: { [key: string]: SlotModel[] } = {}; // chave: YYYY-MM-DD
+    providerOptions: SlotModel[] = [];
+    showProviderModal: boolean = false;
 
     constructor(
       private fb: FormBuilder,
@@ -42,6 +52,54 @@
 
     get selectedService(): ServiceModel | undefined {
       return this.services.find(s => s.id === this.form.value.serviceId);
+    }
+
+    updateWeekDays() {
+      this.weekDays = [];
+      for (let i = 0; i < 7; i++) {
+        this.weekDays.push(addDays(this.currentWeekStart, i));
+      }
+      this.organizeSlotsByDay();
+    }
+
+    goToNextWeek() {
+      this.currentWeekStart = addDays(this.currentWeekStart, 7);
+      this.currentWeekEnd = addDays(this.currentWeekEnd, 7);
+      this.updateWeekDays();
+    }
+
+    goToPreviousWeek() {
+      this.currentWeekStart = addDays(this.currentWeekStart, -7);
+      this.currentWeekEnd = addDays(this.currentWeekEnd, -7);
+      this.updateWeekDays();
+    }
+
+
+    organizeSlotsByDay() {
+      this.weeklySlots = {};
+
+      for (const day of this.weekDays) {
+        const key = day.toISOString().split('T')[0]; // YYYY-MM-DD
+        const daySlots = this.filteredSlots.filter(slot =>
+          isSameDay(new Date(slot.start), day)
+        );
+
+        // Group by start hour (ignoring provider)
+        const uniqueSlotsMap = new Map<string, SlotModel[]>();
+
+        for (const slot of daySlots) {
+          const slotTimeKey = new Date(slot.start).toISOString().substring(0, 16); // YYYY-MM-DDTHH:mm
+
+          if (!uniqueSlotsMap.has(slotTimeKey)) {
+            uniqueSlotsMap.set(slotTimeKey, []);
+          }
+
+          uniqueSlotsMap.get(slotTimeKey)!.push(slot);
+        }
+
+        // Store one slot per time group (e.g., show just the first provider initially)
+        this.weeklySlots[key] = Array.from(uniqueSlotsMap.values()).map(group => group[0]);
+      }
     }
 
     ngOnInit(): void {
@@ -68,6 +126,14 @@
         },
         error: err => console.error('Erro ao carregar tipos de serviço:', err)
       });
+    }
+
+    filterByProvider(provider: string | null) {
+      this.selectedProvider = provider;
+      this.filteredSlots = this.slots.filter(slot =>
+        !provider || slot.providerName === provider
+      );
+      this.organizeSlotsByDay(); // <-- Atualizar visualização
     }
 
     onSearchChange(event: Event) {
@@ -106,18 +172,47 @@
         this.scheduleApi.getFreeSlots(this.selectedServiceId).subscribe({
           next: data => {
             this.slots = data;
+            this.providers = [...new Set(data.map(slot => slot.providerName))];
+            this.filteredSlots = data;
             this.currentStep = 'slots';
+            this.currentWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+            this.currentWeekEnd = endOfWeek(new Date(), { weekStartsOn: 1 });
+            this.updateWeekDays();
           },
           error: err => console.error('Erro ao carregar slots:', err)
         });
       }
     }
 
-    selectSlot(slot: SlotModel) {
-      this.selectedSlot = slot;
-      this.currentStep = 'confirmation'; // Avança para confirmação
-      this.showConfirmationModal = true;
+
+    onProviderSearchChange(event: Event) {
+      const input = event.target as HTMLInputElement;
+      this.providerSearchTerm = input.value.toLowerCase();
+      this.applySlotFilters();
     }
+
+    applySlotFilters() {
+      this.filteredSlots = this.slots.filter(slot =>
+        slot.providerName.toLowerCase().includes(this.providerSearchTerm)
+      );
+      this.organizeSlotsByDay(); // <-- Atualizar visualização
+    }
+
+    selectSlot(slot: SlotModel) {
+      const sameTimeSlots = this.slots.filter(s => s.start === slot.start);
+
+      if (sameTimeSlots.length > 1) {
+        // Mostrar a lista de prestadores disponíveis (passo 'provider')
+        this.providerOptions = sameTimeSlots;
+        this.currentStep = 'provider';
+      } else {
+        this.selectedSlot = slot;
+        this.currentStep = 'confirmation';
+        this.showConfirmationModal = true;
+      }
+    }
+
+
 
     cancelModal() {
       this.showConfirmationModal = false;
@@ -178,4 +273,17 @@
         error: err => alert('Erro ao obter prestador de serviço: ' + err.message)
       });
     }
+
+    showProviderSelectionModal(slots: SlotModel[]) {
+      this.providerOptions = slots;
+      this.showProviderModal = true;
+    }
+
+    selectProviderSlot(slot: SlotModel) {
+      this.selectedSlot = slot;
+      this.showProviderModal = false;
+      this.currentStep = 'confirmation';
+      this.showConfirmationModal = true;
+    }
   }
+``

@@ -31,24 +31,72 @@
       <li *ngFor="let s of filteredServices"
           (click)="selectService(s)"
           [class.selected]="s.id === form.get('serviceId')?.value">
-        {{ s.name }} - {{ s.description }} - {{ s.price }}€ - {{ s.serviceTypeId }}
+        {{ s.name }} - {{ s.price }}€
       </li>
     </ul>
   </div>
 
   <!-- Passo 2: Slots -->
   <div *ngIf="currentStep === 'slots' && slots.length > 0">
+    <div class="search-bar">
+      <input type="text" placeholder="Filtrar por prestador..." (input)="onProviderSearchChange($event)" />
+    </div>
+    <!-- Filtro por prestador -->
+    <div class="service-type-scroll">
+      <button
+        class="type-button"
+        [class.active]="!selectedProvider"
+        (click)="filterByProvider(null)">
+        Todos
+      </button>
+      <button
+        *ngFor="let provider of providers"
+        class="type-button"
+        [class.active]="selectedProvider === provider"
+        (click)="filterByProvider(provider)">
+        {{ provider }}
+      </button>
+    </div>
+    <div class="week-navigation">
+      <button (click)="goToPreviousWeek()">« Semana Anterior</button>
+      <span>
+        {{ currentWeekStart | date: 'dd/MM/yyyy' }} - {{ currentWeekEnd | date: 'dd/MM/yyyy' }}
+      </span>
+      <button (click)="goToNextWeek()">Semana Seguinte »</button>
+    </div>
     <h3>Escolher horário</h3>
+    <!-- Slots por dia da semana -->
+    <div class="weekly-slots">
+      <div class="day-column" *ngFor="let day of weekDays">
+        <h4>{{ day | date: 'EEE dd/MM' }}</h4>
+        <ul>
+          <li *ngFor="let slot of weeklySlots[day.toISOString().split('T')[0]]"
+              (click)="selectSlot(slot)">
+            <div class="slot-hour">{{ slot.start | date: 'HH:mm' }}</div>
+            <div class="slot-provider">{{ slot.providerName }}</div>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="top-bar">
+      <button class="back-button" (click)="currentStep = 'service'">Voltar para serviços</button>
+    </div>
+  </div>
+
+  <!-- Passo de seleção do prestador -->
+  <div *ngIf="currentStep === 'provider'">
+    <h3>Escolha um prestador para o horário {{ providerOptions[0]?.start | date:'shortTime' }}</h3>
     <ul>
-      <li *ngFor="let slot of slots"
-          (click)="selectSlot(slot)"
-          [class.selected]="slot === selectedSlot">
-        {{ slot.start | date:'short' }} - {{ slot.providerName }}
+      <li *ngFor="let slot of providerOptions" (click)="selectProviderSlot(slot)" class="provider-option">
+        {{ slot.providerName }}
       </li>
     </ul>
-    <button (click)="currentStep = 'service'">Voltar a serviços</button>
+    <button (click)="currentStep = 'slots'">Voltar para horários</button>
   </div>
 </div>
+
+
+
 
 <!-- Modal de confirmação -->
 <div class="modal-backdrop" *ngIf="currentStep === 'confirmation' && showConfirmationModal">
