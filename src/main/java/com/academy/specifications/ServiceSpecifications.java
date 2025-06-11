@@ -42,4 +42,23 @@ public class ServiceSpecifications {
             return cb.or(predicates);
         };
     }
+
+    public static Specification<Service> nameOrTagMatches(String query) {
+        return (root, cq, cb) -> {
+            if (query == null || query.isBlank()) return null;
+
+            String likePattern = "%" + query.toLowerCase() + "%";
+
+            Predicate nameLike = cb.like(cb.lower(root.get("name")), likePattern);
+
+            Join<Service, Tag> tagJoin = root.join("tags", JoinType.LEFT);
+            Predicate tagLike = cb.like(cb.lower(tagJoin.get("name")), likePattern);
+
+            if (cq != null) {
+                cq.distinct(true); // Avoid returning the same service duplicated, if multiple matches
+            }
+
+            return cb.or(nameLike, tagLike);
+        };
+    }
 }

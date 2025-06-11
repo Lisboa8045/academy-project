@@ -1,27 +1,20 @@
 package com.academy.controllers;
 
 import com.academy.exceptions.AuthenticationException;
-import com.academy.exceptions.InvalidArgumentException;
 import com.academy.exceptions.EntityAlreadyExists;
-import com.academy.exceptions.NotFoundException;
 import com.academy.exceptions.EntityNotFoundException;
-
+import com.academy.exceptions.NotFoundException;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-
 import org.springframework.validation.FieldError;
-
 import org.springframework.web.bind.MethodArgumentNotValidException;
-
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.Collections;
-
 import java.util.HashMap;
-
 import java.util.Map;
 
 @ControllerAdvice
@@ -54,6 +47,11 @@ public class ExceptionController {
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<Object> handleInvalidValue(BadRequestException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Object> handleInvalidValue(NoResourceFoundException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(AuthenticationException.class)

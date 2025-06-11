@@ -13,16 +13,15 @@ export interface PagedResponse {
   providedIn: 'root',
 })
 export class ServiceApiService {
-  private BASE_URL = 'http://localhost:8080/auth/services/search';
+  private BASE_URL = 'http://localhost:8080/services/search';
 
   constructor(private http: HttpClient) {}
 
   searchServices(
     name = '',
     page = 0,
-    size = 10,
+    size = 40,
     sort = 'price,asc',
-    tags: string[] = [],
     priceMin?: number,
     priceMax?: number
   ): Observable<PagedResponse> {
@@ -31,12 +30,6 @@ export class ServiceApiService {
       .set('page', page)
       .set('size', size)
       .set('sort', sort);
-
-    if (tags.length) {
-      tags.forEach(tag => {
-        params = params.append('tags', tag);
-      });
-    }
 
     if (priceMin !== undefined) params = params.set('priceMin', priceMin);
     if (priceMax !== undefined) params = params.set('priceMax', priceMax);
