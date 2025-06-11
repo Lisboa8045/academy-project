@@ -24,18 +24,23 @@ export class ProfileButtonComponent implements OnInit {
     this.menuItems = [
       {
         label: 'Profile',
+        icon: '👤'
       },
       {
         label: 'Appointments',
+        icon: '📅'
       },
       {
         label: 'BackOffice',
+        icon: '👔'
       },
       {
         label: 'Settings',
+        icon: '⚙️'
       },
       {
         label: 'Logout',
+        icon: '↩',
         command: () => {
           this.authService.logout().subscribe({
             next: () => this.router.navigate(['/']),
