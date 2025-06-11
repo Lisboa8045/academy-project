@@ -1,5 +1,6 @@
 package com.academy.services;
 
+import com.academy.config.AppProperties;
 import com.academy.config.authentication.JwtUtil;
 import com.academy.dtos.member.MemberRequestDTO;
 import com.academy.dtos.member.MemberResponseDTO;
@@ -18,6 +19,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.ClassPathResource;
@@ -44,6 +46,7 @@ public class MemberService {
     private final MessageSource messageSource;
     private final EmailService emailService;
     private final GlobalConfigurationService globalConfigurationService;
+    private final AppProperties appProperties;
 
     @Autowired
     public MemberService(MemberRepository memberRepository,
@@ -53,7 +56,8 @@ public class MemberService {
                          JwtUtil jwtUtil,
                          MessageSource messageSource,
                          EmailService emailService,
-                         GlobalConfigurationService globalConfigurationService) {
+                         GlobalConfigurationService globalConfigurationService,
+                         AppProperties appProperties) {
         this.memberRepository = memberRepository;
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
@@ -62,6 +66,7 @@ public class MemberService {
         this.messageSource = messageSource;
         this.emailService = emailService;
         this.globalConfigurationService = globalConfigurationService;
+        this.appProperties = appProperties;
     }
     public void logout(HttpServletResponse response){
         System.out.println("Backend 2 logout");
@@ -105,15 +110,16 @@ public class MemberService {
     }
 
     private void sendConfirmationEmail(Member member, String rawToken) {
+        String confirmationUrl = appProperties.getUrl() + "/auth/confirm-email/" + rawToken;
         String html = loadVerificationEmailHtml()
                 .replace("[User Name]", member.getUsername())
-                .replace("[CONFIRMATION_LINK]", "http://localhost:8080/auth/confirm-email/" + rawToken) //TODO trocar isto para pegar o caminho da app
-                .replace("[App Name]", "Academy Project"); //TODO trocar para isto ser algo que vem da Global table(nome da aplicação)
+                .replace("[CONFIRMATION_LINK]", confirmationUrl)
+                .replace("[App Name]", appProperties.getName());
 
         emailService.send(
                 member.getEmail(),
                 "Confirm your account",
-                "Clique no link para confirmar: " + "http://localhost:8080/auth/confirm-email/" + rawToken,
+                "Clique no link para confirmar: " + confirmationUrl,
                 html
         );
     }
