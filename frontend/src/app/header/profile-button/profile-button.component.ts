@@ -49,4 +49,8 @@ export class ProfileButtonComponent implements OnInit {
   toggleMenu() {
     this.showMenu.set(!this.showMenu());
   }
+
+  closeMenu() {
+    this.showMenu.set(false);
+  }
 }
