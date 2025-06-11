@@ -1,0 +1,16 @@
+
+@if(loading()) {
+  <app-loading/>
+} @else {
+  <div>
+    <h2> {{ service?.name }}</h2>
+    <p> <strong> Description</strong> {{ service?.description }}</p>
+    <p><strong>Price:</strong> {{ service?.price }}</p>
+    <p><strong>Discount:</strong> {{ service?.discount }}%</p>
+    <p><strong>Negotiable:</strong> {{ service?.negotiable }}</p>
+    <p><strong>Duration:</strong> {{ service?.duration }} minutes</p>
+    <p><strong>Type of service:</strong> {{ service?.serviceType }}</p>
+    <p><strong>Tags:</strong> {{ service?.tagNames }}</p>
+    <p><strong>Permissions:</strong> {{ service?.permissions }}</p>
+  </div>
+}
