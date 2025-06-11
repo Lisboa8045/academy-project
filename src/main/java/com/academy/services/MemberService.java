@@ -43,6 +43,7 @@ public class MemberService {
     private final JwtUtil jwtUtil;
     private final MessageSource messageSource;
     private final EmailService emailService;
+    private final GlobalConfigurationService globalConfigurationService;
 
     @Autowired
     public MemberService(MemberRepository memberRepository,
@@ -50,7 +51,9 @@ public class MemberService {
                          RoleRepository roleRepository,
                          MemberMapper memberMapper,
                          JwtUtil jwtUtil,
-                         MessageSource messageSource, EmailService emailService) {
+                         MessageSource messageSource,
+                         EmailService emailService,
+                         GlobalConfigurationService globalConfigurationService) {
         this.memberRepository = memberRepository;
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
@@ -58,6 +61,7 @@ public class MemberService {
         this.jwtUtil = jwtUtil;
         this.messageSource = messageSource;
         this.emailService = emailService;
+        this.globalConfigurationService = globalConfigurationService;
     }
     public void logout(HttpServletResponse response){
         System.out.println("Backend 2 logout");
@@ -92,7 +96,8 @@ public class MemberService {
         member.setStatus(MemberStatusEnum.WAITING_FOR_EMAIL_APPROVAL);
         String rawConfirmationToken = generateUniqueConfirmationToken();
         member.setConfirmationToken(passwordEncoder.encode(rawConfirmationToken));
-        member.setTokenExpiry(LocalDateTime.now().plusMinutes(30));
+        member.setTokenExpiry(LocalDateTime.now().plusMinutes(
+                Integer.parseInt(globalConfigurationService.getConfigValue("confirmation_token_expiry_minutes"))));
         memberRepository.save(member);
 
         sendConfirmationEmail(member, rawConfirmationToken);
