@@ -1,19 +1,29 @@
 <div class="schedule-container">
   <h2>Agendar Marcação</h2>
-  <!-- Lista de serviços clicável -->
-  <div *ngIf="services && services.length > 0">
+
+  <div *ngIf="currentStep === 'service' && serviceTypes.length > 0" class="service-type-filter">
+    <label for="serviceTypeSelect">Filtrar por tipo de serviço:</label>
+    <select id="serviceTypeSelect" (change)="onServiceTypeChange($event)">
+      <option value="">Todos</option>
+      <option *ngFor="let type of serviceTypes" [value]="type.id">{{ type.name }}</option>
+    </select>
+  </div>
+
+  <!-- Lista de serviços (filtrados) -->
+  <div *ngIf="currentStep === 'service' && filteredServices.length > 0">
     <h3>Escolher serviço</h3>
     <ul>
-      <li *ngFor="let s of services"
+      <li *ngFor="let s of filteredServices"
           (click)="selectService(s)"
           [class.selected]="s.id === form.get('serviceId')?.value">
-        {{ s.name }} - {{ s.description }} - {{ s.price }}€
+        {{ s.name }} - {{ s.description }} - {{ s.price }}€ - {{ s.serviceTypeId }}
       </li>
     </ul>
   </div>
 
-  <!-- Slots disponíveis -->
-  <div *ngIf="slots && slots.length > 0">
+
+  <!-- Passo 2: Slots -->
+  <div *ngIf="currentStep === 'slots' && slots.length > 0">
     <h3>Escolher horário</h3>
     <ul>
       <li *ngFor="let slot of slots"
@@ -22,11 +32,21 @@
         {{ slot.start | date:'short' }} - {{ slot.providerName }}
       </li>
     </ul>
+    <button (click)="currentStep = 'service'">Voltar a serviços</button>
   </div>
+</div>
 
-  <button
-    [disabled]="!selectedSlot || !form.get('serviceId')?.value"
-    (click)="confirmAppointment()">
-    Confirmar
-  </button>
+<!-- Modal de confirmação -->
+<div class="modal-backdrop" *ngIf="currentStep === 'confirmation' && showConfirmationModal">
+  <div class="modal">
+    <h3>Confirmar Marcação</h3>
+    <p><strong>Serviço:</strong> {{ selectedService?.name }}</p>
+    <p><strong>Data:</strong> {{ selectedSlot?.start | date:'short' }}</p>
+    <p><strong>Prestador:</strong> {{ selectedSlot?.providerName }}</p>
+
+    <div class="modal-buttons">
+      <button (click)="cancelModal()">Cancelar</button>
+      <button (click)="confirmInModal()">Confirmar</button>
+    </div>
+  </div>
 </div>

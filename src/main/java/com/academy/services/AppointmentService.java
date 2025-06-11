@@ -2,6 +2,7 @@
 
 package com.academy.services;
 
+import com.academy.config.authentication.AuthenticationFacade;
 import com.academy.dtos.appointment.AppointmentMapper;
 import com.academy.dtos.appointment.AppointmentRequestDTO;
 import com.academy.dtos.appointment.AppointmentResponseDTO;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,12 +32,14 @@ public class AppointmentService {
 
     private final MemberService memberService;
 
+    private final AuthenticationFacade authenticationFacade;
+
     @Value("${slot.window.days:30}")
     private int slotWindowDays;
 
     @Autowired
 
-    public AppointmentService(AppointmentRepository appointmentRepository, ServiceProviderService serviceProviderService, AppointmentMapper appointmentMapper, MemberService memberService) {
+    public AppointmentService(AppointmentRepository appointmentRepository, ServiceProviderService serviceProviderService, AppointmentMapper appointmentMapper, MemberService memberService, AuthenticationFacade authenticationFacade) {
 
         this.appointmentRepository = appointmentRepository;
 
@@ -45,6 +49,7 @@ public class AppointmentService {
 
         this.memberService = memberService;
 
+        this.authenticationFacade = authenticationFacade;
     }
 
     public List<AppointmentResponseDTO> getAllAppointments() {
@@ -68,21 +73,30 @@ public class AppointmentService {
     }
 
     public AppointmentResponseDTO createAppointment(AppointmentRequestDTO dto) {
+        Optional<Member> member = memberService.findbyId(dto.memberId());
+        System.out.println(">>> Membro: " + member);
 
         ServiceProvider serviceProvider = serviceProviderService.getServiceProviderEntityById(dto.serviceProviderId());
+        System.out.println(">>> Prestador: " + serviceProvider);
 
-        Member member = memberService.getMemberEntityById(dto.memberId());
         Appointment appointment = appointmentMapper.toEntity(dto);
+        System.out.println(">>> Entidade Appointment antes de guardar: " + appointment);
 
+        if (member.isPresent()) {
+            appointment.setMember(member.get());
+        } else {
+            // Tratar caso não exista o membro, lançar exceção ou retornar erro
+            throw new RuntimeException("Member not found with id: " + dto.memberId());
+        }
         appointment.setServiceProvider(serviceProvider);
-
-        appointment.setMember(member);
+        appointment.setStartDateTime(dto.startDateTime());
+        appointment.setEndDateTime(dto.endDateTime());
 
         return appointmentMapper.toResponseDTO(appointmentRepository.save(appointment));
-
     }
 
-    
+
+
     public AppointmentResponseDTO updateAppointment(int id, AppointmentRequestDTO appointmentDetails) {
 
         Appointment appointment = appointmentRepository.findById(id)

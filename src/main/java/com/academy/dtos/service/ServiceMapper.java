@@ -26,6 +26,7 @@ public abstract class ServiceMapper {
 
     @Mapping(source = "service.tags", target = "tagNames", qualifiedByName = "mapTagsToNames")
     @Mapping(source = "service.serviceType.name", target = "serviceTypeName")
+    @Mapping(source = "service.serviceType.id", target = "serviceTypeId")
     @Mapping(expression = "java(service.getOwner().getId())", target = "ownerId")
     @Mapping(expression = "java(permissions)", target = "permissions")
     public abstract ServiceResponseDTO toDto(Service service, List<ProviderPermissionEnum> permissions);
