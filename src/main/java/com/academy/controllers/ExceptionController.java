@@ -49,10 +49,22 @@ public class ExceptionController {
     public ResponseEntity<Object> handleInvalidValue(BadRequestException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
+
     @ExceptionHandler(com.academy.exceptions.BadRequestException.class)
     public ResponseEntity<Object> handleInvalidValue(com.academy.exceptions.BadRequestException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(SendEmailException.class)
+    public ResponseEntity<Object> handleInvalidValue(SendEmailException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(EmailTemplateLoadingException.class)
+    public ResponseEntity<Object> handleInvalidValue(EmailTemplateLoadingException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<Object> handleInvalidValue(AuthenticationException e) {

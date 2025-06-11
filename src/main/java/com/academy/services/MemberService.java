@@ -27,6 +27,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
@@ -111,10 +112,12 @@ public class MemberService {
 
     private void sendConfirmationEmail(Member member, String rawToken) {
         String confirmationUrl = appProperties.getUrl() + "/auth/confirm-email/" + rawToken;
+
         String html = loadVerificationEmailHtml()
                 .replace("[User Name]", member.getUsername())
                 .replace("[CONFIRMATION_LINK]", confirmationUrl)
-                .replace("[App Name]", appProperties.getName());
+                .replace("[App Name]", appProperties.getName())
+                        .replace("[hours]", formatHours(globalConfigurationService.getConfigValue("confirmation_token_expiry_minutes")));
 
         emailService.send(
                 member.getEmail(),
@@ -123,14 +126,29 @@ public class MemberService {
                 html
         );
     }
+    private String formatHours(String minutesStr){
+        long totalMinutes = Long.parseLong(minutesStr);
+
+        long hours = totalMinutes / 60;
+        long minutes = totalMinutes % 60;
+        String formattedTime;
+        if (hours > 0 && minutes > 0) {
+            formattedTime = hours + " hour" + (hours > 1 ? "s" : "") + " and " + minutes + " minute" + (minutes > 1 ? "s" : "");
+        } else if (hours > 0) {
+            formattedTime = hours + " hour" + (hours > 1 ? "s" : "");
+        } else {
+            formattedTime = minutes + " minute" + (minutes > 1 ? "s" : "");
+        }
+        return formattedTime;
+    }
 
     private String loadVerificationEmailHtml(){
             try {
                 ClassPathResource resource = new ClassPathResource("templates/verification-email.html");
                 byte[] bytes = Files.readAllBytes(resource.getFile().toPath());
                 return new String(bytes, StandardCharsets.UTF_8);
-            } catch (Exception e) { //TODO Exception melhor
-                throw new RuntimeException("Erro ao carregar template de e-mail", e);
+            } catch (IOException e) {
+                throw new EmailTemplateLoadingException("Erro ao carregar template de e-mail");
             }
     }
 
