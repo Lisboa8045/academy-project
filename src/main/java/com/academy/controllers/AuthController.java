@@ -1,5 +1,6 @@
 package com.academy.controllers;
 
+import com.academy.config.authentication.AuthenticationFacade;
 import com.academy.dtos.register.*;
 import com.academy.services.EmailService;
 import com.academy.services.MemberService;
@@ -29,7 +30,7 @@ public class AuthController {
     private final EmailService emailService;
 
     @Autowired
-    public AuthController(MemberService memberService, MessageSource messageSource, EmailService emailService) {
+    public AuthController(MemberService memberService, MessageSource messageSource, EmailService emailService, AuthenticationFacade authenticationFacade) {
         this.memberService = memberService;
         this.messageSource = messageSource;
         this.emailService = emailService;
@@ -80,4 +81,10 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("username", username));
     }
 
+    @PostMapping("/recreate-confirmation-token")
+    public ResponseEntity<RecreateConfirmationTokenResponseDto> recreateConfirmationToken(
+            @RequestBody RecreateConfirmationTokenRequestDto request) {
+        memberService.recreateConfirmationToken(request.login(), request.password());
+        return ResponseEntity.ok(new RecreateConfirmationTokenResponseDto("Confirmation token recreated"));
+    }
 }

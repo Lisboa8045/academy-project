@@ -174,13 +174,19 @@ public class MemberService {
 
     }
 
-    public LoginResponseDto login(LoginRequestDto request, HttpServletResponse response) {
-        Optional<Member> optionalMember = request.login().contains("@")
-                ? memberRepository.findByEmail(request.login())
-                : memberRepository.findByUsername(request.login());
+    private Member tryToAuthenticateMember(String login, String password) {
+        Optional<Member> optionalMember = login.contains("@")
+                ? memberRepository.findByEmail(login)
+                : memberRepository.findByUsername(login);
 
-        if(optionalMember.isPresent() && passwordEncoder.matches(request.password(), optionalMember.get().getPassword())) {
-            Member member = optionalMember.get();
+        if(optionalMember.isEmpty() ||  !passwordEncoder.matches(password, optionalMember.get().getPassword()))
+            throw new AuthenticationException(messageSource.getMessage("auth.invalid", null, LocaleContextHolder.getLocale()));
+
+        return optionalMember.get();
+    }
+    public LoginResponseDto login(LoginRequestDto request, HttpServletResponse response) {
+            Member member = tryToAuthenticateMember(request.login(), request.password());
+
             if(!member.isEnabled())
                 throw new UnavailableUserException(member.getStatus());
             UserDetails userDetails = new org.springframework.security.core.userdetails.User(
@@ -200,8 +206,6 @@ public class MemberService {
                     member.getId(),
                     member.getUsername()
             );
-        }
-        throw new AuthenticationException(messageSource.getMessage("auth.invalid", null, LocaleContextHolder.getLocale()));
     }
 
     public Member getMemberByUsername(String username){
@@ -273,5 +277,17 @@ public class MemberService {
     }
     public Member getMemberEntityById(long id){
         return memberRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
+    }
+
+    public void recreateConfirmationToken(String login, String password) {
+        Member member = tryToAuthenticateMember(login, password);
+        if(member.isEnabled())
+            throw new BadRequestException("Member already enabled");
+        member.setTokenExpiry(LocalDateTime.now().plusMinutes(
+                Integer.parseInt(globalConfigurationService.getConfigValue("confirmation_token_expiry_minutes"))));
+        String rawConfirmationToken = generateUniqueConfirmationToken();
+        member.setConfirmationToken(passwordEncoder.encode(rawConfirmationToken));
+        memberRepository.save(member);
+        sendConfirmationEmail(member, rawConfirmationToken);
     }
 }

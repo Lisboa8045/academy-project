@@ -44,9 +44,13 @@ public class ExceptionController {
     public ResponseEntity<Object> handleInvalidValue(EntityAlreadyExists e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
     }
-
+//TODO eliminar esta para apenas utilizar a de baixo
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<Object> handleInvalidValue(BadRequestException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(com.academy.exceptions.BadRequestException.class)
+    public ResponseEntity<Object> handleInvalidValue(com.academy.exceptions.BadRequestException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
