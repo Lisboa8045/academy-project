@@ -199,19 +199,50 @@
     }
 
     selectSlot(slot: SlotModel) {
-      const sameTimeSlots = this.slots.filter(s => s.start === slot.start);
+      const slotTime = new Date(slot.start).toISOString();
 
-      if (sameTimeSlots.length > 1) {
-        // Mostrar a lista de prestadores disponíveis (passo 'provider')
-        this.providerOptions = sameTimeSlots;
-        this.currentStep = 'provider';
-      } else {
+      // Obter todos slots com o mesmo horário
+      const sameTimeSlots = this.slots.filter(s =>
+        new Date(s.start).toISOString() === slotTime
+      );
+
+      // Criar map único de providers
+      const uniqueProviderMap = new Map<string, SlotModel>();
+      for (const s of sameTimeSlots) {
+        if (!uniqueProviderMap.has(s.providerName)) {
+          uniqueProviderMap.set(s.providerName, s);
+        }
+      }
+
+      this.providerOptions = Array.from(uniqueProviderMap.values());
+
+      // Se filtro por provider estiver ativo E provider do slot for esse filtro
+      if (this.selectedProvider && slot.providerName === this.selectedProvider) {
         this.selectedSlot = slot;
         this.currentStep = 'confirmation';
+        this.showProviderModal = false;
+        this.showConfirmationModal = true;
+        return;
+      }
+
+      if (this.providerOptions.length > 1) {
+        // Se clicou no mesmo provider, "desmarca" e abre modal para escolha
+        if (this.selectedSlot && this.selectedSlot.providerName === slot.providerName) {
+          this.selectedSlot = undefined;
+          this.showProviderModal = true;
+        } else {
+          this.selectedSlot = this.providerOptions.find(p => p.providerName === slot.providerName) ?? undefined;
+          this.showProviderModal = true;
+        }
+        this.currentStep = 'provider';
+      } else {
+        // Só um provider -> vai direto à confirmação
+        this.selectedSlot = this.providerOptions[0];
+        this.currentStep = 'confirmation';
+        this.showProviderModal = false;
         this.showConfirmationModal = true;
       }
     }
-
 
 
     cancelModal() {
@@ -229,24 +260,22 @@
       const selectElement = event.target as HTMLSelectElement;
       const value = selectElement.value;
 
-      console.log('Valor selecionado (value):', value); // <== AQUI
+      this.currentStep = 'service'; // <- força o fluxo a recomeçar
+      this.selectedSlot = undefined;
+      this.filteredSlots = [];
+      this.slots = [];
 
       if (!value) {
         this.filteredServices = this.services;
       } else {
         const selectedTypeId = parseInt(value, 10);
-        console.log('Filtrando por serviceTypeId:', selectedTypeId); // <== E AQUI
-
-        this.filteredServices = this.services.filter(s => {
-          console.log('Comparando:', s.serviceTypeId, '===', selectedTypeId);
-          return s.serviceTypeId === selectedTypeId;
-        });
+        this.filteredServices = this.services.filter(s => s.serviceTypeId === selectedTypeId);
       }
 
       this.form.get('serviceId')?.setValue(null);
       this.selectedServiceId = undefined;
-      this.slots = [];
     }
+
 
 
 
@@ -282,8 +311,9 @@
     selectProviderSlot(slot: SlotModel) {
       this.selectedSlot = slot;
       this.showProviderModal = false;
-      this.currentStep = 'confirmation';
       this.showConfirmationModal = true;
+      this.currentStep = 'confirmation';
     }
+
   }
 ``

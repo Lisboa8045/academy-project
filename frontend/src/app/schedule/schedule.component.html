@@ -37,11 +37,9 @@
   </div>
 
   <!-- Passo 2: Slots -->
-  <div *ngIf="currentStep === 'slots' && slots.length > 0">
-    <div class="search-bar">
-      <input type="text" placeholder="Filtrar por prestador..." (input)="onProviderSearchChange($event)" />
-    </div>
+  <div *ngIf="(currentStep === 'slots' || currentStep === 'confirmation' || currentStep === 'provider') && slots.length > 0">
     <!-- Filtro por prestador -->
+    <h3>Escolher prestador</h3>
     <div class="service-type-scroll">
       <button
         class="type-button"
@@ -73,19 +71,18 @@
           <li *ngFor="let slot of weeklySlots[day.toISOString().split('T')[0]]"
               (click)="selectSlot(slot)">
             <div class="slot-hour">{{ slot.start | date: 'HH:mm' }}</div>
-            <div class="slot-provider">{{ slot.providerName }}</div>
           </li>
         </ul>
       </div>
     </div>
     <div class="top-bar">
-      <button class="back-button" (click)="currentStep = 'service'">Voltar para serviços</button>
+      <button class="back-button" (click)="currentStep = 'service'">Voltar a serviços</button>
     </div>
   </div>
 
-  <!-- Passo de seleção do prestador -->
-  <div *ngIf="currentStep === 'provider'">
-    <h3>Escolha um prestador para o horário {{ providerOptions[0]?.start | date:'shortTime' }}</h3>
+<div class="modal-backdrop" *ngIf="currentStep === 'provider' && showProviderModal">
+  <div class="modal">
+    <h3>Escolha um prestador para as {{ providerOptions[0]?.start | date:'shortTime' }}</h3>
     <ul>
       <li *ngFor="let slot of providerOptions" (click)="selectProviderSlot(slot)" class="provider-option">
         {{ slot.providerName }}
@@ -94,8 +91,6 @@
     <button (click)="currentStep = 'slots'">Voltar para horários</button>
   </div>
 </div>
-
-
 
 
 <!-- Modal de confirmação -->

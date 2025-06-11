@@ -25,7 +25,7 @@ h2, h3 {
   padding: 8px 12px;
   border-radius: 6px;
   border: 1.5px solid #ced4da;
-  font-size: 16px;
+  font-size: 14px;
   outline: none;
   transition: border-color 0.3s ease;
   background-color: #f8f9fa;
@@ -69,7 +69,7 @@ h2, h3 {
   border-radius: 6px;
   background-color: #f8f9fa;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
   color: #000;
   user-select: none;
   box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
@@ -84,6 +84,8 @@ h2, h3 {
   background-color: #e9f5ff;
   border-color: #74b9ff;
   color: #0d6efd;
+  transition: transform 0.25s ease;
+  transform: scale(1.08);
 }
 
 .type-button.active {
@@ -97,8 +99,8 @@ h2, h3 {
 /* Lista de serviços em duas colunas */
 .schedule-container ul {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 5px 5px;
+  grid-template-columns: repeat(3, 1fr); /* <-- Aqui estava 2 */
+  gap: 20px 20px;
   list-style: none;
   padding: 0;
   margin: 16px 0 16px 0;
@@ -117,12 +119,15 @@ h2, h3 {
   flex-direction: column;
   justify-content: center;
   background-color: #f8f9fa;
+  max-width: 350px;
 }
 
 .schedule-container li:hover:not(.selected) {
   background-color: #e9f5ff;
   border-color: #74b9ff;
   color: #0d6efd;
+  transition: transform 0.25s ease;
+  transform: scale(1.08);
 }
 
 .schedule-container li.selected {
@@ -206,16 +211,18 @@ button:hover {
 
 .weekly-slots {
   display: flex;
-  gap: 12px;
+  gap: 15px;
   overflow-x: auto;
+  margin-bottom: 16px;
 }
 
 .day-column {
   flex: 1;
-  min-width: 120px;
+  min-width: 200px;
+
   border: 1px solid #ccc;
   border-radius: 6px;
-  padding: 8px;
+  padding: 15px;
   background: #f8f8f8;
 }
 
@@ -227,6 +234,7 @@ button:hover {
 .day-column ul {
   list-style: none;
   padding: 0;
+  gap: 8px; /* space between slots */
 }
 
 .day-column li {
@@ -249,16 +257,21 @@ button:hover {
 .day-column li {
   cursor: pointer;
   padding: 6px 4px;
-  border-bottom: 1px solid #ddd;
   text-align: center;
+  min-height: 40px; /* increase this value as you want */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* center text vertically */
 }
 
-.day-column li:hover {
-  background-color: #eef;
-}
+
+  .day-column li:hover {
+    background-color: #eef;
+    transition: transform 0.25s ease;
+    transform: scale(1.08);
+  }
 
 .slot-hour {
-  font-weight: bold;
   font-size: 14px;
 }
 
