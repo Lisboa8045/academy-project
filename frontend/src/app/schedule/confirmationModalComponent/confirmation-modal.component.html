@@ -2,9 +2,9 @@
 <div class="modal-backdrop">
   <div class="modal">
     <h3>Confirmar Marcação</h3>
-    <p><strong>Serviço:</strong> {{ selectedService?.name }}</p>
-    <p><strong>Data:</strong> {{ selectedSlot?.start | date:'short' }}</p>
-    <p><strong>Prestador:</strong> {{ selectedSlot?.providerName }}</p>
+    <p class="modal-title"><strong>Serviço: </strong> {{ selectedService?.name }}</p>
+    <p class="modal-title"><strong>Data: </strong> {{ selectedSlot?.start | date:'short' }}</p>
+    <p class="modal-title"><strong>Prestador: </strong> {{ selectedSlot?.providerName }}</p>
 
     <div class="modal-buttons">
       <button (click)="cancel.emit()">Cancelar</button>  <!-- Note .emit() -->

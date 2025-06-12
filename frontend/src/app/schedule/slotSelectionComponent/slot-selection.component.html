@@ -21,18 +21,21 @@
   </span>
   <button (click)="goToNextWeek()">Semana Seguinte »</button>
 </div>
-<h3>Escolher horário</h3>
+<h3>Calendar</h3>
 <div class="weekly-slots">
   <div class="day-column" *ngFor="let day of getWeekDays()">
     <h4>{{ day | date: 'EEE dd/MM' }}</h4>
-    <ul>
+    <ul *ngIf="getSlotsForDay(day).length > 0; else emptyDay">
       <li *ngFor="let slot of getSlotsForDay(day)"
           (click)="selectSlot(slot)">
         <div class="slot-hour">{{ slot.start | date: 'HH:mm' }}</div>
       </li>
     </ul>
+    <ng-template #emptyDay>
+      <div class="empty-day">No availability for this day</div>
+    </ng-template>
   </div>
 </div>
 <div class="top-bar">
-  <button class="back-button" (click)="backToServices.emit()">Voltar a serviços</button>
+  <button class="back-button" (click)="backToServices.emit()">Back to services</button>
 </div>

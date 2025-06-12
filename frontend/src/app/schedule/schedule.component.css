@@ -106,6 +106,15 @@ h2, h3 {
   font-weight: 600;
 }
 
+.empty-day {
+
+  text-align: center;
+  color: #aaa;
+  font-size: 0.9rem;
+  margin-top: 190px;
+  font-style: italic;
+}
+
 /* Lista de serviços em duas colunas */
 .schedule-container ul {
   display: grid;
@@ -176,6 +185,11 @@ button:hover {
   align-items: center;
   z-index: 9999;
 }
+
+.modal-title{
+  color: #000;
+}
+
 
 .modal {
   background-color: white;

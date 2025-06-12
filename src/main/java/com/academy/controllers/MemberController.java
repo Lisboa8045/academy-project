@@ -2,6 +2,7 @@ package com.academy.controllers;
 
 import com.academy.dtos.member.MemberRequestDTO;
 import com.academy.dtos.member.MemberResponseDTO;
+import com.academy.models.Member;
 import com.academy.services.MemberService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,7 @@ public class MemberController {
     public MemberController(MemberService memberService) {
         this.memberService = memberService;
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMember(@PathVariable Long id) {
         memberService.deleteMember(id);
@@ -24,7 +26,7 @@ public class MemberController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MemberResponseDTO> editMember(@PathVariable long id, @RequestBody MemberRequestDTO memberRequestDTO){
+    public ResponseEntity<MemberResponseDTO> editMember(@PathVariable long id, @RequestBody MemberRequestDTO memberRequestDTO) {
         MemberResponseDTO memberResponseDTO = memberService.editMember(id, memberRequestDTO);
         return ResponseEntity.ok(memberResponseDTO);
     }
@@ -38,4 +40,10 @@ public class MemberController {
     public ResponseEntity<MemberResponseDTO> getMemberById(@PathVariable Long id) {
         return ResponseEntity.ok(memberService.getMemberById(id));
     }
+
+    @GetMapping("/{username}")
+    public ResponseEntity<Long> getMemberById(@PathVariable String username) {
+        return ResponseEntity.ok(memberService.getMemberByUsername(username).getId());
+    }
+
 }

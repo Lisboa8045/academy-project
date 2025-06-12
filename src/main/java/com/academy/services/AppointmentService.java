@@ -73,24 +73,24 @@ public class AppointmentService {
     }
 
     public AppointmentResponseDTO createAppointment(AppointmentRequestDTO dto) {
-        Optional<Member> member = memberService.findbyId(dto.memberId());
-        System.out.println(">>> Membro: " + member);
+
+        String username = authenticationFacade.getUsername();
+        Member member = memberService.getMemberByUsername(username);
+
+        System.out.println(">>> Membro: " + username);
 
         ServiceProvider serviceProvider = serviceProviderService.getServiceProviderEntityById(dto.serviceProviderId());
-        System.out.println(">>> Prestador: " + serviceProvider);
+        System.out.println(">>> Prestador ID: " + serviceProvider.getId());
 
         Appointment appointment = appointmentMapper.toEntity(dto);
         System.out.println(">>> Entidade Appointment antes de guardar: " + appointment);
 
-        if (member.isPresent()) {
-            appointment.setMember(member.get());
-        } else {
-            // Tratar caso não exista o membro, lançar exceção ou retornar erro
-            throw new RuntimeException("Member not found with id: " + dto.memberId());
-        }
+
+        appointment.setMember(member);
         appointment.setServiceProvider(serviceProvider);
         appointment.setStartDateTime(dto.startDateTime());
         appointment.setEndDateTime(dto.endDateTime());
+        appointment.setStatus(dto.status());
 
         return appointmentMapper.toResponseDTO(appointmentRepository.save(appointment));
     }
@@ -103,11 +103,8 @@ public class AppointmentService {
 
                 .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
 
-        if(appointmentDetails.memberId() != null){
-            Member member = memberService.getMemberEntityById(appointmentDetails.memberId());
-            appointment.setMember(member);
-
-        }
+        String username = authenticationFacade.getUsername();
+        Member member = memberService.getMemberByUsername(username);
 
         if(appointmentDetails.serviceProviderId() != null) {
             ServiceProvider serviceProvider = serviceProviderService.getServiceProviderEntityById(appointmentDetails.serviceProviderId());

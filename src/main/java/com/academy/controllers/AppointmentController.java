@@ -40,6 +40,7 @@ public class AppointmentController {
 
     @PostMapping
     public ResponseEntity<AppointmentResponseDTO> createAppointment(@Valid @RequestBody AppointmentRequestDTO dto) {
+        System.out.println("CREATE APPOINTMENT CHAMADO");
         AppointmentResponseDTO response = appointmentService.createAppointment(dto);
         System.out.println("Successfully created appointment with ID: " + response.id());
         return ResponseEntity.ok(response);

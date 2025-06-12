@@ -23,12 +23,11 @@ export class ScheduleApiService {
     return this.http.get<ServiceTypeModel[]>(`${this.BASE_URL}/service-types`);
   }
 
-  getServiceProviderId(serviceId: number, providerId: number): Observable<any> {
+  getServiceProvider(serviceId: number, providerId: number): Observable<any> {
     return this.http.get(`${this.BASE_URL}/service-providers/services/${serviceId}/providers/${providerId}`);
   }
 
   confirmAppointment(appointment: AppointmentModel): Observable<any> {
     return this.http.post(`${this.BASE_URL}/appointments`, appointment);
   }
-
 }

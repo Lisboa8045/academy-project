@@ -32,6 +32,10 @@ export class SlotSelectionComponent {
     return days;
   }
 
+  hasSlots(): boolean {
+    return Object.values(this.weeklySlots).some(daySlots => daySlots.length > 0);
+  }
+
   getSlotsForDay(day: Date): SlotModel[] {
     const key = day.toISOString().split('T')[0];
     return this.weeklySlots[key] || [];

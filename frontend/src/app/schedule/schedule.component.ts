@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { addDays, startOfWeek, endOfWeek, isSameDay } from 'date-fns';
 import { ServiceApiService } from '../shared/service-api.service';
@@ -13,6 +13,8 @@ import {ServiceListComponent} from './serviceListComponent/service-list.componen
 import {ProviderSelectionModalComponent} from './providerSelectionModalComponent/provider-selection-modal.component';
 import {ConfirmationModalComponent} from './confirmationModalComponent/confirmation-modal.component';
 import {SlotSelectionComponent} from './slotSelectionComponent/slot-selection.component';
+import { ServiceProviderModel } from './models/service-provider.model';
+import {AuthStore} from '../auth/auth.store';
 
 @Component({
   selector: 'app-schedule',
@@ -42,7 +44,6 @@ export class ScheduleComponent implements OnInit {
   filteredServices: ServiceModel[] = [];
   selectedServiceTypeId: number | null = null;
   searchTerm = '';
-  providerSearchTerm = '';
   filteredSlots: SlotModel[] = [];
   providers: string[] = [];
   selectedProvider: string | null = null;
@@ -52,6 +53,7 @@ export class ScheduleComponent implements OnInit {
   weeklySlots: { [key: string]: SlotModel[] } = {};
   providerOptions: SlotModel[] = [];
   showProviderModal = false;
+  readonly username = inject(AuthStore).username;
 
   constructor(
     private fb: FormBuilder,
@@ -63,91 +65,91 @@ export class ScheduleComponent implements OnInit {
     });
   }
 
-    get selectedService(): ServiceModel | undefined {
-      return this.services.find(s => s.id === this.form.value.serviceId);
+  get selectedService(): ServiceModel | undefined {
+    return this.services.find(s => s.id === this.form.value.serviceId);
+  }
+
+  updateWeekDays() {
+    this.weekDays = [];
+    for (let i = 0; i < 7; i++) {
+      this.weekDays.push(addDays(this.currentWeekStart, i));
     }
+    this.organizeSlotsByDay();
+  }
 
-    updateWeekDays() {
-      this.weekDays = [];
-      for (let i = 0; i < 7; i++) {
-        this.weekDays.push(addDays(this.currentWeekStart, i));
-      }
-      this.organizeSlotsByDay();
-    }
+  goToNextWeek() {
+    this.currentWeekStart = addDays(this.currentWeekStart, 7);
+    this.currentWeekEnd = addDays(this.currentWeekEnd, 7);
+    this.updateWeekDays();
+  }
 
-    goToNextWeek() {
-      this.currentWeekStart = addDays(this.currentWeekStart, 7);
-      this.currentWeekEnd = addDays(this.currentWeekEnd, 7);
-      this.updateWeekDays();
-    }
-
-    goToPreviousWeek() {
-      this.currentWeekStart = addDays(this.currentWeekStart, -7);
-      this.currentWeekEnd = addDays(this.currentWeekEnd, -7);
-      this.updateWeekDays();
-    }
+  goToPreviousWeek() {
+    this.currentWeekStart = addDays(this.currentWeekStart, -7);
+    this.currentWeekEnd = addDays(this.currentWeekEnd, -7);
+    this.updateWeekDays();
+  }
 
 
-    organizeSlotsByDay() {
-      this.weeklySlots = {};
+  organizeSlotsByDay() {
+    this.weeklySlots = {};
 
-      for (const day of this.weekDays) {
-        const key = day.toISOString().split('T')[0]; // YYYY-MM-DD
-        const daySlots = this.filteredSlots.filter(slot =>
-          isSameDay(new Date(slot.start), day)
-        );
+    for (const day of this.weekDays) {
+      const key = day.toISOString().split('T')[0]; // YYYY-MM-DD
+      const daySlots = this.filteredSlots.filter(slot =>
+        isSameDay(new Date(slot.start), day)
+      );
 
-        // Group by start hour (ignoring provider)
-        const uniqueSlotsMap = new Map<string, SlotModel[]>();
+      // Group by start hour (ignoring provider)
+      const uniqueSlotsMap = new Map<string, SlotModel[]>();
 
-        for (const slot of daySlots) {
-          const slotTimeKey = new Date(slot.start).toISOString().substring(0, 16); // YYYY-MM-DDTHH:mm
+      for (const slot of daySlots) {
+        const slotTimeKey = new Date(slot.start).toISOString().substring(0, 16); // YYYY-MM-DDTHH:mm
 
-          if (!uniqueSlotsMap.has(slotTimeKey)) {
-            uniqueSlotsMap.set(slotTimeKey, []);
-          }
-
-          uniqueSlotsMap.get(slotTimeKey)!.push(slot);
+        if (!uniqueSlotsMap.has(slotTimeKey)) {
+          uniqueSlotsMap.set(slotTimeKey, []);
         }
 
-        // Store one slot per time group (e.g., show just the first provider initially)
-        this.weeklySlots[key] = Array.from(uniqueSlotsMap.values()).map(group => group[0]);
+        uniqueSlotsMap.get(slotTimeKey)!.push(slot);
       }
-    }
 
-    ngOnInit(): void {
-      this.loadServices();
-      console.log(this.services);
-      this.loadServiceTypes();
-
+      // Store one slot per time group (e.g., show just the first provider initially)
+      this.weeklySlots[key] = Array.from(uniqueSlotsMap.values()).map(group => group[0]);
     }
+  }
 
-    loadServices() {
-      this.serviceApi.searchServices().subscribe({
-        next: (res: ServiceModel[]) => {
-          this.services = res;
-          this.filteredServices = res; // inicialmente todos
-        },
-        error: err => console.error('Erro ao carregar serviços:', err)
-      });
-    }
+  ngOnInit(): void {
+    this.loadServices();
+    console.log(this.services);
+    this.loadServiceTypes();
 
-    loadServiceTypes() {
-      this.scheduleApi.getServiceTypes().subscribe({
-        next: (res: ServiceTypeModel[]) => {
-          this.serviceTypes = res;
-        },
-        error: err => console.error('Erro ao carregar tipos de serviço:', err)
-      });
-    }
+  }
 
-    filterByProvider(provider: string | null) {
-      this.selectedProvider = provider;
-      this.filteredSlots = this.slots.filter(slot =>
-        !provider || slot.providerName === provider
-      );
-      this.organizeSlotsByDay(); // <-- Atualizar visualização
-    }
+  loadServices() {
+    this.serviceApi.searchServices().subscribe({
+      next: (res: ServiceModel[]) => {
+        this.services = res;
+        this.filteredServices = res; // inicialmente todos
+      },
+      error: err => console.error('Erro ao carregar serviços:', err)
+    });
+  }
+
+  loadServiceTypes() {
+    this.scheduleApi.getServiceTypes().subscribe({
+      next: (res: ServiceTypeModel[]) => {
+        this.serviceTypes = res;
+      },
+      error: err => console.error('Erro ao carregar tipos de serviço:', err)
+    });
+  }
+
+  filterByProvider(provider: string | null) {
+    this.selectedProvider = provider;
+    this.filteredSlots = this.slots.filter(slot =>
+      !provider || slot.providerName === provider
+    );
+    this.organizeSlotsByDay(); // <-- Atualizar visualização
+  }
 
   onSearchChange(searchTerm: string) {
     this.searchTerm = searchTerm.toLowerCase();
@@ -194,13 +196,6 @@ export class ScheduleComponent implements OnInit {
           error: err => console.error('Erro ao carregar slots:', err)
         });
       }
-    }
-
-    applySlotFilters() {
-      this.filteredSlots = this.slots.filter(slot =>
-        slot.providerName.toLowerCase().includes(this.providerSearchTerm)
-      );
-      this.organizeSlotsByDay(); // <-- Atualizar visualização
     }
 
     selectSlot(slot: SlotModel) {
@@ -266,16 +261,20 @@ export class ScheduleComponent implements OnInit {
       const serviceId = this.form.value.serviceId;
       const providerId = this.selectedSlot.providerId;
 
-      this.scheduleApi.getServiceProviderId(serviceId, providerId).subscribe({
-        next: (serviceProviderId: number) => {
+      this.scheduleApi.getServiceProvider(serviceId, providerId).subscribe({
+        next: (serviceProvider: ServiceProviderModel) => {
           const appointment: AppointmentModel = {
-            serviceProviderId: serviceProviderId,
+            serviceProviderId: serviceProvider.id,
             startDateTime: this.selectedSlot!.start,
             endDateTime: this.selectedSlot!.end,
             status: 'CONFIRMED'
           };
 
-          console.log('APPOINTMENT CREATE: ' + appointment);
+          console.log('[LOG] Creating appointment with the following details:');
+          console.log('Service Provider ID:', appointment.serviceProviderId);
+          console.log('Start DateTime:', appointment.startDateTime);
+          console.log('End DateTime:', appointment.endDateTime);
+          console.log('Status:', appointment.status);
 
           this.scheduleApi.confirmAppointment(appointment).subscribe({
             next: () => alert('Marcação efetuada com sucesso!'),
@@ -291,37 +290,6 @@ export class ScheduleComponent implements OnInit {
       this.showProviderModal = false;
       this.showConfirmationModal = true;
       this.currentStep = 'confirmation';
-    }
-
-    showProviderSelectionModal(slots: SlotModel[]) {
-      this.providerOptions = slots;
-      this.showProviderModal = true;
-    }
-
-    onServiceTypeChange(event: Event) {
-      const selectElement = event.target as HTMLSelectElement;
-      const value = selectElement.value;
-
-      this.currentStep = 'service'; // <- força o fluxo a recomeçar
-      this.selectedSlot = undefined;
-      this.filteredSlots = [];
-      this.slots = [];
-
-      if (!value) {
-        this.filteredServices = this.services;
-      } else {
-        const selectedTypeId = parseInt(value, 10);
-        this.filteredServices = this.services.filter(s => s.serviceTypeId === selectedTypeId);
-      }
-
-      this.form.get('serviceId')?.setValue(null);
-      this.selectedServiceId = undefined;
-    }
-
-    onProviderSearchChange(event: Event) {
-      const input = event.target as HTMLInputElement;
-      this.providerSearchTerm = input.value.toLowerCase();
-      this.applySlotFilters();
     }
 
 }

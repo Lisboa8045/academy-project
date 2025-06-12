@@ -10,8 +10,8 @@ import { ServiceModel } from '../../service/service.model';
   styleUrls: ['../schedule.component.css']
 })
 export class ServiceListComponent {
-  @Input() services: ServiceModel[] = [];  // Must match parent binding
-  @Input() selectedServiceId?: number;    // Must match parent binding
+  @Input() services: ServiceModel[] = [];
+  @Input() selectedServiceId?: number;
   @Output() serviceSelected = new EventEmitter<ServiceModel>();
 
   selectService(service: ServiceModel) {
