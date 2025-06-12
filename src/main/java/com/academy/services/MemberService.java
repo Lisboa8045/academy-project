@@ -1,6 +1,7 @@
 package com.academy.services;
 
 import com.academy.config.AppProperties;
+import com.academy.config.TestTokenStorage;
 import com.academy.config.authentication.JwtUtil;
 import com.academy.dtos.member.MemberRequestDTO;
 import com.academy.dtos.member.MemberResponseDTO;
@@ -48,6 +49,9 @@ public class MemberService {
     private final EmailService emailService;
     private final GlobalConfigurationService globalConfigurationService;
     private final AppProperties appProperties;
+    @Autowired(required = false)
+    private TestTokenStorage testTokenStorage;
+
 
     @Autowired
     public MemberService(MemberRepository memberRepository,
@@ -101,6 +105,9 @@ public class MemberService {
         member.setEnabled(false);
         member.setStatus(MemberStatusEnum.WAITING_FOR_EMAIL_APPROVAL);
         String rawConfirmationToken = generateUniqueConfirmationToken();
+        if (testTokenStorage != null) {
+            testTokenStorage.storeToken(rawConfirmationToken);
+        }
         member.setConfirmationToken(passwordEncoder.encode(rawConfirmationToken));
         member.setTokenExpiry(LocalDateTime.now().plusMinutes(
                 Integer.parseInt(globalConfigurationService.getConfigValue("confirmation_token_expiry_minutes"))));
@@ -117,7 +124,7 @@ public class MemberService {
                 .replace("[User Name]", member.getUsername())
                 .replace("[CONFIRMATION_LINK]", confirmationUrl)
                 .replace("[App Name]", appProperties.getName())
-                        .replace("[hours]", formatHours(globalConfigurationService.getConfigValue("confirmation_token_expiry_minutes")));
+                        .replace("[HOURS]", formatHours(globalConfigurationService.getConfigValue("confirmation_token_expiry_minutes")));
 
         emailService.send(
                 member.getEmail(),
@@ -310,6 +317,9 @@ public class MemberService {
         member.setTokenExpiry(LocalDateTime.now().plusMinutes(
                 Integer.parseInt(globalConfigurationService.getConfigValue("confirmation_token_expiry_minutes"))));
         String rawConfirmationToken = generateUniqueConfirmationToken();
+        if (testTokenStorage != null) {
+            testTokenStorage.storeToken(rawConfirmationToken);
+        }
         member.setConfirmationToken(passwordEncoder.encode(rawConfirmationToken));
         memberRepository.save(member);
         sendConfirmationEmail(member, rawConfirmationToken);
