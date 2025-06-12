@@ -8,5 +8,6 @@ import java.util.List;
 public record ServiceProviderRequestDTO(
         @NotNull Long memberId,
         @NotNull Long serviceId,
-        @NotNull List<ProviderPermissionEnum> permissions
+        @NotNull List<ProviderPermissionEnum> permissions,
+        boolean isServiceCreation
 ) {}

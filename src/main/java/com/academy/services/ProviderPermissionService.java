@@ -6,6 +6,7 @@ import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.ProviderPermissionRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -15,10 +16,13 @@ import java.util.List;
 public class ProviderPermissionService {
 
     private final ProviderPermissionRepository providerPermissionRepository;
+    private final ServiceProviderService serviceProviderService;
 
     @Autowired
-    public ProviderPermissionService(ProviderPermissionRepository providerPermissionRepository) {
+    public ProviderPermissionService(ProviderPermissionRepository providerPermissionRepository,
+                                     @Lazy ServiceProviderService serviceProviderService) {
         this.providerPermissionRepository = providerPermissionRepository;
+        this.serviceProviderService = serviceProviderService;
     }
     public boolean hasPermission(Long serviceProviderId, String permission){
         return providerPermissionRepository.existsByServiceProviderIdAndPermission(serviceProviderId, permission);
@@ -27,16 +31,18 @@ public class ProviderPermissionService {
         return providerPermissionRepository.findAllByServiceProviderId(serviceProviderId).stream()
                 .map(ProviderPermission::getPermission).toList();
     }
-    public void createPermissionsViaList(List<ProviderPermissionEnum> permissions, ServiceProvider serviceProvider){
-        List<ProviderPermission> permissionsCreated = new ArrayList<>();
+    public ServiceProvider createPermissionsViaList(List<ProviderPermissionEnum> permissions, ServiceProvider serviceProvider){
+        List<ProviderPermission> providerPermissions = new ArrayList<>();
         for(ProviderPermissionEnum permission : permissions){
             ProviderPermission providerPermission = new ProviderPermission();
             providerPermission.setPermission(permission);
             providerPermission.setServiceProvider(serviceProvider);
-            permissionsCreated.add(providerPermission);
             providerPermissionRepository.save(providerPermission);
+
+            providerPermissions.add(providerPermission);
         }
-        serviceProvider.setPermissions(permissionsCreated);
+        serviceProvider.setPermissions(providerPermissions);
+        return serviceProvider;
     }
 
     @Transactional
@@ -49,5 +55,9 @@ public class ProviderPermissionService {
 
             providerPermissionRepository.delete(permission);
         }
+    }
+    public void deleteAllByServiceProvider(Long serviceProviderId) {
+        ServiceProvider serviceProvider = serviceProviderService.getServiceProviderEntityById(serviceProviderId);
+        providerPermissionRepository.deleteAll(serviceProvider.getPermissions());
     }
 }
