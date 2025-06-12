@@ -1,7 +1,16 @@
 package com.academy;
 
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.jdbc.datasource.init.ScriptUtils;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
 
 @SpringBootApplication
 public class AcademyApplication {
@@ -10,7 +19,6 @@ public class AcademyApplication {
 		SpringApplication.run(AcademyApplication.class, args);
 	}
 
-/*
 	@Bean
 	@ConditionalOnProperty(name = "starting.scripts.enabled", havingValue = "true", matchIfMissing = false)
 	CommandLineRunner populateData(DataSource dataSource) {
@@ -24,7 +32,7 @@ public class AcademyApplication {
 			System.out.println("Populated database");
 		};
 	}
- */
+
 
 
 }
