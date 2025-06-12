@@ -1,109 +1,47 @@
 <div class="schedule-container">
   <h2>Agendar Marcação</h2>
+  <app-service-search
+    *ngIf="currentStep === 'service' && serviceTypes.length > 0"
+    [serviceTypes]="serviceTypes"
+    [selectedServiceTypeId]="selectedServiceTypeId"
+    (searchChange)="onSearchChange($event)"
+    (typeChange)="filterByType($event)">
+  </app-service-search>
 
-  <!-- Pesquisa e filtro -->
-  <div *ngIf="currentStep === 'service' && serviceTypes.length > 0">
-    <div class="search-bar">
-      <input type="text" placeholder="Procurar serviços..." (input)="onSearchChange($event)" />
-    </div>
+  <app-service-list
+    *ngIf="currentStep === 'service' && filteredServices.length > 0"
+    [services]="filteredServices"
+    [selectedServiceId]="form.get('serviceId')?.value"
+    (serviceSelected)="selectService($event)">
+  </app-service-list>
 
-    <div class="service-type-scroll">
-      <button
-        class="type-button"
-        [class.active]="!selectedServiceTypeId"
-        (click)="filterByType(null)">
-        Todos
-      </button>
-      <button
-        *ngFor="let type of serviceTypes"
-        class="type-button"
-        [class.active]="selectedServiceTypeId === type.id"
-        (click)="filterByType(type.id)">
-        {{ type.name }}
-      </button>
-    </div>
-  </div>
+  <app-slot-selection
+    *ngIf="(currentStep === 'slots' || currentStep === 'confirmation' || currentStep === 'provider') && slots.length > 0"
+    [slots]="slots"
+    [providers]="providers"
+    [selectedProvider]="selectedProvider"
+    [currentWeekStart]="currentWeekStart"
+    [currentWeekEnd]="currentWeekEnd"
+    [weeklySlots]="weeklySlots"
+    (providerFilter)="filterByProvider($event)"
+    (previousWeek)="goToPreviousWeek()"
+    (nextWeek)="goToNextWeek()"
+    (slotSelected)="selectSlot($event)"
+    (backToServices)="currentStep = 'service'">
+  </app-slot-selection>
 
-  <!-- Lista de serviços (filtrados) -->
-  <div *ngIf="currentStep === 'service' && filteredServices.length > 0">
-    <h3>Escolher serviço</h3>
-    <ul>
-      <li *ngFor="let s of filteredServices"
-          (click)="selectService(s)"
-          [class.selected]="s.id === form.get('serviceId')?.value">
-        {{ s.name }} - {{ s.price }}€
-      </li>
-    </ul>
-  </div>
+  <app-provider-selection-modal
+    *ngIf="currentStep === 'provider' && showProviderModal"
+    [providerOptions]="providerOptions"
+    (providerSelected)="selectProviderSlot($event)"
+    (backToSlots)="currentStep = 'slots'">
+  </app-provider-selection-modal>
 
-  <!-- Passo 2: Slots -->
-  <div *ngIf="(currentStep === 'slots' || currentStep === 'confirmation' || currentStep === 'provider') && slots.length > 0">
-    <!-- Filtro por prestador -->
-    <h3>Escolher prestador</h3>
-    <div class="service-type-scroll">
-      <button
-        class="type-button"
-        [class.active]="!selectedProvider"
-        (click)="filterByProvider(null)">
-        Todos
-      </button>
-      <button
-        *ngFor="let provider of providers"
-        class="type-button"
-        [class.active]="selectedProvider === provider"
-        (click)="filterByProvider(provider)">
-        {{ provider }}
-      </button>
-    </div>
-    <div class="week-navigation">
-      <button (click)="goToPreviousWeek()">« Semana Anterior</button>
-      <span>
-        {{ currentWeekStart | date: 'dd/MM/yyyy' }} - {{ currentWeekEnd | date: 'dd/MM/yyyy' }}
-      </span>
-      <button (click)="goToNextWeek()">Semana Seguinte »</button>
-    </div>
-    <h3>Escolher horário</h3>
-    <!-- Slots por dia da semana -->
-    <div class="weekly-slots">
-      <div class="day-column" *ngFor="let day of weekDays">
-        <h4>{{ day | date: 'EEE dd/MM' }}</h4>
-        <ul>
-          <li *ngFor="let slot of weeklySlots[day.toISOString().split('T')[0]]"
-              (click)="selectSlot(slot)">
-            <div class="slot-hour">{{ slot.start | date: 'HH:mm' }}</div>
-          </li>
-        </ul>
-      </div>
-    </div>
-    <div class="top-bar">
-      <button class="back-button" (click)="currentStep = 'service'">Voltar a serviços</button>
-    </div>
-  </div>
-
-<div class="modal-backdrop" *ngIf="currentStep === 'provider' && showProviderModal">
-  <div class="modal">
-    <h3>Escolha um prestador para as {{ providerOptions[0]?.start | date:'shortTime' }}</h3>
-    <ul>
-      <li *ngFor="let slot of providerOptions" (click)="selectProviderSlot(slot)" class="provider-option">
-        {{ slot.providerName }}
-      </li>
-    </ul>
-    <button (click)="currentStep = 'slots'">Voltar para horários</button>
-  </div>
-</div>
-
-
-<!-- Modal de confirmação -->
-<div class="modal-backdrop" *ngIf="currentStep === 'confirmation' && showConfirmationModal">
-  <div class="modal">
-    <h3>Confirmar Marcação</h3>
-    <p><strong>Serviço:</strong> {{ selectedService?.name }}</p>
-    <p><strong>Data:</strong> {{ selectedSlot?.start | date:'short' }}</p>
-    <p><strong>Prestador:</strong> {{ selectedSlot?.providerName }}</p>
-
-    <div class="modal-buttons">
-      <button (click)="cancelModal()">Cancelar</button>
-      <button (click)="confirmInModal()">Confirmar</button>
-    </div>
-  </div>
+  <app-confirmation-modal
+    *ngIf="currentStep === 'confirmation' && showConfirmationModal"
+    [selectedService]="selectedService"
+    [selectedSlot]="selectedSlot"
+    (cancel)="cancelModal()"
+    (confirm)="confirmInModal()">
+  </app-confirmation-modal>
 </div>

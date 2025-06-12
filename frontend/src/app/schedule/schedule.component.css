@@ -20,6 +20,17 @@ h2, h3 {
   width: 50%;
 }
 
+.provider-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto 16px auto;
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
 .search-bar input {
   width: 100%;
   padding: 8px 12px;
@@ -81,11 +92,11 @@ h2, h3 {
 }
 
 .type-button:hover:not(.active) {
-  background-color: #e9f5ff;
-  border-color: #74b9ff;
-  color: #0d6efd;
+  background-color: #d9e8fd;
   transition: transform 0.25s ease;
   transform: scale(1.08);
+  font-weight: 600;
+  border-color: #d9e8fd;
 }
 
 .type-button.active {
@@ -93,7 +104,6 @@ h2, h3 {
   border-color: #0a58ca;
   color: white;
   font-weight: 600;
-  box-shadow: 0 0 10px rgba(13, 110, 253, 0.5);
 }
 
 /* Lista de serviços em duas colunas */
@@ -237,16 +247,6 @@ button:hover {
   gap: 8px; /* space between slots */
 }
 
-.day-column li {
-  cursor: pointer;
-  padding: 4px;
-  border-bottom: 1px solid #ddd;
-}
-
-.day-column li:hover {
-  background-color: #eef;
-}
-
 .week-navigation {
   display: flex;
   justify-content: space-between;
@@ -266,9 +266,11 @@ button:hover {
 
 
   .day-column li:hover {
-    background-color: #eef;
+    background-color: #d9e8fd;
     transition: transform 0.25s ease;
     transform: scale(1.08);
+    border-radius: 5px;
+    font-weight: 600;
   }
 
 .slot-hour {

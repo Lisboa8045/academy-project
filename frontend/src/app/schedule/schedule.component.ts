@@ -1,54 +1,67 @@
-  import { Component, OnInit } from '@angular/core';
-  import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
-  import { CommonModule } from '@angular/common';
-  import { ServiceApiService } from '../shared/service-api.service';
-  import { ScheduleApiService } from './schedule.service';
-  import { SlotModel } from '../schedule/slot.model';
-  import { ServiceModel } from '../service/service.model';
-  import { AppointmentModel } from './appointment.model';
-  import {ServiceTypeModel} from './service-type.model';
-  import { addDays, startOfWeek, endOfWeek, isSameDay } from 'date-fns';
+import { Component, OnInit } from '@angular/core';
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
+import { addDays, startOfWeek, endOfWeek, isSameDay } from 'date-fns';
+import { ServiceApiService } from '../shared/service-api.service';
+import { ScheduleApiService } from './schedule.service';
+import { SlotModel } from './models/slot.model';
+import { ServiceModel } from '../service/service.model';
+import { AppointmentModel } from './models/appointment.model';
+import { ServiceTypeModel } from './models/service-type.model';
+import {CommonModule, DatePipe} from '@angular/common';
+import {ServiceSearchComponent} from './serviceSearchComponent/service-search.component';
+import {ServiceListComponent} from './serviceListComponent/service-list.component';
+import {ProviderSelectionModalComponent} from './providerSelectionModalComponent/provider-selection-modal.component';
+import {ConfirmationModalComponent} from './confirmationModalComponent/confirmation-modal.component';
+import {SlotSelectionComponent} from './slotSelectionComponent/slot-selection.component';
 
-  @Component({
-    selector: 'app-schedule',
-    standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, FormsModule],
-    templateUrl: './schedule.component.html',
-    styleUrls: ['./schedule.component.css']
-  })
+@Component({
+  selector: 'app-schedule',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    ServiceSearchComponent,
+    ServiceListComponent,
+    SlotSelectionComponent,
+    ConfirmationModalComponent,
+    ProviderSelectionModalComponent,
+  ],
+  templateUrl: './schedule.component.html',
+  styleUrls: ['./schedule.component.css']
+})
+export class ScheduleComponent implements OnInit {
+  form: FormGroup;
+  services: ServiceModel[] = [];
+  slots: SlotModel[] = [];
+  selectedSlot?: SlotModel;
+  selectedServiceId?: number;
+  showConfirmationModal = false;
+  currentStep: 'service' | 'slots' | 'provider' | 'confirmation' = 'service';
+  serviceTypes: ServiceTypeModel[] = [];
+  filteredServices: ServiceModel[] = [];
+  selectedServiceTypeId: number | null = null;
+  searchTerm = '';
+  providerSearchTerm = '';
+  filteredSlots: SlotModel[] = [];
+  providers: string[] = [];
+  selectedProvider: string | null = null;
+  currentWeekStart: Date = startOfWeek(new Date(), { weekStartsOn: 1 });
+  currentWeekEnd: Date = endOfWeek(new Date(), { weekStartsOn: 1 });
+  weekDays: Date[] = [];
+  weeklySlots: { [key: string]: SlotModel[] } = {};
+  providerOptions: SlotModel[] = [];
+  showProviderModal = false;
 
-  export class ScheduleComponent implements OnInit {
-    form: FormGroup;
-    services: ServiceModel[] = [];
-    slots: SlotModel[] = [];
-    selectedSlot?: SlotModel;
-    selectedServiceId?: number;
-    showConfirmationModal = false;
-    currentStep: 'service' | 'slots' | 'provider' | 'confirmation' = 'service';
-    serviceTypes: ServiceTypeModel[] = [];
-    filteredServices: ServiceModel[] = [];
-    selectedServiceTypeId: number | null = null;
-    searchTerm = '';
-    providerSearchTerm = '';
-    filteredSlots: SlotModel[] = [];
-    providers: string[] = [];
-    selectedProvider: string | null = null;
-    currentWeekStart: Date = startOfWeek(new Date(), { weekStartsOn: 1 }); // Segunda-feira
-    currentWeekEnd: Date = endOfWeek(new Date(), { weekStartsOn: 1 });
-    weekDays: Date[] = [];
-    weeklySlots: { [key: string]: SlotModel[] } = {}; // chave: YYYY-MM-DD
-    providerOptions: SlotModel[] = [];
-    showProviderModal: boolean = false;
-
-    constructor(
-      private fb: FormBuilder,
-      private serviceApi: ServiceApiService,
-      private scheduleApi: ScheduleApiService
-    ) {
-      this.form = this.fb.group({
-        serviceId: [null]
-      });
-    }
+  constructor(
+    private fb: FormBuilder,
+    private serviceApi: ServiceApiService,
+    private scheduleApi: ScheduleApiService
+  ) {
+    this.form = this.fb.group({
+      serviceId: [null]
+    });
+  }
 
     get selectedService(): ServiceModel | undefined {
       return this.services.find(s => s.id === this.form.value.serviceId);
@@ -136,11 +149,10 @@
       this.organizeSlotsByDay(); // <-- Atualizar visualização
     }
 
-    onSearchChange(event: Event) {
-      const input = event.target as HTMLInputElement;
-      this.searchTerm = input.value.toLowerCase();
-      this.applyFilters();
-    }
+  onSearchChange(searchTerm: string) {
+    this.searchTerm = searchTerm.toLowerCase();
+    this.applyFilters();
+  }
 
     filterByType(typeId: number | null) {
       this.selectedServiceTypeId = typeId;
@@ -182,13 +194,6 @@
           error: err => console.error('Erro ao carregar slots:', err)
         });
       }
-    }
-
-
-    onProviderSearchChange(event: Event) {
-      const input = event.target as HTMLInputElement;
-      this.providerSearchTerm = input.value.toLowerCase();
-      this.applySlotFilters();
     }
 
     applySlotFilters() {
@@ -244,7 +249,6 @@
       }
     }
 
-
     cancelModal() {
       this.showConfirmationModal = false;
       this.currentStep = 'slots'; // Volta para escolher slot
@@ -255,29 +259,6 @@
       this.confirmAppointment();
       this.currentStep = 'service'; // Volta para começar
     }
-
-    onServiceTypeChange(event: Event) {
-      const selectElement = event.target as HTMLSelectElement;
-      const value = selectElement.value;
-
-      this.currentStep = 'service'; // <- força o fluxo a recomeçar
-      this.selectedSlot = undefined;
-      this.filteredSlots = [];
-      this.slots = [];
-
-      if (!value) {
-        this.filteredServices = this.services;
-      } else {
-        const selectedTypeId = parseInt(value, 10);
-        this.filteredServices = this.services.filter(s => s.serviceTypeId === selectedTypeId);
-      }
-
-      this.form.get('serviceId')?.setValue(null);
-      this.selectedServiceId = undefined;
-    }
-
-
-
 
     confirmAppointment() {
       if (!this.selectedSlot || !this.form.value.serviceId) return;
@@ -303,11 +284,6 @@
       });
     }
 
-    showProviderSelectionModal(slots: SlotModel[]) {
-      this.providerOptions = slots;
-      this.showProviderModal = true;
-    }
-
     selectProviderSlot(slot: SlotModel) {
       this.selectedSlot = slot;
       this.showProviderModal = false;
@@ -315,5 +291,35 @@
       this.currentStep = 'confirmation';
     }
 
-  }
-``
+    showProviderSelectionModal(slots: SlotModel[]) {
+      this.providerOptions = slots;
+      this.showProviderModal = true;
+    }
+
+    onServiceTypeChange(event: Event) {
+      const selectElement = event.target as HTMLSelectElement;
+      const value = selectElement.value;
+
+      this.currentStep = 'service'; // <- força o fluxo a recomeçar
+      this.selectedSlot = undefined;
+      this.filteredSlots = [];
+      this.slots = [];
+
+      if (!value) {
+        this.filteredServices = this.services;
+      } else {
+        const selectedTypeId = parseInt(value, 10);
+        this.filteredServices = this.services.filter(s => s.serviceTypeId === selectedTypeId);
+      }
+
+      this.form.get('serviceId')?.setValue(null);
+      this.selectedServiceId = undefined;
+    }
+
+    onProviderSearchChange(event: Event) {
+      const input = event.target as HTMLInputElement;
+      this.providerSearchTerm = input.value.toLowerCase();
+      this.applySlotFilters();
+    }
+
+}
