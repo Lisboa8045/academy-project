@@ -47,11 +47,11 @@ export class AuthComponent{
   }
 
   toggleMode(): void {
-    this.isLoginMode.update(mode => !mode)
-    this.errorMessage = ''
+    this.isLoginMode.update(mode => !mode);
+    this.errorMessage = '';
     this.passwordVisible = false;
     this.confirmPasswordVisible = false;
-    this.buildForm()
+    this.buildForm();
   }
 
   private buildForm(): void {
@@ -81,6 +81,10 @@ export class AuthComponent{
     return password === confirm ? null : { passwordsMismatch: true };
   }
 
+  private getHttpErrors(error: any): any[] | null {
+    return error?.error?.errors ?? null;
+  }
+
   submit(): void {
     const { login, email, username, password } = this.authForm.value;
 
@@ -104,9 +108,9 @@ export class AuthComponent{
           console.error('Signup failed:', err);
 
           this.errorMessage = '';
+          const errors = this.getHttpErrors(err);
 
-          if (err?.error?.errors) {
-            const errors = err.error.errors;
+          if (errors) {
             for (const field in errors) {
               if (this.authForm.controls[field]) {
                 this.authForm.get(field)?.setErrors({ serverError: errors[field] });

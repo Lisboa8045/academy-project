@@ -41,31 +41,21 @@
       </div>
     }
 
-    @if (isLoginMode()){
-      <div class="password-wrapper">
-        <label class="password-label">
-          <input [type]="passwordVisible ? 'text' : 'password'" formControlName="password" placeholder="Password" required />
-          <span class="toggle-password" (click)="togglePasswordVisibility($event)" style="cursor:pointer;">
+    <div class="password-wrapper">
+      <label class="password-label">
+        <input [type]="passwordVisible ? 'text' : 'password'" formControlName="password" placeholder="Password" required />
+        <span class="toggle-password" (click)="togglePasswordVisibility($event)" style="cursor:pointer;">
             <span class="material-symbols-outlined" *ngIf="passwordVisible">visibility_off</span>
             <span class="material-symbols-outlined" *ngIf="!passwordVisible">visibility</span>
         </span>
-        </label>
-      </div>
+      </label>
+    </div>
+    @if (isLoginMode()){
       <div class="validation-error" *ngIf="authForm.get('password')?.errors?.['maxlength'] && authForm.get('password')?.touched">
         Please insert 64 characters or less.
       </div>
     }
     @else {
-      <div class="password-wrapper">
-        <label class="password-label">
-          <input [type]="passwordVisible ? 'text' : 'password'" formControlName="password" placeholder="Password" required />
-          <span class="toggle-password" (click)="togglePasswordVisibility($event)" style="cursor:pointer;">
-            <span class="material-symbols-outlined" *ngIf="passwordVisible">visibility_off</span>
-            <span class="material-symbols-outlined" *ngIf="!passwordVisible">visibility</span>
-        </span>
-        </label>
-      </div>
-
       <div class="validation-error" *ngIf="authForm.get('password')?.errors?.['weakPassword'] && authForm.get('password')?.touched">
         Password must include uppercase, lowercase, digit, and special character.
       </div>
