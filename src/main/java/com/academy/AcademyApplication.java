@@ -3,6 +3,7 @@ package com.academy;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -20,6 +21,7 @@ public class AcademyApplication {
 
 
 	@Bean
+	@ConditionalOnProperty(name = "starting.scripts.enabled", havingValue = "true", matchIfMissing = false)
 	CommandLineRunner populateData(DataSource dataSource) {
 		return args -> {
 			Resource resource = new ClassPathResource("sql-scripts/populateRoles.sql");

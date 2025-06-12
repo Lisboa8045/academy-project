@@ -50,11 +50,4 @@ public class Tag {
     @ManyToMany(mappedBy = "tags")
     @JsonIgnore
     private List<Service> services = new ArrayList<>();
-
-    public void removeAllServices() {
-        for (Service service : new ArrayList<>(services)) {
-            service.getTags().remove(this);
-        }
-        services.clear();
-    }
 }
