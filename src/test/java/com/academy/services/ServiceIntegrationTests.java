@@ -74,7 +74,6 @@ public class ServiceIntegrationTests {
     void setUp() {
         // Set up a ServiceType, Member and Tags before each test
         Role role = new Role();
-        role.setId(1L);
         role.setName("ADMIN");
         roleRepository.save(role);
 
