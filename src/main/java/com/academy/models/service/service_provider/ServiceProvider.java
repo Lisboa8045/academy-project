@@ -27,9 +27,10 @@ import java.util.List;
 @Entity
 
 @Table(name="service_provider",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"member_id", "service_id"}))@Getter
+        uniqueConstraints = @UniqueConstraint(columnNames = {"member_id", "service_id"}))
+@Getter
 @Setter
-@ToString(exclude = "service")
+@ToString(exclude = {"provider", "service", "appointmentList", "permissions"})
 public class ServiceProvider {
 
     @Id
@@ -45,7 +46,7 @@ public class ServiceProvider {
     @JoinColumn(name="service_id")
     private Service service;
 
-    @OneToMany(mappedBy = "serviceProvider")
+    @OneToMany(mappedBy = "serviceProvider", fetch = FetchType.EAGER)
     private List<Appointment> appointmentList = new ArrayList<>();
 
     @OneToMany(mappedBy = "serviceProvider")

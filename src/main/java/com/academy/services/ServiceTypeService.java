@@ -55,6 +55,11 @@ public class ServiceTypeService {
         ServiceType serviceType = getServiceTypeEntityById(id);
         return serviceTypeMapper.toDto(serviceType);
     }
+    public ServiceType getEntityById(Long id) {
+        return serviceTypeRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(ServiceType.class, id));
+
+    }
 
     // Delete
     @Transactional
