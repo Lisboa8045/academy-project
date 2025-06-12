@@ -1,32 +1,43 @@
 package com.academy.availability;
 
+import com.academy.config.authentication.AuthenticationFacade;
 import com.academy.dtos.availability.AvailabilityRequestDTO;
 import com.academy.dtos.availability.AvailabilityResponseDTO;
-import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
+import com.academy.dtos.service.ServiceMapper;
+import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.exceptions.InvalidArgumentException;
 import com.academy.models.Member;
 import com.academy.models.Role;
 import com.academy.models.ServiceType;
 import com.academy.models.service.Service;
-import com.academy.models.service.service_provider.ProviderPermissionEnum;
-import com.academy.repositories.*;
+import com.academy.repositories.AvailabilityRepository;
+import com.academy.repositories.MemberRepository;
+import com.academy.repositories.RoleRepository;
+import com.academy.repositories.ServiceRepository;
+import com.academy.repositories.ServiceTypeRepository;
 import com.academy.services.AvailabilityService;
 import com.academy.services.ServiceProviderService;
+import com.academy.services.ServiceService;
 import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
@@ -37,9 +48,14 @@ public class AvailabilityIntegrationTests {
     @Autowired private AvailabilityRepository availabilityRepository;
     @Autowired private MemberRepository memberRepository;
     @Autowired private ServiceRepository serviceRepository;
+    @Autowired private ServiceService serviceService;
+    @Autowired private ServiceMapper serviceMapper;
     @Autowired private ServiceTypeRepository serviceTypeRepository;
     @Autowired private ServiceProviderService serviceProviderService;
     @Autowired private RoleRepository roleRepository;
+
+    @MockBean
+    private AuthenticationFacade authenticationFacade; // ✅ MockBean, not Autowired constructor
 
     private Member defaultMember;
 
@@ -79,25 +95,25 @@ public class AvailabilityIntegrationTests {
     @Test
     void getAvailabilitiesByServiceId_shouldReturnResults() throws BadRequestException {
         Member provider = saveMember("provider1", "PROVIDER");
+        Authentication authentication = Mockito.mock(Authentication.class);
+        Mockito.when(authenticationFacade.getUsername()).thenReturn("provider1");
+        Mockito.when(authenticationFacade.getAuthentication()).thenReturn(authentication);
 
         ServiceType type = new ServiceType();
         type.setName("Basic Type");
         type.setIcon("type.png");
+        serviceTypeRepository.save(type);
 
-        Service service = new Service();
-        service.setName("Basic Service");
-        service.setServiceType(type);
-        service.setOwner(provider);
-        service = serviceRepository.save(service);
-
-        serviceProviderService.createServiceProviderWithDTO(
-            new ServiceProviderRequestDTO(provider.getId(), service.getId(), List.of(
-                ProviderPermissionEnum.READ,
-                ProviderPermissionEnum.UPDATE,
-                ProviderPermissionEnum.DELETE,
-                ProviderPermissionEnum.SERVE
-            ), false)
-        );
+        Service service = serviceService.createToEntity(new ServiceRequestDTO(
+                "Basic Service",
+                "Service",
+                20.0,
+                1,
+                false,
+                100,
+                type.getName(),
+                new ArrayList<>()
+        ));
 
         availabilityService.createAvailability(
             createDTO(provider.getId(), DayOfWeek.MONDAY, LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(1).plusHours(2))

@@ -39,6 +39,7 @@ class GlobalConfigurationTests {
 
     @BeforeEach
     void setUp() {
+        this.globalConfigurationRepository.deleteAll();
         GlobalConfiguration config = new GlobalConfiguration();
         config.setConfigKey("configKey_string");
         config.setConfigValue("configValue");

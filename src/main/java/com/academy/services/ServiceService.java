@@ -6,15 +6,14 @@ import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
 import com.academy.exceptions.AuthenticationException;
+import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.Member;
+import com.academy.models.ServiceType;
+import com.academy.models.Tag;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
-import com.academy.exceptions.EntityNotFoundException;
-import com.academy.models.ServiceType;
-import com.academy.models.Tag;
 import com.academy.repositories.ServiceRepository;
-import com.academy.repositories.TagRepository;
 import com.academy.specifications.ServiceSpecifications;
 import com.academy.utils.Utils;
 import jakarta.transaction.Transactional;
@@ -23,7 +22,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,9 +58,7 @@ public class ServiceService {
         this.serviceTypeService = serviceTypeService;
     }
 
-    // Create
-    @Transactional
-    public ServiceResponseDTO create(ServiceRequestDTO dto) throws AuthenticationException, BadRequestException {
+    public Service createToEntity(ServiceRequestDTO dto) throws BadRequestException {
         Member member = memberService.getMemberByUsername(authenticationFacade.getUsername());
         Service service = serviceMapper.toEntity(dto, member.getId());
 
@@ -76,7 +72,15 @@ public class ServiceService {
 
         ServiceProvider owner = createOwnerServiceProvider(member.getId(), service.getId());
         linkServiceToOwnerAsProvider(service, owner);
-        return serviceMapper.toDto(savedService, getPermissionsByProviderUsernameAndServiceId(member.getUsername(), savedService.getId()));
+        return savedService;
+    }
+
+    // Create
+    @Transactional
+    public ServiceResponseDTO create(ServiceRequestDTO dto) throws AuthenticationException, BadRequestException {
+        Service service = createToEntity(dto);
+        String username = authenticationFacade.getUsername();
+        return serviceMapper.toDto(service, getPermissionsByProviderUsernameAndServiceId(username, service.getId()));
     }
 
     // Update

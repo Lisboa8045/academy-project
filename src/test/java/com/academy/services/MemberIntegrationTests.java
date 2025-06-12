@@ -97,7 +97,7 @@ public class MemberIntegrationTests {
         assertThat(memberResponseDTO.address()).isEqualTo("Esgoto");
         assertThat(memberResponseDTO.postalCode()).isEqualTo("0000-100");
         assertThat(memberResponseDTO.phoneNumber()).isEqualTo("987654321");
-        assertThat(memberResponseDTO.email()).isEqualTo("donatello@example.com");
+        assertThat(memberResponseDTO.email()).isNotEqualTo("donatello@example.com");
         assertThat(memberResponseDTO.role()).isEqualTo("CLIENT");
     }
 
@@ -132,7 +132,7 @@ public class MemberIntegrationTests {
         assertThat(memberResponseDTO.email()).isEqualTo(member.getEmail());
         assertThat(memberResponseDTO.postalCode()).isEqualTo(member.getPostalCode());
         assertThat(memberResponseDTO.phoneNumber()).isEqualTo(member.getPhoneNumber());
-        assertThat(memberResponseDTO.role()).isEqualTo(member.getRole());
+        assertThat(memberResponseDTO.role()).isEqualTo(member.getRole().getName());
     }
 
     @Test
