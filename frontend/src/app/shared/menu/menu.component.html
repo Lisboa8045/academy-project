@@ -1,0 +1,5 @@
+<menu class="app-menu">
+@for (item of items(); track item.label) {
+  <li (click)="onClickedItem(item)">{{ item.icon }} {{item.label}}</li>
+}
+</menu>
