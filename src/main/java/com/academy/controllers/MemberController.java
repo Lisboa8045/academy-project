@@ -4,7 +4,7 @@ import com.academy.config.authentication.JwtCookieUtil;
 import com.academy.config.authentication.JwtUtil;
 import com.academy.dtos.member.MemberRequestDTO;
 import com.academy.dtos.member.MemberResponseDTO;
-import com.academy.models.Member;
+import com.academy.models.member.Member;
 import com.academy.services.MemberService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;

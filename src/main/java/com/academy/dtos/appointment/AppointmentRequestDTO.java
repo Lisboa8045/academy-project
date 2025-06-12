@@ -13,5 +13,6 @@ public record AppointmentRequestDTO(
         @NotNull LocalDateTime startDateTime,
         @NotNull LocalDateTime endDateTime,
         @Min(0) @Max(5) Integer rating,
-        @Size(max = FieldLengths.REVIEW_MAX) String comment
+        @Size(max = FieldLengths.REVIEW_MAX) String comment,
+        String status
 ) {}
