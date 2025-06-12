@@ -62,8 +62,8 @@ public class MemberService {
                          RoleRepository roleRepository,
                          MemberMapper memberMapper,
                          JwtUtil jwtUtil,
-                         MessageSource messageSource, JwtCookieUtil jwtCookieUtil) {
                          MessageSource messageSource,
+                         JwtCookieUtil jwtCookieUtil,
                          EmailService emailService,
                          GlobalConfigurationService globalConfigurationService,
                          AppProperties appProperties) {
@@ -73,11 +73,12 @@ public class MemberService {
         this.memberMapper = memberMapper;
         this.jwtUtil = jwtUtil;
         this.messageSource = messageSource;
+        this.jwtCookieUtil = jwtCookieUtil;
         this.emailService = emailService;
         this.globalConfigurationService = globalConfigurationService;
         this.appProperties = appProperties;
-        this.jwtCookieUtil = jwtCookieUtil;
     }
+
 
     public void logout(HttpServletResponse response){
         jwtCookieUtil.clearJwtCookie(response);

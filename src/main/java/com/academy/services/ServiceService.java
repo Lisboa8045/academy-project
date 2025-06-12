@@ -7,7 +7,6 @@ import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
 import com.academy.exceptions.AuthenticationException;
 import com.academy.exceptions.EntityNotFoundException;
-import com.academy.models.Member;
 import com.academy.models.ServiceType;
 import com.academy.models.Tag;
 import com.academy.models.member.Member;

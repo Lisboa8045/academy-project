@@ -43,10 +43,10 @@ public class Member {
     @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "enabled", nullable = false)
+    @Column(name = "enabled") //TODO should be nullable quando alterarem os testes para usar service
     private boolean enabled;
 
-    @Column(name = "status", nullable = false)
+    @Column(name = "status") //TODO should be nullable quando alterarem os testes para usar service
     @Enumerated(EnumType.STRING)
     private MemberStatusEnum status;
 

@@ -1,8 +1,6 @@
 package com.academy.models.notification;
 
 import com.academy.models.member.Member;
-import jakarta.persistence.*;
-import com.academy.models.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
