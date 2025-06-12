@@ -3,11 +3,13 @@ package com.academy.models.service.service_provider;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name="provider_permission")
 @Getter
 @Setter
+@ToString(exclude="serviceProvider")
 public class ProviderPermission {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)

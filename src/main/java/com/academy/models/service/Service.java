@@ -34,7 +34,7 @@ import java.util.List;
 @Table(name="service")
 @Getter
 @Setter
-@ToString(exclude = "serviceProviders")
+@ToString(exclude = {"owner", "serviceType", "tags", "serviceProviders"})
 public class Service {
 
     @Column(name="id")

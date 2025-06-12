@@ -5,6 +5,8 @@ import com.academy.exceptions.EntityAlreadyExists;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.exceptions.NotFoundException;
 import com.academy.exceptions.RegistrationConflictException;
+
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -38,20 +40,29 @@ public class ExceptionController {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
 
     }
+
     @ExceptionHandler(EntityAlreadyExists.class)
     public ResponseEntity<Object> handleInvalidValue(EntityAlreadyExists e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
     }
+
     @ExceptionHandler(RegistrationConflictException.class)
     public ResponseEntity<Object> handleInvalidValue(RegistrationConflictException e) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .body(Map.of("errors", e.getFieldErrors()));
     }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<Object> handleInvalidValue(BadRequestException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<Object> handleInvalidValue(AuthenticationException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
     }
+    
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Object> handleInvalidValue(NotFoundException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
@@ -68,6 +79,13 @@ public class ExceptionController {
         Map<String, String> body = Collections.singletonMap(key, value);
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
-
     }
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleUnexpectedException(Exception e) {
+        Map<String, String> body = new HashMap<>();
+        body.put("error", "An unexpected error occurred. Please contact support.");
+
+        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 }

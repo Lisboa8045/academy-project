@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record MemberRequestDTO(
+        @NotBlank @Size(max = FieldLengths.USERNAME_MAX) String username,
         @NotBlank @Size(max = FieldLengths.EMAIL_MAX) String email,
         @Size(max = FieldLengths.ADDRESS_MAX) String address,
         @Size(max = FieldLengths.POSTAL_CODE_MAX) String postalCode,

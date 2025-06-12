@@ -18,7 +18,7 @@ import java.util.ArrayList;
 @Table(name = "member")
 @Getter
 @Setter
-@ToString
+@ToString(exclude = {"availabilities", "appointments", "createdServices", "role"})
 public class Member {
 
     @Id
@@ -64,5 +64,9 @@ public class Member {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
+
+    @Column(name = "profile-picture")
+    private String profilePicture;
+
 
 }

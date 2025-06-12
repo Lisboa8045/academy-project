@@ -20,8 +20,9 @@ import java.time.LocalDateTime;
 
 @Getter @Setter
 
-@NoArgsConstructor @ToString
+@NoArgsConstructor
 
+@ToString(exclude = {"member", "serviceProvider"})
 public class Appointment {
 
     @Id
