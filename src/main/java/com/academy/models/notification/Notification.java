@@ -1,6 +1,7 @@
 package com.academy.models.notification;
 
 import com.academy.models.member.Member;
+import com.academy.util.FieldLengths;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -34,7 +35,7 @@ public class Notification {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @Column(name="title")
+    @Column(name="title", length = FieldLengths.NOTIFICATION_TITLE_MAX)
     private String title;
 
     @Column(name="seen")
