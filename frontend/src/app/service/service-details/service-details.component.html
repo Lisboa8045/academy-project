@@ -2,14 +2,68 @@
 @if(loading()) {
   <app-loading/>
 } @else {
+
+    <div class ="service-page">
+
+        <div class="image-section card">
+            <div class="image-wrapper">
+<!--                <button class="nav left" (click)="prevImage()" [disabled]="currentImageIndex === 0">&#10094</button>-->
+                <img [src] ="imageUrl()" alt="Service Image" class = "main-image" />
+
+<!--                <button class = "nav right" (click)="nextImage()" [disabled]="currentImageIndex === service?.images-length - 1"> &#10095</button>-->
+            </div>
+
+            <div class="thumbnails">
+                CENAS AQUI
+            </div>
+        </div>
+
+        <div class="info-section card" >
+            <h2>{{ service?.name  }}</h2>
+<!--            Meter isto a dar link para uma pesquisa por este service type-->
+            <h3> {{ service?.serviceTypeName  }}</h3>
+            <ng-container *ngIf="discountedPrice !== null; else normalPrice">
+                <div class="price-container">
+                    <div class="price-details">
+                        <div class="original-price" style="text-decoration: line-through; color: grey;">
+                            {{ service?.price }}€
+                        </div>
+                        <div class="discounted-price" style="font-weight: bold;">
+                            {{ discountedPrice }}€
+
+                        </div>
+                    </div>
+                    <div class="discount-badge" style="background-color: red; color: white; padding: 4px 8px; border-radius: 5px;">
+                        -{{ service?.discount }}%
+
+                    </div>
+
+                </div>
+<!--                COMENTADO PORQUE NAO SABEMOS SE VAMOS IMPLEMENTAR ALGUMA MANEIRA DE CONTACTAR O SERVICE-->
+<!--                <span *ngIf="service!.negotiable" class="negotiable-label">-->
+<!--                                NEGOTIABLE-->
+<!--                            </span>-->
+            </ng-container>
+
+            <ng-template #normalPrice>
+                <div class="normal-price" style="font-weight: bold;">{{ service?.price }}€</div>
+            </ng-template>
+
+            <button class="schedule-btn">Schedule Appointment</button>
+
+            <p> {{ service?.description  }}</p>
+        </div>
+    </div>
   <div>
-    <h2> {{ service?.name }}</h2>
+    <h1 class ="service-title"> {{ service?.name }}</h1>
+      </div>
+    <div>
     <p> <strong> Description</strong> {{ service?.description }}</p>
     <p><strong>Price:</strong> {{ service?.price }}</p>
     <p><strong>Discount:</strong> {{ service?.discount }}%</p>
     <p><strong>Negotiable:</strong> {{ service?.negotiable }}</p>
     <p><strong>Duration:</strong> {{ service?.duration }} minutes</p>
-    <p><strong>Type of service:</strong> {{ service?.serviceType }}</p>
+    <p><strong>Type of service:</strong> {{ service?.serviceTypeName }}</p>
     <p><strong>Tags:</strong> {{ service?.tagNames }}</p>
     <p><strong>Permissions:</strong> {{ service?.permissions }}</p>
   </div>
