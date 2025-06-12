@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 // tem o status para saber se ja foi ou nao realizada a operação
 // tem o schedule_at para definirmos com que frequência queremos que a task seja executada
 
+@ToString(callSuper = true)
 public class Task extends BaseEntity {
 
     @Column(name = "schedule_at", nullable = false)

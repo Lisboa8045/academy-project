@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@ToString(exclude="member")
+@ToString(callSuper = true, exclude="member")
 @Entity
 @Table(name = "availability")
 

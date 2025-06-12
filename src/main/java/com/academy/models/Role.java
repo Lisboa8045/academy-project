@@ -14,7 +14,7 @@ import lombok.ToString;
 @Table(name = "role")
 @Getter
 @Setter
-@ToString(exclude="members")
+@ToString(callSuper = true, exclude="members")
 public class Role extends BaseEntity {
 
     @Column(name = "name")

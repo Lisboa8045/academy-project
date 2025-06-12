@@ -19,7 +19,7 @@ import java.util.List;
 @Table(name="tag")
 @Getter
 @Setter
-@ToString(exclude="services")
+@ToString(callSuper = true, exclude="services")
 public class Tag extends BaseEntity {
 
     @NotBlank

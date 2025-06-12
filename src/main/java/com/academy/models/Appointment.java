@@ -24,7 +24,7 @@ import java.time.LocalDateTime;
 @Getter 
 @Setter
 @NoArgsConstructor
-@ToString(exclude = {"member", "serviceProvider"})
+@ToString(callSuper = true, exclude = {"member", "serviceProvider"})
 public class Appointment extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.EAGER)

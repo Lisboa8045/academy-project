@@ -13,7 +13,7 @@ import lombok.ToString;
 @Entity
 @Getter
 @Setter
-@ToString
+@ToString(callSuper = true)
 public class GlobalConfiguration extends BaseEntity {
 
     @Column(name="config_key", unique = true, nullable = false)

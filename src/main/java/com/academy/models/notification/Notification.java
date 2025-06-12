@@ -17,7 +17,7 @@ import lombok.ToString;
 @Table(name="notification")
 @Getter
 @Setter
-@ToString(exclude="member")
+@ToString(callSuper = true, exclude="member")
 public class Notification extends BaseEntity {
 
     @ManyToOne

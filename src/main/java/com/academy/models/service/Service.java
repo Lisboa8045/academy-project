@@ -27,7 +27,7 @@ import java.util.List;
 @Table(name="service")
 @Getter
 @Setter
-@ToString(exclude = {"owner", "serviceType", "tags", "serviceProviders"})
+@ToString(callSuper = true, exclude = {"owner", "serviceType", "tags", "serviceProviders"})
 public class Service extends BaseEntity {
 
     @Column(name="name")
