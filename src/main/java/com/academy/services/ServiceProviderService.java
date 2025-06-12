@@ -50,11 +50,13 @@ public class ServiceProviderService {
                 .map(serviceProviderMapper::toResponseDTO);
     }
 
+    @Transactional
     public ServiceProviderResponseDTO createServiceProviderWithDTO(ServiceProviderRequestDTO dto) {
         ServiceProvider serviceProvider = createServiceProvider(dto);
         return serviceProviderMapper.toResponseDTO(serviceProvider);
     }
 
+    @Transactional
     public ServiceProvider createServiceProvider(ServiceProviderRequestDTO dto) {
         Member member = memberService.getMemberEntityById(dto.memberId());
 
@@ -72,7 +74,7 @@ public class ServiceProviderService {
         return serviceProviderRepository.save(saved);
     }
 
-
+    @Transactional
     public ServiceProviderResponseDTO updateServiceProvider(long id, ServiceProviderRequestDTO details) {
         ServiceProvider serviceProvider = serviceProviderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
