@@ -1,11 +1,13 @@
 package com.academy.controllers;
 
 import com.academy.exceptions.AuthenticationException;
+import com.academy.exceptions.EmailTemplateLoadingException;
 import com.academy.exceptions.EntityAlreadyExists;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.exceptions.NotFoundException;
 import com.academy.exceptions.RegistrationConflictException;
-
+import com.academy.exceptions.SendEmailException;
+import com.academy.exceptions.UnavailableUserException;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -74,7 +76,6 @@ public class ExceptionController {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<Object> handleInvalidValue(AuthenticationException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
@@ -84,6 +85,7 @@ public class ExceptionController {
     public ResponseEntity<Object> handleInvalidValue(NotFoundException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }
+
     @ExceptionHandler(UnavailableUserException.class)
     public ResponseEntity<Object> handleInvalidValue(UnavailableUserException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);

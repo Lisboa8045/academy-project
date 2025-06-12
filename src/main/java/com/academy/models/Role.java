@@ -30,6 +30,7 @@ public class Role {
 
     @Column(name = "name", length = FieldLengths.ROLE_MAX)
     private String name;
+
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Member> members;
 }
