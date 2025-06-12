@@ -12,6 +12,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -23,6 +24,7 @@ import java.util.List;
 @Table(name="tag")
 @Getter
 @Setter
+@ToString(exclude="services")
 public class Tag {
 
     @Column(name="id")
@@ -54,16 +56,5 @@ public class Tag {
             service.getTags().remove(this);
         }
         services.clear();
-    }
-
-    @Override
-    public String toString() {
-        return "Tag{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", custom=" + custom +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                '}';
     }
 }
