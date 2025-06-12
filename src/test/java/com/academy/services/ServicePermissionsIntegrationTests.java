@@ -8,6 +8,7 @@ import com.academy.dtos.service_type.ServiceTypeRequestDTO;
 import com.academy.dtos.service_type.ServiceTypeResponseDTO;
 import com.academy.exceptions.AuthenticationException;
 import com.academy.models.Member;
+import com.academy.models.Role;
 import com.academy.models.ServiceType;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
@@ -16,28 +17,24 @@ import com.academy.repositories.MemberRepository;
 import com.academy.repositories.RoleRepository;
 import jakarta.transaction.Transactional;
 import org.apache.coyote.BadRequestException;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import com.academy.models.Role;
 
-import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Transactional
@@ -115,7 +112,7 @@ public class ServicePermissionsIntegrationTests {
         assertNotNull(response);
         assertEquals("Service", response.name());
 
-        Service service = serviceService.getEntityById(response.id());
+        Service service = serviceService.getServiceEntityById(response.id());
         assertNotNull(service);
         assertEquals("Service", service.getName());
 
@@ -200,7 +197,7 @@ public class ServicePermissionsIntegrationTests {
                                 new ArrayList<>()
                         )
         );
-                Service service = serviceService.getEntityById(serviceId);
+                Service service = serviceService.getServiceEntityById(serviceId);
                 assertEquals("ServiceUpdated", service.getName());
                 assertEquals(30.0, service.getPrice());
     }

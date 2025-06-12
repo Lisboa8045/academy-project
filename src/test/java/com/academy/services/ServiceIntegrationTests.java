@@ -17,7 +17,6 @@ import com.academy.repositories.ServiceTypeRepository;
 import com.academy.repositories.TagRepository;
 import jakarta.transaction.Transactional;
 import org.apache.coyote.BadRequestException;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -123,7 +122,7 @@ public class ServiceIntegrationTests {
     }
 
     @Test
-    void updateService_invalidServiceType_throwsException() {
+    void updateService_invalidServiceType_throwsException() throws BadRequestException {
         ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1"));
 
         ServiceResponseDTO createdResponse = serviceService.create(serviceRequestDTO);
@@ -143,7 +142,7 @@ public class ServiceIntegrationTests {
     }
 
     @Test
-    void deleteTag_associatedWithService() {
+    void deleteTag_associatedWithService() throws BadRequestException {
         Tag tag2 = createTag("tag2");
         ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag2"));
 

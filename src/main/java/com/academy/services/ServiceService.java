@@ -6,20 +6,18 @@ import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
 import com.academy.exceptions.AuthenticationException;
+import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.Member;
+import com.academy.models.ServiceType;
+import com.academy.models.Tag;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
-import com.academy.exceptions.EntityNotFoundException;
-import com.academy.models.ServiceType;
-import com.academy.models.Tag;
 import com.academy.repositories.ServiceRepository;
-import com.academy.repositories.TagRepository;
 import com.academy.specifications.ServiceSpecifications;
 import com.academy.utils.Utils;
 import jakarta.transaction.Transactional;
 import org.apache.coyote.BadRequestException;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -80,8 +78,7 @@ public class ServiceService {
         Service existing = getServiceEntityById(id);
 
         List<ProviderPermissionEnum> permissions = getPermissionsByProviderUsernameAndServiceId(username, existing.getId());
-        if(!checkIfHasPermission(permissions,ProviderPermissionEnum.UPDATE))
-            throw new AuthenticationException("Member doesn't have permission to update service");
+        checkIfHasPermission(permissions,ProviderPermissionEnum.UPDATE, "update service");
 
         linkServiceToType(existing, dto.serviceTypeName());
         linkServiceToTags(existing, dto.tagNames());
@@ -115,8 +112,7 @@ public class ServiceService {
         String username =  authenticationFacade.getUsername();
         Service service = getServiceEntityById(id);
         List<ProviderPermissionEnum> permissions = getPermissionsByProviderUsernameAndServiceId(username, id);
-        if(!checkIfHasPermission(permissions,ProviderPermissionEnum.DELETE))
-            throw new AuthenticationException("Member doesn't have permission to delete service");
+        checkIfHasPermission(permissions,ProviderPermissionEnum.DELETE, "delete service");
 
         cleanUpService(service);
         serviceRepository.delete(service);
@@ -143,12 +139,8 @@ public class ServiceService {
         type.getServices().add(service);
     }
 
-    private void createAndLinkServiceOwner(Service service, Long memberId) {
-        ServiceProvider owner = createOwnerServiceProvider(new ServiceProviderRequestDTO(
-                memberId,
-                service.getId(),
-                Arrays.asList(ProviderPermissionEnum.values())
-        ));
+    private void createAndLinkServiceOwner(Service service, Long memberId) throws BadRequestException {
+        ServiceProvider owner = createOwnerServiceProvider(memberId, service.getId());
         service.getServiceProviders().add(owner);
         owner.setService(service);
     }
@@ -224,8 +216,7 @@ public class ServiceService {
                                              Long updaterId,
                                              Long memberToBeUpdatedId) throws BadRequestException {
         boolean isOwnerBeingUpdated = oldPermissions.contains(ProviderPermissionEnum.OWNER);
-        if(!checkIfHasPermission(updaterPermissions, ProviderPermissionEnum.UPDATE_PERMISSIONS))
-            throw new AuthenticationException("Member does not have permission to update permissions");
+        checkIfHasPermission(updaterPermissions, ProviderPermissionEnum.UPDATE_PERMISSIONS, "update permissions");
 
         if(updaterId == memberToBeUpdatedId)
             throw new BadRequestException("Cannot edit your own permissions");
@@ -235,8 +226,9 @@ public class ServiceService {
         ServiceProviderService.checkIfValidPermissions(newPermissions);
     }
 
-    private boolean checkIfHasPermission(List<ProviderPermissionEnum> permissions, ProviderPermissionEnum permission ) {
-        return Utils.hasPermission(permissions, permission);
+    private void checkIfHasPermission(List<ProviderPermissionEnum> permissions, ProviderPermissionEnum permission, String permissionName) {
+        if (!Utils.hasPermission(permissions, permission))
+            throw new AuthenticationException("Member doesn't have permission to " + permissionName);
     }
     public Service getServiceEntityById(Long id) {
         return serviceRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(Service.class, id));
