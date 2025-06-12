@@ -77,13 +77,9 @@ public class AppointmentService {
         String username = authenticationFacade.getUsername();
         Member member = memberService.getMemberByUsername(username);
 
-        System.out.println(">>> Membro: " + username);
-
         ServiceProvider serviceProvider = serviceProviderService.getServiceProviderEntityById(dto.serviceProviderId());
-        System.out.println(">>> Prestador ID: " + serviceProvider.getId());
 
         Appointment appointment = appointmentMapper.toEntity(dto);
-        System.out.println(">>> Entidade Appointment antes de guardar: " + appointment);
 
 
         appointment.setMember(member);
