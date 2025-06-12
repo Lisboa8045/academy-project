@@ -1,23 +1,23 @@
 package com.academy.models.log;
 
 import com.academy.models.Member;
-import jakarta.persistence.*;
+import com.academy.models.shared.BaseEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name="log")
-@Getter @Setter
-
-public class Log {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="log_id")
-    private long id;
+@Getter
+@Setter
+public class Log extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name="member_id")
@@ -27,19 +27,13 @@ public class Log {
     @Column(name="action", nullable = false)
     private ActionEnum action;
 
-
     // column definition -> + de 255 caracteres
     @Column(name="details", columnDefinition = "TEXT")
     private String details;
-
-    @Column(name = "created_at", updatable = false)
-    @CreationTimestamp
-    private LocalDateTime createdAt;
 
     //LOB -> large object como texto longo e ficheiros binários
     @Lob
     @Column(name = "attachemnt")
     private byte[] attachment;
-    
-    // nao tem updated_at porque este campo nunca é alterado
+
 }

@@ -1,23 +1,22 @@
 package com.academy.models.notification;
 
 import com.academy.models.Member;
-import jakarta.persistence.*;
+import com.academy.models.shared.BaseEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalTime;
 
 @Entity
 @Table(name="notification")
-@Getter @Setter
-public class Notification {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="notification_id")
-    private long id;
+@Getter
+@Setter
+public class Notification extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
@@ -29,17 +28,8 @@ public class Notification {
     @Column(name="seen")
     private boolean seen;
 
-    @Column(name="created_at", updatable = false)
-    @CreationTimestamp
-    private LocalTime createdAt;
-
-    @Column(name="update_at")
-    @UpdateTimestamp
-    private LocalTime updatedAt;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "notification_type", nullable = false)
     private NotificationTypeEnum notificationTypeEnum;
-
 
 }

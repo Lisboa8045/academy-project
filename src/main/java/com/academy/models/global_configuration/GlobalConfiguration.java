@@ -1,28 +1,18 @@
 package com.academy.models.global_configuration;
 
+import com.academy.models.shared.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
-public class GlobalConfiguration {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="id")
-    private Long id;
+public class GlobalConfiguration extends BaseEntity {
 
     @Column(name="config_key", unique = true, nullable = false)
     @NotBlank
@@ -36,11 +26,4 @@ public class GlobalConfiguration {
     @Column(name="config_type", nullable = false)
     private GlobalConfigurationTypeEnum configType;
 
-    @Column(name="created_at", updatable = false)
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @Column(name="updated_at")
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
 }
