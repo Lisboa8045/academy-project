@@ -3,7 +3,7 @@ package com.academy.services;
 import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.exceptions.EntityNotFoundException;
-import com.academy.models.Member;
+import com.academy.models.member.Member;
 import com.academy.models.Role;
 import com.academy.models.ServiceType;
 import com.academy.models.Tag;

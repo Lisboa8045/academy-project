@@ -1,16 +1,18 @@
 package com.academy.models.service;
 
-import com.academy.models.Member;
+import com.academy.models.member.Member;
 import com.academy.models.ServiceType;
 import com.academy.models.Tag;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.models.shared.BaseEntity;
+import com.academy.util.FieldLengths;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -30,9 +32,10 @@ import java.util.List;
 @ToString(callSuper = true, exclude = {"owner", "serviceType", "tags", "serviceProviders"})
 public class Service extends BaseEntity {
 
-    @Column(name="name")
+    @Column(name="name", length = FieldLengths.SERVICE_TITLE_MAX, nullable = false)
     private String name;
 
+    @Lob
     @Column(name="description")
     private String description;
 

@@ -1,6 +1,6 @@
 package com.academy.models.log;
 
-import com.academy.models.Member;
+import com.academy.models.member.Member;
 import com.academy.models.shared.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

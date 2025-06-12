@@ -1,7 +1,9 @@
 package com.academy.models;
 
+import com.academy.models.member.Member;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.models.shared.BaseEntity;
+import com.academy.util.FieldLengths;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -38,7 +40,7 @@ public class Appointment extends BaseEntity {
     @Column(name="rating")
     private Integer rating;
 
-    @Column(name="comment")
+    @Column(name="comment", length = FieldLengths.REVIEW_MAX)
     private String comment;
 
     @Column(name = "start_date_time")

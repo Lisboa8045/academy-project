@@ -1,7 +1,7 @@
 package com.academy.models.service.service_provider;
 
 import com.academy.models.Appointment;
-import com.academy.models.Member;
+import com.academy.models.member.Member;
 import com.academy.models.service.Service;
 import com.academy.models.shared.BaseEntity;
 import jakarta.persistence.Entity;

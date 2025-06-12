@@ -2,6 +2,7 @@ package com.academy.models;
 
 import com.academy.models.service.Service;
 import com.academy.models.shared.BaseEntity;
+import com.academy.util.FieldLengths;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,7 +24,7 @@ import java.util.List;
 public class Tag extends BaseEntity {
 
     @NotBlank
-    @Column(name="name", unique = true)
+    @Column(name="name", unique = true, length = FieldLengths.TAG_NAME_MAX)
     private String name;
 
     @Column(name="custom", nullable = false)

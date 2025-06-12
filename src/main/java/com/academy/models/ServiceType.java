@@ -2,6 +2,7 @@ package com.academy.models;
 
 import com.academy.models.service.Service;
 import com.academy.models.shared.BaseEntity;
+import com.academy.util.FieldLengths;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -23,11 +24,11 @@ import java.util.List;
 public class ServiceType extends BaseEntity {
 
     @NotBlank
-    @Column(name="name", unique = true)
+    @Column(name="name", unique = true, length = FieldLengths.SERVICE_TYPE_MAX)
     private String name;
 
     @NotBlank
-    @Column(name="icon")
+    @Column(name="icon", length = FieldLengths.URL_MAX)
     private String icon;
 
     @OneToMany(mappedBy = "serviceType", fetch = FetchType.LAZY)
