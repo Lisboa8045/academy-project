@@ -6,13 +6,12 @@ export function strongPasswordValidator(): ValidatorFn {
 
     if (!password) return null;
 
-    const isLongEnough = password.length >= 8;
     const hasDigit = /[0-9]/.test(password);
     const hasLower = /[a-z]/.test(password);
     const hasUpper = /[A-Z]/.test(password);
     const hasSpecial = /[^a-zA-Z0-9]/.test(password);
 
-    const valid = isLongEnough && hasDigit && hasLower && hasUpper && hasSpecial;
+    const valid = hasDigit && hasLower && hasUpper && hasSpecial;
 
     return valid ? null : { weakPassword: true };
   };

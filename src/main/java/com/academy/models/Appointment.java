@@ -1,6 +1,8 @@
 package com.academy.models;
 
+import com.academy.models.member.Member;
 import com.academy.models.service.service_provider.ServiceProvider;
+import com.academy.util.FieldLengths;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -39,7 +41,7 @@ public class Appointment {
     @Column(name="rating")
     private Integer rating;
 
-    @Column(name="comment")
+    @Column(name="comment", length = FieldLengths.REVIEW_MAX)
     private String comment;
 
     @Column(name="created_at", updatable = false)
