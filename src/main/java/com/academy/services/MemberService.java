@@ -9,20 +9,25 @@ import com.academy.dtos.member.MemberResponseDTO;
 import com.academy.dtos.register.LoginRequestDto;
 import com.academy.dtos.register.LoginResponseDto;
 import com.academy.dtos.register.MemberMapper;
-import com.academy.dtos.register.LoginRequestDto;
 import com.academy.dtos.register.RegisterRequestDto;
-import com.academy.exceptions.*;
-import com.academy.models.member.Member;
+import com.academy.exceptions.AuthenticationException;
+import com.academy.exceptions.BadRequestException;
+import com.academy.exceptions.EmailTemplateLoadingException;
+import com.academy.exceptions.EntityNotFoundException;
+import com.academy.exceptions.InvalidArgumentException;
+import com.academy.exceptions.MemberNotFoundException;
+import com.academy.exceptions.NotFoundException;
+import com.academy.exceptions.RegistrationConflictException;
+import com.academy.exceptions.UnavailableUserException;
 import com.academy.models.Role;
+import com.academy.models.member.Member;
 import com.academy.models.member.MemberStatusEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.MemberRepository;
 import com.academy.repositories.RoleRepository;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.ClassPathResource;
@@ -35,7 +40,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -86,9 +93,18 @@ public class MemberService {
 
     @Transactional
     public long register(RegisterRequestDto request) {
-        if (memberRepository.findByUsername(request.username()).isPresent()
-                || memberRepository.findByEmail(request.email()).isPresent())
-            throw new EntityAlreadyExists(messageSource.getMessage("user.exists", null, LocaleContextHolder.getLocale()));
+        Map<String, String> errors = new HashMap<>();
+        if (memberRepository.findByUsername(request.username()).isPresent()) {
+            String message = messageSource.getMessage("username.exists", null, LocaleContextHolder.getLocale());
+            errors.put("username", message);
+        }
+        if (memberRepository.findByEmail(request.email()).isPresent()) {
+            String message = messageSource.getMessage("email.exists", null, LocaleContextHolder.getLocale());
+            errors.put("email", message);
+        }
+        if (!errors.isEmpty()) {
+            throw new RegistrationConflictException(errors);
+        }
 
         if (!isValidPassword(request.password()))
             throw new InvalidArgumentException(messageSource.getMessage("register.invalidpassword", null, LocaleContextHolder.getLocale()));
