@@ -37,6 +37,12 @@ public class Notification {
     @Column(name="title")
     private String title;
 
+    @Column(name="body")
+    private String body;
+
+    @Column(name="url")
+    private String url;
+
     @Column(name="seen")
     private boolean seen;
 
