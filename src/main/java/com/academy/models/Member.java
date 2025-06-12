@@ -64,4 +64,8 @@ public class Member {
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
+    @Column(name = "profile-picture")
+    private String profilePicture;
+
+
 }

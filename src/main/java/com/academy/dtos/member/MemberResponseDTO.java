@@ -7,5 +7,6 @@ public record MemberResponseDTO(
         String address,
         String postalCode,
         String phoneNumber,
-        String role
+        String role,
+        String profilePicture
 ) {}
