@@ -31,6 +31,8 @@ public class ProviderPermissionService {
         return providerPermissionRepository.findAllByServiceProviderId(serviceProviderId).stream()
                 .map(ProviderPermission::getPermission).toList();
     }
+
+    @Transactional
     public ServiceProvider createPermissionsViaList(List<ProviderPermissionEnum> permissions, ServiceProvider serviceProvider){
         List<ProviderPermission> providerPermissions = new ArrayList<>();
         for(ProviderPermissionEnum permission : permissions){
@@ -56,6 +58,8 @@ public class ProviderPermissionService {
             providerPermissionRepository.delete(permission);
         }
     }
+
+    @Transactional
     public void deleteAllByServiceProvider(Long serviceProviderId) {
         ServiceProvider serviceProvider = serviceProviderService.getServiceProviderEntityById(serviceProviderId);
         providerPermissionRepository.deleteAll(serviceProvider.getPermissions());

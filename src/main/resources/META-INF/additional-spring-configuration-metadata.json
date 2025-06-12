@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "starting.scripts.enabled",
+      "type": "java.lang.String",
+      "defaultValue": false,
+      "description": "Enable or disable the populateData() Scripts."
+  }
+] }

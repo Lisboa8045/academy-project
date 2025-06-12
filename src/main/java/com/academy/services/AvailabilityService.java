@@ -89,6 +89,11 @@ public class AvailabilityService {
     // Create a new availability
     @Transactional
     public AvailabilityResponseDTO createAvailability(AvailabilityRequestDTO requestDTO) {
+
+        if (!requestDTO.isEndAfterStart()) {
+            throw new InvalidArgumentException("EndDateTime must be after StartDateTime");
+        }
+
         Long memberId = requestDTO.memberId();
         Member member = memberService.findbyId(memberId)
                 .orElseThrow(() -> new EntityNotFoundException(Member.class, " with ID " + memberId + " not found."));

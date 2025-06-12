@@ -4,11 +4,13 @@ import com.academy.models.member.Member;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name = "role")
 @Getter
 @Setter
+@ToString(exclude="members")
 public class Role {
 
     @Id

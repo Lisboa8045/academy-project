@@ -2,12 +2,14 @@ package com.academy.services;
 
 import com.academy.config.AppProperties;
 import com.academy.config.TestTokenStorage;
+import com.academy.config.authentication.JwtCookieUtil;
 import com.academy.config.authentication.JwtUtil;
 import com.academy.dtos.member.MemberRequestDTO;
 import com.academy.dtos.member.MemberResponseDTO;
 import com.academy.dtos.register.LoginRequestDto;
 import com.academy.dtos.register.LoginResponseDto;
 import com.academy.dtos.register.MemberMapper;
+import com.academy.dtos.register.LoginRequestDto;
 import com.academy.dtos.register.RegisterRequestDto;
 import com.academy.exceptions.*;
 import com.academy.models.member.Member;
@@ -52,6 +54,7 @@ public class MemberService {
     @Autowired(required = false)
     private TestTokenStorage testTokenStorage;
 
+    private final JwtCookieUtil jwtCookieUtil;
 
     @Autowired
     public MemberService(MemberRepository memberRepository,
@@ -59,6 +62,7 @@ public class MemberService {
                          RoleRepository roleRepository,
                          MemberMapper memberMapper,
                          JwtUtil jwtUtil,
+                         MessageSource messageSource, JwtCookieUtil jwtCookieUtil) {
                          MessageSource messageSource,
                          EmailService emailService,
                          GlobalConfigurationService globalConfigurationService,
@@ -72,14 +76,11 @@ public class MemberService {
         this.emailService = emailService;
         this.globalConfigurationService = globalConfigurationService;
         this.appProperties = appProperties;
+        this.jwtCookieUtil = jwtCookieUtil;
     }
+
     public void logout(HttpServletResponse response){
-        System.out.println("Backend 2 logout");
-        Cookie cookie = new Cookie("token", null);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
+        jwtCookieUtil.clearJwtCookie(response);
     }
 
     @Transactional
@@ -225,17 +226,13 @@ public class MemberService {
             );
             String token = jwtUtil.generateToken(userDetails);
             System.out.println("Token generated:" + token);
-            Cookie cookie = new Cookie("token", token);
-            cookie.setHttpOnly(true);
-            cookie.setSecure(true);
-            cookie.setPath("/");
-            cookie.setMaxAge(60 * 60 * 24);
-            response.addCookie(cookie);
+            jwtCookieUtil.addJwtCookie(response, token);
             return new LoginResponseDto(
                     messageSource.getMessage("user.loggedin", null, LocaleContextHolder.getLocale()),
                     token,
                     member.getId(),
-                    member.getUsername()
+                    member.getUsername(),
+                    member.getProfilePicture()
             );
     }
 
@@ -279,8 +276,8 @@ public class MemberService {
             member.setPhoneNumber(memberRequestDTO.phoneNumber());
         }
 
-        if(memberRequestDTO.email() != null){
-            member.setEmail(memberRequestDTO.email());
+        if(memberRequestDTO.username() != null){
+            member.setUsername(memberRequestDTO.username());
         }
 
         if(memberRequestDTO.password() != null){
@@ -323,5 +320,16 @@ public class MemberService {
         member.setConfirmationToken(passwordEncoder.encode(rawConfirmationToken));
         memberRepository.save(member);
         sendConfirmationEmail(member, rawConfirmationToken);
+    }
+
+    public Member saveProfilePic(Long id, String filename) {
+        memberRepository.findById(id)
+                .map(m -> {
+                    m.setProfilePicture(filename);
+                    memberRepository.save(m);
+                    return m;
+                })
+                .orElseThrow(() -> new EntityNotFoundException(Member.class, id));
+        return null;
     }
 }

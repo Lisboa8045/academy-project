@@ -32,7 +32,7 @@ import java.util.List;
 @Table(name="service")
 @Getter
 @Setter
-@ToString(exclude = "serviceProviders")
+@ToString(exclude = {"owner", "serviceType", "tags", "serviceProviders"})
 public class Service {
 
     @Column(name="id")
@@ -87,20 +87,4 @@ public class Service {
 
     @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ServiceProvider> serviceProviders = new ArrayList<>();
-
-    private void removeAllTags() {
-        for (Tag tag : new ArrayList<>(tags)) {
-            tag.getServices().remove(this);
-        }
-        tags.clear();
-    }
-
-    private void removeServiceTypeLink() {
-        serviceType.getServices().remove(this);
-    }
-
-    public void removeAllLinks() {
-        removeAllTags();
-        removeServiceTypeLink();
-    }
 }

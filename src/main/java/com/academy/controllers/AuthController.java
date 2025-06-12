@@ -3,6 +3,11 @@ package com.academy.controllers;
 import com.academy.config.authentication.AuthenticationFacade;
 import com.academy.dtos.register.*;
 import com.academy.services.EmailService;
+import com.academy.dtos.register.LoginRequestDto;
+import com.academy.dtos.register.LoginResponseDto;
+import com.academy.dtos.register.RegisterRequestDto;
+import com.academy.dtos.register.RegisterResponseDto;
+import com.academy.models.Member;
 import com.academy.services.MemberService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -46,11 +51,13 @@ public class AuthController {
                 )
         );
     }
+
     @GetMapping("/confirm-email/{token}")
     public ResponseEntity<ConfirmEmailResponseDto> confirmEmail(@PathVariable String token) {
        memberService.confirmEmail(token);
        return  ResponseEntity.ok(new ConfirmEmailResponseDto("Email confirmed successfully"));
     }
+
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@Valid @RequestBody LoginRequestDto request, HttpServletResponse httpResponse){
         LoginResponseDto response = memberService.login(request, httpResponse);
@@ -77,8 +84,11 @@ public class AuthController {
         if ("anonymousUser".equals(username)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+        Member member = memberService.getMemberByUsername(username);
+        Long id = member.getId();
+        String profilePicture = member.getProfilePicture();
 
-        return ResponseEntity.ok(Map.of("username", username));
+        return ResponseEntity.ok(Map.of("username", username, "id", id, "profilePicture", profilePicture));
     }
 
     @PostMapping("/recreate-confirmation-token")
