@@ -1,5 +1,6 @@
 package com.academy.models;
 
+import com.academy.models.member.Member;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

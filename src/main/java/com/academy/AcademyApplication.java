@@ -19,7 +19,7 @@ public class AcademyApplication {
 		SpringApplication.run(AcademyApplication.class, args);
 	}
 
-
+/*
 	@Bean
 	@ConditionalOnProperty(name = "starting.scripts.enabled", havingValue = "true", matchIfMissing = false)
 	CommandLineRunner populateData(DataSource dataSource) {
@@ -37,6 +37,8 @@ public class AcademyApplication {
 			System.out.println("Populated database");
 		};
 	}
+	
+ */
 
 
 }

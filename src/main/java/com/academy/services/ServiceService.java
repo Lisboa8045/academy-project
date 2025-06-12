@@ -7,9 +7,9 @@ import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
 import com.academy.exceptions.AuthenticationException;
 import com.academy.exceptions.EntityNotFoundException;
-import com.academy.models.Member;
 import com.academy.models.ServiceType;
 import com.academy.models.Tag;
+import com.academy.models.member.Member;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
@@ -180,7 +180,7 @@ public class ServiceService {
     private Specification<Service> addIfPresent(Specification<Service> spec, boolean condition, Supplier<Specification<Service>> supplier) {
         return condition ? spec.and(supplier.get()) : spec; // add specification on supplier, if the condition is met
     }
-    
+
     @Transactional
     public ServiceResponseDTO updateMemberPermissions(Long serviceId, Long memberToBeUpdatedId, List<ProviderPermissionEnum> newPermissions) throws AuthenticationException, BadRequestException {
         String updaterUsername =   authenticationFacade.getUsername();
@@ -201,7 +201,7 @@ public class ServiceService {
         serviceProviderService.addPermissions(serviceProvider, newPermissions);
         return getById(serviceId);
     }
-    
+
     private ServiceProvider createOwnerServiceProvider(Long memberId, Long serviceId) throws AuthenticationException, BadRequestException {
         return serviceProviderService.createServiceProvider(new ServiceProviderRequestDTO(
                 memberId,

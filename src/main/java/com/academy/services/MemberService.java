@@ -1,5 +1,7 @@
 package com.academy.services;
 
+import com.academy.config.AppProperties;
+import com.academy.config.TestTokenStorage;
 import com.academy.config.authentication.JwtCookieUtil;
 import com.academy.config.authentication.JwtUtil;
 import com.academy.dtos.member.MemberRequestDTO;
@@ -10,25 +12,32 @@ import com.academy.dtos.register.MemberMapper;
 import com.academy.dtos.register.LoginRequestDto;
 import com.academy.dtos.register.RegisterRequestDto;
 import com.academy.exceptions.*;
-import com.academy.models.Availability;
-import com.academy.models.Member;
+import com.academy.models.member.Member;
 import com.academy.models.Role;
+import com.academy.models.member.MemberStatusEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.MemberRepository;
 import com.academy.repositories.RoleRepository;
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,6 +48,12 @@ public class MemberService {
     private final MemberMapper memberMapper;
     private final JwtUtil jwtUtil;
     private final MessageSource messageSource;
+    private final EmailService emailService;
+    private final GlobalConfigurationService globalConfigurationService;
+    private final AppProperties appProperties;
+    @Autowired(required = false)
+    private TestTokenStorage testTokenStorage;
+
     private final JwtCookieUtil jwtCookieUtil;
 
     @Autowired
@@ -47,7 +62,11 @@ public class MemberService {
                          RoleRepository roleRepository,
                          MemberMapper memberMapper,
                          JwtUtil jwtUtil,
-                         MessageSource messageSource, JwtCookieUtil jwtCookieUtil) {
+                         MessageSource messageSource,
+                         JwtCookieUtil jwtCookieUtil,
+                         EmailService emailService,
+                         GlobalConfigurationService globalConfigurationService,
+                         AppProperties appProperties) {
         this.memberRepository = memberRepository;
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
@@ -55,27 +74,128 @@ public class MemberService {
         this.jwtUtil = jwtUtil;
         this.messageSource = messageSource;
         this.jwtCookieUtil = jwtCookieUtil;
+        this.emailService = emailService;
+        this.globalConfigurationService = globalConfigurationService;
+        this.appProperties = appProperties;
     }
+
 
     public void logout(HttpServletResponse response){
         jwtCookieUtil.clearJwtCookie(response);
     }
 
-
+    @Transactional
     public long register(RegisterRequestDto request) {
         if (memberRepository.findByUsername(request.username()).isPresent()
                 || memberRepository.findByEmail(request.email()).isPresent())
             throw new EntityAlreadyExists(messageSource.getMessage("user.exists", null, LocaleContextHolder.getLocale()));
+
         if (!isValidPassword(request.password()))
             throw new InvalidArgumentException(messageSource.getMessage("register.invalidpassword", null, LocaleContextHolder.getLocale()));
         Optional<Role> optionalRole = roleRepository.findById(request.roleId());
+
         if(optionalRole.isEmpty())
             throw new NotFoundException(messageSource.getMessage("role.notfound", null, LocaleContextHolder.getLocale()));
+
+        return createMember(request, optionalRole.get()).getId();
+
+    }
+    private Member createMember(RegisterRequestDto request, Role role){
         Member member = memberMapper.toMember(request);
         member.setPassword(passwordEncoder.encode(request.password()));
-        member.setRole(optionalRole.get());
+        member.setRole(role);
+        member.setEnabled(false);
+        member.setStatus(MemberStatusEnum.WAITING_FOR_EMAIL_APPROVAL);
+        String rawConfirmationToken = generateUniqueConfirmationToken();
+        if (testTokenStorage != null) {
+            testTokenStorage.storeToken(rawConfirmationToken);
+        }
+        member.setConfirmationToken(passwordEncoder.encode(rawConfirmationToken));
+        member.setTokenExpiry(LocalDateTime.now().plusMinutes(
+                Integer.parseInt(globalConfigurationService.getConfigValue("confirmation_token_expiry_minutes"))));
         memberRepository.save(member);
-        return member.getId();
+
+        sendConfirmationEmail(member, rawConfirmationToken);
+        return member;
+    }
+
+    private void sendConfirmationEmail(Member member, String rawToken) {
+        String confirmationUrl = appProperties.getUrl() + "/auth/confirm-email/" + rawToken;
+
+        String html = loadVerificationEmailHtml()
+                .replace("[User Name]", member.getUsername())
+                .replace("[CONFIRMATION_LINK]", confirmationUrl)
+                .replace("[App Name]", appProperties.getName())
+                        .replace("[HOURS]", formatHours(globalConfigurationService.getConfigValue("confirmation_token_expiry_minutes")));
+
+        emailService.send(
+                member.getEmail(),
+                "Confirm your account",
+                "Clique no link para confirmar: " + confirmationUrl,
+                html
+        );
+    }
+    private String formatHours(String minutesStr){
+        long totalMinutes = Long.parseLong(minutesStr);
+
+        long hours = totalMinutes / 60;
+        long minutes = totalMinutes % 60;
+        String formattedTime;
+        if (hours > 0 && minutes > 0) {
+            formattedTime = hours + " hour" + (hours > 1 ? "s" : "") + " and " + minutes + " minute" + (minutes > 1 ? "s" : "");
+        } else if (hours > 0) {
+            formattedTime = hours + " hour" + (hours > 1 ? "s" : "");
+        } else {
+            formattedTime = minutes + " minute" + (minutes > 1 ? "s" : "");
+        }
+        return formattedTime;
+    }
+
+    private String loadVerificationEmailHtml(){
+            try {
+                ClassPathResource resource = new ClassPathResource("templates/verification-email.html");
+                byte[] bytes = Files.readAllBytes(resource.getFile().toPath());
+                return new String(bytes, StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                throw new EmailTemplateLoadingException("Erro ao carregar template de e-mail");
+            }
+    }
+
+    private String generateUniqueConfirmationToken() {
+        String rawToken;
+        Optional<Member> optionalMember;
+
+        do {
+            rawToken = generateEncodedToken();
+            String finalRawToken = rawToken;
+            optionalMember = memberRepository.findAll().stream()
+                    .filter(m -> m.getConfirmationToken() != null &&
+                            passwordEncoder.matches(finalRawToken, m.getConfirmationToken()))
+                    .findFirst();
+        } while (optionalMember.isPresent());
+
+        return rawToken;
+    }
+
+
+    private String generateEncodedToken(){
+        return UUID.randomUUID().toString();
+    }
+    @Transactional
+    public void confirmEmail(String confirmationToken) {
+        Member member = memberRepository.findAll().stream()
+                .filter(m -> m.getConfirmationToken() != null &&
+                        passwordEncoder.matches(confirmationToken, m.getConfirmationToken()))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("Confirmation Token not found"));
+
+        if (member.getTokenExpiry().isBefore(LocalDateTime.now()))
+            throw new AuthenticationException("Confirmation Token has Expired");
+
+        member.setTokenExpiry(null);
+        member.setEnabled(true);
+        member.setStatus(MemberStatusEnum.ACTIVE);
+        memberRepository.save(member);
     }
 
     private boolean isValidPassword(String password) {
@@ -87,14 +207,23 @@ public class MemberService {
 
     }
 
-    public LoginResponseDto login(LoginRequestDto request, HttpServletResponse response) {
-        Optional<Member> member = request.login().contains("@")
-                ? memberRepository.findByEmail(request.login())
-                : memberRepository.findByUsername(request.login());
+    private Member tryToAuthenticateMember(String login, String password) {
+        Optional<Member> optionalMember = login.contains("@")
+                ? memberRepository.findByEmail(login)
+                : memberRepository.findByUsername(login);
 
-        if(member.isPresent() && passwordEncoder.matches(request.password(), member.get().getPassword())) {
+        if(optionalMember.isEmpty() ||  !passwordEncoder.matches(password, optionalMember.get().getPassword()))
+            throw new AuthenticationException(messageSource.getMessage("auth.invalid", null, LocaleContextHolder.getLocale()));
+
+        return optionalMember.get();
+    }
+    public LoginResponseDto login(LoginRequestDto request, HttpServletResponse response) {
+            Member member = tryToAuthenticateMember(request.login(), request.password());
+
+            if(!member.isEnabled())
+                throw new UnavailableUserException(member.getStatus());
             UserDetails userDetails = new org.springframework.security.core.userdetails.User(
-                    member.get().getUsername(), member.get().getPassword(), new ArrayList<>()
+                    member.getUsername(), member.getPassword(), new ArrayList<>()
             );
             String token = jwtUtil.generateToken(userDetails);
             System.out.println("Token generated:" + token);
@@ -102,12 +231,10 @@ public class MemberService {
             return new LoginResponseDto(
                     messageSource.getMessage("user.loggedin", null, LocaleContextHolder.getLocale()),
                     token,
-                    member.get().getId(),
-                    member.get().getUsername(),
-                    member.get().getProfilePicture()
+                    member.getId(),
+                    member.getUsername(),
+                    member.getProfilePicture()
             );
-        }
-        throw new AuthenticationException(messageSource.getMessage("auth.invalid", null, LocaleContextHolder.getLocale()));
     }
 
     public Member getMemberByUsername(String username){
@@ -179,6 +306,21 @@ public class MemberService {
     }
     public Member getMemberEntityById(long id){
         return memberRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
+    }
+
+    public void recreateConfirmationToken(String login, String password) {
+        Member member = tryToAuthenticateMember(login, password);
+        if(member.isEnabled())
+            throw new BadRequestException("Member already enabled");
+        member.setTokenExpiry(LocalDateTime.now().plusMinutes(
+                Integer.parseInt(globalConfigurationService.getConfigValue("confirmation_token_expiry_minutes"))));
+        String rawConfirmationToken = generateUniqueConfirmationToken();
+        if (testTokenStorage != null) {
+            testTokenStorage.storeToken(rawConfirmationToken);
+        }
+        member.setConfirmationToken(passwordEncoder.encode(rawConfirmationToken));
+        memberRepository.save(member);
+        sendConfirmationEmail(member, rawConfirmationToken);
     }
 
     public Member saveProfilePic(Long id, String filename) {
