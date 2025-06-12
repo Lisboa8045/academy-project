@@ -1,6 +1,6 @@
 package com.academy.models.service;
 
-import com.academy.models.Member;
+import com.academy.models.member.Member;
 import com.academy.models.ServiceType;
 import com.academy.models.Tag;
 import com.academy.models.service.service_provider.ServiceProvider;
@@ -90,20 +90,4 @@ public class Service {
 
     @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ServiceProvider> serviceProviders = new ArrayList<>();
-
-    private void removeAllTags() {
-        for (Tag tag : new ArrayList<>(tags)) {
-            tag.getServices().remove(this);
-        }
-        tags.clear();
-    }
-
-    private void removeServiceTypeLink() {
-        serviceType.getServices().remove(this);
-    }
-
-    public void removeAllLinks() {
-        removeAllTags();
-        removeServiceTypeLink();
-    }
 }

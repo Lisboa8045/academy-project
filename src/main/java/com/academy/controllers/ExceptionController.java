@@ -53,10 +53,27 @@ public class ExceptionController {
                 .body(Map.of("errors", e.getFieldErrors()));
     }
 
+//TODO eliminar esta para apenas utilizar a de baixo
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<Object> handleInvalidValue(BadRequestException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(com.academy.exceptions.BadRequestException.class)
+    public ResponseEntity<Object> handleInvalidValue(com.academy.exceptions.BadRequestException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(SendEmailException.class)
+    public ResponseEntity<Object> handleInvalidValue(SendEmailException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(EmailTemplateLoadingException.class)
+    public ResponseEntity<Object> handleInvalidValue(EmailTemplateLoadingException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<Object> handleInvalidValue(AuthenticationException e) {
@@ -66,6 +83,10 @@ public class ExceptionController {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Object> handleInvalidValue(NotFoundException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+    @ExceptionHandler(UnavailableUserException.class)
+    public ResponseEntity<Object> handleInvalidValue(UnavailableUserException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)

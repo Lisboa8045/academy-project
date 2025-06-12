@@ -1,5 +1,7 @@
 package com.academy.models;
 
+import com.academy.models.member.Member;
+import jakarta.persistence.*;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

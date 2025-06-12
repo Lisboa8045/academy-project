@@ -35,8 +35,7 @@ public class ServiceTypeService {
     // Update
     @Transactional
     public ServiceTypeResponseDTO update(Long id, ServiceTypeRequestDTO dto) {
-        ServiceType existing = serviceTypeRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(ServiceType.class, id));
+        ServiceType existing = getServiceTypeEntityById(id);
 
         serviceTypeMapper.updateEntityFromDto(dto, existing);
         ServiceType updated = serviceTypeRepository.save(existing);
@@ -53,8 +52,7 @@ public class ServiceTypeService {
 
     // Read one
     public ServiceTypeResponseDTO getById(Long id) {
-        ServiceType serviceType = serviceTypeRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(ServiceType.class, id));
+        ServiceType serviceType = getServiceTypeEntityById(id);
         return serviceTypeMapper.toDto(serviceType);
     }
     public ServiceType getEntityById(Long id) {
@@ -66,13 +64,16 @@ public class ServiceTypeService {
     // Delete
     @Transactional
     public void delete(Long id) {
-        ServiceType serviceType = serviceTypeRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(ServiceType.class, id));
+        ServiceType serviceType = getServiceTypeEntityById(id);
         serviceTypeRepository.delete(serviceType);
     }
 
-    public ServiceType findByNameOrThrow(String name) {
+    public ServiceType getServiceTypeEntityByName(String name) {
         return serviceTypeRepository.findByName(name)
                 .orElseThrow(() -> new EntityNotFoundException(ServiceType.class, " with name " + name + " not found"));
+    }
+
+    public ServiceType getServiceTypeEntityById(Long id) {
+        return serviceTypeRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(ServiceType.class, id));
     }
 }

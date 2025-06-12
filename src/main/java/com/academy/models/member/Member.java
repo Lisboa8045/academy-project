@@ -1,5 +1,8 @@
-package com.academy.models;
+package com.academy.models.member;
 
+import com.academy.models.Appointment;
+import com.academy.models.Availability;
+import com.academy.models.Role;
 import com.academy.models.service.Service;
 import com.academy.util.FieldLengths;
 import jakarta.persistence.*;
@@ -40,6 +43,19 @@ public class Member {
 
     @Column(name = "email", nullable = false, length = FieldLengths.EMAIL_MAX)
     private String email;
+
+    @Column(name = "enabled") //TODO should be nullable quando alterarem os testes para usar service
+    private boolean enabled;
+
+    @Column(name = "status") //TODO should be nullable quando alterarem os testes para usar service
+    @Enumerated(EnumType.STRING)
+    private MemberStatusEnum status;
+
+    @Column(name = "confirmation_token")
+    private String confirmationToken;
+
+    @Column(name = "token_expiry")
+    private LocalDateTime tokenExpiry;
 
     @Column(name = "address", length = FieldLengths.ADDRESS_MAX)
     private String address;

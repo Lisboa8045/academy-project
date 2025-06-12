@@ -1,5 +1,6 @@
 package com.academy.models;
 
+import com.academy.models.member.Member;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.util.FieldLengths;
 import jakarta.persistence.*;

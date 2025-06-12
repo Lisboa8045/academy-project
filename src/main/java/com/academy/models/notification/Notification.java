@@ -1,6 +1,6 @@
 package com.academy.models.notification;
 
-import com.academy.models.Member;
+import com.academy.models.member.Member;
 import com.academy.util.FieldLengths;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
