@@ -29,7 +29,7 @@ public class Notification {
     @Column(name="seen")
     private boolean seen;
 
-    @Column(name="created_at")
+    @Column(name="created_at", updatable = false)
     @CreationTimestamp
     private LocalTime createdAt;
 

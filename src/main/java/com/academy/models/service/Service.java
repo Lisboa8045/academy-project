@@ -62,7 +62,7 @@ public class Service {
     @Column(name="duration")
     private int duration;
 
-    @Column(name="created_at", updatable=false)
+    @Column(name="created_at", updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
 

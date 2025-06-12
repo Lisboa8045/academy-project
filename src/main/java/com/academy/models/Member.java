@@ -52,7 +52,7 @@ public class Member {
     @OneToMany(mappedBy = "owner")
     private List<Service> createdServices;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
 

@@ -29,7 +29,7 @@ public class Task {
     @Column(name = "status")
     private String status;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", updatable = false)
     @CreationTimestamp
     private LocalTime createdAt;
 

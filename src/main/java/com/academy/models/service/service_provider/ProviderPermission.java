@@ -3,6 +3,10 @@ package com.academy.models.service.service_provider;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name="provider_permission")
@@ -22,4 +26,11 @@ public class ProviderPermission {
     @Column(name="provider_permission", nullable = false, length = 200)
     private ProviderPermissionEnum permission;
 
+    @Column(name="created_at", updatable = false)
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @Column(name="updated_at")
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }

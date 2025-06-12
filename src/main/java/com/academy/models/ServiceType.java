@@ -36,7 +36,7 @@ public class ServiceType {
     @OneToMany(mappedBy = "serviceType", fetch = FetchType.LAZY)
     private List<Service> services = new ArrayList<>();
 
-    @Column(name="created_at", updatable=false)
+    @Column(name="created_at", updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
 
