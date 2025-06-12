@@ -1,4 +1,3 @@
-// ServiceProviderService.java
 package com.academy.services;
 
 import com.academy.config.authentication.AuthenticationFacade;
@@ -11,13 +10,12 @@ import com.academy.models.Member;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
-import com.academy.repositories.MemberRepository;
-import com.academy.utils.Utils;
 import com.academy.repositories.ServiceProviderRepository;
+import com.academy.utils.Utils;
 import jakarta.transaction.Transactional;
-import com.academy.repositories.ServiceRepository;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +35,7 @@ public class ServiceProviderService {
                                   ServiceProviderMapper serviceProviderMapper,
                                   ProviderPermissionService providerPermissionService,
                                   MemberService memberService,
-                                  ServiceService serviceService,
+                                  @Lazy ServiceService serviceService,
                                   AuthenticationFacade authenticationFacade) {
         this.serviceProviderRepository = serviceProviderRepository;
         this.serviceProviderMapper = serviceProviderMapper;
@@ -63,10 +61,13 @@ public class ServiceProviderService {
         return serviceProviderRepository.findById(id)
                 .map(serviceProviderMapper::toResponseDTO);
     }
+
+    @Transactional
     public ServiceProviderResponseDTO createServiceProviderWithDTO(ServiceProviderRequestDTO dto) throws BadRequestException {
         ServiceProvider serviceProvider = createServiceProvider(dto);
         return serviceProviderMapper.toResponseDTO(serviceProvider);
     }
+
     @Transactional
     public ServiceProvider createServiceProvider(ServiceProviderRequestDTO dto) throws BadRequestException {
         Member member = memberService.getMemberEntityById(dto.memberId());
@@ -105,21 +106,16 @@ public class ServiceProviderService {
 
         return true;
     }
+
     private void validatePermissions(List<ProviderPermissionEnum> permissions, boolean isServiceCreation) throws BadRequestException {
         if(!isServiceCreation && permissions.contains(ProviderPermissionEnum.OWNER))
             throw new BadRequestException("Can't give the Owner permission to a new worker!");
     }
 
+    @Transactional
     public ServiceProviderResponseDTO updateServiceProvider(long id, ServiceProviderRequestDTO details) {
         ServiceProvider serviceProvider = serviceProviderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
-
-
-//        if(details.getMemberId() != null){
-//            Member member = memberRepository.findById(details.getMemberId())
-//                    .orElseThrow(()-> new EntityNotFoundException(Member.class, details.getMemberId()));
-//            serviceProvider.setProvider(member);
-//        }
 
         if(details.serviceId() != null) {
             Service service = serviceService.getServiceEntityById(details.serviceId());
@@ -196,15 +192,17 @@ public class ServiceProviderService {
         return optionalServiceProvider.get();
     }
 
-
+    @Transactional
     public void deleteAllPermissions(Long serviceProviderId) {
         ServiceProvider serviceProvider = getServiceProviderEntityById(serviceProviderId);
         providerPermissionService.deleteAllByServiceProvider(serviceProvider.getId());
     }
 
+    @Transactional
     public void addPermissions(ServiceProvider serviceProvider,List<ProviderPermissionEnum> permissions){
         providerPermissionService.createPermissionsViaList(permissions, serviceProvider);
     }
+
     public List<Long> findMemberIdsByServiceId(Long serviceId) {
         return serviceProviderRepository.findMemberIdsByServiceId(serviceId);
     }
