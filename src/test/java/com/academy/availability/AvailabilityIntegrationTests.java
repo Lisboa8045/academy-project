@@ -10,7 +10,11 @@ import com.academy.models.Role;
 import com.academy.models.ServiceType;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
-import com.academy.repositories.*;
+import com.academy.repositories.AvailabilityRepository;
+import com.academy.repositories.MemberRepository;
+import com.academy.repositories.RoleRepository;
+import com.academy.repositories.ServiceRepository;
+import com.academy.repositories.ServiceTypeRepository;
 import com.academy.services.AvailabilityService;
 import com.academy.services.ServiceProviderService;
 import org.apache.coyote.BadRequestException;
@@ -26,7 +30,8 @@ import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional

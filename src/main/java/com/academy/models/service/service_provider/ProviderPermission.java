@@ -11,11 +11,13 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name="provider_permission")
 @Getter
 @Setter
+@ToString(exclude="serviceProvider")
 public class ProviderPermission extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.EAGER)

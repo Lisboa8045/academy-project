@@ -22,7 +22,7 @@ import java.util.List;
 @Table(name = "member")
 @Getter
 @Setter
-@ToString
+@ToString(exclude = {"availabilities", "appointments", "createdServices", "role"})
 public class Member extends BaseEntity {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -56,8 +56,7 @@ public class Member extends BaseEntity {
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
-    @Column(name = "profile-picture")
+    @Column(name = "profile_picture")
     private String profilePicture;
-
 
 }

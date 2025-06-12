@@ -1,16 +1,13 @@
 import {Component, OnInit} from '@angular/core';
 import {Router, RouterOutlet} from '@angular/router';
 import {AppHeaderComponent} from './header/app-header.component';
-import {AppFooterComponent} from './footer/app-footer.component';
-import {LoadingComponent} from './loading/loading.component';
 import {HttpClient} from '@angular/common/http';
 import {AuthStore} from './auth/auth.store';
-import {LoginResponseDto} from "./auth/login-response-dto.model";
 import {MemberResponseDTO} from "./auth/member-response-dto.model";
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, AppHeaderComponent, AppFooterComponent],
+  imports: [RouterOutlet, AppHeaderComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

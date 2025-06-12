@@ -1,4 +1,4 @@
-import {Component, effect, inject, OnInit, signal} from '@angular/core';
+import {Component, effect, inject, signal} from '@angular/core';
 import {Router} from '@angular/router';
 import { ProfileService} from './profile.service';
 import {AuthStore} from '../auth/auth.store';
@@ -97,8 +97,6 @@ export class ProfileComponent{
 
   clearImage(){
     this.tempImageUrl.set("");
-    if(!this.profileForm.dirty)
-      this.toggleEdit()
   }
 
   toggleEdit(){

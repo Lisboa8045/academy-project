@@ -21,10 +21,10 @@ import java.time.LocalDateTime;
 
 //Lombok annotations
 
-@Getter @Setter
-
-@NoArgsConstructor @ToString
-
+@Getter 
+@Setter
+@NoArgsConstructor
+@ToString(exclude = {"member", "serviceProvider"})
 public class Appointment extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -51,4 +51,3 @@ public class Appointment extends BaseEntity {
     private String status;
 
 }
-

@@ -65,8 +65,8 @@ public class MemberIntegrationTests {
         roleRepository.deleteAll();
     }
 
-    private MemberRequestDTO createMemberRequestDTO(String email, String address, String postalCode, String phoneNumber, String password, Long roleId) {
-        return new MemberRequestDTO(email, address, postalCode, phoneNumber, password, roleId);
+    private MemberRequestDTO createMemberRequestDTO(String username, String email, String address, String postalCode, String phoneNumber, String password, Long roleId) {
+        return new MemberRequestDTO(username, email, address, postalCode, phoneNumber, password, roleId);
     }
 @Test
     void deleteMember_memberNotFound_throwsException(){
@@ -82,14 +82,14 @@ public class MemberIntegrationTests {
 
     @Test
     void editMember_memberNotFound_throwsException(){
-        MemberRequestDTO memberRequestDTO = createMemberRequestDTO(member.getEmail(), member.getAddress(), member.getPostalCode(), member.getPhoneNumber(), member.getPassword(), member.getId());
+        MemberRequestDTO memberRequestDTO = createMemberRequestDTO(member.getUsername(), member.getEmail(), member.getAddress(), member.getPostalCode(), member.getPhoneNumber(), member.getPassword(), member.getId());
         assertThatThrownBy(() -> memberService.editMember(999, memberRequestDTO))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
     void editMember_shouldEditSuccessfully(){
-        MemberRequestDTO memberRequestDTO = createMemberRequestDTO("donatello@example.com",
+        MemberRequestDTO memberRequestDTO = createMemberRequestDTO("Donatello", "donatello@example.com",
                 "Esgoto", "0000-100",
                 "987654321", "pizza4EverEnjoyer!", 2L);
         MemberResponseDTO memberResponseDTO = memberService.editMember(member.getId(), memberRequestDTO);
@@ -104,6 +104,7 @@ public class MemberIntegrationTests {
     @Test
     void editMember_roleNotFound_throwsException(){
         MemberRequestDTO memberRequestDTO = createMemberRequestDTO(
+                "Donatello",
                 "donatello@example.com",
                 "Esgoto", "0000-100",
                 "987654321",
@@ -116,6 +117,7 @@ public class MemberIntegrationTests {
     @Test
     void editMember_withSameData_shouldUpdateSuccessfully(){
         MemberRequestDTO request = createMemberRequestDTO(
+                member.getUsername(),
                 member.getEmail(),
                 member.getAddress(),
                 member.getPostalCode(),
@@ -125,6 +127,7 @@ public class MemberIntegrationTests {
         );
         MemberResponseDTO memberResponseDTO = memberService.editMember(member.getId(), request);
 
+        assertThat(memberResponseDTO.username()).isEqualTo(member.getUsername());
         assertThat(memberResponseDTO.address()).isEqualTo(member.getAddress());
         assertThat(memberResponseDTO.email()).isEqualTo(member.getEmail());
         assertThat(memberResponseDTO.postalCode()).isEqualTo(member.getPostalCode());
@@ -134,7 +137,7 @@ public class MemberIntegrationTests {
 
     @Test
     void editMember_withNullFields_shouldWork(){
-        MemberRequestDTO memberRequestDTO = createMemberRequestDTO(null,
+        MemberRequestDTO memberRequestDTO = createMemberRequestDTO(null,null,
                 null, null,
                 "987654321", "pizza4EverEnjoyer!", 1L);
 
@@ -148,7 +151,7 @@ public class MemberIntegrationTests {
 
     @Test
     void editMember_toAnotherRole_shouldWork(){
-        MemberRequestDTO memberRequestDTO = createMemberRequestDTO(null,
+        MemberRequestDTO memberRequestDTO = createMemberRequestDTO(null,null,
                 null, null,
                 null, null, 2L);
         MemberResponseDTO response = memberService.editMember(member.getId(), memberRequestDTO);

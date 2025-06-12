@@ -18,7 +18,7 @@
             <div class="placeholder-avatar">🧑</div>
           }
         }
-        <label class="avatar-edit-icon bottom-right" title="Change your avatar">
+        <label class="avatar-edit-icon bottom-right" title="Change your avatar" *ngIf="editMode">
           <input type="file" accept="image/*" (change)="onFileSelected($event)" hidden>
           ➕
         </label>
