@@ -97,8 +97,6 @@ export class ProfileComponent{
 
   clearImage(){
     this.tempImageUrl.set("");
-    if(!this.profileForm.dirty)
-      this.toggleEdit()
   }
 
   toggleEdit(){
