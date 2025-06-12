@@ -275,6 +275,8 @@ export class ScheduleComponent implements OnInit {
             status: 'CONFIRMED'
           };
 
+          console.log('APPOINTMENT CREATE: ' + appointment);
+
           this.scheduleApi.confirmAppointment(appointment).subscribe({
             next: () => alert('Marcação efetuada com sucesso!'),
             error: err => alert('Erro ao marcar: ' + err.message)

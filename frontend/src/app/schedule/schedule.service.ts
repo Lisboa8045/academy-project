@@ -6,7 +6,6 @@ import { SlotModel } from './models/slot.model';
 import { AppointmentModel } from './models/appointment.model';
 import { ServiceTypeModel } from './models/service-type.model';
 
-
 @Injectable({
   providedIn: 'root',
 })
