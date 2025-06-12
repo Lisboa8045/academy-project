@@ -1,11 +1,11 @@
 <div (blur)="closeMenu()" tabindex="-1">
-  <div (click)="toggleMenu()">
-    <div class="username">
-      <ng-content />
-    </div>
-    <div class="profile-pic-wrapper">
-      <img src="https://d.newsweek.com/en/full/420435/borat.jpg?w=1600&h=1600&q=88&f=0fa38db7bab4d07592e90aaf207b33be" class="profile-pic">
-    </div>
+  <div (click)="toggleMenu()" class="wrapper">
+    <span class="username">{{ username() }}</span>
+    @if (imageUrl()){
+      <img class="profile-picture" [src]="imageUrl()" alt="Profile">
+    }@else{
+      <span class="placeholder-avatar">🧑</span>
+    }
   </div>
-  <app-menu *ngIf="showMenu()" [items]="menuItems"></app-menu>
+  <app-menu *ngIf="showMenu()" [items]="menuItems" (click)="closeMenu()"></app-menu>
 </div>

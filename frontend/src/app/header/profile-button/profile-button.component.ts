@@ -4,6 +4,8 @@ import {MenuComponent} from '../../shared/menu/menu.component';
 import {MenuItem} from '../../shared/menu/menu.model';
 import {AuthService} from '../../auth/auth.service';
 import {Router} from '@angular/router';
+import {AuthStore} from '../../auth/auth.store';
+import {UserProfileService} from '../../profile/user-profile.service';
 
 @Component({
   selector: 'app-profile-button',
@@ -17,6 +19,8 @@ import {Router} from '@angular/router';
 export class ProfileButtonComponent implements OnInit {
   showMenu = signal(false);
   authService = inject(AuthService);
+  readonly username = inject(AuthStore).username;
+  readonly imageUrl = inject(UserProfileService).imageUrl;
   router = inject(Router);
   menuItems: MenuItem[] = [];
 
@@ -24,7 +28,10 @@ export class ProfileButtonComponent implements OnInit {
     this.menuItems = [
       {
         label: 'Profile',
-        icon: '👤'
+        icon: '👤',
+        command: () => {
+          this.router.navigate(['/profile'])
+        }
       },
       {
         label: 'Appointments',
