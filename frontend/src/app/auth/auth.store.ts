@@ -11,7 +11,6 @@ export class AuthStore {
     effect(() => {
 
       const fileName = this.profilePicture();
-      console.log(fileName);
 
       if (fileName) {
         console.log(fileName);
@@ -27,12 +26,10 @@ export class AuthStore {
   }
 
   setId(id:number){
-    console.debug("setId", id);
     this.id.set(id)
   }
 
   setProfilePicture(profilePicture: string) {
-    console.debug("setProfilePicture", profilePicture);
     this.profilePicture.set(profilePicture);
   }
 

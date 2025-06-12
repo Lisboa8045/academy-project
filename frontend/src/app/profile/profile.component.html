@@ -8,18 +8,15 @@
       <div class="avatar-wrapper">
         @if(tempImageUrl()){
           <img class="profile-picture" [src]="tempImageUrl()" alt="Profile">
-
+          <button class="avatar-action-button bottom-left" title="Discard image" (click)="clearImage()">
+            🗑️
+          </button>
         } @else {
           @if (imageUrl()){
             <img class="profile-picture" [src]="imageUrl()" alt="Profile">
           }@else{
             <div class="placeholder-avatar">🧑</div>
           }
-        }
-        @if (tempImageUrl()) {
-          <button class="avatar-action-button bottom-left" title="Discard image" (click)="clearImage()">
-            🗑️
-          </button>
         }
         <label class="avatar-edit-icon bottom-right" title="Change your avatar">
           <input type="file" accept="image/*" (change)="onFileSelected($event)" hidden>
