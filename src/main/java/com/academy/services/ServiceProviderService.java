@@ -10,11 +10,9 @@ import com.academy.models.Member;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
-import com.academy.repositories.MemberRepository;
-import com.academy.utils.Utils;
 import com.academy.repositories.ServiceProviderRepository;
+import com.academy.utils.Utils;
 import jakarta.transaction.Transactional;
-import com.academy.repositories.ServiceRepository;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -189,15 +187,17 @@ public class ServiceProviderService {
         return optionalServiceProvider.get();
     }
 
-
+    @Transactional
     public void deleteAllPermissions(Long serviceProviderId) {
         ServiceProvider serviceProvider = getServiceProviderEntityById(serviceProviderId);
         providerPermissionService.deleteAllByServiceProvider(serviceProvider.getId());
     }
 
+    @Transactional
     public void addPermissions(ServiceProvider serviceProvider,List<ProviderPermissionEnum> permissions){
         providerPermissionService.createPermissionsViaList(permissions, serviceProvider);
     }
+
     public List<Long> findMemberIdsByServiceId(Long serviceId) {
         return serviceProviderRepository.findMemberIdsByServiceId(serviceId);
     }
