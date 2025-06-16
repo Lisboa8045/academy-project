@@ -1,0 +1,6 @@
+<div class="highlighted">
+  <div *ngFor="let service of services" class="service-card">
+    <h3>{{ service.name }}</h3>
+    <p>Rating médio: {{ service.averageRating | number: '1.1-2' }}</p>
+  </div>
+</div>

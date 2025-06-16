@@ -1,11 +1,17 @@
 import { Component } from '@angular/core';
+import { ServiceTypesComponent } from './service-types/service-types.component';
+import { HighlightedServicesComponent } from './highlighted-services/highlighted-services.component';
+import { ServiceProvidersComponent } from './service-providers/service-providers.component';
 
 @Component({
   selector: 'app-landing-page',
-  imports: [],
+  standalone: true,
+  imports: [
+    ServiceTypesComponent,
+    HighlightedServicesComponent,
+    ServiceProvidersComponent
+  ],
   templateUrl: './landing-page.component.html',
-  styleUrl: './landing-page.component.css'
+  styleUrls: ['./landing-page.component.css']
 })
-export class LandingPageComponent {
-
-}
+export class LandingPageComponent {}

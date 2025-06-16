@@ -1,0 +1,15 @@
+.scroll-container {
+  display: flex;
+  overflow-x: auto;
+  gap: 1rem;
+  padding: 1rem;
+
+  .type-card {
+    min-width: 150px;
+    padding: 1rem;
+    background: #f1f1f1;
+    border-radius: 8px;
+    white-space: nowrap;
+    text-align: center;
+  }
+}
