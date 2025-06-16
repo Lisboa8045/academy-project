@@ -15,20 +15,21 @@ export class AuthService {
   login(login: string, password: string): Observable<any> {
     return this.http.post<LoginResponseDto>(
       `${this.apiUrl}/login`,
-      { login, password },
-      { withCredentials: true }
+      { login, password }
     ).pipe(
-      tap(res => this.authStore.setUsername(res.username))
+      tap(res => {this.authStore.setUsername(res.username);
+        this.authStore.setId(res.memberId);
+        this.authStore.setProfilePicture(res.profilePicture);
+      })
     );
   }
 
   logout(): Observable<any> {
     console.log("logged out")
-    return this.http.get(`${this.apiUrl}/logout`, { withCredentials: true }).pipe(
+    return this.http.get(`${this.apiUrl}/logout`).pipe(
       tap(() => this.authStore.clear())
     );
   }
-
 
   signup(email: string, username: string, roleId: string, password: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/register`, { email: email, username: username, roleId: roleId, password: password });

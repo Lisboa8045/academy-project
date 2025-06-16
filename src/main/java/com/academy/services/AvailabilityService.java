@@ -2,10 +2,9 @@ package com.academy.services;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.academy.models.Member;
+import com.academy.models.member.Member;
 import com.academy.models.service.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -90,6 +89,11 @@ public class AvailabilityService {
     // Create a new availability
     @Transactional
     public AvailabilityResponseDTO createAvailability(AvailabilityRequestDTO requestDTO) {
+
+        if (!requestDTO.isEndAfterStart()) {
+            throw new InvalidArgumentException("EndDateTime must be after StartDateTime");
+        }
+
         Long memberId = requestDTO.memberId();
         Member member = memberService.findbyId(memberId)
                 .orElseThrow(() -> new EntityNotFoundException(Member.class, " with ID " + memberId + " not found."));

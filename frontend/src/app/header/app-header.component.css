@@ -18,6 +18,9 @@
 }
 
 .nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   text-decoration: none;
   color: white;
   margin-left: 1rem;
@@ -69,3 +72,30 @@
 .search-button:hover {
   background-color: #f3a847;
 }
+
+
+
+.user-profile {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+}
+
+.profile-picture {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ccc;
+}
+
+.username {
+  font-size: 1.2rem;
+  color: white;
+  display: inline-block;
+  line-height: 1;
+  vertical-align: middle;
+}
+

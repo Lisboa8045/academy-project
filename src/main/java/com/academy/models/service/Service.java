@@ -1,9 +1,10 @@
 package com.academy.models.service;
 
-import com.academy.models.Member;
+import com.academy.models.member.Member;
 import com.academy.models.ServiceType;
 import com.academy.models.Tag;
 import com.academy.models.service.service_provider.ServiceProvider;
+import com.academy.util.FieldLengths;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,6 +14,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -32,7 +34,7 @@ import java.util.List;
 @Table(name="service")
 @Getter
 @Setter
-@ToString(exclude = "serviceProviders")
+@ToString(exclude = {"owner", "serviceType", "tags", "serviceProviders"})
 public class Service {
 
     @Column(name="id")
@@ -40,9 +42,10 @@ public class Service {
     @Id
     private long id;
 
-    @Column(name="name")
+    @Column(name="name", length = FieldLengths.SERVICE_TITLE_MAX, nullable = false)
     private String name;
 
+    @Lob
     @Column(name="description")
     private String description;
 
@@ -87,20 +90,4 @@ public class Service {
 
     @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ServiceProvider> serviceProviders = new ArrayList<>();
-
-    private void removeAllTags() {
-        for (Tag tag : new ArrayList<>(tags)) {
-            tag.getServices().remove(this);
-        }
-        tags.clear();
-    }
-
-    private void removeServiceTypeLink() {
-        serviceType.getServices().remove(this);
-    }
-
-    public void removeAllLinks() {
-        removeAllTags();
-        removeServiceTypeLink();
-    }
 }

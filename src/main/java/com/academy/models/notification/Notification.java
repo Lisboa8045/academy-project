@@ -1,9 +1,20 @@
 package com.academy.models.notification;
 
-import com.academy.models.Member;
-import jakarta.persistence.*;
+import com.academy.models.member.Member;
+import com.academy.util.FieldLengths;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -12,6 +23,7 @@ import java.time.LocalTime;
 @Entity
 @Table(name="notification")
 @Getter @Setter
+@ToString(exclude="member")
 public class Notification {
 
     @Id
@@ -23,7 +35,7 @@ public class Notification {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @Column(name="title")
+    @Column(name="title", length = FieldLengths.NOTIFICATION_TITLE_MAX)
     private String title;
 
     @Column(name="seen")

@@ -2,7 +2,7 @@ package com.academy.models.service.service_provider;
 
 import com.academy.models.Appointment;
 
-import com.academy.models.Member;
+import com.academy.models.member.Member;
 
 import com.academy.models.service.Service;
 
@@ -30,7 +30,7 @@ import java.util.List;
         uniqueConstraints = @UniqueConstraint(columnNames = {"member_id", "service_id"}))
 @Getter
 @Setter
-@ToString(exclude = "service")
+@ToString(exclude = {"provider", "service", "appointmentList", "permissions"})
 public class ServiceProvider {
 
     @Id

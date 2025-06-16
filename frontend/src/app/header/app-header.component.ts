@@ -1,19 +1,23 @@
-import {Component, inject} from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {Component, effect, inject} from '@angular/core';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {Router, RouterModule} from '@angular/router';
-import {AuthStore} from '../auth/auth.store';
 import {FormsModule} from '@angular/forms';
+import {AuthStore} from '../auth/auth.store';
+import {ProfileButtonComponent} from './profile-button/profile-button.component';
+import {UserProfileService} from "../profile/user-profile.service";
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, ProfileButtonComponent, NgOptimizedImage],
   templateUrl: './app-header.component.html',
   styleUrls: ['./app-header.component.css']
 })
 export class AppHeaderComponent {
   searchQuery: string = '';
   readonly username = inject(AuthStore).username;
+  readonly imageUrl = inject(UserProfileService).imageUrl;
+
 
   constructor(private router: Router) {}
 

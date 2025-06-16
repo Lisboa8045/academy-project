@@ -17,11 +17,13 @@
     </form>
 
     <div class="right-links">
+      <div class="user-profile">
       @if (username()) {
-        <a class="nav-item" routerLink="/profile">👤 {{ username() }}</a>
+        <app-profile-button/>
       } @else {
         <a class="nav-item" routerLink="/auth">🔐 Login</a>
       }
+      </div>
     </div>
   </nav>
 </header>
