@@ -67,11 +67,15 @@ public class ServiceController {
     @GetMapping("/search")
     public ResponseEntity<Page<ServiceResponseDTO>> search(
             @RequestParam(required = false) String name,
-            @RequestParam(required = false) Double priceMin,
-            @RequestParam(required = false) Double priceMax,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) Double minDuration,
+            @RequestParam(required = false) Double maxDuration,
+            @RequestParam(required = false) Boolean negotiable,
             @PageableDefault(sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Page<ServiceResponseDTO> responses = serviceService.searchServices(name, priceMin, priceMax, pageable);
+        Page<ServiceResponseDTO> responses = serviceService.searchServices(name, minPrice,
+                maxPrice, minDuration, maxDuration, negotiable, pageable);
         return ResponseEntity.ok(responses);
     }
 

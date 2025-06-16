@@ -32,16 +32,19 @@
 
 .controls-bar {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   margin-bottom: 1rem;
   padding: 0.5rem;
-  background-color: #f3f4f6;
+  background-color: #e3e3e3;
   border-radius: 0.5rem;
 }
 
-.controls-bar label {
-  margin-right: 0.5rem;
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-right: 1.5rem;
 }
 
 .controls-bar select {
@@ -83,4 +86,32 @@
 .page-item:hover:not(.disabled):not(.active) {
   background-color: #e9ecef;
 }
+
+.sidebar-filters {
+  width: 250px;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border-right: 1px solid #ddd;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+  height: 100%;
+}
+
+.filter-group {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-group label {
+  margin-bottom: 0.3rem;
+  font-weight: 500;
+}
+
+.filter-group input,
+.filter-group select {
+  padding: 0.4rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
 

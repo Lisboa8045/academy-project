@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import {ServiceModel} from '../service/service.model';
+import {ServiceQuery} from './models/service-query.model';
 
 export interface PagedResponse {
   content: ServiceModel[];
@@ -20,22 +21,19 @@ export class ServiceApiService {
 
   constructor(private http: HttpClient) {}
 
-  searchServices(
-    name: string,
-    page: number,
-    size: number,
-    sort: string,
-    priceMin?: number,
-    priceMax?: number
-  ): Observable<PagedResponse> {
+  searchServices(name: string, options: ServiceQuery): Observable<PagedResponse> {
     let params = new HttpParams()
       .set('name', name)
-      .set('page', page)
-      .set('size', size)
-      .set('sort', sort);
+      .set('page', options.page.toString())
+      .set('size', options.pageSize.toString())
+      .set('sort', options.sortOrder);
 
-    if (priceMin !== undefined) params = params.set('priceMin', priceMin);
-    if (priceMax !== undefined) params = params.set('priceMax', priceMax);
+    if (options.minPrice != null) params = params.set('minPrice', options.minPrice.toString());
+    if (options.maxPrice != null) params = params.set('maxPrice', options.maxPrice.toString());
+    if (options.minDuration != null) params = params.set('minDuration', options.minDuration.toString());
+    if (options.maxDuration != null) params = params.set('maxDuration', options.maxDuration.toString());
+    if (options.negotiable != null) params = params.set('negotiable', options.negotiable.toString());
+    if (options.serviceType) params = params.set('serviceType', options.serviceType);
 
     return this.http.get<PagedResponse>(this.BASE_URL, { params });
   }

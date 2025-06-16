@@ -5,6 +5,7 @@ import {LoadingComponent} from '../loading/loading.component';
 import {DatePipe, NgForOf} from '@angular/common';
 import {ActivatedRoute} from '@angular/router';
 import {FormsModule} from '@angular/forms';
+import {ServiceQuery} from '../shared/models/service-query.model';
 
 @Component({
   selector: 'app-service-list',
@@ -18,8 +19,19 @@ export class ServiceListComponent implements OnInit{
   loading = signal(false);
   currentPage = signal(0);
   totalPages = signal(0);
-  pageSize = signal(1);
+  pageSize = signal(10);
   sortOrder = signal("price,asc");
+
+  filters = {
+    minPrice: null,
+    maxPrice: null,
+    minDuration: null,
+    maxDuration: null,
+    negotiable: false,
+    serviceType: ''
+  };
+
+  serviceTypes = ['Consulting', 'Development', 'Design', 'Training'];
 
   constructor(private serviceApi: ServiceApiService, private route: ActivatedRoute) {
   }
@@ -28,19 +40,15 @@ export class ServiceListComponent implements OnInit{
     this.route.queryParams.subscribe(params => {
       const q = (params['q'] || '').trim();
       this.searchTerm.set(q);
-      this.fetchServices();
+      this.fetchServices(this.buildQuery({ page: 0 }));
     });
   }
 
-  fetchServices(filters?: { pageSize?: number; sortOrder?: string; page?: number }): void {
-    const query = this.searchTerm().trim();
+  fetchServices(query: ServiceQuery): void {
+    const search = this.searchTerm().trim();
     this.loading.set(true);
 
-    const pageSize = filters?.pageSize ?? this.pageSize();
-    const sortOrder = filters?.sortOrder ?? this.sortOrder();
-    const page = filters?.page ?? this.currentPage();
-
-    this.serviceApi.searchServices(query, page, pageSize, sortOrder).subscribe({
+    this.serviceApi.searchServices(search, query).subscribe({
       next: (res: PagedResponse) => {
         this.services.set(res.content);
         this.totalPages.set(res.totalPages);
@@ -55,12 +63,23 @@ export class ServiceListComponent implements OnInit{
     });
   }
 
+  buildQuery(overrides: Partial<ServiceQuery> = {}): ServiceQuery {
+    return {
+      page: overrides.page ?? this.currentPage(),
+      pageSize: overrides.pageSize ?? this.pageSize(),
+      sortOrder: overrides.sortOrder ?? this.sortOrder(),
+      minPrice: this.filters.minPrice ?? undefined,
+      maxPrice: this.filters.maxPrice ?? undefined,
+      minDuration: this.filters.minDuration ?? undefined,
+      maxDuration: this.filters.maxDuration ?? undefined,
+      negotiable: this.filters.negotiable ?? undefined,
+      serviceType: this.filters.serviceType || undefined
+    };
+  }
+
   onFilterChange() {
-    this.fetchServices({
-      pageSize: this.pageSize(),
-      sortOrder: this.sortOrder(),
-      page: 0
-    });
+    this.currentPage.set(0);
+    this.fetchServices(this.buildQuery({ page: 0 }));
   }
 
   getPaginationPages(): (number | string)[] {
@@ -110,23 +129,17 @@ export class ServiceListComponent implements OnInit{
 
   goToPreviousPage() {
     if (this.currentPage() > 0) {
-      this.currentPage.set(this.currentPage() - 1);
-      this.fetchServices({
-        page: this.currentPage(),
-        pageSize: this.pageSize(),
-        sortOrder: this.sortOrder()
-      });
+      const newPage = this.currentPage() - 1;
+      this.currentPage.set(newPage);
+      this.fetchServices(this.buildQuery({ page: newPage }));
     }
   }
 
   goToNextPage() {
     if (this.currentPage() + 1 < this.totalPages()) {
-      this.currentPage.set(this.currentPage() + 1);
-      this.fetchServices({
-        page: this.currentPage(),
-        pageSize: this.pageSize(),
-        sortOrder: this.sortOrder()
-      });
+      const newPage = this.currentPage() + 1;
+      this.currentPage.set(newPage);
+      this.fetchServices(this.buildQuery({ page: newPage }));
     }
   }
 
@@ -134,11 +147,7 @@ export class ServiceListComponent implements OnInit{
     const pageNumber = Number(page);
     if (pageNumber >= 0 && pageNumber < this.totalPages()) {
       this.currentPage.set(pageNumber);
-      this.fetchServices({
-        page: this.currentPage(),
-        pageSize: this.pageSize(),
-        sortOrder: this.sortOrder()
-      });
+      this.fetchServices(this.buildQuery({ page: pageNumber }));
     }
   }
 
