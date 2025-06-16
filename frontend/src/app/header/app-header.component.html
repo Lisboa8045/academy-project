@@ -5,6 +5,7 @@
     <div class="right-links">
       <div class="user-profile">
       @if (username()) {
+        <app-notification-button/>
         <app-profile-button/>
       } @else {
         <a class="nav-item" routerLink="/auth">🔐 Login</a>

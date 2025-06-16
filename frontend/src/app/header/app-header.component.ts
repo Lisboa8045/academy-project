@@ -4,11 +4,12 @@ import { RouterModule } from '@angular/router';
 import {AuthStore} from '../auth/auth.store';
 import {ProfileButtonComponent} from './profile-button/profile-button.component';
 import {UserProfileService} from "../profile/user-profile.service";
+import {NotificationButtonComponent} from './notification-button/notification-button.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterModule, ProfileButtonComponent, NgOptimizedImage],
+  imports: [CommonModule, RouterModule, ProfileButtonComponent, NotificationButtonComponent],
   templateUrl: './app-header.component.html',
   styleUrls: ['./app-header.component.css']
 })
