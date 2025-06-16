@@ -92,7 +92,7 @@
 
 .info-section h2 {
     font-size: 2rem;
-    margin-top: 3rem;
+    margin-top: 1rem;
     line-height: 1.2;
 }
 .info-section h3{
@@ -119,6 +119,7 @@
 .price-details {
     display: flex;
     flex-direction: column;
+  margin-top: 20px;
 }
 
 .original-price {
@@ -132,7 +133,7 @@
     font-weight: bold;
     font-size: 3rem;
     margin-left: 1rem;
-    margin-top: -0.3rem;
+    margin-top: 0rem;
 }
 
 .normal-price {
@@ -159,8 +160,8 @@
 }
 
 .schedule-btn {
-    margin-top: 50px;
-    padding: 8px 16px;
+    margin-top: 58px;
+    padding: 16px 16px;
     border-radius: 20px;
     border: none;
     background-color: #007bff;
@@ -174,6 +175,68 @@
 .schedule-btn:hover {
     background-color: #0056b3;
 }
+
+.tag-list {
+  margin-top: -29px;
+}
+
+.tag {
+  background-color: #f0f0f0;
+  padding: 6px 12px;
+  margin-right: 8px;
+  margin-bottom: 8px;
+  display: inline-block;
+  border-radius: 16px;
+  font-size: 14px;
+}
+
+.type-and-duration {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  margin-top: -0.5rem;
+}
+
+.type-and-duration h3 {
+  margin: 0;
+}
+
+.duration-info {
+  font-size: 1rem;
+  color: #555;
+  font-weight: 500;
+}
+.service-description {
+  margin-top: 3rem;
+  padding: 2rem;
+  background: linear-gradient(to bottom right, #f5f7fa, #e4ecf2);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease-in-out;
+}
+
+.service-description:hover {
+  transform: translateY(-3px);
+}
+
+.service-description h3 {
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+  color: #007bff;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.service-description p {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #333;
+}
+
+
+
 
 
 

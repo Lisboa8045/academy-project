@@ -21,8 +21,25 @@
         <div class="info-section card" >
             <h2>{{ service?.name  }}</h2>
 <!--            Meter isto a dar link para uma pesquisa por este service type-->
-            <h3> {{ service?.serviceTypeName  }}</h3>
-            <ng-container *ngIf="discountedPrice !== null; else normalPrice">
+          <div class ="type-and-duration">
+            <h3> {{ service?.serviceTypeName }}</h3>
+            <div *ngIf="formatedTimeMinutes != null && formatedTimeMinutes > 0; else onlyHours">
+              <span class="duration-info">🕒 {{ formatedTimeHours }}h:{{ formatedTimeMinutes }} min</span>
+            </div>
+          </div>
+
+      <ng-template #onlyHours>
+        <span class="duration-info">🕒 {{ formatedTimeHours }} H</span>
+      </ng-template>
+
+
+      <div *ngIf="service?.tagNames?.length" class="tag-list">
+            <span *ngFor="let tag of service?.tagNames" class="tag">
+              {{ tag }}
+            </span>
+          </div>
+
+          <ng-container *ngIf="discountedPrice !== null; else normalPrice">
                 <div class="price-container">
                     <div class="price-details">
                         <div class="original-price" style="text-decoration: line-through; color: grey;">
@@ -30,7 +47,6 @@
                         </div>
                         <div class="discounted-price" style="font-weight: bold;">
                             {{ discountedPrice }}€
-
                         </div>
                     </div>
                     <div class="discount-badge" style="background-color: red; color: white; padding: 4px 8px; border-radius: 5px;">
@@ -51,20 +67,14 @@
 
             <button class="schedule-btn">Schedule Appointment</button>
 
-            <p> {{ service?.description  }}</p>
         </div>
     </div>
-  <div>
-    <h1 class ="service-title"> {{ service?.name }}</h1>
-      </div>
-    <div>
-    <p> <strong> Description</strong> {{ service?.description }}</p>
-    <p><strong>Price:</strong> {{ service?.price }}</p>
-    <p><strong>Discount:</strong> {{ service?.discount }}%</p>
-    <p><strong>Negotiable:</strong> {{ service?.negotiable }}</p>
-    <p><strong>Duration:</strong> {{ service?.duration }} minutes</p>
-    <p><strong>Type of service:</strong> {{ service?.serviceTypeName }}</p>
-    <p><strong>Tags:</strong> {{ service?.tagNames }}</p>
-    <p><strong>Permissions:</strong> {{ service?.permissions }}</p>
+
+  <div class="service-description">
+    <h3><i class="fa-solid fa-info-circle"></i> Description</h3>
+    <p>
+      Comprehensive English tutoring with therapeutic relaxation sessions.
+    </p>
   </div>
+
 }

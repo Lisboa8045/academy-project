@@ -3,13 +3,14 @@ import {ServiceModel} from '../service.model';
 import {ActivatedRoute} from '@angular/router';
 import {ServiceDetailsService} from '../service-details.service';
 import {LoadingComponent} from '../../loading/loading.component';
-import {NgIf} from "@angular/common";
+import {NgForOf, NgIf} from "@angular/common";
 
 @Component({
   selector: 'app-service-details',
   imports: [
     LoadingComponent,
-    NgIf
+    NgIf,
+    NgForOf
   ],
   templateUrl: './service-details.component.html',
   styleUrl: './service-details.component.css'
@@ -19,6 +20,8 @@ export class ServiceDetailsComponent implements OnInit {
   fetched = false;
   imageUrl = signal("");
   discountedPrice: number | null = null;
+  formatedTimeHours: number | null = null;
+  formatedTimeMinutes: number | null = null;
 
 
   service?: ServiceModel;
@@ -49,7 +52,6 @@ export class ServiceDetailsComponent implements OnInit {
   ngOnInit(): void {
     this.loadImage("image1.png");
 
-
     const id = Number(this.route.snapshot.paramMap.get('id'));
     this.loading.set(true);
     this.serviceDetailsService.getServiceById(id).subscribe({
@@ -62,6 +64,10 @@ export class ServiceDetailsComponent implements OnInit {
           this.discountedPrice = null;
         }
 
+        if(this.service?.duration >= 60){
+          this.formatedTimeHours = Math.floor((this.service?.duration || 0) / 60);
+          this.formatedTimeMinutes = this.service?.duration % 60;
+        }
         this.loading.set(false);
       },
       error: (err) => {
@@ -70,9 +76,11 @@ export class ServiceDetailsComponent implements OnInit {
       }
 
     });
-  }
+
+    }
 
   protected readonly length = length;
+
 
 
 }
