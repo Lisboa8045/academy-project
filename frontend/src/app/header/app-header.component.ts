@@ -1,5 +1,5 @@
-import {Component, effect, inject} from '@angular/core';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {Component,  inject} from '@angular/core';
+import {CommonModule} from '@angular/common';
 import { RouterModule } from '@angular/router';
 import {AuthStore} from '../auth/auth.store';
 import {ProfileButtonComponent} from './profile-button/profile-button.component';
