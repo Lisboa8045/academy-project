@@ -23,11 +23,15 @@ public class AcademyApplication {
 	@ConditionalOnProperty(name = "starting.scripts.enabled", havingValue = "true", matchIfMissing = false)
 	CommandLineRunner populateData(DataSource dataSource) {
 		return args -> {
-			Resource resource4 = new ClassPathResource("sql-scripts/populateGlobalConfigurations.sql");
-			Resource resource5 = new ClassPathResource("sql-scripts/populateAvailabilities.sql");
-			Resource resource6 = new ClassPathResource("sql-scripts/populateServiceProviders.sql");
+			Resource resource2= new ClassPathResource("sql-scripts/populateAvailabilities.sql");
+			Resource resource3= new ClassPathResource("sql-scripts/populateServiceProviders.sql");
+			Resource resource4= new ClassPathResource("sql-scripts/populateServices.sql");
+			Resource resource5= new ClassPathResource("sql-scripts/populateAvailabilities.sql");
 			try (Connection conn = dataSource.getConnection()) {
+				ScriptUtils.executeSqlScript(conn, resource2);
+				ScriptUtils.executeSqlScript(conn, resource3);
 				ScriptUtils.executeSqlScript(conn, resource4);
+				ScriptUtils.executeSqlScript(conn, resource5);
 			}
 			System.out.println("Populated database");
 		};

@@ -121,7 +121,6 @@ export class ScheduleComponent implements OnInit {
     this.loadServices();
     console.log(this.services);
     this.loadServiceTypes();
-
   }
 
   loadServices() {

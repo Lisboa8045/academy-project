@@ -65,9 +65,12 @@ public class SchedulingService {
                     .map(ProviderPermission::getPermission)
                     .anyMatch(permission -> permission == ProviderPermissionEnum.SERVE);
 
+            System.out.println("[DEBUG] Permission to serve this service: " + hasServePermission);
+
             //ALTERAR para hasServePermissions
             if (hasServePermission) {
                 availabilities = availabilityService.getAvailabilitiesForProvider(providerId);
+                System.out.println("[DEBUG] Availability count: " + availabilities.size());
             }
 
             // Fetch all future appointments for this provider
