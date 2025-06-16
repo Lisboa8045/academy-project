@@ -1,0 +1,17 @@
+.notification-list li {
+  position: relative;
+  padding: 10px 15px; /* Add some padding */
+  cursor: pointer; /* Change cursor to pointer */
+  transition: background-color 0.3s; /* Smooth background color transition */
+  font-family: 'Poppins', sans-serif;
+  color: #000000;
+  transform: translate(0);
+}
+
+.notification-list li:hover {
+  background-color: #b2ebf2; /* Slightly darker blue on hover */
+}
+
+.notification-list li:not(:last-child) {
+  border-bottom: 1px solid #80deea; /* Light blue border between items */
+}
