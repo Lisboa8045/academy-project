@@ -1,11 +1,11 @@
 import {Component, signal} from '@angular/core';
-import {NotificationListComponent} from './notification-list/notification-list.component';
+import {NotificationSidebarComponent} from './notification-sidebar/notification-sidebar.component';
 import {NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-notification-button',
   imports: [
-    NotificationListComponent,
+    NotificationSidebarComponent,
     NgIf
   ],
   templateUrl: './notification-button.component.html',
