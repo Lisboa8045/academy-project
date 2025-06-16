@@ -1,0 +1,30 @@
+.notification-sidebar {
+  width: 300px;
+  background-color: #f8f9fa;
+  border-right: 1px solid #ddd;
+  padding: 2px;
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.notification-card {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 15px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.notification-card h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+}
+
+.notification-card p {
+  margin: 0 0 10px;
+  font-size: 14px;
+}
