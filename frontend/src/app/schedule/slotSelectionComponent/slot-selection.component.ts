@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { SlotModel } from '../models/slot.model';
+import { SlotModel } from '../../models/slot.model';
 import {CommonModule, DatePipe} from '@angular/common';
 
 @Component({

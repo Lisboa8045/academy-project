@@ -1,20 +1,20 @@
-import {Component, OnInit} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { LandingPageService } from '../landing-page.service';
+import { Observable } from 'rxjs';
+import { ServiceTypeModel } from '../../models/service-type.model';
 
 @Component({
   selector: 'app-service-types',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './service-types.component.html',
-  styleUrl: './service-types.component.css'
+  styleUrls: ['./service-types.component.css']
 })
-export class ServiceTypesComponent implements OnInit {
-  serviceTypes: any[] = [];
+export class ServiceTypesComponent {
+  serviceTypes$: Observable<ServiceTypeModel[]>;
 
-  constructor(private http: HttpClient) {}
-
-  ngOnInit(): void {
-    this.http.get<any[]>('/api/service-types').subscribe(data => {
-      this.serviceTypes = data;
-    });
+  constructor(private landingService: LandingPageService) {
+    this.serviceTypes$ = this.landingService.getServiceTypes();
   }
 }

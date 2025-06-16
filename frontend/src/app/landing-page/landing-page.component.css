@@ -1,0 +1,11 @@
+h1,h2{
+  text-align: center;
+  font-weight: 200;
+}
+
+app-service-types {
+  display: flex;
+  justify-content: center; /* centra horizontalmente o scroll-container dentro deste componente */
+  width: 100%;
+  box-sizing: border-box;
+}

@@ -1,15 +1,43 @@
 .scroll-container {
   display: flex;
   overflow-x: auto;
+  overflow-y: hidden; /* evita scroll vertical interno */
   gap: 1rem;
-  padding: 1rem;
+  scroll-snap-type: x mandatory;
+  align-items: center;
+  max-height: 150px; /* ou altura que caiba no ecrã */
+  box-sizing: border-box;
+}
 
-  .type-card {
-    min-width: 150px;
-    padding: 1rem;
-    background: #f1f1f1;
-    border-radius: 8px;
-    white-space: nowrap;
-    text-align: center;
-  }
+.type-card {
+  flex: 0 0 auto;
+  width: 100px;
+  height: 120px;
+  text-align: center;
+  scroll-snap-align: start;
+  cursor: pointer;
+  transition: transform 0.2s;
+
+  display: flex;          /* ativa flexbox */
+  flex-direction: column; /* empilha verticalmente */
+  justify-content: center;/* centra verticalmente */
+  align-items: center;    /* centra horizontalmente */
+}
+
+.type-card:hover {
+  transform: scale(1.05);
+  background-color: #f0f0f0;
+}
+
+.type-icon {
+  font-size: 32px;
+  margin-bottom: 0.5rem;
+  color: #3f51b5;
+}
+
+.type-icon img {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  display: inline-block;
 }

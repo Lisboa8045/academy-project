@@ -1,4 +1,4 @@
-import {ServiceModel} from '../../service/service.model';
+import {ServiceModel} from '../service/service.model';
 
 export interface ServiceTypeModel {
   id: number;

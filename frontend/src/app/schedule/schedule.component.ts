@@ -3,17 +3,17 @@ import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular
 import { addDays, startOfWeek, endOfWeek, isSameDay } from 'date-fns';
 import { ServiceApiService } from '../shared/service-api.service';
 import { ScheduleApiService } from './schedule.service';
-import { SlotModel } from './models/slot.model';
+import { SlotModel } from '../models/slot.model';
 import { ServiceModel } from '../service/service.model';
-import { AppointmentModel } from './models/appointment.model';
-import { ServiceTypeModel } from './models/service-type.model';
+import { AppointmentModel } from '../models/appointment.model';
+import { ServiceTypeModel } from '../models/service-type.model';
 import {CommonModule, DatePipe} from '@angular/common';
 import {ServiceSearchComponent} from './serviceSearchComponent/service-search.component';
 import {ServiceListComponent} from './serviceListComponent/service-list.component';
 import {ProviderSelectionModalComponent} from './providerSelectionModalComponent/provider-selection-modal.component';
 import {ConfirmationModalComponent} from './confirmationModalComponent/confirmation-modal.component';
 import {SlotSelectionComponent} from './slotSelectionComponent/slot-selection.component';
-import { ServiceProviderModel } from './models/service-provider.model';
+import { ServiceProviderModel } from '../models/service-provider.model';
 import {AuthStore} from '../auth/auth.store';
 
 @Component({
