@@ -162,7 +162,7 @@ public class ServiceService {
     private boolean hasServiceProvider(Long id, Long  serviceId){
         return serviceProviderService.existsByServiceIdAndProviderId(id, serviceId);
     }
-    public Page<ServiceResponseDTO> searchServices(String name, Double priceMin, Double priceMax, List<String> tagNames, Pageable pageable) {
+    public Page<ServiceResponseDTO> searchServices(String name, Double priceMin, Double priceMax, Pageable pageable) {
         String username = authenticationFacade.getUsername();
 
         Specification<Service> spec = Specification.where(null); // start with no specifications, add each specification after if not null/empty

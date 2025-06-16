@@ -7,6 +7,9 @@ import {ServiceModel} from '../service/service.model';
 export interface PagedResponse {
   content: ServiceModel[];
   totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
 }
 
 @Injectable({
@@ -18,10 +21,10 @@ export class ServiceApiService {
   constructor(private http: HttpClient) {}
 
   searchServices(
-    name = '',
-    page = 0,
-    size = 40,
-    sort = 'price,asc',
+    name: string,
+    page: number,
+    size: number,
+    sort: string,
     priceMin?: number,
     priceMax?: number
   ): Observable<PagedResponse> {

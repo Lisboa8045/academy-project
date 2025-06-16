@@ -9,7 +9,7 @@ import {UserProfileService} from "../profile/user-profile.service";
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, ProfileButtonComponent, NgOptimizedImage],
+  imports: [CommonModule, RouterModule, FormsModule, ProfileButtonComponent],
   templateUrl: './app-header.component.html',
   styleUrls: ['./app-header.component.css']
 })
@@ -31,9 +31,18 @@ export class AppHeaderComponent {
     }
 
     if (this.searchQuery) {
-      this.router.navigate(['/services'], {
-        queryParams: { q: this.searchQuery },
-      });
+      const currentUrl = this.router.url.split('?')[0];
+
+      if (currentUrl !== '/services') {
+        this.router.navigate(['/services'], {
+          queryParams: {q: this.searchQuery},
+        });
+      } else {
+        this.router.navigate([], {
+          queryParams: {q: this.searchQuery},
+          queryParamsHandling: 'merge',
+        });
+      }
     }
   }
 }

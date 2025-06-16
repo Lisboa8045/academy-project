@@ -1,7 +1,26 @@
 @if (loading()) {
   <app-loading />
 } @else {
-  @if (services()?.length === 0) {
+  <div class="controls-bar">
+    <div class="controls-left">
+      <label for="pageSize">Items per page:</label>
+      <select id="pageSize" [(ngModel)]="pageSizeValue" (change)="onFilterChange()">
+        <option [value]="10">10</option>
+        <option [value]="20">20</option>
+        <option [value]="30">30</option>
+      </select>
+    </div>
+
+    <div class="controls-right">
+      <label for="sortOrder">Sort by:</label>
+      <select id="sortOrder" [(ngModel)]="sortOrderValue" (change)="onFilterChange()">
+        <option value="updatedAt,desc">Recently Updated</option>
+        <option value="price,desc">Highest Price</option>
+        <option value="price,asc">Lowest Price</option>
+      </select>
+    </div>
+  </div>
+  @if (services().length === 0) {
     <div class="no-services-message">
       <h2>No services found</h2>
       <p>Try checking spelling, using more general terms, or removing filters.</p>
@@ -17,5 +36,37 @@
         <small>Updated at: {{ service.updatedAt | date }}</small>
       </div>
     </div>
+
+    @if (totalPages() > 1) {
+      <nav aria-label="Page navigation">
+        <ul class="pagination-bar">
+          <li
+            class="page-item"
+            [class.disabled]="currentPage() === 0"
+            (click)="currentPage() > 0 && goToPreviousPage()"
+          >
+            Previous
+          </li>
+
+          <li
+            *ngFor="let page of getPaginationPages()"
+            class="page-item"
+            [class.active]="page === currentPage()"
+            [class.disabled]="page === '...'"
+            (click)="page !== '...' && goToPage(page)"
+          >
+            {{ page === '...' ? '…' : displayPageNumber(page) }}
+          </li>
+
+          <li
+            class="page-item"
+            [class.disabled]="currentPage() + 1 >= totalPages()"
+            (click)="currentPage() + 1 < totalPages() && goToNextPage()"
+          >
+            Next
+          </li>
+        </ul>
+      </nav>
+    }
   }
 }
