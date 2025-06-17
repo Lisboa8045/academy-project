@@ -1,5 +1,7 @@
 package com.academy.controllers;
 
+import com.academy.dtos.notification.NotificationMapper;
+import com.academy.dtos.notification.NotificationResponseDTO;
 import com.academy.models.notification.Notification;
 import com.academy.services.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,15 +17,17 @@ import java.util.List;
 @RequestMapping("/notifications")
 public class NotificationController {
     private final NotificationService notificationService;
+    private final NotificationMapper notificationMapper;
 
     @Autowired
-    public NotificationController(NotificationService notificationService) {
+    public NotificationController(NotificationService notificationService, NotificationMapper notificationMapper) {
         this.notificationService = notificationService;
+        this.notificationMapper = notificationMapper;
     }
 
     @GetMapping("/{memberId}")
-    public ResponseEntity<List<Notification>> getNotificationsByMemberId(@PathVariable("memberId") long memberId) {
+    public ResponseEntity<List<NotificationResponseDTO>> getNotificationsByMemberId(@PathVariable("memberId") long memberId) {
         List<Notification> notifications = notificationService.getNotificationsByMemberId(memberId);
-        return ResponseEntity.ok(notifications);
+        return ResponseEntity.ok(notifications.stream().map(notificationMapper::toDTO).toList());
     }
 }
