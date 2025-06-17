@@ -39,45 +39,36 @@ export class LandingPageService {
       serviceProviders: this.http.get<ServiceProviderModel[]>(`${this.BASE_URL}/service-providers`),
     }).pipe(
       map(({ appointments, services, serviceProviders }) => {
+        // Mapa para relacionar providerId -> serviceId
+        const providerToService = new Map(serviceProviders.map(sp => [sp.id, sp.serviceId]));
 
-        const providerToService = new Map<number, number>();
-        for (const sp of serviceProviders) {
-          providerToService.set(sp.id, sp.serviceId);
-        }
+        // Mapa para serviços por id para lookup rápido
+        const servicesMap = new Map(services.map(s => [s.id, s]));
 
-        const servicesMap = new Map(services.map((s: ServiceModel) => [s.id, s]));
-
-        const ratings = new Map<number, { total: number; count: number }>();
-
-        for (const appointment of appointments) {
-          const serviceProviderId = appointment.serviceProviderId;
-          const serviceId = providerToService.get(serviceProviderId);
-          const rating = appointment.rating;
-          if (
-            serviceId != null &&
-            rating != null &&
-            servicesMap.has(serviceId)
-          ) {
-            const entry = ratings.get(serviceId) ?? { total: 0, count: 0 };
-            entry.total += rating;
-            entry.count += 1;
-            ratings.set(serviceId, entry);
+        // Acumula total de ratings e contagem por serviceId
+        const ratings = appointments.reduce((acc, appointment) => {
+          const serviceId = providerToService.get(appointment.serviceProviderId);
+          if (serviceId != null && appointment.rating != null && servicesMap.has(serviceId)) {
+            const current = acc.get(serviceId) ?? { total: 0, count: 0 };
+            current.total += appointment.rating;
+            current.count += 1;
+            acc.set(serviceId, current);
           }
-        }
+          return acc;
+        }, new Map<number, { total: number; count: number }>());
 
-        const ratedServices: RatedServiceModel[] = Array.from(ratings.entries())
-          .map(([id, { total, count }]) => {
-            const avg = total / count;
-            return {
-              ...servicesMap.get(id)!,
-              averageRating: avg,
-            };
-          });
+        // Calcula média e cria array de serviços com rating
+        const ratedServices: RatedServiceModel[] = Array.from(ratings.entries() as Iterable<[number, { total: number; count: number }]>).map(
+          ([id, { total, count }]) => ({
+            ...servicesMap.get(id)!,
+            averageRating: total / count,
+          })
+        );
 
-        return ratedServices
-          .sort((a, b) => b.averageRating - a.averageRating)
-          .slice(0, 10);
+        // Ordena por rating decrescente e pega os top 10
+        return ratedServices.sort((a, b) => b.averageRating - a.averageRating).slice(0, 10);
       })
     );
   }
+
 }
