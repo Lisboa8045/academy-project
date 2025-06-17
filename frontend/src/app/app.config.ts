@@ -6,10 +6,11 @@ import {provideHttpClient, withInterceptors} from '@angular/common/http';
 import {credentialsInterceptor} from './shared/interceptors/credentials.interceptor';
 import {authErrorInterceptor} from './shared/interceptors/auth-error.interceptor';
 import { BrowserModule } from '@angular/platform-browser';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    importProvidersFrom(BrowserModule),
+    importProvidersFrom(BrowserModule,MatSnackBarModule),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(withInterceptors([credentialsInterceptor, authErrorInterceptor]))

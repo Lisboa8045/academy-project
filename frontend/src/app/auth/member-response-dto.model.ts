@@ -7,4 +7,7 @@ export interface MemberResponseDTO {
   phoneNumber: string;
   role: string;
   profilePicture: string;
+  oldPassword: string;
+  newPassword: string;
+  confirmPassword: string;
 }

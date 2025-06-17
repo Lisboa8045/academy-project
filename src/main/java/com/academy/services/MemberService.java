@@ -297,14 +297,19 @@ public class MemberService {
             member.setUsername(memberRequestDTO.username());
         }
 
-        if(memberRequestDTO.password() != null){
-            member.setPassword(memberRequestDTO.password());
-        }
-
         if(memberRequestDTO.roleId() != null){
             Role newRole = roleRepository.findById(memberRequestDTO.roleId())
                     .orElseThrow(() -> new EntityNotFoundException(Role.class, memberRequestDTO.roleId()));
             member.setRole(newRole);
+        }
+
+        if(memberRequestDTO.oldPassword() != null){
+            if(!passwordEncoder.matches(memberRequestDTO.oldPassword(), member.getPassword()))
+                throw new AuthenticationException("Incorrect password");
+            if(!isValidPassword(memberRequestDTO.newPassword()))
+                throw new InvalidArgumentException(messageSource.getMessage("register.invalidpassword", null, LocaleContextHolder.getLocale()));
+
+            member.setPassword(passwordEncoder.encode(memberRequestDTO.newPassword()));
         }
         return memberMapper.toResponseDTO(memberRepository.save(member));
     }
