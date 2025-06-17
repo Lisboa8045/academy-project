@@ -72,7 +72,7 @@ public class AuthController {
         Long id = member.getId();
         String profilePicture = member.getProfilePicture();
 
-        return ResponseEntity.ok(Map.of("username", username, "id", id, "profilePicture", profilePicture));
+        return ResponseEntity.ok(Map.of("username", username, "id", id, "profilePicture", profilePicture != null ? profilePicture : ""));
     }
 
 }

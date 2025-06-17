@@ -13,8 +13,14 @@ import { ServiceTypeModel } from '../../models/service-type.model';
 })
 export class ServiceTypesComponent {
   serviceTypes$: Observable<ServiceTypeModel[]>;
+  defaultIcon = 'https://cdn-icons-png.flaticon.com/512/847/847969.png';
 
   constructor(private landingService: LandingPageService) {
     this.serviceTypes$ = this.landingService.getServiceTypes();
+  }
+
+  onIconError(event: Event) {
+    const img = event.target as HTMLImageElement;
+    img.src = this.defaultIcon;
   }
 }

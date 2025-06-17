@@ -1,6 +1,16 @@
 <div class="highlighted">
   <div *ngFor="let service of services" class="service-card">
-    <h3>{{ service.name }}</h3>
-    <p>Rating médio: {{ service.averageRating | number: '1.1-2' }}</p>
+    <div class="image-container">
+      <img [src]="service.image_url || defaultImage"
+           (error)="onImgError($event)"
+           alt="Service Image" />
+      <div class="rating-badge" *ngIf="service.averageRating">
+        ★ {{ service.averageRating }}
+      </div>
+    </div>
+    <div class="service-info">
+      <h3>{{ service.name }}</h3>
+      <p>{{ service.price | currency:'EUR' }}</p>
+    </div>
   </div>
 </div>

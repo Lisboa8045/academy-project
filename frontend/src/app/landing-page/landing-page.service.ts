@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import {Observable, map, forkJoin} from 'rxjs';
 import {AppointmentModel} from '../models/appointment.model';
 import {ServiceModel} from '../service/service.model';
+import {ServiceProviderModel} from '../models/service-provider.model';
 
 
 interface RatedServiceModel extends ServiceModel {
@@ -31,29 +32,36 @@ export class LandingPageService {
     return this.http.get<AppointmentModel[]>(`${this.BASE_URL}/appointments`);
   }
 
-  getServiceProviderById(id: number): Observable<any> {
-    return this.http.get(`${this.BASE_URL}/service-providers/${id}`);
-  }
-
   getTopRatedServices(): Observable<RatedServiceModel[]> {
     return forkJoin({
       appointments: this.getAppointments(),
-      services: this.getServices()
+      services: this.getServices(),
+      serviceProviders: this.http.get<ServiceProviderModel[]>(`${this.BASE_URL}/service-providers`),
     }).pipe(
-      map(({ appointments, services }) => {
+      map(({ appointments, services, serviceProviders }) => {
+
+        const providerToService = new Map<number, number>();
+        for (const sp of serviceProviders) {
+          providerToService.set(sp.id, sp.serviceId);
+        }
+
         const servicesMap = new Map(services.map((s: ServiceModel) => [s.id, s]));
 
         const ratings = new Map<number, { total: number; count: number }>();
 
         for (const appointment of appointments) {
+          const serviceProviderId = appointment.serviceProviderId;
+          const serviceId = providerToService.get(serviceProviderId);
           const rating = appointment.rating;
-          const service = servicesMap.get(appointment.serviceProviderId);
-
-          if (rating != null && service?.id != null && servicesMap.has(service.id)) {
-            const entry = ratings.get(service.id) ?? { total: 0, count: 0 };
+          if (
+            serviceId != null &&
+            rating != null &&
+            servicesMap.has(serviceId)
+          ) {
+            const entry = ratings.get(serviceId) ?? { total: 0, count: 0 };
             entry.total += rating;
             entry.count += 1;
-            ratings.set(service.id, entry);
+            ratings.set(serviceId, entry);
           }
         }
 
@@ -62,7 +70,7 @@ export class LandingPageService {
             const avg = total / count;
             return {
               ...servicesMap.get(id)!,
-              averageRating: avg
+              averageRating: avg,
             };
           });
 
@@ -72,7 +80,4 @@ export class LandingPageService {
       })
     );
   }
-
-
-
 }

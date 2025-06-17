@@ -1,8 +1,11 @@
 <div class="scroll-container">
   <div class="type-card" *ngFor="let type of serviceTypes$ | async">
     <div class="type-icon">
-      <img *ngIf="type.icon" [src]="type.icon" alt="{{type.name}} icon" />
-      <i *ngIf="!type.icon" class="material-icons">Icon</i>
+      <img
+        [src]="type.icon || defaultIcon"
+        (error)="onIconError($event)"
+        alt="{{ type.name }} icon"
+      />
     </div>
     <div>{{ type.name }}</div>
   </div>
