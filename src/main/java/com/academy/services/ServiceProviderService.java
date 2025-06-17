@@ -6,6 +6,8 @@ import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
 import com.academy.dtos.service_provider.ServiceProviderResponseDTO;
 import com.academy.exceptions.AuthenticationException;
 import com.academy.exceptions.EntityNotFoundException;
+import com.academy.exceptions.MemberNotFoundException;
+import com.academy.models.Appointment;
 import com.academy.models.member.Member;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
@@ -29,6 +31,7 @@ public class ServiceProviderService {
     private final ServiceService serviceService;
     private final AuthenticationFacade authenticationFacade;
     private final ProviderPermissionService providerPermissionService;
+    private final AppointmentService appointmentService;
 
     @Autowired
     public ServiceProviderService(ServiceProviderRepository serviceProviderRepository,
@@ -36,13 +39,15 @@ public class ServiceProviderService {
                                   ProviderPermissionService providerPermissionService,
                                   MemberService memberService,
                                   @Lazy ServiceService serviceService,
-                                  AuthenticationFacade authenticationFacade) {
+                                  AuthenticationFacade authenticationFacade,
+                                  @Lazy AppointmentService appointmentService) {
         this.serviceProviderRepository = serviceProviderRepository;
         this.serviceProviderMapper = serviceProviderMapper;
         this.memberService = memberService;
         this.serviceService = serviceService;
         this.providerPermissionService = providerPermissionService;
         this.authenticationFacade = authenticationFacade;
+        this.appointmentService = appointmentService;
     }
 
     public static void checkIfValidPermissions(List<ProviderPermissionEnum> newPermissions) throws BadRequestException {
@@ -60,6 +65,17 @@ public class ServiceProviderService {
     public Optional<ServiceProviderResponseDTO> getServiceProviderById(long id) {
         return serviceProviderRepository.findById(id)
                 .map(serviceProviderMapper::toResponseDTO);
+    }
+
+    public ServiceProvider getServiceProviderByUsername(String username){
+        Optional<ServiceProvider> optionalServiceProvider = serviceProviderRepository.findByProviderUsername(username);
+        if(optionalServiceProvider.isEmpty())
+            throw new MemberNotFoundException(username);
+        return optionalServiceProvider.get();
+    }
+
+    public List<ServiceProvider> getAllByProviderId(Long id) {
+        return serviceProviderRepository.findAllByProviderId(id);
     }
 
     @Transactional
@@ -135,8 +151,16 @@ public class ServiceProviderService {
                 .orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
 
         providerPermissionService.deletePermissionsFromServiceProvider(serviceProvider);
-
+        unlinkAppointments(id);
         serviceProviderRepository.delete(serviceProvider);
+    }
+
+    private void unlinkAppointments(Long id){
+        List<Appointment> serviceProviders = appointmentService.getAllByProviderId(id);
+
+        for (Appointment appt : serviceProviders) {
+            appt.setServiceProvider(null);
+        }
     }
 
     public List<ProviderPermissionEnum> getPermissionsByProviderUsernameAndServiceId(String username, Long serviceId){
