@@ -1,18 +1,18 @@
 package com.academy.models.service;
 
-import com.academy.models.Member;
+import com.academy.models.member.Member;
 import com.academy.models.ServiceType;
 import com.academy.models.Tag;
 import com.academy.models.service.service_provider.ServiceProvider;
+import com.academy.models.shared.BaseEntity;
+import com.academy.util.FieldLengths;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -21,10 +21,7 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,17 +29,13 @@ import java.util.List;
 @Table(name="service")
 @Getter
 @Setter
-@ToString(exclude = {"owner", "serviceType", "tags", "serviceProviders"})
-public class Service {
+@ToString(callSuper = true, exclude = {"owner", "serviceType", "tags", "serviceProviders"})
+public class Service extends BaseEntity {
 
-    @Column(name="id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Id
-    private long id;
-
-    @Column(name="name")
+    @Column(name="name", length = FieldLengths.SERVICE_TITLE_MAX, nullable = false)
     private String name;
 
+    @Lob
     @Column(name="description")
     private String description;
 
@@ -61,14 +54,6 @@ public class Service {
 
     @Column(name="duration")
     private int duration;
-
-    @Column(name="created_at", updatable=false)
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @Column(name="updated_at")
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "service_type_id", nullable = false)

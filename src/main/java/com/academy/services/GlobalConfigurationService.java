@@ -32,6 +32,10 @@ public class GlobalConfigurationService {
                 .toList();
     }
 
+    public String getConfigValue(String configKey){
+        return getConfig(configKey).configValue();
+    }
+
     public GlobalConfigurationResponseDTO getConfig(String configKey) {
         GlobalConfiguration config = configurationRepository.findByConfigKey(configKey)
                 .orElseThrow(() -> new EntityNotFoundException(GlobalConfiguration.class, "No configuration for: " + configKey));
