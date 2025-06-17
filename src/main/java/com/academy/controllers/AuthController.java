@@ -68,7 +68,7 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(HttpServletRequest request) {
+    public ResponseEntity<?> getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         if (auth == null || !auth.isAuthenticated()) {
@@ -84,7 +84,7 @@ public class AuthController {
         Long id = member.getId();
         String profilePicture = member.getProfilePicture();
 
-        return ResponseEntity.ok(Map.of("username", username, "id", id, "profilePicture", profilePicture));
+        return ResponseEntity.ok(Map.of("username", username, "id", id, "profilePicture", profilePicture != null ? profilePicture : ""));
     }
 
     @PostMapping("/recreate-confirmation-token")
