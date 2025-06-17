@@ -1,11 +1,11 @@
 .scroll-container {
   display: flex;
   overflow-x: auto;
-  overflow-y: hidden; /* evita scroll vertical interno */
+  overflow-y: hidden;
   gap: 1rem;
   scroll-snap-type: x mandatory;
   align-items: center;
-  max-height: 150px; /* ou altura que caiba no ecrã */
+  max-height: 150px;
   box-sizing: border-box;
 }
 
@@ -17,10 +17,10 @@
   scroll-snap-align: start;
   cursor: pointer;
   transition: transform 0.2s;
-  display: flex;          /* ativa flexbox */
-  flex-direction: column; /* empilha verticalmente */
-  justify-content: center;/* centra verticalmente */
-  align-items: center;    /* centra horizontalmente */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .type-card:hover {

@@ -148,7 +148,7 @@ export class ScheduleComponent implements OnInit {
     this.filteredSlots = this.slots.filter(slot =>
       !provider || slot.providerName === provider
     );
-    this.organizeSlotsByDay(); // <-- Atualizar visualização
+    this.organizeSlotsByDay();
   }
 
   onSearchChange(searchTerm: string) {
@@ -200,13 +200,10 @@ export class ScheduleComponent implements OnInit {
 
     selectSlot(slot: SlotModel) {
       const slotTime = new Date(slot.start).toISOString();
-
-      // Obter todos slots com o mesmo horário
       const sameTimeSlots = this.slots.filter(s =>
         new Date(s.start).toISOString() === slotTime
       );
 
-      // Criar map único de providers
       const uniqueProviderMap = new Map<string, SlotModel>();
       for (const s of sameTimeSlots) {
         if (!uniqueProviderMap.has(s.providerName)) {
@@ -216,7 +213,6 @@ export class ScheduleComponent implements OnInit {
 
       this.providerOptions = Array.from(uniqueProviderMap.values());
 
-      // Se filtro por provider estiver ativo E provider do slot for esse filtro
       if (this.selectedProvider && slot.providerName === this.selectedProvider) {
         this.selectedSlot = slot;
         this.currentStep = 'confirmation';
@@ -246,13 +242,13 @@ export class ScheduleComponent implements OnInit {
 
     cancelModal() {
       this.showConfirmationModal = false;
-      this.currentStep = 'slots'; // Volta para escolher slot
+      this.currentStep = 'slots';
     }
 
     confirmInModal() {
       this.showConfirmationModal = false;
       this.confirmAppointment();
-      this.currentStep = 'service'; // Volta para começar
+      this.currentStep = 'service';
     }
 
     confirmAppointment() {

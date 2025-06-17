@@ -10,8 +10,8 @@ import { ServiceTypeModel } from '../../models/service-type.model';
   styleUrls: ['../schedule.component.css']
 })
 export class ServiceSearchComponent {
-  @Input() serviceTypes: ServiceTypeModel[] = [];  // Must match parent
-  @Input() selectedServiceTypeId: number | null = null;  // Must match parent
+  @Input() serviceTypes: ServiceTypeModel[] = [];
+  @Input() selectedServiceTypeId: number | null = null;
   @Output() searchChange = new EventEmitter<string>();
   @Output() typeChange = new EventEmitter<number | null>();
 

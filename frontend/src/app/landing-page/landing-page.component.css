@@ -8,7 +8,7 @@ h1 {
 
 app-service-types {
   display: flex;
-  justify-content: center; /* centra horizontalmente o scroll-container dentro deste componente */
+  justify-content: center;
   width: 100%;
   box-sizing: border-box;
 }
