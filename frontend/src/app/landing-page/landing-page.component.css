@@ -1,0 +1,14 @@
+h1,h2{
+  font-weight: normal;
+}
+
+h1 {
+  text-align: center;
+}
+
+app-service-types {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+}

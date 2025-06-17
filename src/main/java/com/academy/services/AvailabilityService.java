@@ -1,5 +1,7 @@
 package com.academy.services;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -7,6 +9,7 @@ import java.util.stream.Collectors;
 import com.academy.models.member.Member;
 import com.academy.models.service.Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.academy.dtos.availability.AvailabilityMapper;
 import com.academy.dtos.availability.AvailabilityRequestDTO;
@@ -25,6 +28,10 @@ public class AvailabilityService {
     private final ServiceService serviceService;
     private final MemberService memberService;
     private final AvailabilityMapper availabilityMapper;
+
+    @Value("${slot.window.days:30}")
+    private int slotWindowDays;
+
 
     @Autowired
     public AvailabilityService(
@@ -159,5 +166,14 @@ public class AvailabilityService {
                 .stream()
                 .map(availabilityMapper::toResponseDTOWithMember)
                 .collect(Collectors.toList());
+    }
+
+    public List<Availability> getAvailabilitiesForProvider(Long providerId) {
+        if (providerId == null) {
+            throw new InvalidArgumentException("Provider ID cannot be null");
+        }
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime days = now.plusDays(slotWindowDays);
+        return availabilityRepository.findByMember_IdAndStartDateTimeBetween(providerId, now, days);
     }
 }

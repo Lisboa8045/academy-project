@@ -1,0 +1,41 @@
+.scroll-container {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  gap: 1rem;
+  scroll-snap-type: x mandatory;
+  align-items: center;
+  max-height: 150px;
+  box-sizing: border-box;
+}
+
+.type-card {
+  flex: 0 0 auto;
+  width: 100px;
+  height: 120px;
+  text-align: center;
+  scroll-snap-align: start;
+  cursor: pointer;
+  transition: transform 0.2s;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.type-card:hover {
+  transform: scale(1.08);
+  background-color: #f0f0f0;
+}
+
+.type-icon {
+  font-size: 32px;
+  color: #3f51b5;
+}
+
+.type-icon img {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  display: inline-block;
+}

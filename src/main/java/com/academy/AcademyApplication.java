@@ -18,6 +18,8 @@ public class AcademyApplication {
 	CommandLineRunner populateData(DataSource dataSource) {
 		return args -> {
 			Resource resource4 = new ClassPathResource("sql-scripts/populateGlobalConfigurations.sql");
+			Resource resource5 = new ClassPathResource("sql-scripts/populateAvailabilities.sql");
+			Resource resource6 = new ClassPathResource("sql-scripts/populateServiceProviders.sql");
 			try (Connection conn = dataSource.getConnection()) {
 				ScriptUtils.executeSqlScript(conn, resource4);
 			}

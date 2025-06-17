@@ -2,6 +2,7 @@
 
 package com.academy.services;
 
+import com.academy.config.authentication.AuthenticationFacade;
 import com.academy.dtos.appointment.AppointmentMapper;
 import com.academy.dtos.appointment.AppointmentRequestDTO;
 import com.academy.dtos.appointment.AppointmentResponseDTO;
@@ -11,9 +12,13 @@ import com.academy.models.member.Member;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.AppointmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,9 +32,14 @@ public class AppointmentService {
 
     private final MemberService memberService;
 
+    private final AuthenticationFacade authenticationFacade;
+
+    @Value("${slot.window.days:30}")
+    private int slotWindowDays;
+
     @Autowired
 
-    public AppointmentService(AppointmentRepository appointmentRepository, ServiceProviderService serviceProviderService, AppointmentMapper appointmentMapper, MemberService memberService) {
+    public AppointmentService(AppointmentRepository appointmentRepository, ServiceProviderService serviceProviderService, AppointmentMapper appointmentMapper, MemberService memberService, AuthenticationFacade authenticationFacade) {
 
         this.appointmentRepository = appointmentRepository;
 
@@ -39,6 +49,7 @@ public class AppointmentService {
 
         this.memberService = memberService;
 
+        this.authenticationFacade = authenticationFacade;
     }
 
     public List<AppointmentResponseDTO> getAllAppointments() {
@@ -63,31 +74,37 @@ public class AppointmentService {
 
     public AppointmentResponseDTO createAppointment(AppointmentRequestDTO dto) {
 
+        String username = authenticationFacade.getUsername();
+        Member member = memberService.getMemberByUsername(username);
+
+        System.out.println(">>> Membro: " + username);
+
         ServiceProvider serviceProvider = serviceProviderService.getServiceProviderEntityById(dto.serviceProviderId());
+        System.out.println(">>> Prestador ID: " + serviceProvider.getId());
 
-        Member member = memberService.getMemberEntityById(dto.memberId());
         Appointment appointment = appointmentMapper.toEntity(dto);
+        System.out.println(">>> Entidade Appointment antes de guardar: " + appointment);
 
-        appointment.setServiceProvider(serviceProvider);
 
         appointment.setMember(member);
+        appointment.setServiceProvider(serviceProvider);
+        appointment.setStartDateTime(dto.startDateTime());
+        appointment.setEndDateTime(dto.endDateTime());
+        appointment.setStatus(dto.status());
 
         return appointmentMapper.toResponseDTO(appointmentRepository.save(appointment));
-
     }
 
-    
+
+
     public AppointmentResponseDTO updateAppointment(int id, AppointmentRequestDTO appointmentDetails) {
 
         Appointment appointment = appointmentRepository.findById(id)
 
                 .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
 
-        if(appointmentDetails.memberId() != null){
-            Member member = memberService.getMemberEntityById(appointmentDetails.memberId());
-            appointment.setMember(member);
-
-        }
+        String username = authenticationFacade.getUsername();
+        Member member = memberService.getMemberByUsername(username);
 
         if(appointmentDetails.serviceProviderId() != null) {
             ServiceProvider serviceProvider = serviceProviderService.getServiceProviderEntityById(appointmentDetails.serviceProviderId());
@@ -124,5 +141,13 @@ public class AppointmentService {
 
     }
 
+    public List<Appointment> getAppointmentsForProvider(Long providerId) {
+    if (providerId == null) {
+        throw new IllegalArgumentException("Provider ID cannot be null");
+    }
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime end = now.plusDays(slotWindowDays);
+        return appointmentRepository.findByServiceProvider_Provider_IdAndStartDateTimeBetween(providerId, now, end);
+    }
 }
 
