@@ -1,107 +1,139 @@
 @if (loading()) {
-  <app-loading />
+    <app-loading/>
 } @else {
-  <div class="controls-bar">
-    <div class="control-group">
-      <label for="pageSize">Items per page:</label>
-      <select id="pageSize" [(ngModel)]="pageSizeValue" (change)="onFilterChange()">
-        <option [value]="10">10</option>
-        <option [value]="20">20</option>
-        <option [value]="30">30</option>
-      </select>
+    <div class="controls-bar">
+        <div class="control-group">
+            <label for="pageSize">Items per page:</label>
+            <select id="pageSize" [(ngModel)]="pageSizeValue" (change)="onFilterChange()">
+                <option [value]="10">10</option>
+                <option [value]="20">20</option>
+                <option [value]="30">30</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label for="sortOrder">Sort by:</label>
+            <select id="sortOrder" [(ngModel)]="sortOrderValue" (change)="onFilterChange()">
+                <option value="updatedAt,desc">Recently Updated</option>
+                <option value="price,desc">Highest Price</option>
+                <option value="price,asc">Lowest Price</option>
+            </select>
+        </div>
     </div>
-    <div class="control-group">
-      <label for="sortOrder">Sort by:</label>
-      <select id="sortOrder" [(ngModel)]="sortOrderValue" (change)="onFilterChange()">
-        <option value="updatedAt,desc">Recently Updated</option>
-        <option value="price,desc">Highest Price</option>
-        <option value="price,asc">Lowest Price</option>
-      </select>
+    <div class="main-content">
+        <div class="sidebar-filters">
+            <h3>Filter Services</h3>
+
+            <div class="filter-group">
+                <label for="minPrice">Min Price (€)</label>
+                <div class="input-clear-wrapper">
+                    <input type="number" id="minPrice" [(ngModel)]="filters.minPrice" (change)="onFilterChange()"/>
+                    @if (appliedFilters.minPrice !== null) {
+                        <button class="clear-btn" (click)="clearFilter('minPrice')" aria-label="Clear Min Price"
+                                type="button">×
+                        </button>
+                    }
+                </div>
+
+                <label for="maxPrice">Max Price (€)</label>
+                <div class="input-clear-wrapper">
+                    <input type="number" id="maxPrice" [(ngModel)]="filters.maxPrice" (change)="onFilterChange()"/>
+                    @if (appliedFilters.maxPrice !== null) {
+                        <button class="clear-btn" (click)="clearFilter('maxPrice')" aria-label="Clear Max Price"
+                                type="button">×
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label for="minDuration">Min Duration (mins)</label>
+                <div class="input-clear-wrapper">
+                    <input type="number" id="minDuration" [(ngModel)]="filters.minDuration"
+                           (change)="onFilterChange()"/>
+                    @if (appliedFilters.minDuration !== null) {
+                        <button class="clear-btn" (click)="clearFilter('minDuration')" aria-label="Clear Min Duration"
+                                type="button">×
+                        </button>
+                    }
+                </div>
+
+                <label for="maxDuration">Max Duration (mins)</label>
+                <div class="input-clear-wrapper">
+                    <input type="number" id="maxDuration" [(ngModel)]="filters.maxDuration"
+                           (change)="onFilterChange()"/>
+                    @if (appliedFilters.maxDuration !== null) {
+                        <button class="clear-btn" (click)="clearFilter('maxDuration')" aria-label="Clear Max Duration"
+                                type="button">×
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label>
+                    <input type="checkbox" [(ngModel)]="filters.negotiable" (change)="onFilterChange()"/>
+                    Negotiable Only
+                </label>
+            </div>
+
+            <div class="filter-group">
+                <label for="serviceType">Service Type</label>
+                <select id="serviceType" [(ngModel)]="filters.serviceType" (change)="onFilterChange()">
+                    <option value="">All</option>
+                    <option *ngFor="let type of serviceTypes" [value]="type">{{ type }}</option>
+                </select>
+            </div>
+        </div>
+        <div class="results-container">
+            @if (services().length === 0) {
+                <div class="no-services-message">
+                    <h2>No services found</h2>
+                    <p>Try checking spelling, using more general terms, or removing filters.</p>
+                </div>
+            } @else {
+                <div class="card-grid">
+                    <div class="card" *ngFor="let service of services()">
+                        <h3>{{ service.name }}</h3>
+                        <p>{{ service.description }}</p>
+                        <p><strong>Price:</strong> ${{ service.price }}</p>
+                        <p><strong>Tags:</strong> {{ service.tagNames.join(', ') }}</p>
+                        <p><strong>Negotiable:</strong> {{ service.negotiable ? 'Yes' : 'No' }}</p>
+                        <small>Updated at: {{ service.updatedAt | date }}</small>
+                    </div>
+                </div>
+
+                @if (totalPages() > 1) {
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination-bar">
+                            <li
+                                    class="page-item"
+                                    [class.disabled]="currentPage() === 0"
+                                    (click)="currentPage() > 0 && goToPreviousPage()"
+                            >
+                                Previous
+                            </li>
+
+                            <li
+                                    *ngFor="let page of getPaginationPages()"
+                                    class="page-item"
+                                    [class.active]="page === currentPage()"
+                                    [class.disabled]="page === '...'"
+                                    (click)="page !== '...' && goToPage(page)"
+                            >
+                                {{ page === '...' ? '…' : displayPageNumber(page) }}
+                            </li>
+
+                            <li
+                                    class="page-item"
+                                    [class.disabled]="currentPage() + 1 >= totalPages()"
+                                    (click)="currentPage() + 1 < totalPages() && goToNextPage()"
+                            >
+                                Next
+                            </li>
+                        </ul>
+                    </nav>
+                }
+            }
+        </div>
     </div>
-  </div>
-
-  <div class="sidebar-filters">
-    <h3>Filter Services</h3>
-
-    <div class="filter-group">
-        <label for="minPrice">Min Price (€)</label>
-      <input type="number" id="minPrice" [(ngModel)]="filters.minPrice" (change)="onFilterChange()" />
-
-        <label for="maxPrice">Max Price (€)</label>
-      <input type="number" id="maxPrice" [(ngModel)]="filters.maxPrice" (change)="onFilterChange()" />
-    </div>
-
-    <div class="filter-group">
-      <label for="minDuration">Min Duration (mins)</label>
-      <input type="number" id="minDuration" [(ngModel)]="filters.minDuration" (change)="onFilterChange()" />
-
-      <label for="maxDuration">Max Duration (mins)</label>
-      <input type="number" id="maxDuration" [(ngModel)]="filters.maxDuration" (change)="onFilterChange()" />
-    </div>
-
-    <div class="filter-group">
-      <label>
-        <input type="checkbox" [(ngModel)]="filters.negotiable" (change)="onFilterChange()" />
-        Negotiable Only
-      </label>
-    </div>
-
-    <div class="filter-group">
-      <label for="serviceType">Service Type</label>
-      <select id="serviceType" [(ngModel)]="filters.serviceType" (change)="onFilterChange()">
-        <option value="">All</option>
-        <option *ngFor="let type of serviceTypes" [value]="type">{{ type }}</option>
-      </select>
-    </div>
-  </div>
-
-  @if (services().length === 0) {
-    <div class="no-services-message">
-      <h2>No services found</h2>
-      <p>Try checking spelling, using more general terms, or removing filters.</p>
-    </div>
-  } @else {
-    <div class="card-grid">
-      <div class="card" *ngFor="let service of services()">
-        <h3>{{ service.name }}</h3>
-        <p>{{ service.description }}</p>
-        <p><strong>Price:</strong> ${{ service.price }}</p>
-        <p><strong>Tags:</strong> {{ service.tagNames.join(', ') }}</p>
-        <p><strong>Negotiable:</strong> {{ service.negotiable ? 'Yes' : 'No' }}</p>
-        <small>Updated at: {{ service.updatedAt | date }}</small>
-      </div>
-    </div>
-
-    @if (totalPages() > 1) {
-      <nav aria-label="Page navigation">
-        <ul class="pagination-bar">
-          <li
-            class="page-item"
-            [class.disabled]="currentPage() === 0"
-            (click)="currentPage() > 0 && goToPreviousPage()"
-          >
-            Previous
-          </li>
-
-          <li
-            *ngFor="let page of getPaginationPages()"
-            class="page-item"
-            [class.active]="page === currentPage()"
-            [class.disabled]="page === '...'"
-            (click)="page !== '...' && goToPage(page)"
-          >
-            {{ page === '...' ? '…' : displayPageNumber(page) }}
-          </li>
-
-          <li
-            class="page-item"
-            [class.disabled]="currentPage() + 1 >= totalPages()"
-            (click)="currentPage() + 1 < totalPages() && goToNextPage()"
-          >
-            Next
-          </li>
-        </ul>
-      </nav>
-    }
-  }
 }

@@ -7,6 +7,8 @@ import {ActivatedRoute} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {ServiceQuery} from '../shared/models/service-query.model';
 
+type ClearableFilterKeys = 'minPrice' | 'maxPrice' | 'minDuration' | 'maxDuration';
+
 @Component({
   selector: 'app-service-list',
   templateUrl: './service-list.component.html',
@@ -22,7 +24,14 @@ export class ServiceListComponent implements OnInit{
   pageSize = signal(10);
   sortOrder = signal("price,asc");
 
-  filters = {
+  filters: {
+    minPrice: number | null;
+    maxPrice: number | null;
+    minDuration: number | null;
+    maxDuration: number | null;
+    negotiable: boolean;
+    serviceType: string;
+  } = {
     minPrice: null,
     maxPrice: null,
     minDuration: null,
@@ -30,6 +39,8 @@ export class ServiceListComponent implements OnInit{
     negotiable: false,
     serviceType: ''
   };
+
+  appliedFilters: typeof this.filters = {...this.filters};
 
   serviceTypes: string[] = [];
 
@@ -83,6 +94,7 @@ export class ServiceListComponent implements OnInit{
   onFilterChange() {
     this.currentPage.set(0);
     this.fetchServices(this.buildQuery({ page: 0 }));
+    this.appliedFilters = {...this.filters};
   }
 
   getPaginationPages(): (number | string)[] {
@@ -178,5 +190,10 @@ export class ServiceListComponent implements OnInit{
       return page + 1;
     }
     return 0;
+  }
+
+  clearFilter(field: ClearableFilterKeys) {
+    this.filters[field] = null;
+    this.onFilterChange();
   }
 }
