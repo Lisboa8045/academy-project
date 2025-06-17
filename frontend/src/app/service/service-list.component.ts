@@ -1,6 +1,6 @@
 import {Component, OnInit, signal} from '@angular/core';
 import {ServiceModel} from './service.model';
-import {ServiceApiService, PagedResponse} from '../shared/service-api.service';
+import {PagedResponse, ServiceApiService} from '../shared/service-api.service';
 import {LoadingComponent} from '../loading/loading.component';
 import {DatePipe, NgForOf} from '@angular/common';
 import {ActivatedRoute} from '@angular/router';
@@ -31,12 +31,15 @@ export class ServiceListComponent implements OnInit{
     serviceType: ''
   };
 
-  serviceTypes = ['Consulting', 'Development', 'Design', 'Training'];
+  serviceTypes: string[] = [];
 
   constructor(private serviceApi: ServiceApiService, private route: ActivatedRoute) {
   }
 
   ngOnInit(): void {
+    this.serviceApi.getServiceTypes().subscribe(types => {
+      this.serviceTypes = types.map(type => type.name);
+    });
     this.route.queryParams.subscribe(params => {
       const q = (params['q'] || '').trim();
       this.searchTerm.set(q);
@@ -73,7 +76,7 @@ export class ServiceListComponent implements OnInit{
       minDuration: this.filters.minDuration ?? undefined,
       maxDuration: this.filters.maxDuration ?? undefined,
       negotiable: this.filters.negotiable ?? undefined,
-      serviceType: this.filters.serviceType || undefined
+      serviceTypeName: this.filters.serviceType?.trim() || undefined
     };
   }
 

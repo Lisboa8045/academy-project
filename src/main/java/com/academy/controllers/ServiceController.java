@@ -69,13 +69,14 @@ public class ServiceController {
             @RequestParam(required = false) String name,
             @RequestParam(required = false) Double minPrice,
             @RequestParam(required = false) Double maxPrice,
-            @RequestParam(required = false) Double minDuration,
-            @RequestParam(required = false) Double maxDuration,
+            @RequestParam(required = false) Integer minDuration,
+            @RequestParam(required = false) Integer maxDuration,
             @RequestParam(required = false) Boolean negotiable,
+            @RequestParam(required = false) String serviceTypeName,
             @PageableDefault(sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Page<ServiceResponseDTO> responses = serviceService.searchServices(name, minPrice,
-                maxPrice, minDuration, maxDuration, negotiable, pageable);
+                maxPrice, minDuration, maxDuration, negotiable, serviceTypeName, pageable);
         return ResponseEntity.ok(responses);
     }
 

@@ -61,4 +61,26 @@ public class ServiceSpecifications {
             return cb.or(nameLike, tagLike);
         };
     }
+
+    public static Specification<Service> hasDurationGreaterThanOrEqual(Integer minDuration) {
+        return (root, query, cb) ->
+                minDuration == null ? null : cb.greaterThanOrEqualTo(root.get("duration"), minDuration);
+    }
+
+    public static Specification<Service> hasDurationLessThanOrEqual(Integer maxDuration) {
+        return (root, query, cb) ->
+                maxDuration == null ? null : cb.lessThanOrEqualTo(root.get("duration"), maxDuration);
+    }
+
+    public static Specification<Service> canNegotiate(Boolean negotiable) {
+        return (root, query, cb) ->
+                Boolean.TRUE.equals(negotiable) ? cb.isTrue(root.get("negotiable")) : null;
+    }
+
+    public static Specification<Service> hasServiceType(String typeName) {
+        return (root, query, cb) ->
+                typeName == null || typeName.isBlank()
+                        ? null
+                        : cb.equal(cb.lower(root.get("serviceType").get("name")), typeName.toLowerCase());
+    }
 }

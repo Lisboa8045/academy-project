@@ -7,5 +7,5 @@ export interface ServiceQuery {
   minDuration?: number;
   maxDuration?: number;
   negotiable?: boolean;
-  serviceType?: string;
+  serviceTypeName?: string;
 }

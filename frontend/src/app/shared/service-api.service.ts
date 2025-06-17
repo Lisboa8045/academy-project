@@ -1,9 +1,10 @@
 // src/app/services/service-api.service.ts
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {Observable} from 'rxjs';
 import {ServiceModel} from '../service/service.model';
 import {ServiceQuery} from './models/service-query.model';
+import {ServiceTypeResponseDTO} from "./models/service-type.model";
 
 export interface PagedResponse {
   content: ServiceModel[];
@@ -17,7 +18,8 @@ export interface PagedResponse {
   providedIn: 'root',
 })
 export class ServiceApiService {
-  private BASE_URL = 'http://localhost:8080/services/search';
+  private BASE_URL = 'http://localhost:8080/services';
+  private SERVICE_TYPE_URL = 'http://localhost:8080/service-types';
 
   constructor(private http: HttpClient) {}
 
@@ -33,8 +35,14 @@ export class ServiceApiService {
     if (options.minDuration != null) params = params.set('minDuration', options.minDuration.toString());
     if (options.maxDuration != null) params = params.set('maxDuration', options.maxDuration.toString());
     if (options.negotiable != null) params = params.set('negotiable', options.negotiable.toString());
-    if (options.serviceType) params = params.set('serviceType', options.serviceType);
+    if (options.serviceTypeName != null) params = params.set('serviceTypeName', options.serviceTypeName.toString());
 
-    return this.http.get<PagedResponse>(this.BASE_URL, { params });
+    console.log('Search params:', params.toString());
+
+    return this.http.get<PagedResponse>(this.BASE_URL + '/search', {params});
+  }
+
+  getServiceTypes(): Observable<ServiceTypeResponseDTO[]> {
+    return this.http.get<ServiceTypeResponseDTO[]>(this.SERVICE_TYPE_URL);
   }
 }
