@@ -39,7 +39,11 @@ export class ProfileButtonComponent implements OnInit {
       },
       {
         label: 'BackOffice',
-        icon: '👔'
+        icon: '👔',
+        command: () => {
+          this.router.navigate(['/backoffice/availability'])
+        }
+
       },
       {
         label: 'Schedule',

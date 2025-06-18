@@ -1,41 +1,78 @@
-<h2>Configuração de Disponibilidade Semanal</h2>
-<form (ngSubmit)="gerarDisponibilidades()">
+<div class="availability-management">
 
-  <table>
-    <thead>
-    <tr>
-      <th>Dia da Semana</th>
-      <th>Ativo?</th>
-      <th>Início</th>
-      <th>Fim</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr *ngFor="let item of weeklyAvailabilities">
-      <td>{{ item.day }}</td>
-      <td>
-        <input type="checkbox" [(ngModel)]="item.enabled" name="{{item.day}}_enabled">
-      </td>
-      <td>
-        <input type="time" [(ngModel)]="item.startTime" name="{{item.day}}_startTime" [disabled]="!item.enabled">
-      </td>
-      <td>
-        <input type="time" [(ngModel)]="item.endTime" name="{{item.day}}_endTime" [disabled]="!item.enabled">
-      </td>
-    </tr>
-    </tbody>
-  </table>
+  <!-- Navegação semanal -->
+  <div class="week-navigation">
+    <button (click)="goToPreviousWeek()">← Semana anterior</button>
+    <span>
+      {{ currentWeekStart | date: 'dd/MM/yyyy' }} - {{ currentWeekEnd | date: 'dd/MM/yyyy' }}
+    </span>
+    <button (click)="goToNextWeek()">Semana seguinte →</button>
+  </div>
 
-  <h3>Período de Vigência</h3>
-  <label>
-    Data Inicial:
-    <input type="date" [(ngModel)]="period.startDate" name="startDate" required>
-  </label>
-  <label>
-    Data Final:
-    <input type="date" [(ngModel)]="period.endDate" name="endDate" required>
-  </label>
+  <!-- Dias da semana -->
+  <div class="weekly-slots">
+    <div *ngFor="let day of getWeekDays()" class="day-column">
+      <h4>
+        {{ day | date: 'EEEE' }}<br />
+        <small>{{ day | date: 'dd/MM' }}</small>
+      </h4>
 
-  <br><br>
-  <button type="submit">Gerar Disponibilidades</button>
-</form>
+      <ul>
+        <li *ngFor="let avail of getAvailabilityForDay(day)">
+          <span class="slot-hour">
+            {{ avail.startDateTime | date: 'HH:mm' }} - {{ avail.endDateTime | date: 'HH:mm' }}
+          </span>
+          <span class="slot-actions">
+            <button (click)="editAvailability(avail)">Editar</button>
+            <button (click)="removeAvailability(avail)">Remover</button>
+          </span>
+        </li>
+      </ul>
+
+      <div *ngIf="getAvailabilityForDay(day).length === 0" class="empty-day">
+        Sem disponibilidade
+      </div>
+
+      <button (click)="addAvailability(day)">+ Disponibilidade</button>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" *ngIf="showAvailabilityModal">
+    <div class="modal-content">
+      <h3>{{ modalMode === 'add' ? 'Nova' : 'Editar' }} Disponibilidade</h3>
+
+      <label>Hora de início:
+        <input type="time" [(ngModel)]="modalStartTime" />
+      </label>
+
+      <label>Hora de fim:
+        <input type="time" [(ngModel)]="modalEndTime" />
+      </label>
+
+      <label>Aplicar em:
+        <select [(ngModel)]="applyType" (change)="onApplyTypeChange()">
+          <option value="one-day">Só neste dia</option>
+          <option value="all-year">Mesmo dia todos os meses</option>
+          <option value="some-months">Alguns meses</option>
+        </select>
+      </label>
+
+      <div *ngIf="applyType === 'some-months'" class="month-selection">
+        <label *ngFor="let month of monthsList">
+          <input type="checkbox"
+                 [value]="month.value"
+                 [(ngModel)]="selectedMonths"
+                 [checked]="selectedMonths.includes(month.value)" />
+          {{ month.label }}
+        </label>
+      </div>
+
+      <div class="modal-actions">
+        <button (click)="saveAvailability()">Guardar</button>
+        <button (click)="closeAvailabilityModal()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+</div>
