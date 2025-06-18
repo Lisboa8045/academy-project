@@ -1,21 +1,23 @@
 import {Component, OnInit, signal} from '@angular/core';
 import {ServiceModel} from './service.model';
 import {PagedResponse, ServiceApiService} from '../shared/service-api.service';
-import {LoadingComponent} from '../loading/loading.component';
-import {DatePipe, NgForOf} from '@angular/common';
 import {ActivatedRoute} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {ServiceQuery} from '../shared/models/service-query.model';
+import {ControlsBarComponent} from "./search/controls-bar/controls-bar.component";
+import {SidebarFiltersComponent} from "./search/sidebar-filters/sidebar-filters.component";
+import {PaginationBarComponent} from "./search/pagination-bar/pagination-bar.component";
+import {ServiceListComponent} from "./service-list/service-list.component";
 
 type ClearableFilterKeys = 'minPrice' | 'maxPrice' | 'minDuration' | 'maxDuration';
 
 @Component({
-  selector: 'app-service-list',
-  templateUrl: './service-list.component.html',
-  styleUrls: ['./service-list.component.css'],
-  imports: [LoadingComponent, NgForOf, DatePipe, FormsModule]
+  selector: 'app-search-services',
+  templateUrl: './search-services.component.html',
+  styleUrls: ['./search-services.component.css'],
+  imports: [FormsModule, ControlsBarComponent, SidebarFiltersComponent, PaginationBarComponent, ServiceListComponent]
 })
-export class ServiceListComponent implements OnInit{
+export class SearchServicesComponent implements OnInit {
   services = signal<ServiceModel[]>([]);
   searchTerm = signal('');
   loading = signal(false);
@@ -24,23 +26,23 @@ export class ServiceListComponent implements OnInit{
   pageSize = signal(10);
   sortOrder = signal("price,asc");
 
-  filters: {
-    minPrice: number | null;
-    maxPrice: number | null;
-    minDuration: number | null;
-    maxDuration: number | null;
-    negotiable: boolean;
-    serviceType: string;
-  } = {
-    minPrice: null,
-    maxPrice: null,
-    minDuration: null,
-    maxDuration: null,
+  filters = signal({
+    minPrice: null as number | null,
+    maxPrice: null as number | null,
+    minDuration: null as number | null,
+    maxDuration: null as number | null,
     negotiable: false,
     serviceType: ''
-  };
+  });
 
-  appliedFilters: typeof this.filters = {...this.filters};
+  appliedFilters = signal({
+    minPrice: null as number | null,
+    maxPrice: null as number | null,
+    minDuration: null as number | null,
+    maxDuration: null as number | null,
+    negotiable: false,
+    serviceType: ''
+  });
 
   serviceTypes: string[] = [];
 
@@ -82,19 +84,19 @@ export class ServiceListComponent implements OnInit{
       page: overrides.page ?? this.currentPage(),
       pageSize: overrides.pageSize ?? this.pageSize(),
       sortOrder: overrides.sortOrder ?? this.sortOrder(),
-      minPrice: this.filters.minPrice ?? undefined,
-      maxPrice: this.filters.maxPrice ?? undefined,
-      minDuration: this.filters.minDuration ?? undefined,
-      maxDuration: this.filters.maxDuration ?? undefined,
-      negotiable: this.filters.negotiable ?? undefined,
-      serviceTypeName: this.filters.serviceType?.trim() || undefined
+      minPrice: this.filters().minPrice ?? undefined,
+      maxPrice: this.filters().maxPrice ?? undefined,
+      minDuration: this.filters().minDuration ?? undefined,
+      maxDuration: this.filters().maxDuration ?? undefined,
+      negotiable: this.filters().negotiable ?? undefined,
+      serviceTypeName: this.filters().serviceType?.trim() || undefined,
     };
   }
 
   onFilterChange() {
     this.currentPage.set(0);
     this.fetchServices(this.buildQuery({ page: 0 }));
-    this.appliedFilters = {...this.filters};
+    this.appliedFilters.set({...this.filters()});
   }
 
   getPaginationPages(): (number | string)[] {
@@ -139,61 +141,5 @@ export class ServiceListComponent implements OnInit{
     }
 
     return pages;
-  }
-
-
-  goToPreviousPage() {
-    if (this.currentPage() > 0) {
-      const newPage = this.currentPage() - 1;
-      this.currentPage.set(newPage);
-      this.fetchServices(this.buildQuery({ page: newPage }));
-    }
-  }
-
-  goToNextPage() {
-    if (this.currentPage() + 1 < this.totalPages()) {
-      const newPage = this.currentPage() + 1;
-      this.currentPage.set(newPage);
-      this.fetchServices(this.buildQuery({ page: newPage }));
-    }
-  }
-
-  goToPage(page: number | string): void {
-    const pageNumber = Number(page);
-    if (pageNumber >= 0 && pageNumber < this.totalPages()) {
-      this.currentPage.set(pageNumber);
-      this.fetchServices(this.buildQuery({ page: pageNumber }));
-    }
-  }
-
-  get pageSizeValue() {
-    return this.pageSize();
-  }
-
-  set pageSizeValue(value: number) {
-    this.pageSize.set(value);
-  }
-
-  get sortOrderValue() {
-    return this.sortOrder();
-  }
-  set sortOrderValue(value: string) {
-    this.sortOrder.set(value);
-  }
-
-  isPageNumber(page: number | string): page is number {
-    return typeof page === 'number';
-  }
-
-  displayPageNumber(page: number | string): number {
-    if (this.isPageNumber(page)) {
-      return page + 1;
-    }
-    return 0;
-  }
-
-  clearFilter(field: ClearableFilterKeys) {
-    this.filters[field] = null;
-    this.onFilterChange();
   }
 }

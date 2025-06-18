@@ -1,0 +1,17 @@
+@if (services().length === 0) {
+    <div class="no-services-message">
+        <h2>No services found</h2>
+        <p>Try checking spelling, using more general terms, or removing filters.</p>
+    </div>
+} @else {
+    <div class="card-grid">
+        <div class="card" *ngFor="let service of services()">
+            <h3>{{ service.name }}</h3>
+            <p>{{ service.description }}</p>
+            <p><strong>Price:</strong> ${{ service.price }}</p>
+            <p><strong>Tags:</strong> {{ service.tagNames.join(', ') }}</p>
+            <p><strong>Negotiable:</strong> {{ service.negotiable ? 'Yes' : 'No' }}</p>
+            <small>Updated at: {{ service.updatedAt | date }}</small>
+        </div>
+    </div>
+}

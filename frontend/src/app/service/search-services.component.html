@@ -1,0 +1,25 @@
+<app-controls-bar
+        [pageSizeValue]="pageSize"
+        [sortOrderValue]="sortOrder">
+</app-controls-bar>
+
+<div class="main-content">
+    <app-sidebar-filters
+            [filters]="filters"
+            [serviceTypes]="serviceTypes"
+            [onFilterChange]="onFilterChange.bind(this)"
+    ></app-sidebar-filters>
+
+    <div class="results-container">
+        <app-service-list
+                [services]="services">
+        </app-service-list>
+
+        <app-pagination-bar
+                [currentPage]="currentPage"
+                [totalPages]="totalPages"
+                [getPaginationPages]="getPaginationPages"
+                [pageChange]="currentPage">
+        </app-pagination-bar>
+    </div>
+</div>
