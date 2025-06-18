@@ -1,21 +1,20 @@
-import {Component, OnInit, signal} from '@angular/core';
-import {ServiceModel} from './service.model';
-import {PagedResponse, ServiceApiService} from '../shared/service-api.service';
+import {Component, OnInit, signal, WritableSignal} from '@angular/core';
+import {NgForOf} from '@angular/common';
 import {ActivatedRoute} from '@angular/router';
 import {FormsModule} from '@angular/forms';
-import {ServiceQuery} from '../shared/models/service-query.model';
-import {ControlsBarComponent} from "./search/controls-bar/controls-bar.component";
-import {SidebarFiltersComponent} from "./search/sidebar-filters/sidebar-filters.component";
-import {PaginationBarComponent} from "./search/pagination-bar/pagination-bar.component";
-import {ServiceListComponent} from "./service-list/service-list.component";
-
-type ClearableFilterKeys = 'minPrice' | 'maxPrice' | 'minDuration' | 'maxDuration';
+import {ControlsBarComponent} from "./controls-bar/controls-bar.component";
+import {SidebarFiltersComponent} from "./sidebar-filters/sidebar-filters.component";
+import {ServiceModel} from '../service.model';
+import {LoadingComponent} from "../../loading/loading.component";
+import {ServiceListComponent} from "../service-list/service-list.component";
+import {PagedResponse, ServiceApiService} from "../../shared/service-api.service";
+import {ServiceQuery} from "../../shared/models/service-query.model";
 
 @Component({
   selector: 'app-search-services',
   templateUrl: './search-services.component.html',
   styleUrls: ['./search-services.component.css'],
-  imports: [FormsModule, ControlsBarComponent, SidebarFiltersComponent, PaginationBarComponent, ServiceListComponent]
+  imports: [LoadingComponent, NgForOf, FormsModule, ControlsBarComponent, SidebarFiltersComponent, ServiceListComponent]
 })
 export class SearchServicesComponent implements OnInit {
   services = signal<ServiceModel[]>([]);
@@ -26,13 +25,20 @@ export class SearchServicesComponent implements OnInit {
   pageSize = signal(10);
   sortOrder = signal("price,asc");
 
-  filters = signal({
-    minPrice: null as number | null,
-    maxPrice: null as number | null,
-    minDuration: null as number | null,
-    maxDuration: null as number | null,
+  filters: WritableSignal<{
+    minPrice: number | null;
+    maxPrice: number | null;
+    minDuration: number | null;
+    maxDuration: number | null;
+    negotiable: boolean;
+    serviceType: string;
+  }> = signal({
+    minPrice: null,
+    maxPrice: null,
+    minDuration: null,
+    maxDuration: null,
     negotiable: false,
-    serviceType: ''
+    serviceType: '',
   });
 
   appliedFilters = signal({
@@ -89,7 +95,7 @@ export class SearchServicesComponent implements OnInit {
       minDuration: this.filters().minDuration ?? undefined,
       maxDuration: this.filters().maxDuration ?? undefined,
       negotiable: this.filters().negotiable ?? undefined,
-      serviceTypeName: this.filters().serviceType?.trim() || undefined,
+      serviceTypeName: this.filters().serviceType?.trim() || undefined
     };
   }
 
@@ -141,5 +147,41 @@ export class SearchServicesComponent implements OnInit {
     }
 
     return pages;
+  }
+
+
+  goToPreviousPage() {
+    if (this.currentPage() > 0) {
+      const newPage = this.currentPage() - 1;
+      this.currentPage.set(newPage);
+      this.fetchServices(this.buildQuery({ page: newPage }));
+    }
+  }
+
+  goToNextPage() {
+    if (this.currentPage() + 1 < this.totalPages()) {
+      const newPage = this.currentPage() + 1;
+      this.currentPage.set(newPage);
+      this.fetchServices(this.buildQuery({ page: newPage }));
+    }
+  }
+
+  goToPage(page: number | string): void {
+    const pageNumber = Number(page);
+    if (pageNumber >= 0 && pageNumber < this.totalPages()) {
+      this.currentPage.set(pageNumber);
+      this.fetchServices(this.buildQuery({ page: pageNumber }));
+    }
+  }
+
+  isPageNumber(page: number | string): page is number {
+    return typeof page === 'number';
+  }
+
+  displayPageNumber(page: number | string): number {
+    if (this.isPageNumber(page)) {
+      return page + 1;
+    }
+    return 0;
   }
 }

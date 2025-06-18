@@ -2,7 +2,7 @@ import {Routes} from '@angular/router';
 import {AuthComponent} from './auth/auth.component';
 import {ProfileComponent} from './profile/profile.component';
 import {UnauthorizedComponent} from './unauthorized.component';
-import {SearchServicesComponent} from './service/search-services.component';
+import {SearchServicesComponent} from "./service/search/search-services.component";
 
 export const routes: Routes = [
   { path: 'auth', component: AuthComponent },

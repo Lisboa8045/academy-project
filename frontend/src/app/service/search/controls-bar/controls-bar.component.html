@@ -1,15 +1,16 @@
 <div class="controls-bar">
     <div class="control-group">
         <label for="pageSize">Items per page:</label>
-        <select id="pageSize" [value]="pageSizeValue()" (change)="onPageSizeChange($event)">
+        <select id="pageSize" [value]="pageSize()" (change)="onPageSizeChange($event)">
             <option [value]="10">10</option>
             <option [value]="20">20</option>
             <option [value]="30">30</option>
         </select>
     </div>
+
     <div class="control-group">
         <label for="sortOrder">Sort by:</label>
-        <select id="sortOrder" [value]="sortOrderValue()" (change)="onSortOrderChange($event)">
+        <select id="sortOrder" [value]="sortOrder()" (change)="onSortOrderChange($event)">
             <option value="updatedAt,desc">Recently Updated</option>
             <option value="price,desc">Highest Price</option>
             <option value="price,asc">Lowest Price</option>

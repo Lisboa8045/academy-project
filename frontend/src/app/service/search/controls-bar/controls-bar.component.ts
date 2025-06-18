@@ -1,4 +1,4 @@
-import {Component, Input, WritableSignal} from '@angular/core';
+import {Component, Input} from '@angular/core';
 
 @Component({
     selector: 'app-controls-bar',
@@ -6,16 +6,19 @@ import {Component, Input, WritableSignal} from '@angular/core';
     styleUrls: ['./controls-bar.component.css'],
 })
 export class ControlsBarComponent {
-    @Input() pageSizeValue!: WritableSignal<number>;
-    @Input() sortOrderValue!: WritableSignal<string>;
+    @Input() pageSize!: { (): number; set: (value: number) => void };
+    @Input() sortOrder!: { (): string; set: (value: string) => void };
+    @Input() onChange!: () => void;
 
     onPageSizeChange(event: Event) {
-        const value = +(event.target as HTMLSelectElement).value;
-        this.pageSizeValue.set(value);
+        const target = event.target as HTMLSelectElement;
+        this.pageSize.set(Number(target.value));
+        this.onChange();
     }
 
     onSortOrderChange(event: Event) {
-        const value = (event.target as HTMLSelectElement).value;
-        this.sortOrderValue.set(value);
+        const target = event.target as HTMLSelectElement;
+        this.sortOrder.set(target.value);
+        this.onChange();
     }
 }

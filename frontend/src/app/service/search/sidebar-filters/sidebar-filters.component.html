@@ -3,42 +3,20 @@
 <div class="filter-group">
     <label for="minPrice">Min Price (€)</label>
     <div class="input-clear-wrapper">
-        <input
-                type="number"
-                id="minPrice"
-                [ngModel]="filters().minPrice"
-                (ngModelChange)="updateFilter('minPrice', $event)"
-                (change)="onFilterChange()"
-                autocomplete="off"
-        />
-        @if (filters().minPrice !== null) {
-            <button
-                    class="clear-btn"
-                    (click)="clearFilter('minPrice')"
-                    aria-label="Clear Min Price"
-                    type="button"
-            >×
+        <input type="number" id="minPrice" [(ngModel)]="filters().minPrice" (change)="onFilterChange()"/>
+        @if (appliedFilters().minPrice !== null) {
+            <button class="clear-btn" (click)="clearFilter('minPrice')" aria-label="Clear Min Price"
+                    type="button">×
             </button>
         }
     </div>
 
     <label for="maxPrice">Max Price (€)</label>
     <div class="input-clear-wrapper">
-        <input
-                type="number"
-                id="maxPrice"
-                [ngModel]="filters().maxPrice"
-                (ngModelChange)="updateFilter('maxPrice', $event)"
-                (change)="onFilterChange()"
-                autocomplete="off"
-        />
-        @if (filters().maxPrice !== null) {
-            <button
-                    class="clear-btn"
-                    (click)="clearFilter('maxPrice')"
-                    aria-label="Clear Max Price"
-                    type="button"
-            >×
+        <input type="number" id="maxPrice" [(ngModel)]="filters().maxPrice" (change)="onFilterChange()"/>
+        @if (appliedFilters().maxPrice !== null) {
+            <button class="clear-btn" (click)="clearFilter('maxPrice')" aria-label="Clear Max Price"
+                    type="button">×
             </button>
         }
     </div>
@@ -46,45 +24,38 @@
 
 <div class="filter-group">
     <label for="minDuration">Min Duration (mins)</label>
-    <input
-            type="number"
-            id="minDuration"
-            [ngModel]="filters().minDuration"
-            (ngModelChange)="updateFilter('minDuration', $event)"
-            (change)="onFilterChange()"
-            autocomplete="off"
-    />
+    <div class="input-clear-wrapper">
+        <input type="number" id="minDuration" [(ngModel)]="filters().minDuration"
+               (change)="onFilterChange()"/>
+        @if (appliedFilters().minDuration !== null) {
+            <button class="clear-btn" (click)="clearFilter('minDuration')" aria-label="Clear Min Duration"
+                    type="button">×
+            </button>
+        }
+    </div>
 
     <label for="maxDuration">Max Duration (mins)</label>
-    <input
-            type="number"
-            id="maxDuration"
-            [ngModel]="filters().maxDuration"
-            (ngModelChange)="updateFilter('maxDuration', $event)"
-            (change)="onFilterChange()"
-            autocomplete="off"
-    />
+    <div class="input-clear-wrapper">
+        <input type="number" id="maxDuration" [(ngModel)]="filters().maxDuration"
+               (change)="onFilterChange()"/>
+        @if (appliedFilters().maxDuration !== null) {
+            <button class="clear-btn" (click)="clearFilter('maxDuration')" aria-label="Clear Max Duration"
+                    type="button">×
+            </button>
+        }
+    </div>
 </div>
 
 <div class="filter-group">
     <label>
-        <input
-                type="checkbox"
-                [checked]="filters().negotiable"
-                (change)="updateFilter('negotiable', $any($event.target).checked)"
-        />
+        <input type="checkbox" [(ngModel)]="filters().negotiable" (change)="onFilterChange()"/>
         Negotiable Only
     </label>
 </div>
 
 <div class="filter-group">
     <label for="serviceType">Service Type</label>
-    <select
-            id="serviceType"
-            [ngModel]="filters().serviceType"
-            (ngModelChange)="updateFilter('serviceType', $event)"
-            (change)="onFilterChange()"
-    >
+    <select id="serviceType" [(ngModel)]="filters().serviceType" (change)="onFilterChange()">
         <option value="">All</option>
         <option *ngFor="let type of serviceTypes" [value]="type">{{ type }}</option>
     </select>
