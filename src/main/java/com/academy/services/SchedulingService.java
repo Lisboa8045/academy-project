@@ -3,7 +3,10 @@ package com.academy.services;
 import com.academy.dtos.SlotDTO;
 import com.academy.models.Appointment;
 import com.academy.models.Availability;
-import com.academy.models.Member;
+import com.academy.models.member.Member;
+import com.academy.models.service.service_provider.ProviderPermission;
+import com.academy.models.service.service_provider.ProviderPermissionEnum;
+import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.utils.SlotUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,13 +52,26 @@ public class SchedulingService {
 
         List<SlotDTO> allFreeSlots = new ArrayList<>();
         List<Long> providerIds = serviceProviderService.findMemberIdsByServiceId(serviceId);
+        List<Availability> availabilities = new ArrayList<>();
 
         for (Long providerId : providerIds) {
             Optional<Member> memberOpt = memberService.findbyId(providerId);
             String providerName = memberOpt.isPresent() ? memberOpt.get().getUsername() : "Unknown";
 
-            // Fetch all future availabilities for this provider
-            List<Availability> availabilities = availabilityService.getAvailabilitiesForProvider(providerId);
+            ServiceProvider serviceProvider = serviceProviderService
+                    .getServiceProviderByProviderIdAndServiceID(providerId, serviceId);
+
+            boolean hasServePermission = serviceProvider.getPermissions().stream()
+                    .map(ProviderPermission::getPermission)
+                    .anyMatch(permission -> permission == ProviderPermissionEnum.SERVE);
+
+            System.out.println("[DEBUG] Permission to serve this service: " + hasServePermission);
+
+            //ALTERAR para hasServePermissions
+            if (hasServePermission) {
+                availabilities = availabilityService.getAvailabilitiesForProvider(providerId);
+                System.out.println("[DEBUG] Availability count: " + availabilities.size());
+            }
 
             // Fetch all future appointments for this provider
             List<Appointment> appointments = appointmentService.getAppointmentsForProvider(providerId);

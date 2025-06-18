@@ -156,13 +156,18 @@ public class ServiceProviderService {
                     " not found for user " + username + " and serviceId " + serviceId);
         return optionalServiceProvider.get();
     }
-    private ServiceProvider getServiceProviderByProviderIdAndServiceID(Long id, Long serviceId) {
+    public ServiceProvider getServiceProviderByProviderIdAndServiceID(Long id, Long serviceId) {
         Optional<ServiceProvider> optionalServiceProvider =
                 serviceProviderRepository.findByProviderIdAndServiceId(id, serviceId);
         if(optionalServiceProvider.isEmpty())
             throw new EntityNotFoundException(ServiceProvider.class,
                     " not found for user with id" + id + " and serviceId " + serviceId);
         return optionalServiceProvider.get();
+    }
+
+    public ServiceProviderResponseDTO getServiceProviderDTOByProviderIdAndServiceID(Long id, Long serviceId){
+        ServiceProvider sp = getServiceProviderByProviderIdAndServiceID(id, serviceId);
+        return serviceProviderMapper.toResponseDTO(sp);
     }
 
     public List<ProviderPermissionEnum> getPermissions(Long id){

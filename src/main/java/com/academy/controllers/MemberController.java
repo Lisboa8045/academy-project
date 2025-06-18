@@ -4,6 +4,7 @@ import com.academy.config.authentication.JwtCookieUtil;
 import com.academy.config.authentication.JwtUtil;
 import com.academy.dtos.member.MemberRequestDTO;
 import com.academy.dtos.member.MemberResponseDTO;
+import com.academy.models.member.Member;
 import com.academy.services.MemberService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,7 @@ public class MemberController {
         this.userDetailsService = userDetailsService;
         this.jwtCookieUtil = jwtCookieUtil;
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMember(@PathVariable Long id) {
         memberService.deleteMember(id);
@@ -54,4 +56,10 @@ public class MemberController {
     public ResponseEntity<MemberResponseDTO> getMemberById(@PathVariable Long id) {
         return ResponseEntity.ok(memberService.getMemberById(id));
     }
+
+    @GetMapping("/{username}")
+    public ResponseEntity<Long> getMemberById(@PathVariable String username) {
+        return ResponseEntity.ok(memberService.getMemberByUsername(username).getId());
+    }
+
 }

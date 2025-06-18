@@ -2,10 +2,14 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  background-color: #f8f9fa;
 }
 
 .content {
   flex: 1 0 auto;
+  max-width: 80%;
+  margin: 0 auto;
+  width: 100%;
 }
 
 app-footer {

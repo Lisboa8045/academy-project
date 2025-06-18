@@ -1,7 +1,7 @@
 package com.academy.schedulling;
 
 import com.academy.dtos.SlotDTO;
-import com.academy.models.Member;
+import com.academy.models.member.Member;
 import com.academy.models.Role;
 import com.academy.models.Availability;
 import com.academy.models.ServiceType;

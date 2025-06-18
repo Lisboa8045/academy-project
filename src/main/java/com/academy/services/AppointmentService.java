@@ -2,6 +2,7 @@
 
 package com.academy.services;
 
+import com.academy.config.authentication.AuthenticationFacade;
 import com.academy.dtos.appointment.AppointmentMapper;
 import com.academy.dtos.appointment.AppointmentRequestDTO;
 import com.academy.dtos.appointment.AppointmentResponseDTO;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,12 +32,14 @@ public class AppointmentService {
 
     private final MemberService memberService;
 
+    private final AuthenticationFacade authenticationFacade;
+
     @Value("${slot.window.days:30}")
     private int slotWindowDays;
 
     @Autowired
 
-    public AppointmentService(AppointmentRepository appointmentRepository, ServiceProviderService serviceProviderService, AppointmentMapper appointmentMapper, MemberService memberService) {
+    public AppointmentService(AppointmentRepository appointmentRepository, ServiceProviderService serviceProviderService, AppointmentMapper appointmentMapper, MemberService memberService, AuthenticationFacade authenticationFacade) {
 
         this.appointmentRepository = appointmentRepository;
 
@@ -45,6 +49,7 @@ public class AppointmentService {
 
         this.memberService = memberService;
 
+        this.authenticationFacade = authenticationFacade;
     }
 
     public List<AppointmentResponseDTO> getAllAppointments() {
@@ -69,31 +74,33 @@ public class AppointmentService {
 
     public AppointmentResponseDTO createAppointment(AppointmentRequestDTO dto) {
 
+        String username = authenticationFacade.getUsername();
+        Member member = memberService.getMemberByUsername(username);
+
         ServiceProvider serviceProvider = serviceProviderService.getServiceProviderEntityById(dto.serviceProviderId());
 
-        Member member = memberService.getMemberEntityById(dto.memberId());
         Appointment appointment = appointmentMapper.toEntity(dto);
 
-        appointment.setServiceProvider(serviceProvider);
 
         appointment.setMember(member);
+        appointment.setServiceProvider(serviceProvider);
+        appointment.setStartDateTime(dto.startDateTime());
+        appointment.setEndDateTime(dto.endDateTime());
+        appointment.setStatus(dto.status());
 
         return appointmentMapper.toResponseDTO(appointmentRepository.save(appointment));
-
     }
 
-    
+
+
     public AppointmentResponseDTO updateAppointment(int id, AppointmentRequestDTO appointmentDetails) {
 
         Appointment appointment = appointmentRepository.findById(id)
 
                 .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
 
-        if(appointmentDetails.memberId() != null){
-            Member member = memberService.getMemberEntityById(appointmentDetails.memberId());
-            appointment.setMember(member);
-
-        }
+        String username = authenticationFacade.getUsername();
+        Member member = memberService.getMemberByUsername(username);
 
         if(appointmentDetails.serviceProviderId() != null) {
             ServiceProvider serviceProvider = serviceProviderService.getServiceProviderEntityById(appointmentDetails.serviceProviderId());
