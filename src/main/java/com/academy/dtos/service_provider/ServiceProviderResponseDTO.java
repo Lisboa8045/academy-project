@@ -10,5 +10,6 @@ public record ServiceProviderResponseDTO(
         String memberName,
         long serviceId,
         List<AppointmentReviewResponseDTO> appointmentReviewList,
-        List<ProviderPermissionEnum> permissions
+        List<ProviderPermissionEnum> permissions,
+        boolean active
 ) {}

@@ -11,6 +11,9 @@ import java.util.Optional;
 
 @Repository
 public interface ServiceProviderRepository extends JpaRepository<ServiceProvider, Long> {
+    Optional<ServiceProvider> findByProviderUsername(String username);
+
+    List<ServiceProvider> findAllByProviderId(Long providerId);
 
     @Query("SELECT sp.provider.id FROM ServiceProvider sp WHERE sp.service.id = :serviceId")
     List<Long> findMemberIdsByServiceId(Long serviceId);
