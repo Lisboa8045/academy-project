@@ -1,11 +1,13 @@
 // pagination-bar.component.ts
 import type {Signal, WritableSignal} from '@angular/core';
 import {Component, Input} from '@angular/core';
+import {CommonModule} from "@angular/common";
 
 @Component({
     selector: 'app-pagination-bar',
     standalone: true,
     templateUrl: './pagination-bar.component.html',
+    imports: [CommonModule],
     styleUrls: ['./pagination-bar.component.css'],
 })
 export class PaginationBarComponent {

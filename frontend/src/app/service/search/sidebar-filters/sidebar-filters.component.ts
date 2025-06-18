@@ -1,12 +1,11 @@
 import type {WritableSignal} from '@angular/core';
 import {Component, Input} from '@angular/core';
-import {CommonModule} from "@angular/common";
 import {FormsModule} from "@angular/forms";
 
 @Component({
     selector: 'app-sidebar-filters',
     templateUrl: './sidebar-filters.component.html',
-    imports: [CommonModule, FormsModule],
+    imports: [FormsModule],
     styleUrls: ['./sidebar-filters.component.css']
 })
 export class SidebarFiltersComponent {
@@ -22,6 +21,13 @@ export class SidebarFiltersComponent {
     @Input() serviceTypes: string[] = [];
 
     @Input() onFilterChange!: () => void;
+
+    updateFilter(field: keyof ReturnType<WritableSignal<any>>, value: any) {
+        this.filters.update(current => ({...current, [field]: value}));
+        if (this.onFilterChange) {
+            this.onFilterChange();
+        }
+    }
 
     clearFilter(field: keyof ReturnType<WritableSignal<any>>) {
         this.filters.update(current => ({...current, [field]: null}));

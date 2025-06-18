@@ -9,7 +9,7 @@
         </li>
 
         <li
-                *ngFor="let page of getPaginationPages()!()"
+                *ngFor="let page of getPaginationPages()"
                 class="page-item"
                 [class.active]="page === currentPage()"
                 [class.disabled]="page === '...'"
