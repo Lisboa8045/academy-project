@@ -1,1 +1,41 @@
-<p>availability-management works!</p>
+<h2>Configuração de Disponibilidade Semanal</h2>
+<form (ngSubmit)="gerarDisponibilidades()">
+
+  <table>
+    <thead>
+    <tr>
+      <th>Dia da Semana</th>
+      <th>Ativo?</th>
+      <th>Início</th>
+      <th>Fim</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let item of weeklyAvailabilities">
+      <td>{{ item.day }}</td>
+      <td>
+        <input type="checkbox" [(ngModel)]="item.enabled" name="{{item.day}}_enabled">
+      </td>
+      <td>
+        <input type="time" [(ngModel)]="item.startTime" name="{{item.day}}_startTime" [disabled]="!item.enabled">
+      </td>
+      <td>
+        <input type="time" [(ngModel)]="item.endTime" name="{{item.day}}_endTime" [disabled]="!item.enabled">
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <h3>Período de Vigência</h3>
+  <label>
+    Data Inicial:
+    <input type="date" [(ngModel)]="period.startDate" name="startDate" required>
+  </label>
+  <label>
+    Data Final:
+    <input type="date" [(ngModel)]="period.endDate" name="endDate" required>
+  </label>
+
+  <br><br>
+  <button type="submit">Gerar Disponibilidades</button>
+</form>

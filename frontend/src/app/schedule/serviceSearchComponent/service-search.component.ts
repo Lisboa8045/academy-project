@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ServiceTypeModel } from '../models/service-type.model';
+import { ServiceTypeModel } from '../../models/service-type.model';
 
 @Component({
   selector: 'app-service-search',
