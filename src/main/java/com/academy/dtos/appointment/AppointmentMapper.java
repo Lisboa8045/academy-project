@@ -10,7 +10,6 @@ import org.mapstruct.Mappings;
 public abstract class AppointmentMapper {
     @Mappings ({
             @Mapping(source= "serviceProvider.id", target = "serviceProviderId"),
-            @Mapping(source= "member.id", target = "memberId")
     })
     public abstract AppointmentResponseDTO toResponseDTO(Appointment appointment);
 

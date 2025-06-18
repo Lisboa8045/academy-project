@@ -1,0 +1,19 @@
+<div class="search-bar">
+  <input type="text" placeholder="Procurar serviços..." (input)="onSearchInput($event)" />
+</div>
+
+<div class="service-type-scroll">
+  <button
+    class="type-button"
+    [class.active]="!selectedServiceTypeId"
+    (click)="filterByType(null)">
+    Todos
+  </button>
+  <button
+    *ngFor="let type of serviceTypes"
+    class="type-button"
+    [class.active]="selectedServiceTypeId === type.id"
+    (click)="filterByType(type.id)">
+    {{ type.name }}
+  </button>
+</div>

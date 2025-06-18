@@ -9,6 +9,7 @@ export interface ServiceModel {
   duration: number;
   permissions: string[];
   serviceType: string;
+  serviceTypeId: number;
   tagNames: string[];
   createdAt: string;
   updatedAt: string;

@@ -29,4 +29,7 @@ public interface AvailabilityRepository extends JpaRepository<Availability, Long
         @Param("startDateTime") LocalDateTime startDateTime,
         @Param("endDateTime") LocalDateTime endDateTime);
 
+
+    List<Availability> findByMember_IdAndStartDateTimeBetween(Long providerId, LocalDateTime now, LocalDateTime days);
+
 }

@@ -1,13 +1,19 @@
 // AppointmentController.java
 package com.academy.controllers;
 
+import com.academy.dtos.SlotDTO;
 import com.academy.dtos.appointment.AppointmentRequestDTO;
 import com.academy.dtos.appointment.AppointmentResponseDTO;
 import com.academy.services.AppointmentService;
+import com.academy.services.SchedulingService;
+
 import jakarta.validation.Valid;
+
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -15,8 +21,10 @@ import java.util.List;
 public class AppointmentController {
 
     private final AppointmentService appointmentService;
+    private final SchedulingService schedulingService;
 
-    public AppointmentController(AppointmentService appointmentService) {
+    public AppointmentController(AppointmentService appointmentService, SchedulingService schedulingService) {
+        this.schedulingService = schedulingService;
         this.appointmentService = appointmentService;
     }
 
@@ -32,9 +40,12 @@ public class AppointmentController {
 
     @PostMapping
     public ResponseEntity<AppointmentResponseDTO> createAppointment(@Valid @RequestBody AppointmentRequestDTO dto) {
+        System.out.println("CREATE APPOINTMENT CHAMADO");
         AppointmentResponseDTO response = appointmentService.createAppointment(dto);
+        System.out.println("Successfully created appointment with ID: " + response.id());
         return ResponseEntity.ok(response);
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<AppointmentResponseDTO> updateAppointment(@PathVariable int id, @RequestBody AppointmentRequestDTO appointmentDetails) {
@@ -57,5 +68,12 @@ public class AppointmentController {
     public ResponseEntity<Void> deleteReview(@PathVariable int id) {
         appointmentService.deleteReview(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/services/{serviceId}/free-slots")
+    public ResponseEntity<List<SlotDTO>> getFreeSlots(@PathVariable Long serviceId) {
+        List<SlotDTO> slots = schedulingService.getFreeSlotsForService(serviceId);
+        System.out.println("[DEBUG] Number of free slots found: " + slots.size());
+        return ResponseEntity.ok(slots);
     }
 }
