@@ -30,6 +30,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @SpringBootTest
@@ -144,10 +146,12 @@ public class ServiceWorkflowTests {
         ServiceProvider ownerServiceProvider = serviceProviderService.getServiceProviderByUsername("owner");
         // Delete the ServiceProvider
         serviceProviderService.deleteServiceProvider(ownerServiceProvider.getId());
-        // Verify that the Appointment still exists but doesn't have a serviceProvider
+        // Verify that the Appointment still exists and the serviceProvider is Inactive
         AppointmentResponseDTO appointmentRspDTO = appointmentService.getAppointmentById(appointment.id());
         assertThat(appointmentRspDTO).isNotNull();
-        assertThat(appointmentRspDTO.serviceProviderId()).isEqualTo(-1L);
+        assertThat(appointmentRspDTO.serviceProviderId()).isGreaterThan(-1);
+        assertThat(serviceProviderService.getServiceProviderById(appointmentRspDTO.serviceProviderId())).isNotNull();
+        assertFalse(serviceProviderService.getServiceProviderById(appointmentRspDTO.serviceProviderId()).get().active());
     }
 
     @Test

@@ -151,16 +151,7 @@ public class ServiceProviderService {
                 .orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
 
         providerPermissionService.deletePermissionsFromServiceProvider(serviceProvider);
-        unlinkAppointments(id);
-        serviceProviderRepository.delete(serviceProvider);
-    }
-
-    private void unlinkAppointments(Long id){
-        List<Appointment> serviceProviders = appointmentService.getAllByProviderId(id);
-
-        for (Appointment appt : serviceProviders) {
-            appt.setServiceProvider(null);
-        }
+        serviceProvider.setActive(false);
     }
 
     public List<ProviderPermissionEnum> getPermissionsByProviderUsernameAndServiceId(String username, Long serviceId){
