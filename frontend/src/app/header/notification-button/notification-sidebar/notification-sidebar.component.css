@@ -9,8 +9,7 @@
   overflow: hidden; /* Ensure content stays within rounded corners */
 
   padding: 10px;
-  width: 20%;
 
   position: absolute;
-  transform: translateX(-50%);
+  transform: translateX(-10%);
 }

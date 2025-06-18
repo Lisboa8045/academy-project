@@ -10,4 +10,7 @@ import {NotificationModel} from '../notification.model';
 export class NotificationSidebarItemComponent {
   item = input.required<NotificationModel>();
 
+  navigateToUrl() {
+    window.open(this.item().url);
+  }
 }

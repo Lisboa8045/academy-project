@@ -1,5 +1,4 @@
-<div class="notification-card">
+<div class="notification-card" (click)="navigateToUrl()">
   <h3>{{item().title}}</h3>
   <p>{{item().body}}</p>
-  <a [href]="item().url">Click to see more</a>
 </div>
