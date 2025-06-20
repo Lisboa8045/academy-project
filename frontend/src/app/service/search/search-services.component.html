@@ -15,9 +15,14 @@
         ></app-sidebar-filters>
         <div class="results-container">
 
-            <app-service-list
-                    [services]="services">
-            </app-service-list>
+            @if (services().length === 0) {
+                <div class="no-services-message">
+                    <h2>No services found</h2>
+                    <p>Try checking spelling, using more general terms, or removing filters.</p>
+                </div>
+            } @else {
+                <app-service-list [services]="services"></app-service-list>
+            }
 
             <app-pagination-bar
                     [currentPage]="currentPage"
