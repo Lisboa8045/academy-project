@@ -1,5 +1,4 @@
 import {Component, OnInit, signal, WritableSignal} from '@angular/core';
-import {NgForOf} from '@angular/common';
 import {ActivatedRoute} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {ControlsBarComponent} from "./controls-bar/controls-bar.component";
@@ -9,12 +8,13 @@ import {LoadingComponent} from "../../loading/loading.component";
 import {ServiceListComponent} from "../service-list/service-list.component";
 import {PagedResponse, ServiceApiService} from "../../shared/service-api.service";
 import {ServiceQuery} from "../../shared/models/service-query.model";
+import {PaginationBarComponent} from "./pagination-bar/pagination-bar.component";
 
 @Component({
   selector: 'app-search-services',
   templateUrl: './search-services.component.html',
   styleUrls: ['./search-services.component.css'],
-  imports: [LoadingComponent, NgForOf, FormsModule, ControlsBarComponent, SidebarFiltersComponent, ServiceListComponent]
+  imports: [LoadingComponent, FormsModule, ControlsBarComponent, SidebarFiltersComponent, ServiceListComponent, PaginationBarComponent]
 })
 export class SearchServicesComponent implements OnInit {
   services = signal<ServiceModel[]>([]);
@@ -105,51 +105,6 @@ export class SearchServicesComponent implements OnInit {
     this.appliedFilters.set({...this.filters()});
   }
 
-  getPaginationPages(): (number | string)[] {
-    const total = this.totalPages();
-    const current = this.currentPage();
-
-    const pages: (number | string)[] = [];
-
-    if (total <= 7) {
-      for (let i = 0; i < total; i++) {
-        pages.push(i);
-      }
-    } else {
-      pages.push(0);
-
-      const windowSize = 3;
-
-      let start = Math.max(1, current - 1);
-      let end = Math.min(total - 2, current + 1);
-
-      if (current <= 2) {
-        start = 1;
-        end = 1 + windowSize - 1;
-      } else if (current >= total - 3) {
-        start = total - windowSize - 1;
-        end = total - 2;
-      }
-
-      if (start > 1) {
-        pages.push('...');
-      }
-
-      for (let i = start; i <= end; i++) {
-        pages.push(i);
-      }
-
-      if (end < total - 2) {
-        pages.push('...');
-      }
-
-      pages.push(total - 1);
-    }
-
-    return pages;
-  }
-
-
   goToPreviousPage() {
     if (this.currentPage() > 0) {
       const newPage = this.currentPage() - 1;
@@ -157,6 +112,7 @@ export class SearchServicesComponent implements OnInit {
       this.fetchServices(this.buildQuery({ page: newPage }));
     }
   }
+
 
   goToNextPage() {
     if (this.currentPage() + 1 < this.totalPages()) {
@@ -172,16 +128,5 @@ export class SearchServicesComponent implements OnInit {
       this.currentPage.set(pageNumber);
       this.fetchServices(this.buildQuery({ page: pageNumber }));
     }
-  }
-
-  isPageNumber(page: number | string): page is number {
-    return typeof page === 'number';
-  }
-
-  displayPageNumber(page: number | string): number {
-    if (this.isPageNumber(page)) {
-      return page + 1;
-    }
-    return 0;
   }
 }
