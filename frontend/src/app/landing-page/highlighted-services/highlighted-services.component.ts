@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {CommonModule, DecimalPipe} from '@angular/common';
+import {CommonModule} from '@angular/common';
 import { LandingPageService } from '../landing-page.service';
 
 @Component({
@@ -15,7 +15,7 @@ export class HighlightedServicesComponent implements OnInit {
   services: any[] = [];
   defaultImage = 'https://placehold.co/300x200?text=No+Image';
 
-  constructor(private landingService: LandingPageService) {}
+  constructor(private readonly landingService: LandingPageService) {}
 
   onImgError(event: Event) {
     const imgElement = event.target as HTMLImageElement;
@@ -23,8 +23,11 @@ export class HighlightedServicesComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    console.log('LOADING SERVICES');
     this.landingService.getTopRatedServices().subscribe(data => {
       this.services = data;
+      console.log(data);
     });
+    console.log('[SERVICES]: ' + this.services);
   }
 }
