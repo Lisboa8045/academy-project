@@ -1,15 +1,15 @@
 import {Component, inject, signal} from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {CommonModule} from '@angular/common';
 import {
-  ReactiveFormsModule,
-  FormBuilder,
-  Validators,
-  FormGroup,
   AbstractControl,
-  ValidationErrors
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators
 } from '@angular/forms';
-import { AuthService } from './auth.service';
-import { Router } from '@angular/router';
+import {AuthService} from './auth.service';
+import {Router} from '@angular/router';
 import {strongPasswordValidator} from '../shared/validators/password.validator';
 import {noSpecialCharsValidator} from '../shared/validators/no-special-chars.validator';
 
@@ -94,6 +94,12 @@ export class AuthComponent{
       this.authService.login(login!, password!).subscribe({
         next: () => this.router.navigate(['/']),
         error: (err) => {
+          if (err?.type === 'EMAIL_NOT_CONFIRMED') {
+            this.router.navigate(['/confirm-email'], {
+              queryParams: {email: err.email || login}
+            });
+            return;
+          }
           console.error('Login failed:', err);
           this.errorMessage = err?.error || 'Login failed. Please try again.';
         }
