@@ -13,3 +13,8 @@
   position: absolute;
   transform: translateX(-10%);
 }
+
+.see-all:hover {
+  color: #3b2ff5;
+  cursor: pointer;
+}

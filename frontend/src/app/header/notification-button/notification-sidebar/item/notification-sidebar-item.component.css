@@ -19,10 +19,6 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.notification-card:hover {
-  background-color: #eee;
-}
-
 .notification-card h3 {
   margin: 0 0 10px;
   font-size: 18px;

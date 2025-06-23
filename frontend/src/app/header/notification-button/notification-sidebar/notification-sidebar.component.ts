@@ -13,8 +13,14 @@ import {NotificationSidebarItemComponent} from './item/notification-sidebar-item
 export class NotificationSidebarComponent {
   notifications = input.required<NotificationModel[]>();
   removeNotification = output<number>();
+  closeSidebar = output();
 
   removeFromList(id: number) {
     this.removeNotification.emit(id);
+  }
+
+  goToNotificationHub() {
+    console.log('Go to NotificationHub::To be implemented 😔');
+    this.closeSidebar.emit();
   }
 }

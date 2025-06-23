@@ -3,4 +3,5 @@
   @for (notification of notifications(); track notification.id) {
     <app-notification-sidebar-item [item]="notification" (removeFromList)="removeFromList(notification.id)"/>
   }
+  <div class="see-all" (click)="goToNotificationHub()">See all Notifications</div>
 </ul>

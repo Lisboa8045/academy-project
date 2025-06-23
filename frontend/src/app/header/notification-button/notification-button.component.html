@@ -1,4 +1,8 @@
 <div (blur)="closeList()" tabindex="-1">
   <p (click)="toggleList()">🔔</p>
-  <app-notification-sidebar *ngIf="showList()" [notifications]="notifications()" (removeNotification)="removeNotification($event)"/>
+  <app-notification-sidebar *ngIf="showList()"
+                            [notifications]="notifications()"
+                            (removeNotification)="removeNotification($event)"
+                            (closeSidebar)="closeList()"
+  />
 </div>
