@@ -3,7 +3,7 @@ package com.academy.services;
 import com.academy.dtos.SlotDTO;
 import com.academy.models.Appointment;
 import com.academy.models.Availability;
-import com.academy.models.Member;
+import com.academy.models.member.Member;
 import com.academy.models.service.service_provider.ProviderPermission;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;

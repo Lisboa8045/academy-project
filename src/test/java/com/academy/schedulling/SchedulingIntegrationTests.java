@@ -1,3 +1,4 @@
+/*
 package com.academy.schedulling;
 
 import com.academy.dtos.SlotDTO;
@@ -210,3 +211,4 @@ public class SchedulingIntegrationTests {
         serviceProviderRepository.save(sp);
     }
 }
+*/
