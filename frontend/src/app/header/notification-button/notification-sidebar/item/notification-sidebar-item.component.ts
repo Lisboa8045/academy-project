@@ -1,4 +1,4 @@
-import {Component, inject, input, Input, output} from '@angular/core';
+import {Component, inject, input, output} from '@angular/core';
 import {NotificationModel} from '../notification.model';
 import {NotificationService} from '../../../../shared/notification.service';
 

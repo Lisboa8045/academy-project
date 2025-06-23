@@ -1,8 +1,6 @@
-import {Component, inject, input, OnInit, output, signal} from '@angular/core';
+import {Component, input, output} from '@angular/core';
 import {NotificationModel} from './notification.model';
 import {NotificationSidebarItemComponent} from './item/notification-sidebar-item.component';
-import {NotificationService} from '../../../shared/notification.service';
-import {AuthStore} from '../../../auth/auth.store';
 
 @Component({
   selector: 'app-notification-sidebar',
