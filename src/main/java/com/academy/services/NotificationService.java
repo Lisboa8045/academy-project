@@ -1,5 +1,6 @@
 package com.academy.services;
 
+import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.Member;
 import com.academy.models.notification.Notification;
 import com.academy.repositories.NotificationRepository;
@@ -36,5 +37,11 @@ public class NotificationService {
 
     public Notification createNotification(Notification notification) {
         return this.notificationRepository.save(notification);
+    }
+
+    public void markNotificationAsSeen(long notificationId) {
+        Notification notification = this.notificationRepository.findById(notificationId).orElseThrow(() -> new EntityNotFoundException(Notification.class, notificationId));
+        notification.setSeen(true);
+        this.notificationRepository.save(notification);
     }
 }

@@ -32,3 +32,9 @@
   margin: 0 0 10px;
   font-size: 14px;
 }
+
+.mark-as-read:hover {
+  color: #3b2ff5;
+  cursor: pointer;
+}
+

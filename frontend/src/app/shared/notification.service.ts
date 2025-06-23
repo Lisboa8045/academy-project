@@ -13,4 +13,12 @@ export class NotificationService {
     );
   }
 
+  markNotificationAsRead(id: number) {
+    return this.http.patch<NotificationModel[]>(
+      `${this.apiUrl}/${id}`,
+      {
+        seen: true,
+      }
+    );
+  }
 }

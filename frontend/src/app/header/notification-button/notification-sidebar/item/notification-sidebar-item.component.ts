@@ -1,5 +1,6 @@
-import {Component, input, Input} from '@angular/core';
+import {Component, inject, input, Input, output} from '@angular/core';
 import {NotificationModel} from '../notification.model';
+import {NotificationService} from '../../../../shared/notification.service';
 
 @Component({
   selector: 'app-notification-sidebar-item',
@@ -8,9 +9,22 @@ import {NotificationModel} from '../notification.model';
   styleUrl: './notification-sidebar-item.component.css'
 })
 export class NotificationSidebarItemComponent {
+  notificationService = inject(NotificationService);
   item = input.required<NotificationModel>();
+  removeFromList = output();
 
   navigateToUrl() {
     window.open(this.item().url);
+  }
+
+  markAsRead() {
+    this.notificationService.markNotificationAsRead(this.item().id).subscribe({
+      next: () => {
+        this.removeFromList.emit();
+      },
+      error: (e) => {
+        console.error(e);
+      },
+    });
   }
 }

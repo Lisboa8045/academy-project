@@ -50,4 +50,8 @@ export class NotificationButtonComponent implements OnInit {
       },
     });
   }
+
+  removeNotification(id: number) {
+    this.notifications.set(this.notifications().filter(item => item.id !== id));
+  }
 }

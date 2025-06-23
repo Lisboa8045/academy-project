@@ -1,4 +1,7 @@
-<div class="notification-card" (click)="navigateToUrl()">
+<div class="notification-card" >
   <h3>{{item().title}}</h3>
   <p>{{item().body}}</p>
+  <div class="mark-as-read" (click)="markAsRead()">
+    Mark as read
+  </div>
 </div>
