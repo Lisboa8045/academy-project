@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 @Transactional
 @ExtendWith(SpringExtension.class)
-class GlobalConfigurationTests {
+public class GlobalConfigurationTests {
 
     private final GlobalConfigurationService globalConfigurationService;
     private final GlobalConfigurationRepository globalConfigurationRepository;
