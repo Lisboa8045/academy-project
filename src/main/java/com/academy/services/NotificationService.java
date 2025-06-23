@@ -29,6 +29,11 @@ public class NotificationService {
         return this.notificationRepository.findByMember(member);
     }
 
+    public List<Notification> getUnseenNotificationsByMemberId(long memberId) {
+        Member member = memberService.getMemberEntityById(memberId);
+        return this.notificationRepository.findByMemberAndSeen(member, false);
+    }
+
     public Notification createNotification(Notification notification) {
         return this.notificationRepository.save(notification);
     }

@@ -26,8 +26,8 @@ public class NotificationController {
     }
 
     @GetMapping("/{memberId}")
-    public ResponseEntity<List<NotificationResponseDTO>> getNotificationsByMemberId(@PathVariable("memberId") long memberId) {
-        List<Notification> notifications = notificationService.getNotificationsByMemberId(memberId);
+    public ResponseEntity<List<NotificationResponseDTO>> getUnseenNotificationsByMemberId(@PathVariable("memberId") long memberId) {
+        List<Notification> notifications = notificationService.getUnseenNotificationsByMemberId(memberId);
         return ResponseEntity.ok(notifications.stream().map(notificationMapper::toDTO).toList());
     }
 }
