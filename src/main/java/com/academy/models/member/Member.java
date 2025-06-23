@@ -1,6 +1,6 @@
 package com.academy.models.member;
 
-import com.academy.models.Appointment;
+import com.academy.models.appointment.Appointment;
 import com.academy.models.Availability;
 import com.academy.models.Role;
 import com.academy.models.service.Service;

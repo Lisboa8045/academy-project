@@ -1,7 +1,7 @@
 package com.academy.services;
 
 import com.academy.dtos.SlotDTO;
-import com.academy.models.Appointment;
+import com.academy.models.appointment.Appointment;
 import com.academy.models.Availability;
 import com.academy.models.member.Member;
 import com.academy.models.service.service_provider.ProviderPermission;
@@ -65,12 +65,8 @@ public class SchedulingService {
                     .map(ProviderPermission::getPermission)
                     .anyMatch(permission -> permission == ProviderPermissionEnum.SERVE);
 
-            System.out.println("[DEBUG] Permission to serve this service: " + hasServePermission);
-
-            //ALTERAR para hasServePermissions
             if (hasServePermission) {
                 availabilities = availabilityService.getAvailabilitiesForProvider(providerId);
-                System.out.println("[DEBUG] Availability count: " + availabilities.size());
             }
 
             // Fetch all future appointments for this provider
@@ -86,11 +82,11 @@ public class SchedulingService {
                 );
                 for (SlotDTO slot : slots) {
                     // Only consider slots that start in the future
-                    if (slot.getStart().isBefore(LocalDateTime.now())) {
+                    if (slot.start().isBefore(LocalDateTime.now())) {
                         continue;
                     }
                     boolean occupied = appointments.stream().anyMatch(app ->
-                            app.getStartDateTime().isBefore(slot.getEnd()) && app.getEndDateTime().isAfter(slot.getStart())
+                            app.getStartDateTime().isBefore(slot.end()) && app.getEndDateTime().isAfter(slot.start())
                     );
                     if (!occupied) {
                         allFreeSlots.add(slot);

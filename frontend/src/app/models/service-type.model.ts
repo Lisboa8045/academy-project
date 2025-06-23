@@ -5,6 +5,4 @@ export interface ServiceTypeModel {
   name: string;
   icon: string;
   services: ServiceModel[];
-  createdAt: string;
-  updatedAt: string;
 }

@@ -1,4 +1,4 @@
-package com.academy.models;
+package com.academy.models.appointment;
 
 import com.academy.models.member.Member;
 import com.academy.models.service.service_provider.ServiceProvider;
@@ -58,8 +58,9 @@ public class Appointment {
     @Column(name = "end_date_time")
     private LocalDateTime endDateTime;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private String status;
+    private AppointmentStatus status;
 
 }
 

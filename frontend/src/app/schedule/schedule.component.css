@@ -171,10 +171,9 @@ button:hover {
   z-index: 9999;
 }
 
-.modal-title{
+.modal-line{
   color: #000;
 }
-
 
 .modal {
   background-color: white;

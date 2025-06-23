@@ -9,11 +9,9 @@ import com.academy.services.SchedulingService;
 
 import jakarta.validation.Valid;
 
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -40,9 +38,7 @@ public class AppointmentController {
 
     @PostMapping
     public ResponseEntity<AppointmentResponseDTO> createAppointment(@Valid @RequestBody AppointmentRequestDTO dto) {
-        System.out.println("CREATE APPOINTMENT CHAMADO");
         AppointmentResponseDTO response = appointmentService.createAppointment(dto);
-        System.out.println("Successfully created appointment with ID: " + response.id());
         return ResponseEntity.ok(response);
     }
 
@@ -73,7 +69,6 @@ public class AppointmentController {
     @GetMapping("/services/{serviceId}/free-slots")
     public ResponseEntity<List<SlotDTO>> getFreeSlots(@PathVariable Long serviceId) {
         List<SlotDTO> slots = schedulingService.getFreeSlotsForService(serviceId);
-        System.out.println("[DEBUG] Number of free slots found: " + slots.size());
         return ResponseEntity.ok(slots);
     }
 }

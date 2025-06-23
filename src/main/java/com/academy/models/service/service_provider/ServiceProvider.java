@@ -1,6 +1,6 @@
 package com.academy.models.service.service_provider;
 
-import com.academy.models.Appointment;
+import com.academy.models.appointment.Appointment;
 
 import com.academy.models.member.Member;
 

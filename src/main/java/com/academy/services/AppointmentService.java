@@ -7,7 +7,7 @@ import com.academy.dtos.appointment.AppointmentMapper;
 import com.academy.dtos.appointment.AppointmentRequestDTO;
 import com.academy.dtos.appointment.AppointmentResponseDTO;
 import com.academy.exceptions.EntityNotFoundException;
-import com.academy.models.Appointment;
+import com.academy.models.appointment.Appointment;
 import com.academy.models.member.Member;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.AppointmentRepository;
@@ -15,11 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class AppointmentService {
@@ -53,13 +50,9 @@ public class AppointmentService {
     }
 
     public List<AppointmentResponseDTO> getAllAppointments() {
-
         return appointmentRepository.findAll().stream()
-
                 .map(appointmentMapper::toResponseDTO)
-
-                .collect(Collectors.toList());
-
+                .toList();
     }
 
     public AppointmentResponseDTO getAppointmentById(int id) {
@@ -99,15 +92,13 @@ public class AppointmentService {
 
                 .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
 
-        String username = authenticationFacade.getUsername();
-        Member member = memberService.getMemberByUsername(username);
 
-        if(appointmentDetails.serviceProviderId() != null) {
-            ServiceProvider serviceProvider = serviceProviderService.getServiceProviderEntityById(appointmentDetails.serviceProviderId());
-            appointment.setServiceProvider(serviceProvider);
-        }
+        ServiceProvider serviceProvider = serviceProviderService.getServiceProviderEntityById(appointmentDetails.serviceProviderId());
+        appointment.setServiceProvider(serviceProvider);
 
-        if(appointmentDetails.rating() != appointment.getRating() )appointment.setRating(appointmentDetails.rating());
+
+        if(appointmentDetails.rating().equals(appointment.getRating()))
+            appointment.setRating(appointmentDetails.rating());
 
         if(appointmentDetails.comment() != null) appointment.setComment(appointmentDetails.comment());
 

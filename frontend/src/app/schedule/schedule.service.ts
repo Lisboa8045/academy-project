@@ -5,15 +5,16 @@ import { Observable } from 'rxjs';
 import { SlotModel } from '../models/slot.model';
 import { AppointmentModel } from '../models/appointment.model';
 import { ServiceTypeModel } from '../models/service-type.model';
+import { environment } from '../../enviroments/environments';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ScheduleApiService {
 
-  private BASE_URL = 'http://localhost:8080';
+  private readonly BASE_URL = environment.apiBaseUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   getFreeSlots(serviceId: number): Observable<SlotModel[]> {
     return this.http.get<SlotModel[]>(`${this.BASE_URL}/appointments/services/${serviceId}/free-slots`);

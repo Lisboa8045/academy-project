@@ -1,6 +1,6 @@
 package com.academy.repositories;
 
-import com.academy.models.Appointment;
+import com.academy.models.appointment.Appointment;
 
 import java.time.LocalDateTime;
 import java.util.List;
