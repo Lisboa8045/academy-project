@@ -2,7 +2,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ServiceModel } from '../../service/service.model';
-import { SlotModel } from '../models/slot.model';
+import { SlotModel } from '../../models/slot.model';
 
 @Component({
   selector: 'app-confirmation-modal',

@@ -1,4 +1,3 @@
-<!-- confirmation-modal.component.html -->
 <div class="modal-backdrop">
   <div class="modal">
     <h3>Confirmar Marcação</h3>
@@ -7,8 +6,8 @@
     <p class="modal-title"><strong>Prestador: </strong> {{ selectedSlot?.providerName }}</p>
 
     <div class="modal-buttons">
-      <button (click)="cancel.emit()">Cancelar</button>  <!-- Note .emit() -->
-      <button (click)="confirm.emit()">Confirmar</button>  <!-- Note .emit() -->
+      <button (click)="cancel.emit()">Cancelar</button>
+      <button (click)="confirm.emit()">Confirmar</button>
     </div>
   </div>
 </div>

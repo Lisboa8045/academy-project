@@ -2,9 +2,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { SlotModel } from './models/slot.model';
-import { AppointmentModel } from './models/appointment.model';
-import { ServiceTypeModel } from './models/service-type.model';
+import { SlotModel } from '../models/slot.model';
+import { AppointmentModel } from '../models/appointment.model';
+import { ServiceTypeModel } from '../models/service-type.model';
 
 @Injectable({
   providedIn: 'root',

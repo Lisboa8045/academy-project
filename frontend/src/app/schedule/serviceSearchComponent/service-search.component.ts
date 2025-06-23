@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ServiceTypeModel } from '../models/service-type.model';
+import { ServiceTypeModel } from '../../models/service-type.model';
 
 @Component({
   selector: 'app-service-search',
@@ -10,8 +10,8 @@ import { ServiceTypeModel } from '../models/service-type.model';
   styleUrls: ['../schedule.component.css']
 })
 export class ServiceSearchComponent {
-  @Input() serviceTypes: ServiceTypeModel[] = [];  // Must match parent
-  @Input() selectedServiceTypeId: number | null = null;  // Must match parent
+  @Input() serviceTypes: ServiceTypeModel[] = [];
+  @Input() selectedServiceTypeId: number | null = null;
   @Output() searchChange = new EventEmitter<string>();
   @Output() typeChange = new EventEmitter<number | null>();
 

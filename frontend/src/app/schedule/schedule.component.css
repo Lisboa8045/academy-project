@@ -14,7 +14,6 @@ h2, h3 {
   color: #0d6efd;
 }
 
-/* Barra de pesquisa para filtro */
 .search-bar {
   margin-bottom: 12px;
   width: 50%;
@@ -47,7 +46,6 @@ h2, h3 {
   box-shadow: 0 0 5px rgba(13, 110, 253, 0.5);
 }
 
-/* Scroll horizontal para tipos de serviço */
 .service-type-scroll {
   display: flex;
   overflow-x: auto;
@@ -57,7 +55,6 @@ h2, h3 {
   scrollbar-color: #0d6efd #e9f5ff;
 }
 
-/* Para navegadores webkit */
 .service-type-scroll::-webkit-scrollbar {
   height: 8px;
 }
@@ -72,7 +69,6 @@ h2, h3 {
   border-radius: 6px;
 }
 
-/* Botões dos tipos de serviço - estilo igual aos itens da lista */
 .type-button {
   flex: 0 0 auto;
   padding: 12px 16px;
@@ -115,7 +111,6 @@ h2, h3 {
   font-style: italic;
 }
 
-/* Lista de serviços em duas colunas */
 .schedule-container ul {
   display: grid;
   grid-template-columns: repeat(3, 1fr); /* <-- Aqui estava 2 */
@@ -125,7 +120,6 @@ h2, h3 {
   margin: 16px 0 16px 0;
 }
 
-/* Itens da lista de serviços */
 .schedule-container li {
   cursor: pointer;
   padding: 12px 16px;
@@ -272,20 +266,19 @@ button:hover {
   cursor: pointer;
   padding: 6px 4px;
   text-align: center;
-  min-height: 40px; /* increase this value as you want */
+  min-height: 40px;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* center text vertically */
+  justify-content: center;
 }
 
-
-  .day-column li:hover {
-    background-color: #d9e8fd;
-    transition: transform 0.25s ease;
-    transform: scale(1.08);
-    border-radius: 5px;
-    font-weight: 600;
-  }
+.day-column li:hover {
+  background-color: #d9e8fd;
+  transition: transform 0.25s ease;
+  transform: scale(1.08);
+  border-radius: 5px;
+  font-weight: 600;
+}
 
 .slot-hour {
   font-size: 14px;
