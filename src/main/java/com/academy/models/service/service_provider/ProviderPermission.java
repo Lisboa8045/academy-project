@@ -1,14 +1,6 @@
 package com.academy.models.service.service_provider;
 
-import com.academy.models.shared.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -17,8 +9,12 @@ import lombok.ToString;
 @Table(name="provider_permission")
 @Getter
 @Setter
-@ToString(callSuper = true, exclude="serviceProvider")
-public class ProviderPermission extends BaseEntity {
+@ToString(exclude="serviceProvider")
+public class ProviderPermission {
+    @Id
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @Column(name="provider_permission_id")
+    private long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "service_provider_id", nullable = false)

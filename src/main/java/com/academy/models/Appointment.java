@@ -2,18 +2,14 @@ package com.academy.models;
 
 import com.academy.models.member.Member;
 import com.academy.models.service.service_provider.ServiceProvider;
-import com.academy.models.shared.BaseEntity;
 import com.academy.util.FieldLengths;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -23,11 +19,16 @@ import java.time.LocalDateTime;
 
 //Lombok annotations
 
-@Getter 
-@Setter
+@Getter @Setter
+
 @NoArgsConstructor
-@ToString(callSuper = true, exclude = {"member", "serviceProvider"})
-public class Appointment extends BaseEntity {
+
+@ToString(exclude = {"member", "serviceProvider"})
+public class Appointment {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "member_id", nullable = true)
@@ -43,6 +44,14 @@ public class Appointment extends BaseEntity {
     @Column(name="comment", length = FieldLengths.REVIEW_MAX)
     private String comment;
 
+    @Column(name="created_at", updatable = false)
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @Column(name="updated_at")
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
+
     @Column(name = "start_date_time")
     private LocalDateTime startDateTime;
 
@@ -53,3 +62,4 @@ public class Appointment extends BaseEntity {
     private String status;
 
 }
+

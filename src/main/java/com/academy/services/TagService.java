@@ -107,10 +107,6 @@ public class TagService {
         return tagRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(Tag.class, id));
     }
 
-    public Tag getTagEntityByName(String name) {
-        return tagRepository.findByName(name).orElseThrow(() -> new EntityNotFoundException(Tag.class, " with name " + name + " not found"));
-    }
-
     private void removeTagFromAllServices(Tag tag) {
         for (Service service : new ArrayList<>(tag.getServices())) {
             service.getTags().remove(tag);
