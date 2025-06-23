@@ -3,7 +3,6 @@ import {CommonModule} from '@angular/common';
 import { RouterModule } from '@angular/router';
 import {AuthStore} from '../auth/auth.store';
 import {ProfileButtonComponent} from './profile-button/profile-button.component';
-import {UserProfileService} from "../profile/user-profile.service";
 import {NotificationButtonComponent} from './notification-button/notification-button.component';
 
 @Component({
@@ -15,7 +14,4 @@ import {NotificationButtonComponent} from './notification-button/notification-bu
 })
 export class AppHeaderComponent {
   readonly username = inject(AuthStore).username;
-  readonly imageUrl = inject(UserProfileService).imageUrl;
-
-
 }
