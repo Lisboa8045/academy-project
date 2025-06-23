@@ -102,15 +102,6 @@ h2, h3 {
   font-weight: 600;
 }
 
-.empty-day {
-
-  text-align: center;
-  color: #aaa;
-  font-size: 0.9rem;
-  margin-top: 190px;
-  font-style: italic;
-}
-
 .schedule-container ul {
   display: grid;
   grid-template-columns: repeat(3, 1fr); /* <-- Aqui estava 2 */
@@ -288,5 +279,24 @@ button:hover {
   font-size: 12px;
   color: #666;
 }
+
+.day-column.empty {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.day-column.empty h4 {
+  margin-bottom: 16px;
+}
+
+.empty-day {
+  text-align: center;
+  color: #aaa;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
 
 

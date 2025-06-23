@@ -13,7 +13,7 @@ import lombok.ToString;
 public class ProviderPermission {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column(name="provider_permission_id")
+    @Column(name="id")
     private long id;
 
     @ManyToOne(fetch = FetchType.EAGER)

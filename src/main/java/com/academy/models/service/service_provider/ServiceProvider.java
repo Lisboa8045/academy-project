@@ -35,7 +35,7 @@ public class ServiceProvider {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column(name="service_provider_id")
+    @Column(name="id")
     private long id;
 
     @ManyToOne
