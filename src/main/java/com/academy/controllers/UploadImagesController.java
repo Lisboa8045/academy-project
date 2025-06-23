@@ -8,6 +8,7 @@ import org.springframework.http.*;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.academy.models.Member;
 
 import java.io.*;
 import java.nio.file.*;

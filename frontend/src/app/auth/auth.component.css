@@ -8,21 +8,5 @@
   background: #fafafa;
 }
 
-.password-wrapper {
-  position: relative;
-}
 
-.toggle-password {
-  position: absolute;
-  top: 50%;
-  right: -1rem;
-  transform: translateY(-40%);
-  cursor: pointer;
-  user-select: none;
-  color: #888;
-}
-
-.toggle-password:hover {
-  color: #007bff;
-}
 

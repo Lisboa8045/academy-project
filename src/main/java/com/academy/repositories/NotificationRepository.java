@@ -1,6 +1,6 @@
 package com.academy.repositories;
 
-import com.academy.models.member.Member;
+import com.academy.models.Member;
 import com.academy.models.notification.Notification;
 import org.springframework.data.jpa.repository.JpaRepository;
 

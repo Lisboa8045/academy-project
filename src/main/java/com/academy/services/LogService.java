@@ -1,6 +1,6 @@
 package com.academy.services;
 
-import com.academy.models.member.Member;
+import com.academy.models.Member;
 import com.academy.models.log.ActionEnum;
 import com.academy.models.log.Log;
 import com.academy.repositories.LogRepository;

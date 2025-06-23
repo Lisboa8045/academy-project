@@ -1,13 +1,10 @@
 package com.academy.controllers;
 
-import com.academy.config.authentication.AuthenticationFacade;
-import com.academy.dtos.register.*;
-import com.academy.models.member.Member;
-import com.academy.services.EmailService;
 import com.academy.dtos.register.LoginRequestDto;
 import com.academy.dtos.register.LoginResponseDto;
 import com.academy.dtos.register.RegisterRequestDto;
 import com.academy.dtos.register.RegisterResponseDto;
+import com.academy.models.Member;
 import com.academy.services.MemberService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.Map;
 
 @RestController
@@ -28,13 +26,10 @@ public class AuthController {
 
     private final MemberService memberService;
     private final MessageSource messageSource;
-    private final EmailService emailService;
-
     @Autowired
-    public AuthController(MemberService memberService, MessageSource messageSource, EmailService emailService, AuthenticationFacade authenticationFacade) {
+    public AuthController(MemberService memberService, MessageSource messageSource) {
         this.memberService = memberService;
         this.messageSource = messageSource;
-        this.emailService = emailService;
     }
 
     @PostMapping("/register")
@@ -47,13 +42,6 @@ public class AuthController {
                 )
         );
     }
-
-    @GetMapping("/confirm-email/{token}")
-    public ResponseEntity<ConfirmEmailResponseDto> confirmEmail(@PathVariable String token) {
-       memberService.confirmEmail(token);
-       return  ResponseEntity.ok(new ConfirmEmailResponseDto("Email confirmed successfully"));
-    }
-
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@Valid @RequestBody LoginRequestDto request, HttpServletResponse httpResponse){
         LoginResponseDto response = memberService.login(request, httpResponse);
@@ -87,10 +75,4 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("username", username, "id", id, "profilePicture", profilePicture != null ? profilePicture : ""));
     }
 
-    @PostMapping("/recreate-confirmation-token")
-    public ResponseEntity<RecreateConfirmationTokenResponseDto> recreateConfirmationToken(
-            @RequestBody RecreateConfirmationTokenRequestDto request) {
-        memberService.recreateConfirmationToken(request.login(), request.password());
-        return ResponseEntity.ok(new RecreateConfirmationTokenResponseDto("Confirmation token recreated"));
-    }
 }

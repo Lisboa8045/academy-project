@@ -1,22 +1,28 @@
 package com.academy.models.service.service_provider;
 
 import com.academy.models.Appointment;
-import com.academy.models.member.Member;
+
+import com.academy.models.Member;
+
 import com.academy.models.service.Service;
-import com.academy.models.shared.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+
+import jakarta.persistence.*;
+
 import lombok.Getter;
+
 import lombok.Setter;
+
 import lombok.ToString;
+
+import org.hibernate.annotations.CreationTimestamp;
+
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 @Entity
 
@@ -24,8 +30,13 @@ import java.util.List;
         uniqueConstraints = @UniqueConstraint(columnNames = {"member_id", "service_id"}))
 @Getter
 @Setter
-@ToString(callSuper = true, exclude = {"provider", "service", "appointmentList", "permissions"})
-public class ServiceProvider extends BaseEntity {
+@ToString(exclude = {"provider", "service", "appointmentList", "permissions"})
+public class ServiceProvider {
+
+    @Id
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @Column(name="service_provider_id")
+    private long id;
 
     @ManyToOne
     @JoinColumn(name="member_id")
@@ -40,6 +51,14 @@ public class ServiceProvider extends BaseEntity {
 
     @OneToMany(mappedBy = "serviceProvider")
     private List<ProviderPermission> permissions = new ArrayList<>();
+
+    @Column(name="created_at", updatable = false)
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @Column(name="updated_at")
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
 }
 

@@ -1,18 +1,15 @@
 package com.academy.models;
 
 import com.academy.models.service.Service;
-import com.academy.models.shared.BaseEntity;
-import com.academy.util.FieldLengths;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,18 +17,30 @@ import java.util.List;
 @Table(name="service_type")
 @Getter
 @Setter
-@ToString(callSuper = true, exclude="services")
-public class ServiceType extends BaseEntity {
+@ToString(exclude="services")
+public class ServiceType {
+
+    @Column(name="id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    private long id;
 
     @NotBlank
-    @Column(name="name", unique = true, length = FieldLengths.SERVICE_TYPE_MAX)
+    @Column(name="name", unique = true)
     private String name;
 
     @NotBlank
-    @Column(name="icon", length = FieldLengths.URL_MAX)
+    @Column(name="icon")
     private String icon;
 
     @OneToMany(mappedBy = "serviceType", fetch = FetchType.LAZY)
     private List<Service> services = new ArrayList<>();
 
+    @Column(name="created_at", updatable=false)
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @Column(name="updated_at")
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }

@@ -7,9 +7,9 @@ import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
 import com.academy.exceptions.AuthenticationException;
 import com.academy.exceptions.EntityNotFoundException;
+import com.academy.models.Member;
 import com.academy.models.ServiceType;
 import com.academy.models.Tag;
-import com.academy.models.member.Member;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
@@ -18,7 +18,6 @@ import com.academy.specifications.ServiceSpecifications;
 import com.academy.utils.Utils;
 import jakarta.transaction.Transactional;
 import org.apache.coyote.BadRequestException;
-import org.hibernate.collection.spi.PersistentBag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -125,18 +124,7 @@ public class ServiceService {
         List<Tag> tags = tagService.findOrCreateTagsByNames(tagNames);
         service.setTags(tags);
         for (Tag tag : tags) {
-            List<Service> services = tag.getServices();
-
-            if (services == null || services instanceof PersistentBag) {
-                List<Service> modifiableServices = new ArrayList<>();
-                if (services != null) {
-                    modifiableServices.addAll(services);
-                }
-                modifiableServices.add(service);
-                tag.setServices(modifiableServices);
-            } else {
-                services.add(service);
-            }
+            tag.getServices().add(service);
         }
     }
 
@@ -192,7 +180,7 @@ public class ServiceService {
     private Specification<Service> addIfPresent(Specification<Service> spec, boolean condition, Supplier<Specification<Service>> supplier) {
         return condition ? spec.and(supplier.get()) : spec; // add specification on supplier, if the condition is met
     }
-
+    
     @Transactional
     public ServiceResponseDTO updateMemberPermissions(Long serviceId, Long memberToBeUpdatedId, List<ProviderPermissionEnum> newPermissions) throws AuthenticationException, BadRequestException {
         String updaterUsername =   authenticationFacade.getUsername();
@@ -213,7 +201,7 @@ public class ServiceService {
         serviceProviderService.addPermissions(serviceProvider, newPermissions);
         return getById(serviceId);
     }
-
+    
     private ServiceProvider createOwnerServiceProvider(Long memberId, Long serviceId) throws AuthenticationException, BadRequestException {
         return serviceProviderService.createServiceProvider(new ServiceProviderRequestDTO(
                 memberId,

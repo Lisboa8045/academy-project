@@ -5,7 +5,7 @@ import com.academy.dtos.availability.AvailabilityResponseDTO;
 import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.exceptions.InvalidArgumentException;
-import com.academy.models.member.Member;
+import com.academy.models.Member;
 import com.academy.models.Role;
 import com.academy.models.ServiceType;
 import com.academy.models.service.Service;

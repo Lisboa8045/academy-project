@@ -1,7 +1,7 @@
 package com.academy.dtos.register;
 
 import com.academy.dtos.member.MemberResponseDTO;
-import com.academy.models.member.Member;
+import com.academy.models.Member;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

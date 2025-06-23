@@ -4,12 +4,9 @@
   <form [formGroup]="authForm" (ngSubmit)="submit()">
 
     @if (isLoginMode()){
-      <input type="text" formControlName="login" placeholder="Email or Username" required maxlength="255" />
-      <div class="validation-error" *ngIf="authForm.get('login')?.errors?.['required'] && authForm.get('login')?.touched">
-        Email/Username is required.
-      </div>
-      <div class="validation-error" *ngIf="authForm.get('login')?.errors?.['maxlength'] && authForm.get('login')?.touched">
-        Please insert 254 characters or less.
+      <input type="text" formControlName="login" placeholder="Email or Username" required />
+      <div class="validation-error" *ngIf="authForm.get('login')?.invalid && authForm.get('login')?.touched">
+        Please provide an email or username.
       </div>
     } @else {
       <input type="email" formControlName="email" placeholder="Email" required/>
@@ -19,73 +16,33 @@
       <div class="validation-error" *ngIf="authForm.get('email')?.errors?.['email'] && authForm.get('email')?.touched">
         Enter a valid email.
       </div>
-      <div class="validation-error" *ngIf="authForm.get('email')?.errors?.['maxlength'] && authForm.get('email')?.touched">
-        Email must be at most 254 characters.
-      </div>
-      <div class="validation-error" *ngIf="authForm.get('email')?.errors?.['serverError']" >
-        {{ authForm.get('email')?.errors?.['serverError'] }}
-      </div>
 
       <input type="text" formControlName="username" placeholder="Username" required/>
       <div class="validation-error" *ngIf="authForm.get('username')?.errors?.['required'] && authForm.get('username')?.touched">
         Username is required.
       </div>
-      <div class="validation-error" *ngIf="(authForm.get('username')?.errors?.['minlength'] || authForm.get('username')?.errors?.['maxlength']) && authForm.get('username')?.touched">
-        Username must be between 4 and 20 characters.
-      </div>
       <div class="validation-error" *ngIf="authForm.get('username')?.errors?.['specialCharsNotAllowed'] && authForm.get('username')?.touched">
         Special characters are not allowed in the username.
       </div>
-      <div class="validation-error" *ngIf="authForm.get('username')?.errors?.['serverError']" >
-        {{ authForm.get('username')?.errors?.['serverError'] }}
-      </div>
     }
 
-    <div class="password-wrapper">
-      <label class="password-label">
-        <input [type]="passwordVisible ? 'text' : 'password'" formControlName="password" placeholder="Password" required />
-        <span class="toggle-password" (click)="togglePasswordVisibility($event)" style="cursor:pointer;">
-            <span class="material-symbols-outlined" *ngIf="passwordVisible">visibility_off</span>
-            <span class="material-symbols-outlined" *ngIf="!passwordVisible">visibility</span>
-        </span>
-      </label>
-    </div>
-    @if (isLoginMode()){
-      <div class="validation-error" *ngIf="authForm.get('password')?.errors?.['maxlength'] && authForm.get('password')?.touched">
-        Please insert 64 characters or less.
-      </div>
-    }
-    @else {
-      <div class="validation-error" *ngIf="authForm.get('password')?.errors?.['weakPassword'] && authForm.get('password')?.touched">
-        Password must include uppercase, lowercase, digit, and special character.
-      </div>
-      <div class="validation-error" *ngIf="(authForm.get('password')?.errors?.['minlength'] || authForm.get('password')?.errors?.['maxlength']) && authForm.get('password')?.touched">
-        Password must be between 8 and 64 characters.
-      </div>
-    }
+    <input type="password" formControlName="password" placeholder="Password" required />
     <div class="validation-error" *ngIf="authForm.get('password')?.errors?.['required'] && authForm.get('password')?.touched">
       Password is required.
+    </div>
+    <div class="validation-error" *ngIf="authForm.get('password')?.errors?.['weakPassword'] && authForm.get('password')?.touched">
+      Password must be at least 8 characters and include uppercase, lowercase, digit, and special character.
     </div>
 
 
     @if (!isLoginMode()){
-      <div class="password-wrapper">
-        <label class="password-label">
-          <input [type]="confirmPasswordVisible ? 'text' : 'password'" formControlName="confirmPassword" placeholder="Confirm Password" [class.ng-invalid]="authForm.hasError('passwordsMismatch') && authForm.get('confirmPassword')?.touched" required />
-          <span class="toggle-password" (click)="toggleConfirmPasswordVisibility($event)" style="cursor:pointer;">
-            <span class="material-symbols-outlined" *ngIf="confirmPasswordVisible">visibility_off</span>
-            <span class="material-symbols-outlined" *ngIf="!confirmPasswordVisible">visibility</span>
-          </span>
 
-        </label>
-      </div>
+      <input type="password" formControlName="confirmPassword" placeholder="Confirm Password" [class.ng-invalid]="authForm.hasError('passwordsMismatch') && authForm.get('confirmPassword')?.touched" required />
       <div class="validation-error" *ngIf="authForm.hasError('passwordsMismatch') && authForm.get('confirmPassword')?.touched">
         Passwords do not match.
       </div>
     }
-    <div class="validation-error" *ngIf="errorMessage">
-      {{ errorMessage }}
-    </div>
+
     <button type="submit" [disabled]="authForm.invalid">
       {{ isLoginMode() ? 'Login' : 'Create Account' }}
     </button>
