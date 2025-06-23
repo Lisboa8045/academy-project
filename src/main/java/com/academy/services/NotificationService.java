@@ -1,7 +1,7 @@
 package com.academy.services;
 
 import com.academy.exceptions.EntityNotFoundException;
-import com.academy.models.Member;
+import com.academy.models.member.Member;
 import com.academy.models.notification.Notification;
 import com.academy.repositories.NotificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;

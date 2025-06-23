@@ -66,9 +66,6 @@ public class ServiceService {
 
         Service savedService = serviceRepository.save(service);
         createAndLinkServiceOwner(savedService, member.getId());
-
-        ServiceProvider owner = createOwnerServiceProvider(member.getId(), service.getId());
-        linkServiceToOwnerAsProvider(service, owner);
         return savedService;
     }
 
