@@ -10,10 +10,18 @@ import org.mapstruct.Mappings;
 public abstract class AppointmentMapper {
     @Mappings ({
             @Mapping(source= "serviceProvider.id", target = "serviceProviderId"),
-            @Mapping(source= "member.id", target = "memberId")
+            @Mapping(source= "member.id", target = "memberId"),
+            @Mapping(source = "serviceProvider.provider.username", target = "serviceProviderUsername"),
+            @Mapping(source = "member.username", target = "memberUsername"),
     })
     public abstract AppointmentResponseDTO toResponseDTO(Appointment appointment);
 
+    @Mappings ({
+            @Mapping(source = "serviceProvider.provider.username", target = "serviceProviderUsername"),
+            @Mapping(source = "member.username", target = "memberUsername"),
+            @Mapping(source = "serviceProvider.service.name", target="serviceName")
+    })
+    public abstract AppointmentCardDTO toAppointmentCardDTO(Appointment appointment);
 
     public abstract Appointment toEntity(AppointmentRequestDTO appointmentRequestDTO);
 

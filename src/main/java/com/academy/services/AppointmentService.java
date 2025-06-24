@@ -2,6 +2,9 @@
 
 package com.academy.services;
 
+import com.academy.config.authentication.AuthenticationFacade;
+import com.academy.dtos.appointment.AppointmentDetailedDTO;
+import com.academy.dtos.appointment.AppointmentCardDTO;
 import com.academy.dtos.appointment.AppointmentMapper;
 import com.academy.dtos.appointment.AppointmentRequestDTO;
 import com.academy.dtos.appointment.AppointmentResponseDTO;
@@ -11,6 +14,10 @@ import com.academy.models.member.Member;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.AppointmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,10 +33,11 @@ public class AppointmentService {
     private final AppointmentMapper appointmentMapper;
 
     private final MemberService memberService;
+    private final AuthenticationFacade authenticationFacade;
 
     @Autowired
 
-    public AppointmentService(AppointmentRepository appointmentRepository, ServiceProviderService serviceProviderService, AppointmentMapper appointmentMapper, MemberService memberService) {
+    public AppointmentService(AppointmentRepository appointmentRepository, ServiceProviderService serviceProviderService, AppointmentMapper appointmentMapper, MemberService memberService, AuthenticationFacade authenticationFacade) {
 
         this.appointmentRepository = appointmentRepository;
 
@@ -38,7 +46,7 @@ public class AppointmentService {
         this.appointmentMapper = appointmentMapper;
 
         this.memberService = memberService;
-
+        this.authenticationFacade = authenticationFacade;
     }
 
     public List<AppointmentResponseDTO> getAllAppointments() {
@@ -52,13 +60,9 @@ public class AppointmentService {
     }
 
     public AppointmentResponseDTO getAppointmentById(int id) {
-
         return appointmentRepository.findById(id)
-
                 .map(appointmentMapper::toResponseDTO)
-
                 .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
-
     }
 
     public AppointmentResponseDTO createAppointment(AppointmentRequestDTO dto) {
@@ -124,5 +128,24 @@ public class AppointmentService {
 
     }
 
+    public Page<AppointmentCardDTO> getAppointmentsForAuthenticatedMember(int page, int size, String dateOrder) {
+        Sort sort = dateOrder.equalsIgnoreCase("desc") ? Sort.by("startDateTime").descending() : Sort.by("startDateTime").ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Appointment> appointmentPage = appointmentRepository
+                .findByMember_Username(authenticationFacade.getUsername(), pageable);
+
+        return appointmentPage.map(appointmentMapper::toAppointmentCardDTO);
+
+    }
+
+/*
+    public List<AppointmentResponseDTO> getAppointmentsForAuthenticatedProvider() {
+        return appointmentRepository.findByProvider_Username(authenticationFacade.getUsername()).stream()
+                .map(appointmentMapper::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+ */
 }
 

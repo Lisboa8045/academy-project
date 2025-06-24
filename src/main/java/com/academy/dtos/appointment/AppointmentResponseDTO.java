@@ -2,8 +2,10 @@ package com.academy.dtos.appointment;
 
 public record AppointmentResponseDTO(
         Long id,
-        Long serviceProviderId,
-        Long memberId,
+        Long serviceProviderId, //TODO isto não deve estar aqui
+        String serviceProviderUsername,
+        Long memberId, //TODO isto não deve estar aqui
+        String memberUsername,
         Integer rating,
         String comment
 ) {}

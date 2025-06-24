@@ -1,10 +1,12 @@
 // AppointmentController.java
 package com.academy.controllers;
 
+import com.academy.dtos.appointment.AppointmentCardDTO;
 import com.academy.dtos.appointment.AppointmentRequestDTO;
 import com.academy.dtos.appointment.AppointmentResponseDTO;
 import com.academy.services.AppointmentService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -58,4 +60,20 @@ public class AppointmentController {
         appointmentService.deleteReview(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/member")
+    public ResponseEntity<Page<AppointmentCardDTO>> getAppointmentsForAuthenticatedMember(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "asc") String dateOrder
+    ) {
+        return ResponseEntity.ok(appointmentService.getAppointmentsForAuthenticatedMember(page, size, dateOrder));
+    }
+/*
+    @GetMapping("/provider")
+    public ResponseEntity<List<AppointmentResponseDTO>> getAppointmentsForAuthenticatedProvider(){
+        return ResponseEntity.ok(appointmentService.getAppointmentsForAuthenticatedProvider());
+    }
+
+ */
 }

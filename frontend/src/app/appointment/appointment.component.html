@@ -1,0 +1,11 @@
+<div *ngIf="appointment; else loading">
+  <h2>Appointment Details</h2>
+  <p><strong>ID:</strong> {{ appointment.id }}</p>
+  <p><strong>Provider:</strong> {{ appointment.serviceProviderUsername }}</p>
+  <p><strong>Member:</strong> {{ appointment.memberUsername }}</p>
+  <!-- Add more details here -->
+</div>
+
+<ng-template #loading>
+  <p>Loading appointment details...</p>
+</ng-template>
