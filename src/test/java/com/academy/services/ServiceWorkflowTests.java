@@ -71,13 +71,6 @@ public class ServiceWorkflowTests {
 
     @BeforeEach
     void setUp() {
-        // Set up a ServiceType and Tags before each test
-        defaultTag = createTag("tag1");
-        defaultServiceType = createServiceType("Test Service Type");
-    }
-
-    @BeforeAll
-    void setUpOnce() {
         // Set up a Role and Member to be used on all tests
         Role role = new Role();
         role.setName("ADMIN");
@@ -95,6 +88,9 @@ public class ServiceWorkflowTests {
         createDummyClient("client");
         clientId = memberService.getMemberByUsername("client").getId();
 
+        // Set up a ServiceType and Tags before each test
+        defaultTag = createTag("tag1");
+        defaultServiceType = createServiceType("Test Service Type");
     }
 
     private ServiceRequestDTO createDTO(String name, String description, String serviceTypeName, List<String> tags) {

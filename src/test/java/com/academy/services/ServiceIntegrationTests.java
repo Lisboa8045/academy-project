@@ -75,14 +75,6 @@ public class ServiceIntegrationTests {
 
     @BeforeEach
     void setUp() {
-        // Set up a ServiceType and Tags before each test
-
-        defaultTag = createTag("tag1");
-        defaultServiceType = createServiceType("Test Service Type");
-    }
-
-    @BeforeAll
-    void setUpOnce() {
         // Set up a Role and Member to be used on all tests
         Role role = new Role();
         role.setName("ADMIN");
@@ -96,6 +88,11 @@ public class ServiceIntegrationTests {
                     role.getId(), null, null, null);
             memberService.register(requestDTO);
         }
+
+        // Set up a ServiceType and Tags before each test
+
+        defaultTag = createTag("tag1");
+        defaultServiceType = createServiceType("Test Service Type");
     }
 
     private ServiceRequestDTO createDTO(String name, String description, String serviceTypeName, List<String> tags) {

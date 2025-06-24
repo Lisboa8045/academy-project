@@ -31,7 +31,6 @@ public class ServiceProviderService {
     private final ServiceService serviceService;
     private final AuthenticationFacade authenticationFacade;
     private final ProviderPermissionService providerPermissionService;
-    private final AppointmentService appointmentService;
 
     @Autowired
     public ServiceProviderService(ServiceProviderRepository serviceProviderRepository,
@@ -39,15 +38,13 @@ public class ServiceProviderService {
                                   ProviderPermissionService providerPermissionService,
                                   MemberService memberService,
                                   @Lazy ServiceService serviceService,
-                                  AuthenticationFacade authenticationFacade,
-                                  @Lazy AppointmentService appointmentService) {
+                                  AuthenticationFacade authenticationFacade) {
         this.serviceProviderRepository = serviceProviderRepository;
         this.serviceProviderMapper = serviceProviderMapper;
         this.memberService = memberService;
         this.serviceService = serviceService;
         this.providerPermissionService = providerPermissionService;
         this.authenticationFacade = authenticationFacade;
-        this.appointmentService = appointmentService;
     }
 
     public static void checkIfValidPermissions(List<ProviderPermissionEnum> newPermissions) throws BadRequestException {
