@@ -1,0 +1,47 @@
+<div class="schedule-container">
+  <h2>Agendar Marcação</h2>
+  <app-service-search
+    *ngIf="currentStep === 'service' && serviceTypes.length > 0"
+    [serviceTypes]="serviceTypes"
+    [selectedServiceTypeId]="selectedServiceTypeId"
+    (searchChange)="onSearchChange($event)"
+    (typeChange)="filterByType($event)">
+  </app-service-search>
+
+  <app-service-list
+    *ngIf="currentStep === 'service' && filteredServices.length > 0"
+    [services]="filteredServices"
+    [selectedServiceId]="form.get('serviceId')?.value"
+    (serviceSelected)="selectService($event)">
+  </app-service-list>
+
+  <app-slot-selection
+    *ngIf="(currentStep === 'slots' || currentStep === 'confirmation' || currentStep === 'provider') && slots.length > 0"
+    [slots]="slots"
+    [providers]="providers"
+    [selectedProvider]="selectedProvider"
+    [currentWeekStart]="currentWeekStart"
+    [currentWeekEnd]="currentWeekEnd"
+    [weeklySlots]="weeklySlots"
+    (providerFilter)="filterByProvider($event)"
+    (previousWeek)="goToPreviousWeek()"
+    (nextWeek)="goToNextWeek()"
+    (slotSelected)="selectSlot($event)"
+    (backToServices)="currentStep = 'service'">
+  </app-slot-selection>
+
+  <app-provider-selection-modal
+    *ngIf="currentStep === 'provider' && showProviderModal"
+    [providerOptions]="providerOptions"
+    (providerSelected)="selectProviderSlot($event)"
+    (backToSlots)="currentStep = 'slots'">
+  </app-provider-selection-modal>
+
+  <app-confirmation-modal
+    *ngIf="currentStep === 'confirmation' && showConfirmationModal"
+    [selectedService]="selectedService"
+    [selectedSlot]="selectedSlot"
+    (cancel)="cancelModal()"
+    (confirm)="confirmInModal()">
+  </app-confirmation-modal>
+</div>

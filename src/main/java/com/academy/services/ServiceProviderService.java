@@ -101,10 +101,7 @@ public class ServiceProviderService {
             return false;
         }
         List<ProviderPermissionEnum> permissions = getPermissions(loggedMemberServiceProvider.getId());
-        if(!Utils.hasPermission(permissions, ProviderPermissionEnum.ADD_SERVICE_PROVIDER))
-            return false;
-
-        return true;
+        return !Utils.hasPermission(permissions, ProviderPermissionEnum.ADD_SERVICE_PROVIDER);
     }
 
     private void validatePermissions(List<ProviderPermissionEnum> permissions, boolean isServiceCreation) throws BadRequestException {
@@ -156,13 +153,18 @@ public class ServiceProviderService {
                     " not found for user " + username + " and serviceId " + serviceId);
         return optionalServiceProvider.get();
     }
-    private ServiceProvider getServiceProviderByProviderIdAndServiceID(Long id, Long serviceId) {
+    public ServiceProvider getServiceProviderByProviderIdAndServiceID(Long id, Long serviceId) {
         Optional<ServiceProvider> optionalServiceProvider =
                 serviceProviderRepository.findByProviderIdAndServiceId(id, serviceId);
         if(optionalServiceProvider.isEmpty())
             throw new EntityNotFoundException(ServiceProvider.class,
                     " not found for user with id" + id + " and serviceId " + serviceId);
         return optionalServiceProvider.get();
+    }
+
+    public ServiceProviderResponseDTO getServiceProviderDTOByProviderIdAndServiceID(Long id, Long serviceId){
+        ServiceProvider sp = getServiceProviderByProviderIdAndServiceID(id, serviceId);
+        return serviceProviderMapper.toResponseDTO(sp);
     }
 
     public List<ProviderPermissionEnum> getPermissions(Long id){
@@ -205,4 +207,9 @@ public class ServiceProviderService {
     public ServiceProvider getServiceProviderEntityById(long id){
         return serviceProviderRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
     }
+
+    public List<ServiceProvider> findProvidersByServiceIdAndPermission(Long serviceId, ProviderPermissionEnum permission) {
+        return serviceProviderRepository.findProvidersByServiceIdAndPermission(serviceId, permission);
+    }
+
 }

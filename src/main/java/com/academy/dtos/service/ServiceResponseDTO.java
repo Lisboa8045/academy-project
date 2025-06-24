@@ -16,6 +16,7 @@ public record ServiceResponseDTO(
         int duration,
         List<ProviderPermissionEnum> permissions,
         String serviceTypeName,
+        int serviceTypeId,
         List<String> tagNames,
         LocalDateTime createdAt,
         LocalDateTime updatedAt

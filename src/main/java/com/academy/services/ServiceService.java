@@ -18,7 +18,6 @@ import com.academy.specifications.ServiceSpecifications;
 import com.academy.utils.Utils;
 import jakarta.transaction.Transactional;
 import org.apache.coyote.BadRequestException;
-import org.hibernate.collection.spi.PersistentBag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -125,18 +124,7 @@ public class ServiceService {
         List<Tag> tags = tagService.findOrCreateTagsByNames(tagNames);
         service.setTags(tags);
         for (Tag tag : tags) {
-            List<Service> services = tag.getServices();
-
-            if (services == null || services instanceof PersistentBag) {
-                List<Service> modifiableServices = new ArrayList<>();
-                if (services != null) {
-                    modifiableServices.addAll(services);
-                }
-                modifiableServices.add(service);
-                tag.setServices(modifiableServices);
-            } else {
-                services.add(service);
-            }
+            tag.getServices().add(service);
         }
     }
 
