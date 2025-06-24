@@ -6,6 +6,7 @@ import com.academy.models.member.Member;
 
 import com.academy.models.service.Service;
 
+import com.academy.models.shared.BaseEntity;
 import jakarta.persistence.*;
 
 import lombok.Getter;
@@ -13,12 +14,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import lombok.ToString;
-
-import org.hibernate.annotations.CreationTimestamp;
-
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDateTime;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,12 +26,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString(exclude = {"provider", "service", "appointmentList", "permissions"})
-public class ServiceProvider {
-
-    @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column(name="id")
-    private long id;
+public class ServiceProvider extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name="member_id")
@@ -51,14 +41,6 @@ public class ServiceProvider {
 
     @OneToMany(mappedBy = "serviceProvider")
     private List<ProviderPermission> permissions = new ArrayList<>();
-
-    @Column(name="created_at", updatable = false)
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @Column(name="updated_at")
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
 
 }
 

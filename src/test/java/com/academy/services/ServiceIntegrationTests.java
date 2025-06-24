@@ -1,24 +1,25 @@
 package com.academy.services;
 
+import com.academy.dtos.register.RegisterRequestDto;
 import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
+import com.academy.dtos.service_type.ServiceTypeRequestDTO;
+import com.academy.dtos.service_type.ServiceTypeResponseDTO;
+import com.academy.dtos.tag.TagRequestDTO;
+import com.academy.dtos.tag.TagResponseDTO;
 import com.academy.exceptions.EntityNotFoundException;
-import com.academy.models.member.Member;
+import com.academy.exceptions.MemberNotFoundException;
 import com.academy.models.Role;
 import com.academy.models.ServiceType;
 import com.academy.models.Tag;
 import com.academy.models.service.Service;
-import com.academy.repositories.MemberRepository;
-import com.academy.repositories.ProviderPermissionRepository;
 import com.academy.repositories.RoleRepository;
-import com.academy.repositories.ServiceProviderRepository;
-import com.academy.repositories.ServiceRepository;
-import com.academy.repositories.ServiceTypeRepository;
-import com.academy.repositories.TagRepository;
 import jakarta.transaction.Transactional;
 import org.apache.coyote.BadRequestException;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,35 +36,28 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @SpringBootTest
 @Transactional
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(SpringExtension.class)
 @WithMockUser(username = "owner")
 public class ServiceIntegrationTests {
     private final ServiceService serviceService;
     private final TagService tagService;
-    private final ServiceRepository serviceRepository;
-    private final ServiceTypeRepository serviceTypeRepository;
-    private final TagRepository tagRepository;
-    private final MemberRepository memberRepository;
-    private final RoleRepository roleRepository;
+    private final ServiceTypeService serviceTypeService;
+    private final RoleRepository roleRepository; // we do not have a RoleService
+    private final MemberService memberService;
 
     @Autowired
     public ServiceIntegrationTests(ServiceService serviceService,
                                    TagService tagService,
-                                   ServiceRepository serviceRepository,
-                                   ServiceTypeRepository serviceTypeRepository,
-                                   TagRepository tagRepository,
-                                   MemberRepository memberRepository,
-                                   RoleRepository roleRepository,
-                                   ServiceProviderRepository serviceProviderRepository,
-                                   ProviderPermissionRepository providerPermissionRepository
+                                   ServiceTypeService serviceTypeService,
+                                   MemberService memberService,
+                                   RoleRepository roleRepository
     ) {
 
         this.serviceService = serviceService;
         this.tagService = tagService;
-        this.serviceRepository = serviceRepository;
-        this.serviceTypeRepository = serviceTypeRepository;
-        this.tagRepository = tagRepository;
-        this.memberRepository = memberRepository;
+        this.serviceTypeService = serviceTypeService;
+        this.memberService = memberService;
         this.roleRepository = roleRepository;
     }
 
@@ -72,21 +66,27 @@ public class ServiceIntegrationTests {
 
     @BeforeEach
     void setUp() {
-        // Set up a ServiceType, Member and Tags before each test
-        Role role = new Role();
-        role.setId(1L);
-        role.setName("ADMIN");
-        roleRepository.save(role);
-
-        Member member = new Member();
-        member.setUsername("owner");
-        member.setPassword("password");
-        member.setEmail("owner@email.com");
-        member.setRole(role);
-        memberRepository.save(member);
+        // Set up a ServiceType and Tags before each test
 
         defaultTag = createTag("tag1");
         defaultServiceType = createServiceType("Test Service Type");
+    }
+
+    @BeforeAll
+    void setUpOnce() {
+        // Set up a Role and Member to be used on all tests
+        Role role = new Role();
+        role.setName("ADMIN");
+        roleRepository.save(role);
+
+        try {
+            memberService.getMemberByUsername("owner");
+        }
+        catch (MemberNotFoundException e) {
+            RegisterRequestDto requestDTO = new RegisterRequestDto("owner", "Password123!", "owner@email.com",
+                    role.getId(), null, null, null);
+            memberService.register(requestDTO);
+        }
     }
 
     private ServiceRequestDTO createDTO(String name, String description, String serviceTypeName, List<String> tags) {
@@ -94,19 +94,15 @@ public class ServiceIntegrationTests {
     }
 
     private ServiceType createServiceType(String name) {
-        ServiceType serviceType = new ServiceType();
-        serviceType.setName(name);
-        serviceType.setIcon("Test Icon.png");
-        serviceType = serviceTypeRepository.save(serviceType);
-        return serviceType;
+        ServiceTypeRequestDTO requestDTO = new ServiceTypeRequestDTO(name, "Test Icon.png");
+        ServiceTypeResponseDTO responseDTO = serviceTypeService.create(requestDTO);
+        return serviceTypeService.getServiceTypeEntityById(responseDTO.id());
     }
 
     private Tag createTag(String name) {
-        Tag tag = new Tag();
-        tag.setName(name);
-        tag.setCustom(false);
-        tag = tagRepository.save(tag);
-        return tag;
+        TagRequestDTO requestDTO = new TagRequestDTO(name, false, List.of());
+        TagResponseDTO responseDTO = tagService.create(requestDTO);
+        return tagService.getTagEntityById(responseDTO.id());
     }
 
     @Test
@@ -199,7 +195,7 @@ public class ServiceIntegrationTests {
         assertThat(updatedResponse.tagNames()).containsExactlyInAnyOrder("tag2", "tag3");
 
         // Verify that the old serviceType does not contain a reference to the service
-        assertThat(serviceTypeRepository.findById(defaultServiceType.getId()).get().getServices()).isEmpty();
+        assertThat(serviceTypeService.getServiceTypeEntityById(defaultServiceType.getId()).getServices()).isEmpty();
     }
 
     @Test
@@ -211,7 +207,8 @@ public class ServiceIntegrationTests {
         serviceService.delete(createdResponse.id());
 
         // Verify that the service is deleted
-        assertThat(serviceRepository.findById(createdResponse.id())).isEmpty();
+        assertThatThrownBy(() -> serviceService.getServiceEntityById(createdResponse.id()))
+                .isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
@@ -220,21 +217,24 @@ public class ServiceIntegrationTests {
 
         ServiceResponseDTO createdResponse = serviceService.create(serviceRequestDTO);
 
-        assertThat(tagRepository.findById(defaultTag.getId()).get().getServices()).isNotEmpty();
+        assertThat(tagService.getTagEntityById(defaultTag.getId()).getServices()).isNotEmpty();
 
         serviceService.delete(createdResponse.id());
 
         // Verify that the service is deleted
-        assertThat(serviceRepository.findById(createdResponse.id())).isEmpty();
+        assertThatThrownBy(() -> serviceService.getServiceEntityById(createdResponse.id()))
+                .isInstanceOf(EntityNotFoundException.class);
 
         // Verify that associated tag is not deleted
-        assertThat(tagRepository.findById(defaultTag.getId())).isNotEmpty();
+        assertThatCode(() -> tagService.getTagEntityById(defaultTag.getId()))
+                .doesNotThrowAnyException();
 
         // Verify that associated serviceType is not deleted
-        assertThat(serviceTypeRepository.findById(defaultServiceType.getId())).isNotEmpty();
+        assertThatCode(() -> serviceTypeService.getServiceTypeEntityById(defaultServiceType.getId()))
+                .doesNotThrowAnyException();
 
         // Verify that tag has no associations after deletion
-        assertThat(tagRepository.findById(defaultTag.getId()).get().getServices()).isEmpty();
+        assertThat(tagService.getTagEntityById(defaultTag.getId()).getServices()).isEmpty();
     }
 
     @Test
@@ -247,7 +247,7 @@ public class ServiceIntegrationTests {
         tagService.delete(defaultTag.getId());
 
         // Ensure that the tag is dissociated from the service
-        Service updatedService = serviceRepository.findById(createdResponse.id()).orElseThrow();
+        Service updatedService = serviceService.getServiceEntityById(createdResponse.id());
         List<String> remainingTags = updatedService.getTags().stream()
                 .map(Tag::getName)
                 .collect(Collectors.toList());
@@ -266,10 +266,10 @@ public class ServiceIntegrationTests {
         assertThat(createResponseDTO.tagNames()).containsExactlyInAnyOrder("tag1", "tag2");
 
         // Verify that the tags have the service in their 'services' list
-        Tag tag1 = tagRepository.findByName("tag1").orElseThrow();
-        Tag tag2 = tagRepository.findByName("tag2").orElseThrow();
-        assertThat(tag1.getServices()).contains(serviceRepository.findById(createResponseDTO.id()).get());
-        assertThat(tag2.getServices()).contains(serviceRepository.findById(createResponseDTO.id()).get());
+        Tag tag1 = tagService.getTagEntityByName("tag1");
+        Tag tag2 = tagService.getTagEntityByName("tag2");
+        assertThat(tag1.getServices()).contains(serviceService.getServiceEntityById(createResponseDTO.id()));
+        assertThat(tag2.getServices()).contains(serviceService.getServiceEntityById(createResponseDTO.id()));
 
         // Prepare new tag list for update (removes "tag2" and adds "tag3" and "tag4")
         ServiceRequestDTO updateServiceDTO = createDTO("Updated Service", "Updated Description", "Test Service Type", List.of("tag1", "tag3", "tag4"));
@@ -287,16 +287,16 @@ public class ServiceIntegrationTests {
         assertThat(updateResponseDTO.tagNames()).doesNotContain("tag2");
 
         // Verify that tag2 no longer has the service in their 'services' list
-        tag2 = tagRepository.findByName("tag2").orElseThrow();
-        assertThat(tag2.getServices()).doesNotContain(serviceRepository.findById(createResponseDTO.id()).get());
+        tag2 = tagService.getTagEntityByName("tag2");
+        assertThat(tag2.getServices()).doesNotContain(serviceService.getServiceEntityById(createResponseDTO.id()));
 
         // Verify that tag1, tag3 and tag4 now have the service in their 'services' list
-        tag1 = tagRepository.findByName("tag1").orElseThrow();
-        Tag tag3 = tagRepository.findByName("tag3").orElseThrow();
-        Tag tag4 = tagRepository.findByName("tag4").orElseThrow();
-        assertThat(tag1.getServices()).contains(serviceRepository.findById(createResponseDTO.id()).get());
-        assertThat(tag3.getServices()).contains(serviceRepository.findById(createResponseDTO.id()).get());
-        assertThat(tag4.getServices()).contains(serviceRepository.findById(createResponseDTO.id()).get());
+        tag1 = tagService.getTagEntityByName("tag1");
+        Tag tag3 = tagService.getTagEntityByName("tag3");
+        Tag tag4 = tagService.getTagEntityByName("tag4");
+        assertThat(tag1.getServices()).contains(serviceService.getServiceEntityById(createResponseDTO.id()));
+        assertThat(tag3.getServices()).contains(serviceService.getServiceEntityById(createResponseDTO.id()));
+        assertThat(tag4.getServices()).contains(serviceService.getServiceEntityById(createResponseDTO.id()));
     }
 
     @Test
@@ -307,21 +307,20 @@ public class ServiceIntegrationTests {
         Long serviceId = responseDTO.id();
 
         // Verify tag-service association exists
-        Tag tag2 = tagRepository.findByName("delete-tag1").orElseThrow();
-        Tag tag3 = tagRepository.findByName("delete-tag2").orElseThrow();
+        Tag tag2 = tagService.getTagEntityByName("delete-tag1");
+        Tag tag3 = tagService.getTagEntityByName("delete-tag2");
         assertThat(tag2.getServices()).extracting("id").contains(serviceId);
         assertThat(tag3.getServices()).extracting("id").contains(serviceId);
 
         serviceService.delete(serviceId);
 
         // Verify that service is deleted
-        assertThat(serviceRepository.findById(serviceId)).isEmpty();
-
-        serviceTypeRepository.findAll();
+        assertThatThrownBy(() -> serviceService.getServiceEntityById(serviceId))
+                .isInstanceOf(EntityNotFoundException.class);
 
         // Verify that tags no longer reference the deleted service
-        tag2 = tagRepository.findByName("delete-tag1").orElseThrow();
-        tag3 = tagRepository.findByName("delete-tag2").orElseThrow();
+        tag2 = tagService.getTagEntityByName("delete-tag1");
+        tag3 = tagService.getTagEntityByName("delete-tag2");
         assertThat(tag2.getServices()).extracting("id").doesNotContain(serviceId);
         assertThat(tag3.getServices()).extracting("id").doesNotContain(serviceId);
     }

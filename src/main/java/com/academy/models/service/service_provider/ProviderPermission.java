@@ -1,5 +1,6 @@
 package com.academy.models.service.service_provider;
 
+import com.academy.models.shared.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,11 +11,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString(exclude="serviceProvider")
-public class ProviderPermission {
-    @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column(name="id")
-    private long id;
+public class ProviderPermission extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "service_provider_id", nullable = false)

@@ -4,13 +4,12 @@ import com.academy.models.appointment.Appointment;
 import com.academy.models.Availability;
 import com.academy.models.Role;
 import com.academy.models.service.Service;
+import com.academy.models.shared.BaseEntity;
 import com.academy.util.FieldLengths;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,12 +21,7 @@ import java.util.ArrayList;
 @Getter
 @Setter
 @ToString(exclude = {"availabilities", "appointments", "createdServices", "role"})
-public class Member {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="id")
-    private Long id;
+public class Member extends BaseEntity {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Availability> availabilities = new ArrayList<>();
@@ -69,14 +63,6 @@ public class Member {
     @OneToMany(mappedBy = "owner")
     private List<Service> createdServices;
 
-    @Column(name = "created_at")
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
-
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
@@ -86,3 +72,5 @@ public class Member {
 
 
 }
+
+

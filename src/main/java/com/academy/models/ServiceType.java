@@ -1,16 +1,13 @@
 package com.academy.models;
 
 import com.academy.models.service.Service;
+import com.academy.models.shared.BaseEntity;
 import com.academy.util.FieldLengths;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,12 +16,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString(exclude="services")
-public class ServiceType {
-
-    @Column(name="id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Id
-    private long id;
+public class ServiceType extends BaseEntity {
 
     @NotBlank
     @Column(name="name", unique = true, length = FieldLengths.SERVICE_TYPE_MAX)
@@ -37,11 +29,4 @@ public class ServiceType {
     @OneToMany(mappedBy = "serviceType", fetch = FetchType.LAZY)
     private List<Service> services = new ArrayList<>();
 
-    @Column(name="created_at", updatable=false)
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @Column(name="updated_at")
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
 }
