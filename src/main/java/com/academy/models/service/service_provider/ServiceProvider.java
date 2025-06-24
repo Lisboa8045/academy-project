@@ -25,7 +25,7 @@ import java.util.List;
         uniqueConstraints = @UniqueConstraint(columnNames = {"member_id", "service_id"}))
 @Getter
 @Setter
-@ToString(exclude = {"provider", "service", "appointmentList", "permissions"})
+@ToString(callSuper = true, exclude = {"provider", "service", "appointmentList", "permissions"})
 public class ServiceProvider extends BaseEntity {
 
     @ManyToOne

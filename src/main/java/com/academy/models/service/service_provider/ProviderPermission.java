@@ -10,7 +10,7 @@ import lombok.ToString;
 @Table(name="provider_permission")
 @Getter
 @Setter
-@ToString(exclude="serviceProvider")
+@ToString(callSuper = true, exclude="serviceProvider")
 public class ProviderPermission extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.EAGER)

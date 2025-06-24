@@ -15,7 +15,7 @@ import java.util.List;
 @Table(name="service_type")
 @Getter
 @Setter
-@ToString(exclude="services")
+@ToString(callSuper = true, exclude="services")
 public class ServiceType extends BaseEntity {
 
     @NotBlank

@@ -20,7 +20,7 @@ import java.util.ArrayList;
 @Table(name = "member")
 @Getter
 @Setter
-@ToString(exclude = {"availabilities", "appointments", "createdServices", "role"})
+@ToString(callSuper = true, exclude = {"availabilities", "appointments", "createdServices", "role"})
 public class Member extends BaseEntity {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
