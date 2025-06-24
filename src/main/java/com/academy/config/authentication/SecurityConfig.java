@@ -40,7 +40,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/services/search/**").permitAll()
+                        .requestMatchers("/").permitAll()
                         .requestMatchers(HttpMethod.GET, "/service-types/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/services/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/service-providers/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/appointments/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 ).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
