@@ -18,6 +18,7 @@ import com.academy.specifications.ServiceSpecifications;
 import com.academy.utils.Utils;
 import jakarta.transaction.Transactional;
 import org.apache.coyote.BadRequestException;
+import org.hibernate.collection.spi.PersistentBag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -95,7 +96,7 @@ public class ServiceService {
                 .stream()
                 .map(service ->  serviceMapper.toDto(service,
                         getPermissionsByProviderUsernameAndServiceId(username, service.getId())
-                        ))
+                ))
                 .collect(Collectors.toList());
     }
 
@@ -124,7 +125,18 @@ public class ServiceService {
         List<Tag> tags = tagService.findOrCreateTagsByNames(tagNames);
         service.setTags(tags);
         for (Tag tag : tags) {
-            tag.getServices().add(service);
+            List<Service> services = tag.getServices();
+
+            if (services == null || services instanceof PersistentBag) {
+                List<Service> modifiableServices = new ArrayList<>();
+                if (services != null) {
+                    modifiableServices.addAll(services);
+                }
+                modifiableServices.add(service);
+                tag.setServices(modifiableServices);
+            } else {
+                services.add(service);
+            }
         }
     }
 
@@ -153,7 +165,7 @@ public class ServiceService {
     public List<ProviderPermissionEnum> getPermissionsByProviderIdAndServiceId(Long providerId, Long serviceId){
         return hasServiceProvider(providerId, serviceId) ?
                 serviceProviderService.getPermissionsByProviderIdAndServiceId(providerId, serviceId)
-        :
+                :
                 Collections.emptyList();
     }
     private boolean hasServiceProvider(String username, Long serviceId){
