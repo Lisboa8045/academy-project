@@ -1,6 +1,7 @@
 package com.academy.repositories;
 
 import com.academy.models.service.Service;
+import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -26,4 +27,7 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
     boolean existsByServiceIdAndProviderId(Long serviceId, Long id);
 
     Optional<ServiceProvider> findByServiceIdAndProviderId(Long serviceId, Long providerId);
+
+    @Query("SELECT sp FROM ServiceProvider sp JOIN sp.permissions p WHERE sp.service.id = :serviceId AND p.permission = :permission")
+    List<ServiceProvider> findProvidersByServiceIdAndPermission(Long serviceId, ProviderPermissionEnum permission);
 }

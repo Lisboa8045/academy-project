@@ -1,7 +1,7 @@
 -- Populates role table
 INSERT IGNORE INTO `role`
-(id, name, updated_at, created_at, updated_by, created_by)
+(id, name)
 values
-    (1, 'ADMIN', NOW(), NOW(), 'system', 'system'),
-    (2, 'CLIENT', NOW(), NOW(), 'system', 'system'),
-    (3, 'WORKER', NOW(), NOW(), 'system', 'system');
+    (1, 'ADMIN'),
+    (2, 'CLIENT'),
+    (3, 'WORKER');

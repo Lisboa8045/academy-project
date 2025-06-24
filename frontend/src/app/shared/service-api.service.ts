@@ -4,16 +4,11 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import {ServiceModel} from '../service/service.model';
 
-export interface PagedResponse {
-  content: ServiceModel[];
-  totalElements: number;
-}
-
 @Injectable({
   providedIn: 'root',
 })
 export class ServiceApiService {
-  private BASE_URL = 'http://localhost:8080/auth/services/search';
+  private BASE_URL = 'http://localhost:8080/services';
 
   constructor(private http: HttpClient) {}
 
@@ -25,7 +20,7 @@ export class ServiceApiService {
     tags: string[] = [],
     priceMin?: number,
     priceMax?: number
-  ): Observable<PagedResponse> {
+  ): Observable<ServiceModel[]> {  // <-- mudar para array direto
     let params = new HttpParams()
       .set('name', name)
       .set('page', page)
@@ -41,6 +36,6 @@ export class ServiceApiService {
     if (priceMin !== undefined) params = params.set('priceMin', priceMin);
     if (priceMax !== undefined) params = params.set('priceMax', priceMax);
 
-    return this.http.get<PagedResponse>(this.BASE_URL, { params });
+    return this.http.get<ServiceModel[]>(this.BASE_URL, { params });
   }
 }
