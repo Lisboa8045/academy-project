@@ -101,10 +101,7 @@ public class ServiceProviderService {
             return false;
         }
         List<ProviderPermissionEnum> permissions = getPermissions(loggedMemberServiceProvider.getId());
-        if(!Utils.hasPermission(permissions, ProviderPermissionEnum.ADD_SERVICE_PROVIDER))
-            return false;
-
-        return true;
+        return !Utils.hasPermission(permissions, ProviderPermissionEnum.ADD_SERVICE_PROVIDER);
     }
 
     private void validatePermissions(List<ProviderPermissionEnum> permissions, boolean isServiceCreation) throws BadRequestException {
@@ -210,4 +207,9 @@ public class ServiceProviderService {
     public ServiceProvider getServiceProviderEntityById(long id){
         return serviceProviderRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
     }
+
+    public List<ServiceProvider> findProvidersByServiceIdAndPermission(Long serviceId, ProviderPermissionEnum permission) {
+        return serviceProviderRepository.findProvidersByServiceIdAndPermission(serviceId, permission);
+    }
+
 }

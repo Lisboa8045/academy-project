@@ -1,10 +1,8 @@
 package com.academy.services;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.academy.models.member.Member;
 import com.academy.models.service.Service;
@@ -19,6 +17,9 @@ import com.academy.exceptions.InvalidArgumentException;
 import com.academy.models.Availability;
 import com.academy.repositories.AvailabilityRepository;
 import jakarta.transaction.Transactional;
+
+import com.academy.utils.DateRange;
+
 
 @org.springframework.stereotype.Service
 public class AvailabilityService {
@@ -59,7 +60,7 @@ public class AvailabilityService {
         List<Availability> availabilities = availabilityRepository.findByMember_Id(memberId);
         return availabilities.stream()
                 .map(availabilityMapper::toResponseDTOWithMember)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     // Get all availabilities for a specific service by its ID
@@ -138,7 +139,7 @@ public class AvailabilityService {
         availability.setEndDateTime(requestDTO.endDateTime());
 
         // Verifica se é necessário atualizar o membro associado
-        if (availability.getMember().getId() != requestDTO.memberId()) {
+        if (availability.getMember().getId().equals(requestDTO.memberId())) {
             Member newMember = memberService.findbyId(requestDTO.memberId())
                     .orElseThrow(() -> new EntityNotFoundException(Member.class, " with ID " + requestDTO.memberId() + " not found."));
             availability.setMember(newMember);
@@ -165,15 +166,21 @@ public class AvailabilityService {
         return availabilityRepository.findAll()
                 .stream()
                 .map(availabilityMapper::toResponseDTOWithMember)
-                .collect(Collectors.toList());
+                .toList();
     }
+
+    private DateRange calculateCurrentSlotWindow() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime end = now.plusDays(slotWindowDays);
+        return new DateRange(now, end);
+    }
+
 
     public List<Availability> getAvailabilitiesForProvider(Long providerId) {
         if (providerId == null) {
             throw new InvalidArgumentException("Provider ID cannot be null");
         }
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime days = now.plusDays(slotWindowDays);
-        return availabilityRepository.findByMember_IdAndStartDateTimeBetween(providerId, now, days);
+        DateRange slotWindow = calculateCurrentSlotWindow();
+        return availabilityRepository.findByMember_IdAndStartDateTimeBetween(providerId, slotWindow.start(), slotWindow.end());
     }
 }

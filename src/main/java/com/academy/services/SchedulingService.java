@@ -4,14 +4,13 @@ import com.academy.dtos.SlotDTO;
 import com.academy.models.appointment.Appointment;
 import com.academy.models.Availability;
 import com.academy.models.member.Member;
-import com.academy.models.service.service_provider.ProviderPermission;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
-import com.academy.utils.SlotUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,61 +40,106 @@ public class SchedulingService {
     }
 
     public List<SlotDTO> getFreeSlotsForService(Long serviceId) {
-        if (serviceId == null) {
-            throw new IllegalArgumentException("Service ID cannot be null");
-        }
-
-        boolean serviceExists = serviceProviderService.existsByServiceId(serviceId);
-        if (!serviceExists) {
-            throw new IllegalArgumentException("Service with ID " + serviceId + " does not exist");
-        }
+        validateServiceId(serviceId);
 
         List<SlotDTO> allFreeSlots = new ArrayList<>();
-        List<Long> providerIds = serviceProviderService.findMemberIdsByServiceId(serviceId);
-        List<Availability> availabilities = new ArrayList<>();
 
-        for (Long providerId : providerIds) {
+        List<ServiceProvider> providersWithServePermission = serviceProviderService
+                .findProvidersByServiceIdAndPermission(serviceId, ProviderPermissionEnum.SERVE);
+
+        for (ServiceProvider serviceProvider : providersWithServePermission) {
+            Long providerId = serviceProvider.getProvider().getId();
+
             Optional<Member> memberOpt = memberService.findbyId(providerId);
-            String providerName = memberOpt.isPresent() ? memberOpt.get().getUsername() : "Unknown";
-
-            ServiceProvider serviceProvider = serviceProviderService
-                    .getServiceProviderByProviderIdAndServiceID(providerId, serviceId);
-
-            boolean hasServePermission = serviceProvider.getPermissions().stream()
-                    .map(ProviderPermission::getPermission)
-                    .anyMatch(permission -> permission == ProviderPermissionEnum.SERVE);
-
-            if (hasServePermission) {
-                availabilities = availabilityService.getAvailabilitiesForProvider(providerId);
+            if (memberOpt.isEmpty()) {
+                continue;
             }
+            Member member = memberOpt.get();
 
-            // Fetch all future appointments for this provider
+            List<Availability> availabilities = availabilityService.getAvailabilitiesForProvider(providerId);
             List<Appointment> appointments = appointmentService.getAppointmentsForProvider(providerId);
 
-            for (Availability availability : availabilities) {
-                List<SlotDTO> slots = SlotUtils.generateCompleteSlots(
-                        providerId,
-                        providerName,
-                        availability.getStartDateTime(),
-                        availability.getEndDateTime(),
-                        slotDurationMinutes
-                );
-                for (SlotDTO slot : slots) {
-                    // Only consider slots that start in the future
-                    if (slot.start().isBefore(LocalDateTime.now())) {
-                        continue;
-                    }
-                    boolean occupied = appointments.stream().anyMatch(app ->
-                            app.getStartDateTime().isBefore(slot.end()) && app.getEndDateTime().isAfter(slot.start())
-                    );
-                    if (!occupied) {
-                        allFreeSlots.add(slot);
-                    }
-                }
-            }
+            List<SlotDTO> freeSlots = generateFreeSlots(
+                    providerId,
+                    member.getUsername(),
+                    availabilities,
+                    appointments
+            );
+
+            allFreeSlots.addAll(freeSlots);
         }
-        System.out.println("[DEBUG] Total free slots found: " + allFreeSlots.size());
+
         return allFreeSlots;
     }
 
+    public static List<SlotDTO> generateCompleteSlots(Long providerId, String providerName,
+                                                      LocalDateTime start, LocalDateTime end, int slotDurationMinutes) {
+        if (start == null || end == null)
+            throw new IllegalArgumentException("Datas entre início e fim não podem ser nulas.");
+        if (!end.isAfter(start))
+            throw new IllegalArgumentException("Data final deve ser maior que início.");
+        if (slotDurationMinutes <= 0)
+            throw new IllegalArgumentException("Duração dos slots deve ser positiva.");
+
+        long totalDuration = Duration.between(start, end).toMinutes();
+        if (slotDurationMinutes > totalDuration) {
+            throw new IllegalArgumentException(
+                    "Duração do slot maior do que o intervalo total. Nenhum slot pode ser criado.");
+        }
+
+        List<SlotDTO> slots = new ArrayList<>();
+        LocalDateTime slotStart = start;
+        LocalDateTime slotEnd = slotStart.plusMinutes(slotDurationMinutes);
+
+        while (!slotEnd.isAfter(end)) { // Garante que o slot termina dentro do intervalo
+            slots.add(new SlotDTO(providerId, providerName, slotStart, slotEnd));
+            slotStart = slotEnd;
+            slotEnd = slotStart.plusMinutes(slotDurationMinutes);
+        }
+
+        return slots;
+    }
+
+    private void validateServiceId(Long serviceId) {
+        if (serviceId == null) {
+            throw new IllegalArgumentException("Service ID cannot be null");
+        }
+        if (!serviceProviderService.existsByServiceId(serviceId)) {
+            throw new IllegalArgumentException("Service with ID " + serviceId + " does not exist");
+        }
+    }
+
+    private List<SlotDTO> generateFreeSlots(Long providerId, String providerName,
+                                            List<Availability> availabilities,
+                                            List<Appointment> appointments) {
+        List<SlotDTO> freeSlots = new ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
+
+        for (Availability availability : availabilities) {
+            List<SlotDTO> slots = SchedulingService.generateCompleteSlots(
+                    providerId,
+                    providerName,
+                    availability.getStartDateTime(),
+                    availability.getEndDateTime(),
+                    slotDurationMinutes
+            );
+
+            for (SlotDTO slot : slots) {
+                if (slot.start().isBefore(now)) {
+                    continue;
+                }
+                if (isSlotFree(slot, appointments)) {
+                    freeSlots.add(slot);
+                }
+            }
+        }
+        return freeSlots;
+    }
+
+    private boolean isSlotFree(SlotDTO slot, List<Appointment> appointments) {
+        return appointments.stream().noneMatch(app ->
+                app.getStartDateTime().isBefore(slot.end()) &&
+                        app.getEndDateTime().isAfter(slot.start())
+        );
+    }
 }

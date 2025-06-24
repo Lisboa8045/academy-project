@@ -32,7 +32,7 @@ public class AppointmentController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AppointmentResponseDTO> getAppointmentById(@PathVariable int id) {
+    public ResponseEntity<AppointmentResponseDTO> getAppointmentById(@PathVariable Long id) {
         return ResponseEntity.ok(appointmentService.getAppointmentById(id));
     }
 
@@ -44,19 +44,19 @@ public class AppointmentController {
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<AppointmentResponseDTO> updateAppointment(@PathVariable int id, @RequestBody AppointmentRequestDTO appointmentDetails) {
+    public ResponseEntity<AppointmentResponseDTO> updateAppointment(@PathVariable Long id, @RequestBody AppointmentRequestDTO appointmentDetails) {
         AppointmentResponseDTO updated = appointmentService.updateAppointment(id, appointmentDetails);
         return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAppointment(@PathVariable int id) {
+    public ResponseEntity<Void> deleteAppointment(@PathVariable Long id) {
         appointmentService.deleteAppointment(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/review")
-    public ResponseEntity<AppointmentResponseDTO> createReview(@PathVariable int id, @RequestBody AppointmentRequestDTO appointmentDetails) {
+    public ResponseEntity<AppointmentResponseDTO> createReview(@PathVariable Long id, @RequestBody AppointmentRequestDTO appointmentDetails) {
         return updateAppointment(id, appointmentDetails);
     }
 
