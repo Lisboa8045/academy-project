@@ -4,11 +4,11 @@ import {FormsModule} from "@angular/forms";
 
 @Component({
     selector: 'app-sidebar-filters',
-    templateUrl: './sidebar-filters.component.html',
+    templateUrl: './search-sidebar-filters.component.html',
     imports: [CommonModule, FormsModule],
-    styleUrls: ['./sidebar-filters.component.css']
+    styleUrls: ['./search-sidebar-filters.component.css']
 })
-export class SidebarFiltersComponent {
+export class SearchSidebarFiltersComponent {
     @Input() filters!: WritableSignal<{
         minPrice: number | null;
         maxPrice: number | null;

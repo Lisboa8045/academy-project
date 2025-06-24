@@ -2,7 +2,7 @@ import {Component, OnInit, signal, WritableSignal} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {ControlsBarComponent} from "./controls-bar/controls-bar.component";
-import {SidebarFiltersComponent} from "./sidebar-filters/sidebar-filters.component";
+import {SearchSidebarFiltersComponent} from "./search-sidebar-filters/search-sidebar-filters.component";
 import {ServiceModel} from '../service.model';
 import {LoadingComponent} from "../../loading/loading.component";
 import {ServiceListComponent} from "../service-list/service-list.component";
@@ -14,7 +14,7 @@ import {PaginationBarComponent} from "./pagination-bar/pagination-bar.component"
   selector: 'app-search-services',
   templateUrl: './search-services.component.html',
   styleUrls: ['./search-services.component.css'],
-  imports: [LoadingComponent, FormsModule, ControlsBarComponent, SidebarFiltersComponent, ServiceListComponent, PaginationBarComponent]
+  imports: [LoadingComponent, FormsModule, ControlsBarComponent, SearchSidebarFiltersComponent, ServiceListComponent, PaginationBarComponent]
 })
 export class SearchServicesComponent implements OnInit {
   services = signal<ServiceModel[]>([]);

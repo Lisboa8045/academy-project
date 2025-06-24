@@ -4,17 +4,16 @@
       <a class="nav-item" routerLink="/">🏠 Home</a>
     </div>
 
-    <form class="search-form" (ngSubmit)="onSearch()">
-      <input
-        type="text"
-        name="query"
-        [(ngModel)]="searchQuery"
-        placeholder="Search services"
-        maxlength="100"
-        class="search-input"
-      />
-      <button type="submit" class="search-button">🔍</button>
-    </form>
+      <form class="search-form" [formGroup]="form" (ngSubmit)="onSearch()">
+          <input
+                  type="text"
+                  formControlName="query"
+                  placeholder="Search services"
+                  maxlength="100"
+                  class="search-input"
+          />
+          <button type="submit" class="search-button">🔍</button>
+      </form>
 
     <div class="right-links">
       <div class="user-profile">
