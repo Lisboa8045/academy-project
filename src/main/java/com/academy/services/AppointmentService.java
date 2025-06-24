@@ -20,15 +20,11 @@ import java.util.stream.Collectors;
 public class AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
-
     private final ServiceProviderService serviceProviderService;
-
     private final AppointmentMapper appointmentMapper;
-
     private final MemberService memberService;
 
     @Autowired
-
     public AppointmentService(AppointmentRepository appointmentRepository, ServiceProviderService serviceProviderService, AppointmentMapper appointmentMapper, MemberService memberService) {
 
         this.appointmentRepository = appointmentRepository;
@@ -51,18 +47,14 @@ public class AppointmentService {
 
     }
 
-    public AppointmentResponseDTO getAppointmentById(int id) {
-
+    public AppointmentResponseDTO getAppointmentById(Long id) {
         return appointmentRepository.findById(id)
-
                 .map(appointmentMapper::toResponseDTO)
-
                 .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
 
     }
 
     public AppointmentResponseDTO createAppointment(AppointmentRequestDTO dto) {
-
         ServiceProvider serviceProvider = serviceProviderService.getServiceProviderEntityById(dto.serviceProviderId());
 
         Member member = memberService.getMemberEntityById(dto.memberId());
@@ -76,8 +68,8 @@ public class AppointmentService {
 
     }
 
-    
-    public AppointmentResponseDTO updateAppointment(int id, AppointmentRequestDTO appointmentDetails) {
+
+    public AppointmentResponseDTO updateAppointment(Long id, AppointmentRequestDTO appointmentDetails) {
 
         Appointment appointment = appointmentRepository.findById(id)
 
@@ -102,7 +94,7 @@ public class AppointmentService {
 
     }
 
-    public void deleteAppointment(int id) {
+    public void deleteAppointment(Long id) {
 
         if(!appointmentRepository.existsById(id)) throw new EntityNotFoundException(Appointment.class, id);
 
@@ -110,7 +102,7 @@ public class AppointmentService {
 
     }
 
-    public void deleteReview(int id){
+    public void deleteReview(Long id){
 
         Appointment appointment = appointmentRepository.findById(id)
 
@@ -124,5 +116,8 @@ public class AppointmentService {
 
     }
 
+    public List<Appointment> getAllByProviderId(Long id) {
+        return appointmentRepository.findAllByServiceProviderId(id);
+    }
 }
 
