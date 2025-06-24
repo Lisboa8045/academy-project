@@ -53,6 +53,8 @@ export class ScheduleComponent implements OnInit {
   weeklySlots: { [key: string]: SlotModel[] } = {};
   providerOptions: SlotModel[] = [];
   showProviderModal = false;
+  isSubmitting = false;
+
   readonly username = inject(AuthStore).username;
 
   constructor(
@@ -264,12 +266,6 @@ export class ScheduleComponent implements OnInit {
             endDateTime: this.selectedSlot!.end,
             status: 'CONFIRMED'
           };
-
-          console.log('[LOG] Creating appointment with the following details:');
-          console.log('Service Provider ID:', appointment.serviceProviderId);
-          console.log('Start DateTime:', appointment.startDateTime);
-          console.log('End DateTime:', appointment.endDateTime);
-          console.log('Status:', appointment.status);
 
           this.scheduleApi.confirmAppointment(appointment).subscribe({
             next: () => alert('Marcação efetuada com sucesso!'),
