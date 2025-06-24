@@ -4,8 +4,8 @@
       <img [src]="service.image_url || defaultImage"
            (error)="onImgError($event)"
            alt="Service Image" />
-      <div class="rating-badge" *ngIf="service.averageRating">
-        ★ {{ service.averageRating }}
+      <div class="rating-badge">
+        ★ {{ service.averageRating && service.averageRating > 0 ? service.averageRating : 'N/A' }}
       </div>
     </div>
     <div class="service-info">

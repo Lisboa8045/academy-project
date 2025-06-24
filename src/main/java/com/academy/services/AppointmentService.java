@@ -8,6 +8,7 @@ import com.academy.dtos.appointment.AppointmentRequestDTO;
 import com.academy.dtos.appointment.AppointmentResponseDTO;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.appointment.Appointment;
+import com.academy.models.appointment.AppointmentStatus;
 import com.academy.models.member.Member;
 import com.academy.models.service.service_provider.ProviderPermission;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
@@ -57,6 +58,7 @@ public class AppointmentService {
                 .toList();
     }
 
+
     public AppointmentResponseDTO getAppointmentById(Long id) {
 
         return appointmentRepository.findById(id.intValue())
@@ -85,11 +87,20 @@ public class AppointmentService {
         int serviceDurationMinutes = serviceProvider.getService().getDuration();
         LocalDateTime endDateTime = dto.startDateTime().plusMinutes(serviceDurationMinutes);
 
+        boolean existsConflict = appointmentRepository.existsByServiceProviderAndStartDateTimeLessThanAndEndDateTimeGreaterThanAndStatusNot(
+                serviceProvider, endDateTime, dto.startDateTime(), dto.status());
+
+        if (existsConflict) {
+            throw new IllegalStateException("Já existe um agendamento para esse horário!");
+        }
+
+
         Appointment appointment = appointmentMapper.toEntity(dto);
 
         appointment.setMember(member);
         appointment.setServiceProvider(serviceProvider);
         appointment.setEndDateTime(endDateTime);
+        appointment.setRating(0);
 
         return appointmentMapper.toResponseDTO(appointmentRepository.save(appointment));
     }

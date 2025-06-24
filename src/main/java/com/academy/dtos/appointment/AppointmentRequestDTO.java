@@ -15,5 +15,5 @@ public record AppointmentRequestDTO(
         @NotNull LocalDateTime endDateTime,
         @Min(0) @Max(5) Integer rating,
         @Size(max = FieldLengths.REVIEW_MAX) String comment,
-        @NotNull AppointmentStatus status // agora obrigatório e validado
+        @NotNull AppointmentStatus status
 ) {}
