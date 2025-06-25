@@ -3,24 +3,42 @@
   <app-loading/>
 } @else {
 
+
     <div class ="service-page">
 
-        <div class="image-section card">
-            <div class="image-wrapper">
-<!--                <button class="nav left" (click)="prevImage()" [disabled]="currentImageIndex === 0">&#10094</button>-->
-                <img [src] ="imageUrl()" alt="Service Image" class = "main-image" />
+      <div class="image-section card">
+        <div class="image-hover-container">
+          <div class="image-wrapper">
+            <button class="nav left" (click)="prevImage(thumbContainer)" [disabled]="currentImageIndex === 0">&#10094;
+            </button>
 
-<!--                <button class = "nav right" (click)="nextImage()" [disabled]="currentImageIndex === service?.images-length - 1"> &#10095</button>-->
-            </div>
+            <img
+              [src]="imageUrls[currentImageIndex]"
+              alt="Service Image"
+              class="main-image"
+            />
 
-            <div class="thumbnails">
-                CENAS AQUI
+            <button class="nav right" (click)="nextImage(thumbContainer)"
+                    [disabled]="currentImageIndex === imageUrls.length - 1">&#10095;
+            </button>
+
+            <div class="thumbnails-overlay">
+              <div class="thumbnails-scroll-wrapper" #thumbContainer>
+                <img
+                  *ngFor="let imageUrl of imageUrls; let i = index"
+                  [src]="imageUrl"
+                  class="thumbnail-image"
+                  [class.selected]="i === currentImageIndex"
+                  (click)="selectThumbnail(i, thumbContainer)"
+                />
+              </div>
             </div>
+          </div>
         </div>
+      </div>
 
-        <div class="info-section card" >
+      <div class="info-section card">
             <h2>{{ service?.name  }}</h2>
-<!--            Meter isto a dar link para uma pesquisa por este service type-->
           <div class ="type-and-duration">
             <h3> {{ service?.serviceTypeName }}</h3>
             <div *ngIf="formatedTimeMinutes != null && formatedTimeMinutes > 0; else onlyHours">
@@ -71,10 +89,8 @@
     </div>
 
   <div class="service-description">
-    <h3><i class="fa-solid fa-info-circle"></i> Description</h3>
-    <p>
-      Comprehensive English tutoring with therapeutic relaxation sessions.
-    </p>
+    <h3> Descrição</h3>
+    <p>{{ service?.description }}</p>
   </div>
 
 }

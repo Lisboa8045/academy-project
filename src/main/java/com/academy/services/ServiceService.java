@@ -6,15 +6,15 @@ import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
 import com.academy.exceptions.AuthenticationException;
-import com.academy.models.Member;
-import com.academy.models.service.Service;
-import com.academy.models.service.service_provider.ProviderPermissionEnum;
-import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.exceptions.EntityNotFoundException;
+import com.academy.models.Member;
 import com.academy.models.ServiceType;
 import com.academy.models.Tag;
+import com.academy.models.service.Service;
+import com.academy.models.service.ServiceImages;
+import com.academy.models.service.service_provider.ProviderPermissionEnum;
+import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.ServiceRepository;
-import com.academy.repositories.TagRepository;
 import com.academy.specifications.ServiceSpecifications;
 import com.academy.utils.Utils;
 import jakarta.transaction.Transactional;
@@ -23,7 +23,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -261,4 +260,14 @@ public class ServiceService {
         return serviceRepository.existsById(serviceId);
     }
 
+    // este saveImages será para usado depois para o endpoint de criação do serviço
+    public Service saveImages(Long id, List<ServiceImages> images) {
+        serviceRepository.findById(id).map(s -> {
+                    s.setImages(images);
+                    serviceRepository.save(s);
+                    return s;
+                })
+                .orElseThrow(() -> new EntityNotFoundException(Service.class, id));
+        return null;
+    }
 }

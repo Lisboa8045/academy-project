@@ -12,4 +12,5 @@ export interface ServiceModel {
   tagNames: string[];
   createdAt: string;
   updatedAt: string;
+  images: string[];
 }
