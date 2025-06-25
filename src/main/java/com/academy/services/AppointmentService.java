@@ -68,25 +68,41 @@ public class AppointmentService {
     }
 
     public AppointmentResponseDTO createAppointment(AppointmentRequestDTO dto) {
+        // Validate date is not in the past
+        if (dto.startDateTime().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Não é possível agendar para datas passadas");
+        }
 
         String username = authenticationFacade.getUsername();
         Member member = memberService.getMemberByUsername(username);
 
         ServiceProvider serviceProvider = serviceProviderService.getServiceProviderEntityById(dto.serviceProviderId());
 
+        // Validate SERVE permission
         boolean hasServePermission = serviceProvider.getPermissions().stream()
                 .map(ProviderPermission::getPermission)
                 .anyMatch(p -> p == ProviderPermissionEnum.SERVE);
-
         if (!hasServePermission) {
             throw new IllegalStateException("Service provider não possui permissão SERVE");
         }
 
+        // Calculate end time
         int serviceDurationMinutes = serviceProvider.getService().getDuration();
         LocalDateTime endDateTime = dto.startDateTime().plusMinutes(serviceDurationMinutes);
 
-        Appointment appointment = appointmentMapper.toEntity(dto);
+        // Check for conflicts
+        List<Appointment> conflictingAppointments = appointmentRepository
+                .findConflictingAppointments(
+                        serviceProvider.getId(),
+                        dto.startDateTime(),
+                        endDateTime
+                );
+        if (!conflictingAppointments.isEmpty()) {
+            throw new IllegalStateException("Já existe um agendamento para este horário");
+        }
 
+        // Create and save appointment
+        Appointment appointment = appointmentMapper.toEntity(dto);
         appointment.setMember(member);
         appointment.setServiceProvider(serviceProvider);
         appointment.setEndDateTime(endDateTime);

@@ -39,7 +39,7 @@ public class ServiceProvider extends BaseEntity {
     @OneToMany(mappedBy = "serviceProvider", fetch = FetchType.EAGER)
     private List<Appointment> appointmentList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "serviceProvider")
+    @OneToMany(mappedBy = "serviceProvider", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProviderPermission> permissions = new ArrayList<>();
 
 }
