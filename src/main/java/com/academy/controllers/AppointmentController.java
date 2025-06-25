@@ -61,7 +61,7 @@ public class AppointmentController {
     }
 
     @DeleteMapping("/{id}/review")
-    public ResponseEntity<Void> deleteReview(@PathVariable int id) {
+    public ResponseEntity<Void> deleteReview(@PathVariable Long id) {
         appointmentService.deleteReview(id);
         return ResponseEntity.noContent().build();
     }

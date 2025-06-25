@@ -1,5 +1,7 @@
 package com.academy.services;
 
+import com.academy.dtos.appointment.AppointmentRequestDTO;
+import com.academy.dtos.appointment.AppointmentResponseDTO;
 import com.academy.dtos.register.RegisterRequestDto;
 import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
@@ -13,6 +15,7 @@ import com.academy.models.Role;
 import com.academy.models.ServiceType;
 import com.academy.models.Tag;
 import com.academy.models.service.Service;
+import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.RoleRepository;
 import jakarta.transaction.Transactional;
 import org.apache.coyote.BadRequestException;
@@ -45,13 +48,17 @@ public class ServiceIntegrationTests {
     private final ServiceTypeService serviceTypeService;
     private final RoleRepository roleRepository; // we do not have a RoleService
     private final MemberService memberService;
+    private final ServiceProviderService serviceProviderService;
+    private final AppointmentService appointmentService;
 
     @Autowired
     public ServiceIntegrationTests(ServiceService serviceService,
                                    TagService tagService,
                                    ServiceTypeService serviceTypeService,
                                    MemberService memberService,
-                                   RoleRepository roleRepository
+                                   RoleRepository roleRepository,
+                                   ServiceProviderService serviceProviderService,
+                                   AppointmentService appointmentService
     ) {
 
         this.serviceService = serviceService;
@@ -59,6 +66,8 @@ public class ServiceIntegrationTests {
         this.serviceTypeService = serviceTypeService;
         this.memberService = memberService;
         this.roleRepository = roleRepository;
+        this.serviceProviderService = serviceProviderService;
+        this.appointmentService = appointmentService;
     }
 
     private ServiceType defaultServiceType;
@@ -66,14 +75,6 @@ public class ServiceIntegrationTests {
 
     @BeforeEach
     void setUp() {
-        // Set up a ServiceType and Tags before each test
-
-        defaultTag = createTag("tag1");
-        defaultServiceType = createServiceType("Test Service Type");
-    }
-
-    @BeforeAll
-    void setUpOnce() {
         // Set up a Role and Member to be used on all tests
         Role role = new Role();
         role.setName("ADMIN");
@@ -87,6 +88,11 @@ public class ServiceIntegrationTests {
                     role.getId(), null, null, null);
             memberService.register(requestDTO);
         }
+
+        // Set up a ServiceType and Tags before each test
+
+        defaultTag = createTag("tag1");
+        defaultServiceType = createServiceType("Test Service Type");
     }
 
     private ServiceRequestDTO createDTO(String name, String description, String serviceTypeName, List<String> tags) {
@@ -104,6 +110,20 @@ public class ServiceIntegrationTests {
         TagResponseDTO responseDTO = tagService.create(requestDTO);
         return tagService.getTagEntityById(responseDTO.id());
     }
+
+    public AppointmentRequestDTO createAppDTO(Long serviceProviderID, Long memberID){
+        return new AppointmentRequestDTO(serviceProviderID, memberID, null, null);
+    }
+
+    public void createDummyClient(String name){
+        Role role = new Role();
+        role.setName("CLIENT");
+        roleRepository.save(role);
+        RegisterRequestDto requestDTO = new RegisterRequestDto(name, "Password123!", name+"@email.com",
+                role.getId(), null, null, null);
+        memberService.register(requestDTO);
+    }
+
 
     @Test
     void updateService_serviceNotFound_throwsException() {
@@ -219,8 +239,12 @@ public class ServiceIntegrationTests {
 
         assertThat(tagService.getTagEntityById(defaultTag.getId()).getServices()).isNotEmpty();
 
-        serviceService.delete(createdResponse.id());
+        createDummyClient("client");
+        AppointmentResponseDTO apptResponseDTO = appointmentService.createAppointment(createAppDTO(serviceProviderService.getServiceProviderByUsername("owner").getId(), memberService.getMemberByUsername("client").getId()));
 
+        assertThat(appointmentService.getAppointmentById(apptResponseDTO.id())).isNotNull();
+
+        serviceService.delete(createdResponse.id());
         // Verify that the service is deleted
         assertThatThrownBy(() -> serviceService.getServiceEntityById(createdResponse.id()))
                 .isInstanceOf(EntityNotFoundException.class);
@@ -235,6 +259,16 @@ public class ServiceIntegrationTests {
 
         // Verify that tag has no associations after deletion
         assertThat(tagService.getTagEntityById(defaultTag.getId()).getServices()).isEmpty();
+
+        // Verify that appointment is still present after service deletion
+        assertThat(appointmentService.getAppointmentById(apptResponseDTO.id())).isNotNull();
+        assertThat(apptResponseDTO.serviceProviderId()).isEqualTo(serviceProviderService.getServiceProviderByUsername("owner").getId());
+
+        ServiceProvider ownerServiceProvider = serviceProviderService.getServiceProviderByUsername("owner");
+        // Verify that the ServiceProvider still exists but is inactive and doesn't have a service
+        assertThat(ownerServiceProvider).isNotNull();
+        assertThat(ownerServiceProvider.isActive()).isFalse();
+        assertThat(ownerServiceProvider.getService()).isNull();
     }
 
     @Test

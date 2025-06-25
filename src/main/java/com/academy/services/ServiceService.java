@@ -265,16 +265,17 @@ public class ServiceService {
         service.getServiceType().getServices().remove(service);
     }
 
-    private void deleteServiceProviders(Service service) {
+    private void unlinkAndDisableServiceProviders(Service service) {
         List<ServiceProvider> providers = new ArrayList<>(service.getServiceProviders());
 
         for (ServiceProvider provider : providers) {
-            serviceProviderService.deleteServiceProvider(provider.getId());
+            provider.setService(null);
+            provider.setActive(false);
         }
     }
     private void cleanUpService(Service service) {
         removeAllTagLinks(service);
         removeServiceTypeLink(service);
-        deleteServiceProviders(service);
+        unlinkAndDisableServiceProviders(service);
     }
 }

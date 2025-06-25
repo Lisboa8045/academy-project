@@ -70,7 +70,7 @@ public class Service extends BaseEntity {
     )
     private List<Tag> tags = new ArrayList<>();
 
-    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "service")
     private List<ServiceProvider> serviceProviders = new ArrayList<>();
 }
 

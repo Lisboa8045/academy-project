@@ -9,8 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface AppointmentRepository extends JpaRepository<Appointment, Integer> {
-
+public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
+    List<Appointment> findAllByServiceProviderId(Long serviceProviderProviderId);
     List<Appointment> findByMember_Id(Long memberId);
 
     @Query("SELECT a FROM Appointment a " +

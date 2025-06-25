@@ -24,11 +24,8 @@ import java.util.List;
 public class AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
-
     private final ServiceProviderService serviceProviderService;
-
     private final AppointmentMapper appointmentMapper;
-
     private final MemberService memberService;
 
     private final AuthenticationFacade authenticationFacade;
@@ -59,10 +56,9 @@ public class AppointmentService {
 
     public AppointmentResponseDTO getAppointmentById(Long id) {
 
-        return appointmentRepository.findById(id.intValue())
+        return appointmentRepository.findById(id)
 
                 .map(appointmentMapper::toResponseDTO)
-
                 .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
 
     }
@@ -115,7 +111,7 @@ public class AppointmentService {
 
     public AppointmentResponseDTO updateAppointment(Long id, AppointmentRequestDTO appointmentDetails) {
 
-        Appointment appointment = appointmentRepository.findById(id.intValue())
+        Appointment appointment = appointmentRepository.findById(id)
 
                 .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
 
@@ -135,13 +131,13 @@ public class AppointmentService {
 
     public void deleteAppointment(Long id) {
 
-        if(!appointmentRepository.existsById(id.intValue())) throw new EntityNotFoundException(Appointment.class, id);
+        if(!appointmentRepository.existsById(id)) throw new EntityNotFoundException(Appointment.class, id);
 
-        appointmentRepository.deleteById(id.intValue());
+        appointmentRepository.deleteById(id);
 
     }
 
-    public void deleteReview(int id){
+    public void deleteReview(Long id){
 
         Appointment appointment = appointmentRepository.findById(id)
 
