@@ -124,13 +124,6 @@ export class ScheduleComponent implements OnInit {
   }
 
   loadServices() {
-    this.serviceApi.searchServices().subscribe({
-      next: (res: ServiceModel[]) => {
-        this.services = res;
-        this.filteredServices = res; // inicialmente todos
-      },
-      error: err => console.error('Erro ao carregar serviços:', err)
-    });
   }
 
   loadServiceTypes() {
