@@ -25,4 +25,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     List<Appointment> findByServiceProvider_Provider_IdAndStartDateTimeBetween(Long providerId, LocalDateTime now,
             LocalDateTime in30Days);
+
+    List<Appointment> findByServiceProviderId(Long serviceProviderId);
 }

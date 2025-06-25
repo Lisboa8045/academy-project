@@ -3,6 +3,7 @@ package com.academy.services;
 import com.academy.dtos.SlotDTO;
 import com.academy.models.appointment.Appointment;
 import com.academy.models.Availability;
+import com.academy.models.appointment.AppointmentStatus;
 import com.academy.models.member.Member;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
@@ -43,7 +44,6 @@ public class SchedulingService {
         validateServiceId(serviceId);
 
         int serviceDurationMinutes = serviceService.getById(serviceId).duration();
-
         List<SlotDTO> allFreeSlots = new ArrayList<>();
 
         List<ServiceProvider> providersWithServePermission = serviceProviderService
@@ -51,21 +51,22 @@ public class SchedulingService {
 
         for (ServiceProvider serviceProvider : providersWithServePermission) {
             Long providerId = serviceProvider.getProvider().getId();
-
             Optional<Member> memberOpt = memberService.findbyId(providerId);
             if (memberOpt.isEmpty()) continue;
             Member member = memberOpt.get();
 
             List<Availability> availabilities = availabilityService.getAvailabilitiesForProvider(providerId);
-            List<Appointment> appointments = appointmentService.getAppointmentsForProvider(providerId);
 
-            // Passe a duração do serviço para a geração dos slots!
+            List<Appointment> appointments = appointmentService.getAppointmentsForServiceProvider(
+                    serviceProvider.getId()
+            );
+
             List<SlotDTO> freeSlots = generateFreeSlots(
                     providerId,
                     member.getUsername(),
                     availabilities,
                     appointments,
-                    serviceDurationMinutes // <- Aqui!
+                    serviceDurationMinutes
             );
 
             allFreeSlots.addAll(freeSlots);
@@ -95,7 +96,7 @@ public class SchedulingService {
                 continue;
             }
             for (SlotDTO slot : slots) {
-                if (slot.start().isBefore(now)) continue;
+                if (slot.start().isBefore(now.minusSeconds(1))) continue;
                 if (isSlotFree(slot, appointments)) freeSlots.add(slot);
             }
         }
@@ -122,7 +123,8 @@ public class SchedulingService {
         LocalDateTime slotStart = start;
         LocalDateTime slotEnd = slotStart.plusMinutes(slotDurationMinutes);
 
-        while (!slotEnd.isAfter(end)) { // Garante que o slot termina dentro do intervalo
+        // Remove the buffer and restore the original condition
+        while (!slotEnd.isAfter(end)) {
             slots.add(new SlotDTO(providerId, providerName, slotStart, slotEnd));
             slotStart = slotEnd;
             slotEnd = slotStart.plusMinutes(slotDurationMinutes);
@@ -141,9 +143,17 @@ public class SchedulingService {
     }
 
     private boolean isSlotFree(SlotDTO slot, List<Appointment> appointments) {
-        return appointments.stream().noneMatch(app ->
-                app.getStartDateTime().isBefore(slot.end()) &&
-                        app.getEndDateTime().isAfter(slot.start())
-        );
+        if (slot == null || slot.start() == null || slot.end() == null) return false;
+
+        return appointments.stream()
+                .filter(app -> app.getStatus() == AppointmentStatus.CONFIRMED)
+                .noneMatch(app ->
+                        app.getStartDateTime() != null &&
+                                app.getEndDateTime() != null &&
+                                // Comprehensive overlap detection
+                                (slot.start().isBefore(app.getEndDateTime()) &&
+                                        slot.end().isAfter(app.getStartDateTime()))
+                );
     }
+
 }

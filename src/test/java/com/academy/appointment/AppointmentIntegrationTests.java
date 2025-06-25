@@ -54,13 +54,6 @@ class AppointmentIntegrationTests {
 
     @BeforeEach
     void setup() {
-        appointmentRepository.deleteAll();
-        serviceProviderRepository.deleteAll();
-        serviceRepository.deleteAll();
-        serviceTypeRepository.deleteAll();
-        memberRepository.deleteAll();
-        roleRepository.deleteAll();
-
         defaultRole = new Role();
         defaultRole.setName("USER");
         defaultRole = roleRepository.save(defaultRole);
@@ -84,24 +77,6 @@ class AppointmentIntegrationTests {
 
         var authentication = new UsernamePasswordAuthenticationToken("teste1", "Teste123.", List.of());
         SecurityContextHolder.getContext().setAuthentication(authentication);
-    }
-
-    @AfterEach
-    void teardown() {
-        SecurityContextHolder.clearContext();
-
-        appointmentRepository.deleteAll();
-        providerPermissionRepository.deleteAll();
-        serviceProviderRepository.deleteAll();
-
-        serviceRepository.findAll().forEach(service -> service.getTags().clear());
-        serviceRepository.saveAll(serviceRepository.findAll());
-
-        serviceRepository.deleteAll();
-        tagRepository.deleteAll();
-        serviceTypeRepository.deleteAll();
-        memberRepository.deleteAll();
-        roleRepository.deleteAll();
     }
 
     @Test

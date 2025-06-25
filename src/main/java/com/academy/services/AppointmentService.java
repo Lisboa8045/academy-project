@@ -159,4 +159,8 @@ public class AppointmentService {
         LocalDateTime end = now.plusDays(slotWindowDays);
         return appointmentRepository.findByServiceProvider_Provider_IdAndStartDateTimeBetween(providerId, now, end);
     }
+
+    public List<Appointment> getAppointmentsForServiceProvider(Long serviceProviderId) {
+        return appointmentRepository.findByServiceProviderId(serviceProviderId);
+    }
 }

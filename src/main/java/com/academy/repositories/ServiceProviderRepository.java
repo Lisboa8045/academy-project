@@ -33,4 +33,6 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
 
     @Query("SELECT sp FROM ServiceProvider sp JOIN sp.permissions p WHERE sp.service.id = :serviceId AND p.permission = :permission")
     List<ServiceProvider> findProvidersByServiceIdAndPermission(Long serviceId, ProviderPermissionEnum permission);
+
+    boolean existsByServiceIdAndPermissions_Permission(Long id, ProviderPermissionEnum providerPermissionEnum);
 }
