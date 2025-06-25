@@ -10,5 +10,5 @@ export const routes: Routes = [
   { path: 'profile', component: ProfileComponent },
   { path: 'unauthorized', component: UnauthorizedComponent },
   { path: 'schedule', component: ScheduleComponent },
-  { path: 'home', component: LandingPageComponent},
+  { path: '', component: LandingPageComponent},
 ];
