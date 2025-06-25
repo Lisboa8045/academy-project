@@ -42,13 +42,6 @@ export class ProfileButtonComponent implements OnInit {
         icon: '👔'
       },
       {
-        label: 'Schedule',
-        icon: '⚙️',
-        command: () => {
-          this.router.navigate(['/schedule'])
-        }
-      },
-      {
         label: 'Settings',
         icon: '⚙️'
       },
