@@ -126,7 +126,7 @@ class AppointmentIntegrationTests {
         assertEquals(AppointmentStatus.PENDING, created.status());
         assertEquals(sp.getId(), created.serviceProviderId());
 
-        assertTrue(appointmentRepository.findById(created.id().intValue()).isPresent());
+        assertTrue(appointmentRepository.findById(created.id()).isPresent());
     }
 
     @Test

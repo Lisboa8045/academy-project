@@ -112,7 +112,7 @@ public class ServiceIntegrationTests {
     }
 
     public AppointmentRequestDTO createAppDTO(Long serviceProviderID, Long memberID){
-        return new AppointmentRequestDTO(serviceProviderID, memberID, null, null);
+        return new AppointmentRequestDTO(serviceProviderID, null, null, 0, "", null);
     }
 
     public void createDummyClient(String name){
