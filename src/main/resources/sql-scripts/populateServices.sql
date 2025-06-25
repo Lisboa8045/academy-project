@@ -47,3 +47,27 @@ INSERT IGNORE INTO service (id, owner_id, name, description, price, discount, ne
     (19, 2,'Salon & Therapy Spa', 'Classic salon services combined with mental wellness support.', 189.77, 8, 0, 120, 1, NOW(), NOW(), 'system', 'system'),
     (20, 2,'Academic Boost Program', 'Effective tutoring and support in a calm, salon-inspired atmosphere.', 442.23, 29, 1, 120, 3, NOW(), NOW(), 'system', 'system');
 
+
+-- Insert Service-Tag Relations
+INSERT IGNORE INTO service_tag (service_id, tag_id) VALUES
+                                                 (1, 2), (1, 10), (1, 9),
+                                                 (2, 9), (2, 10), (2, 8), (2, 14),
+                                                 (3, 14), (3, 1), (3, 7),
+                                                 (4, 8), (4, 13), (4, 4),
+                                                 (5, 14), (5, 10), (5, 2),
+                                                 (6, 11), (6, 12), (6, 4),
+                                                 (7, 11), (7, 13), (7, 14),
+                                                 (8, 6), (8, 5),
+                                                 (9, 3), (9, 13),
+                                                 (10, 7), (10, 10), (10, 3),
+                                                 (11, 5), (11, 6), (11, 13), (11, 8),
+                                                 (12, 6), (12, 7), (12, 5),
+                                                 (13, 10), (13, 6), (13, 1),
+                                                 (14, 7), (14, 12), (14, 11),
+                                                 (15, 9), (15, 3), (15, 8),
+                                                 (16, 10), (16, 6), (16, 11),
+                                                 (17, 10), (17, 9), (17, 6),
+                                                 (18, 12), (18, 10), (18, 13), (18, 14),
+                                                 (19, 1), (19, 12), (19, 4), (19, 11),
+                                                 (20, 9), (20, 1), (20, 4);
+
