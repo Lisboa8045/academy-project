@@ -4,9 +4,10 @@ export function passwordsMatchValidator(group: AbstractControl): ValidationError
   const password = group.get('newPassword')?.value;
   const confirm = group.get('confirmPassword')?.value;
 
-  if (!password || !confirm) {
+  if (!password || !confirm)
     return null;
 
-  return password === confirm ? null : { passwordsMismatch: true };
+    return password === confirm ? null : {passwordsMismatch: true};
+
 }
 

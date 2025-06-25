@@ -14,6 +14,7 @@ import { noSpecialCharsValidator } from '../shared/validators/no-special-chars.v
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { snackBarSuccess } from '../shared/snackbar/snackbar-success';
 import { snackBarError } from '../shared/snackbar/snackbar-error';
+import {passwordsMatchValidator} from '../shared/validators/password-match-validator';
 
 @Component({
   selector: 'app-profile',
@@ -75,17 +76,19 @@ export class ProfileComponent {
       oldPassword: [''],
       newPassword: [''],
       confirmPassword: ['']
-    }, { validators: this.passwordsMatchValidator });
+    }, { validators: passwordsMatchValidator });
 
     this.profileForm.disable();
   }
 
-  private passwordsMatchValidator(group: AbstractControl): ValidationErrors | null {
+  /*private passwordsMatchValidator(group: AbstractControl): ValidationErrors | null {
     const password = group.get('newPassword')?.value;
     const confirm = group.get('confirmPassword')?.value;
     if (!password || !confirm) return null;
     return password === confirm ? null : { passwordsMismatch: true };
   }
+
+   */
 
   private updatePasswordValidators() {
     if (this.editPasswordMode) {
@@ -184,9 +187,11 @@ export class ProfileComponent {
 
   logout() {
     this.authService.logout().subscribe({
-      next: () => this.router.navigate(['/']),
+      next: () => {
+        this.userProfileService.revoke();
+        this.router.navigate(['/'])
+      },
       error: (err) => console.error('Logout failed', err)
     });
-    this.userProfileService.revoke();
   }
 }
