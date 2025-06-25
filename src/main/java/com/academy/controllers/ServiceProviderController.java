@@ -1,6 +1,7 @@
 // ServiceProviderController.java
 package com.academy.controllers;
 
+import com.academy.dtos.service_provider.ServiceProviderMapper;
 import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
 import com.academy.dtos.service_provider.ServiceProviderResponseDTO;
 import com.academy.exceptions.EntityNotFoundException;
@@ -17,9 +18,11 @@ import java.util.List;
 @RequestMapping("/service-providers")
 public class ServiceProviderController {
     private final ServiceProviderService serviceProviderService;
+    private final ServiceProviderMapper serviceProviderMapper;
 
-    public ServiceProviderController(ServiceProviderService serviceProviderService) {
+    public ServiceProviderController(ServiceProviderService serviceProviderService, ServiceProviderMapper serviceProviderMapper) {
         this.serviceProviderService = serviceProviderService;
+        this.serviceProviderMapper = serviceProviderMapper;
     }
     @GetMapping
     public List<ServiceProviderResponseDTO> getAllServiceProviders() {
@@ -31,6 +34,13 @@ public class ServiceProviderController {
         return serviceProviderService.getServiceProviderById(id)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
+    }
+
+    @GetMapping("/owner/{ownerId}")
+    public ResponseEntity<List<ServiceProviderResponseDTO>> getServiceProviderByOwnerId(@PathVariable long ownerId) {
+        return ResponseEntity.ok(serviceProviderService.getAllByServiceOwnerId(ownerId).stream()
+                .map(serviceProviderMapper::toResponseDTO)
+                .toList());
     }
 
     @PostMapping

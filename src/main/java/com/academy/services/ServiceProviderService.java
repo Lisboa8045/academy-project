@@ -7,7 +7,6 @@ import com.academy.dtos.service_provider.ServiceProviderResponseDTO;
 import com.academy.exceptions.AuthenticationException;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.exceptions.MemberNotFoundException;
-import com.academy.models.Appointment;
 import com.academy.models.member.Member;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
@@ -73,6 +72,10 @@ public class ServiceProviderService {
 
     public List<ServiceProvider> getAllByProviderId(Long id) {
         return serviceProviderRepository.findAllByProviderId(id);
+    }
+
+    public List<ServiceProvider> getAllByServiceOwnerId(Long ownerId) {
+        return serviceProviderRepository.findAllByServiceOwnerId(ownerId);
     }
 
     @Transactional
