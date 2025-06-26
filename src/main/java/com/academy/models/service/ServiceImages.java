@@ -19,7 +19,7 @@ import lombok.Setter;
 public class ServiceImages {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column(name="service_images_id")
+    @Column(name = "id")
     private Long id;
 
     @Column(name="image")
