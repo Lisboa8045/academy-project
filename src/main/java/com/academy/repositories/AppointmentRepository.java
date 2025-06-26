@@ -1,18 +1,35 @@
 package com.academy.repositories;
 
 import com.academy.models.Appointment;
+import com.academy.models.appointment.Appointment;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-public interface AppointmentRepository extends JpaRepository<Appointment, Integer> {
+public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
+    List<Appointment> findAllByServiceProviderId(Long serviceProviderProviderId);
     List<Appointment> findByMember_Id(Long memberId);
     Page<Appointment> findByMember_Username(String username, Pageable pageable);
 
+    @Query("SELECT a FROM Appointment a " +
+            "WHERE a.serviceProvider.id = :providerId " +
+            "AND ((a.startDateTime < :end AND a.endDateTime > :start) " +
+            "OR (a.startDateTime = :start AND a.endDateTime = :end))")
+    List<Appointment> findConflictingAppointments(
+            @Param("providerId") Long providerId,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
 
-    //Collection<Appointment> findByProvider_Username(String );
+    List<Appointment> findByServiceProvider_Provider_IdAndStartDateTimeBetween(Long providerId, LocalDateTime now,
+            LocalDateTime in30Days);
+
+    List<Appointment> findByServiceProviderId(Long serviceProviderId);
 }

@@ -1,8 +1,11 @@
 package com.academy.models.service.service_provider;
 
-import com.academy.models.Appointment;
+import com.academy.models.appointment.Appointment;
+
 import com.academy.models.member.Member;
+
 import com.academy.models.service.Service;
+
 import com.academy.models.shared.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,12 +18,16 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.Column;
 import lombok.Getter;
+
 import lombok.Setter;
+
 import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 @Entity
 
@@ -44,6 +51,9 @@ public class ServiceProvider extends BaseEntity {
 
     @OneToMany(mappedBy = "serviceProvider")
     private List<ProviderPermission> permissions = new ArrayList<>();
+
+    @Column(name  = "active", nullable = false)
+    private boolean active = true;
 
 }
 

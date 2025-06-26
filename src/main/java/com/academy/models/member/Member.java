@@ -1,6 +1,6 @@
 package com.academy.models.member;
 
-import com.academy.models.Appointment;
+import com.academy.models.appointment.Appointment;
 import com.academy.models.Availability;
 import com.academy.models.Role;
 import com.academy.models.service.Service;
@@ -21,8 +21,8 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
 
 
 @Entity
