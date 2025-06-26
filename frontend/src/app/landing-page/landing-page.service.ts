@@ -57,7 +57,7 @@ export class LandingPageService {
           return acc;
         }, new Map<number, { total: number; count: number }>());
 
-        // Calcula média e cria array de serviços com rating
+        // Serviços avaliados
         const ratedServices: RatedServiceModel[] = Array.from(
           ratings.entries() as Iterable<[number, { total: number; count: number }]>
         ).map(([id, { total, count }]) => ({
@@ -65,9 +65,20 @@ export class LandingPageService {
           averageRating: parseFloat((total / count).toFixed(1)),
         }));
 
+        // Serviços sem avaliação (nota 0)
+        const ratedIds = new Set(ratedServices.map(s => s.id));
+        const unratedServices = services
+          .filter(s => !ratedIds.has(s.id))
+          .map(s => ({
+            ...s,
+            averageRating: 0,
+          }));
 
-        // Ordena por rating decrescente e pega os top 10
-        return ratedServices.sort((a, b) => b.averageRating - a.averageRating).slice(0, 10);
+        // Junta ambos e ordena
+        const allServices = [...ratedServices, ...unratedServices];
+        return allServices
+          .sort((a, b) => b.averageRating - a.averageRating)
+          .slice(0, 10);
       })
     );
   }

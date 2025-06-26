@@ -3,11 +3,12 @@ import {Component, Input} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ServiceModel} from '../service.model';
 import { Router } from '@angular/router';
+import {ServiceCardComponent} from '../../shared/service-card/service-card.component';
 
 @Component({
   selector: 'app-service-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ServiceCardComponent],
   templateUrl: './service-list.component.html',
   styleUrls: ['./service-list.component.css']
 })

@@ -2,12 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LandingPageService } from '../landing-page.service';
 import {Router} from '@angular/router';
+import {ServiceCardComponent} from '../../shared/service-card/service-card.component';
 
 @Component({
   selector: 'app-highlighted-services',
   standalone: true,
   imports: [
-    CommonModule
+    CommonModule,
+    ServiceCardComponent
   ],
   templateUrl: './highlighted-services.component.html',
   styleUrls: ['./highlighted-services.component.css']
