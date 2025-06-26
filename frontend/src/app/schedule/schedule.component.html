@@ -12,7 +12,7 @@
     (previousWeek)="goToPreviousWeek()"
     (nextWeek)="goToNextWeek()"
     (slotSelected)="selectSlot($event)"
-    (backToServices)="currentStep = 'service'">
+    (backToServices)="backToServices()">
   </app-slot-selection>
 
   <app-provider-selection-modal

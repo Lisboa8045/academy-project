@@ -6,9 +6,8 @@ import { ScheduleApiService } from './schedule.service';
 import { SlotModel } from '../models/slot.model';
 import { ServiceModel } from '../service/service.model';
 import { AppointmentModel } from '../models/appointment.model';
-import { ServiceTypeModel } from '../models/service-type.model';
 import {CommonModule} from '@angular/common';
-import {ServiceSearchComponent} from './serviceSearchComponent/service-search.component';
+import { Router } from '@angular/router';
 import {ProviderSelectionModalComponent} from './providerSelectionModalComponent/provider-selection-modal.component';
 import {ConfirmationModalComponent} from './confirmationModalComponent/confirmation-modal.component';
 import {SlotSelectionComponent} from './slotSelectionComponent/slot-selection.component';
@@ -55,8 +54,9 @@ export class ScheduleComponent implements OnInit {
       private serviceApi: ServiceApiService,
       private scheduleApi: ScheduleApiService,
       private serviceDetailsService: ServiceDetailsService,
-      private route: ActivatedRoute // Adicionar isto
-  ) {
+      private route: ActivatedRoute,
+      private router: Router
+) {
     this.form = this.fb.group({
       serviceId: [null]
     });
@@ -249,6 +249,10 @@ export class ScheduleComponent implements OnInit {
     this.showProviderModal = false;
     this.showConfirmationModal = true;
     this.currentStep = 'confirmation';
+  }
+
+  backToServices() {
+    this.router.navigate(['/services']);
   }
 
 }
