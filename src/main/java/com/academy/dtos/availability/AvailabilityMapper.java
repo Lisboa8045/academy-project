@@ -11,8 +11,8 @@ public abstract class AvailabilityMapper {
     @Mapping(target = "memberId", source = "member.id")
     public abstract AvailabilityResponseDTO toResponseDTOWithMember(Availability availability);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     public abstract Availability toEntity(AvailabilityRequestDTO requestDTO);
-
-    @Mapping(target = "member.id", source = "memberId")
-    public abstract Availability toEntityWithMember(AvailabilityRequestDTO requestDTO);
 }

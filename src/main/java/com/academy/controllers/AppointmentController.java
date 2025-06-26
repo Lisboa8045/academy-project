@@ -1,10 +1,14 @@
 // AppointmentController.java
 package com.academy.controllers;
 
+import com.academy.dtos.SlotDTO;
 import com.academy.dtos.appointment.AppointmentRequestDTO;
 import com.academy.dtos.appointment.AppointmentResponseDTO;
 import com.academy.services.AppointmentService;
+import com.academy.services.SchedulingService;
+
 import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,8 +19,10 @@ import java.util.List;
 public class AppointmentController {
 
     private final AppointmentService appointmentService;
+    private final SchedulingService schedulingService;
 
-    public AppointmentController(AppointmentService appointmentService) {
+    public AppointmentController(AppointmentService appointmentService, SchedulingService schedulingService) {
+        this.schedulingService = schedulingService;
         this.appointmentService = appointmentService;
     }
 
@@ -35,6 +41,7 @@ public class AppointmentController {
         AppointmentResponseDTO response = appointmentService.createAppointment(dto);
         return ResponseEntity.ok(response);
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<AppointmentResponseDTO> updateAppointment(@PathVariable Long id, @RequestBody AppointmentRequestDTO appointmentDetails) {
@@ -57,5 +64,11 @@ public class AppointmentController {
     public ResponseEntity<Void> deleteReview(@PathVariable Long id) {
         appointmentService.deleteReview(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/services/{serviceId}/free-slots")
+    public ResponseEntity<List<SlotDTO>> getFreeSlots(@PathVariable Long serviceId) {
+        List<SlotDTO> slots = schedulingService.getFreeSlotsForService(serviceId);
+        return ResponseEntity.ok(slots);
     }
 }

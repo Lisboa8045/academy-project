@@ -1,51 +1,48 @@
 // src/app/services/service-api.service.ts
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {Observable} from 'rxjs';
 import {ServiceModel} from '../service/service.model';
+import {ServiceQuery} from './models/service-query.model';
+import {ServiceTypeResponseDTO} from "./models/service-type.model";
 
-export interface PagedServicesResponse {
+export interface PagedResponse {
   content: ServiceModel[];
   totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class ServiceApiService {
-  private SEARCH_URL = 'http://localhost:8080/auth/services/search';
-  private BASE_URL = 'http://localhost:8080/my-services';
+  private BASE_URL = 'http://localhost:8080/services';
+  private SERVICE_TYPE_URL = 'http://localhost:8080/service-types';
 
   constructor(private http: HttpClient) {}
 
-  searchServices(
-    name = '',
-    page = 0,
-    size = 10,
-    sort = 'price,asc',
-    tags: string[] = [],
-    priceMin?: number,
-    priceMax?: number
-  ): Observable<PagedServicesResponse> {
+  searchServices(name: string, options: ServiceQuery): Observable<PagedResponse> {
     let params = new HttpParams()
       .set('name', name)
-      .set('page', page)
-      .set('size', size)
-      .set('sort', sort);
+      .set('page', options.page.toString())
+      .set('size', options.pageSize.toString())
+      .set('sort', options.sortOrder);
 
-    if (tags.length) {
-      tags.forEach(tag => {
-        params = params.append('tags', tag);
-      });
-    }
+    if (options.minPrice != null) params = params.set('minPrice', options.minPrice.toString());
+    if (options.maxPrice != null) params = params.set('maxPrice', options.maxPrice.toString());
+    if (options.minDuration != null) params = params.set('minDuration', options.minDuration.toString());
+    if (options.maxDuration != null) params = params.set('maxDuration', options.maxDuration.toString());
+    if (options.negotiable != null) params = params.set('negotiable', options.negotiable.toString());
+    if (options.serviceTypeName != null) params = params.set('serviceTypeName', options.serviceTypeName.toString());
 
-    if (priceMin !== undefined) params = params.set('priceMin', priceMin);
-    if (priceMax !== undefined) params = params.set('priceMax', priceMax);
+    console.log('Search params:', params.toString());
 
-    return this.http.get<PagedServicesResponse>(this.SEARCH_URL, { params });
+    return this.http.get<PagedResponse>(this.BASE_URL + '/search', {params});
   }
 
-  getServicesByMemberID(id: number){
-    return this.http.get<PagedServicesResponse>(`${this.BASE_URL}/${id}`);
+  getServiceTypes(): Observable<ServiceTypeResponseDTO[]> {
+    return this.http.get<ServiceTypeResponseDTO[]>(this.SERVICE_TYPE_URL);
   }
 }

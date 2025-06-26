@@ -73,3 +73,4 @@ public class Service extends BaseEntity {
     @OneToMany(mappedBy = "service")
     private List<ServiceProvider> serviceProviders = new ArrayList<>();
 }
+
