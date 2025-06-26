@@ -137,7 +137,7 @@ public class MemberService {
     }
 
     private void sendConfirmationEmail(Member member, String rawToken) {
-        String confirmationUrl = appProperties.getUrl() + "/auth/confirm-email/" + rawToken;
+        String confirmationUrl = appProperties.getFrontendUrl() + "/confirm-email/" + rawToken;
 
         String html = loadVerificationEmailHtml()
                 .replace("[User Name]", member.getUsername())

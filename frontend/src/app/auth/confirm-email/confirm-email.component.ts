@@ -34,21 +34,21 @@ export class ConfirmEmailComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        console.error('Email confirmation failed', err);
+        this.loading = false;
         if (err.status === 400) {
-          this.message = 'This confirmation link is invalid.';
+          this.error = 'This confirmation link is invalid.';
         }
         else if (err.status === 410) {
-          this.message = 'This confirmation link has expired.'
+          this.error = 'This confirmation link has expired.'
         }
         else {
-          this.message = 'An unexpected error occurred.';
+          this.error = 'An unexpected error occurred.';
         }
       }
     });
   }
 
   goToLogin(): void {
-    //this.router.navigate(['/auth']);
+    this.router.navigate(['/auth']);
   }
 }
