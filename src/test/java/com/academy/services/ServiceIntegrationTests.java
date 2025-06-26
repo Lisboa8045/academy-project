@@ -19,7 +19,6 @@ import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.RoleRepository;
 import jakarta.transaction.Transactional;
 import org.apache.coyote.BadRequestException;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -182,7 +181,7 @@ public class ServiceIntegrationTests {
         assertThat(responseDTO).isNotNull();
         assertThat(responseDTO.name()).isEqualTo("Test Service");
         assertThat(responseDTO.description()).isEqualTo("Test Description");
-        assertThat(responseDTO.serviceType().name()).isEqualTo(defaultServiceType.getName());
+        assertThat(responseDTO.serviceTypeName()).isEqualTo(defaultServiceType.getName());
         assertThat(responseDTO.tagNames()).containsExactlyInAnyOrder("tag1", "tag2"); // Ensure that tags are associated
     }
 
@@ -211,7 +210,7 @@ public class ServiceIntegrationTests {
 
         // Verify that the service was updated with the new serviceType and tags
         assertThat(updatedResponse.name()).isEqualTo("Updated Service");
-        assertThat(updatedResponse.serviceType().name()).isEqualTo(newServiceType.getName());
+        assertThat(updatedResponse.serviceTypeName()).isEqualTo(newServiceType.getName());
         assertThat(updatedResponse.tagNames()).containsExactlyInAnyOrder("tag2", "tag3");
 
         // Verify that the old serviceType does not contain a reference to the service
@@ -314,7 +313,7 @@ public class ServiceIntegrationTests {
         assertThat(updateResponseDTO).isNotNull();
         assertThat(updateResponseDTO.name()).isEqualTo("Updated Service");
         assertThat(updateResponseDTO.description()).isEqualTo("Updated Description");
-        assertThat(updateResponseDTO.serviceType().name()).isEqualTo(defaultServiceType.getName());
+        assertThat(updateResponseDTO.serviceTypeName()).isEqualTo(defaultServiceType.getName());
 
         // Verify that the tags were updated
         assertThat(updateResponseDTO.tagNames()).containsExactlyInAnyOrder("tag1", "tag3", "tag4");
