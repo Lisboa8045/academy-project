@@ -30,13 +30,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
-@SuppressWarnings("OptionalGetWithoutIsPresent")
 @SpringBootTest
 @Transactional
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -240,7 +238,7 @@ class ServiceIntegrationTests {
         assertThat(tagService.getTagEntityById(defaultTag.getId()).getServices()).isNotEmpty();
 
         createDummyClient("client");
-        AppointmentResponseDTO apptResponseDTO = appointmentService.createAppointment(createAppDTO(serviceProviderService.getServiceProviderByUsername("owner").getId(), memberService.getMemberByUsername("client").getId()));
+        AppointmentResponseDTO apptResponseDTO = appointmentService.createAppointment(createAppDTO(serviceProviderService.getServiceProviderByUsername("owner").getId()));
 
         assertThat(appointmentService.getAppointmentById(apptResponseDTO.id())).isNotNull();
 
