@@ -5,6 +5,7 @@ import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {AuthStore} from '../auth/auth.store';
 import {ProfileButtonComponent} from './profile-button/profile-button.component';
 import {NotificationButtonComponent} from './notification-button/notification-button.component';
+import {UserProfileService} from '../profile/user-profile.service';
 
 @Component({
   selector: 'app-header',
