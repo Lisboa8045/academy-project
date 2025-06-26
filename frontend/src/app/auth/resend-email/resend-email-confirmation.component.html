@@ -1,0 +1,23 @@
+<h2>Email Not Confirmed</h2>
+<p>
+    Please confirm your email using the verification code sent to this address: <strong>{{ email }}</strong>
+</p>
+
+<div class="resend-section">
+    <div class="button-column">
+        <div class="resend-row">
+            <button (click)="resend()" [disabled]="resendDisabled">
+                Resend Verification
+            </button>
+            <span *ngIf="loading" class="spinner"></span>
+            <span *ngIf="resendDisabled && !loading" class="checkmark">✅</span>
+        </div>
+
+        <button *ngIf="showBackToLogin" (click)="goToLogin()">
+            Back to Login
+        </button>
+    </div>
+</div>
+
+<p *ngIf="message" class="success">{{ message }}</p>
+<p *ngIf="error" class="error">{{ error }}</p>

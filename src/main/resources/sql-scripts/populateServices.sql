@@ -7,7 +7,6 @@ INSERT IGNORE INTO service_type (id, name, icon, created_at, updated_at, created
                                                                 (3, 'Education', 'default.png', NOW(), NOW(), 'system', 'system'),
                                                                 (4, 'Home Services', 'default.png', NOW(), NOW(), 'system', 'system'),
                                                                 (5, 'Wellness', 'default.png', NOW(), NOW(), 'system', 'system');
-
 -- Insert Tags
 INSERT IGNORE INTO tag (id, name, custom, created_at, updated_at, created_by, updated_by) VALUES
                                                                   (1, 'salon', 0, NOW(), NOW(), 'system', 'system'),
@@ -25,7 +24,6 @@ INSERT IGNORE INTO tag (id, name, custom, created_at, updated_at, created_by, up
                                                                   (13, 'nutrition', 0, NOW(), NOW(), 'system', 'system'),
                                                                   (14, 'spa', 0, NOW(), NOW(), 'system', 'system'),
                                                                   (15, 'personal training', 0, NOW(), NOW(), 'system', 'system');
-
 -- Insert Services
 INSERT IGNORE INTO service (id, owner_id, name, description, price, discount, negotiable, duration, service_type_id, created_at, updated_at, created_by, updated_by) VALUES
     (1, 2, 'Math & Tutoring Assistance', 'Supportive math and tutoring sessions designed to help students succeed.', 354.12, 15, 0, 120, 3, NOW(), NOW(), 'system', 'system'),
@@ -50,7 +48,6 @@ INSERT IGNORE INTO service (id, owner_id, name, description, price, discount, ne
     (20, 2,'Academic Boost Program', 'Effective tutoring and support in a calm, salon-inspired atmosphere.', 442.23, 29, 1, 120, 3, NOW(), NOW(), 'system', 'system');
 
 
-
 -- Insert Service-Tag Relations
 INSERT IGNORE INTO service_tag (service_id, tag_id) VALUES
                                                  (1, 2), (1, 10), (1, 9),
@@ -73,3 +70,4 @@ INSERT IGNORE INTO service_tag (service_id, tag_id) VALUES
                                                  (18, 12), (18, 10), (18, 13), (18, 14),
                                                  (19, 1), (19, 12), (19, 4), (19, 11),
                                                  (20, 9), (20, 1), (20, 4);
+

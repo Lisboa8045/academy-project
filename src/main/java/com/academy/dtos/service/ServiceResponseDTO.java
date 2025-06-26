@@ -18,5 +18,6 @@ public record ServiceResponseDTO(
         String serviceTypeName,
         List<String> tagNames,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        List<String> images
 ) {}

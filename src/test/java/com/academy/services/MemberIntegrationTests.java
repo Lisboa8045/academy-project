@@ -64,7 +64,7 @@ public class MemberIntegrationTests {
     }
 
     private MemberRequestDTO createMemberRequestDTO(String username, String email, String address, String postalCode, String phoneNumber, String password, Long roleId) {
-        return new MemberRequestDTO(username, email, address, postalCode, phoneNumber, password, roleId);
+        return new MemberRequestDTO(username, email, address, postalCode, phoneNumber, roleId, null, null);
     }
 @Test
     void deleteMember_memberNotFound_throwsException(){

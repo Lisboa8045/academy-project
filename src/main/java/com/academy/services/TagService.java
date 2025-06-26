@@ -53,7 +53,7 @@ public class TagService {
         return tagRepository.findAll()
                 .stream()
                 .map(tagMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     // Read one

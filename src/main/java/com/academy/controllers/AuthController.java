@@ -9,7 +9,6 @@ import com.academy.dtos.register.LoginResponseDto;
 import com.academy.dtos.register.RegisterRequestDto;
 import com.academy.dtos.register.RegisterResponseDto;
 import com.academy.services.MemberService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,6 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
@@ -29,12 +27,14 @@ public class AuthController {
     private final MemberService memberService;
     private final MessageSource messageSource;
     private final EmailService emailService;
+    private final AuthenticationFacade authenticationFacade;
 
     @Autowired
     public AuthController(MemberService memberService, MessageSource messageSource, EmailService emailService, AuthenticationFacade authenticationFacade) {
         this.memberService = memberService;
         this.messageSource = messageSource;
         this.emailService = emailService;
+        this.authenticationFacade = authenticationFacade;
     }
 
     @PostMapping("/register")
@@ -68,8 +68,8 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(HttpServletRequest request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    public ResponseEntity<?> getCurrentUser() {
+        Authentication auth = authenticationFacade.getAuthentication();
 
         if (auth == null || !auth.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -84,13 +84,13 @@ public class AuthController {
         Long id = member.getId();
         String profilePicture = member.getProfilePicture();
 
-        return ResponseEntity.ok(Map.of("username", username, "id", id, "profilePicture", profilePicture));
+        return ResponseEntity.ok(Map.of("username", username, "id", id, "profilePicture", profilePicture != null ? profilePicture : ""));
     }
 
     @PostMapping("/recreate-confirmation-token")
     public ResponseEntity<RecreateConfirmationTokenResponseDto> recreateConfirmationToken(
             @RequestBody RecreateConfirmationTokenRequestDto request) {
-        memberService.recreateConfirmationToken(request.login(), request.password());
+        memberService.recreateConfirmationToken(request.login());
         return ResponseEntity.ok(new RecreateConfirmationTokenResponseDto("Confirmation token recreated"));
     }
 }
