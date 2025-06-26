@@ -145,28 +145,11 @@ export class ScheduleComponent implements OnInit {
 
   onSearchChange(searchTerm: string) {
     this.searchTerm = searchTerm.toLowerCase();
-    this.applyFilters();
   }
 
     filterByType(typeId: number | null) {
       this.selectedServiceTypeId = typeId;
-      this.applyFilters();
     }
-
-    applyFilters() {
-      this.filteredServices = this.services.filter(service => {
-        const matchesType =
-          this.selectedServiceTypeId == null || service.serviceType.id === this.selectedServiceTypeId;
-        const matchesSearch =
-          !this.searchTerm || service.name.toLowerCase().includes(this.searchTerm);
-        return matchesType && matchesSearch;
-      });
-
-      this.form.get('serviceId')?.setValue(null);
-      this.selectedServiceId = undefined;
-      this.slots = [];
-    }
-
 
     selectService(service: ServiceModel) {
       this.form.get('serviceId')?.setValue(service.id);

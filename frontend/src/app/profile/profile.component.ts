@@ -73,9 +73,9 @@ export class ProfileComponent {
       address: [user.address],
       postalCode: [user.postalCode, Validators.pattern(/^[0-9]{4}-[0-9]{3}$/)],
       phoneNumber: [user.phoneNumber, Validators.pattern(/^\+[0-9]{12}$/)],
-      oldPassword: [''],
-      newPassword: [''],
-      confirmPassword: ['']
+      oldPassword: null,
+      newPassword: null,
+      confirmPassword: null
     }, { validators: passwordsMatchValidator });
 
     this.profileForm.disable();
