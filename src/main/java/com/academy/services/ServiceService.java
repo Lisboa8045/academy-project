@@ -11,6 +11,7 @@ import com.academy.models.ServiceType;
 import com.academy.models.Tag;
 import com.academy.models.member.Member;
 import com.academy.models.service.Service;
+import com.academy.models.service.ServiceImages;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.ServiceRepository;
@@ -288,4 +289,16 @@ public class ServiceService {
        return serviceRepository.queryServicesByMemberId(memberId, pageable).map(service ->  serviceMapper.toDto(service,
                getPermissionsByProviderIdAndServiceId(memberId, service.getId())));
     }
+
+    // este saveImages será para usado depois para o endpoint de criação do serviço
+    public Service saveImages(Long id, List<ServiceImages> images) {
+        serviceRepository.findById(id).map(s -> {
+                    s.setImages(images);
+                    serviceRepository.save(s);
+                    return s;
+                })
+                .orElseThrow(() -> new EntityNotFoundException(Service.class, id));
+        return null;
+    }
+
 }
