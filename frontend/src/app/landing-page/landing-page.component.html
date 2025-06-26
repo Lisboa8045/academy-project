@@ -1,6 +1,9 @@
-
 <h1>Discover the best services at your reach</h1>
-<h1>Search bar here</h1>
+
+<div class="search-bar-container">
+  <app-search-bar (search)="onSearch($event)"></app-search-bar>
+</div>
+
 <h2 style="text-align: center">Categories</h2>
 <app-service-types></app-service-types>
 

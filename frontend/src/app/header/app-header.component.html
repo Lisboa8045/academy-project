@@ -1,27 +1,22 @@
 <header class="header">
   <nav class="nav">
     <div class="home-link">
-        <a class="nav-item" routerLink="/">🏠 Home</a>
+      <a class="nav-item" routerLink="/">🏠 Home</a>
     </div>
 
-      <form class="search-form" [formGroup]="form" (ngSubmit)="onSearch()">
-          <input
-                  type="text"
-                  formControlName="query"
-                  placeholder="Search services"
-                  maxlength="100"
-                  class="search-input"
-          />
-          <button type="submit" class="search-button">🔍</button>
-      </form>
+    @if (isLandingPage()) {
+      <div class="search-form" style="visibility: hidden; width: 500px;"></div>
+    } @else {
+      <app-search-bar (search)="onSearchFromChild($event)" />
+    }
 
     <div class="right-links">
       <div class="user-profile">
-      @if (username()) {
-        <app-profile-button/>
-      } @else {
-        <a class="nav-item" routerLink="/auth">🔐 Login</a>
-      }
+        @if (username()) {
+          <app-profile-button />
+        } @else {
+          <a class="nav-item" routerLink="/auth">🔐 Login</a>
+        }
       </div>
     </div>
   </nav>

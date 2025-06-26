@@ -12,3 +12,10 @@ app-service-types {
   width: 100%;
   box-sizing: border-box;
 }
+
+.search-bar-container {
+  display: flex;
+  justify-content: center;  /* center horizontally */
+  margin: 20px 0;           /* vertical spacing */
+  width: 100%;
+}
