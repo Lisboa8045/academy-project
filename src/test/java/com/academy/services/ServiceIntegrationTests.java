@@ -286,8 +286,7 @@ class ServiceIntegrationTests {
                 .map(Tag::getName)
                 .toList();
 
-        assertThat(remainingTags).doesNotContain("tag1");
-        assertThat(remainingTags).contains("tag2");
+        assertThat(remainingTags).doesNotContain("tag1").contains("tag2");
     }
 
     @Test
