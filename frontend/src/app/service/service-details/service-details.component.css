@@ -1,0 +1,308 @@
+.service-page {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 1.3fr 1fr;
+  grid-template-rows: auto auto;
+  margin-top: 4rem;
+  margin-left: 3rem;
+  margin-right: 3rem;
+  align-items: stretch;
+}
+
+.image-section {
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column; /* <-- empilha imagem + thumbnails */
+  justify-content: center;
+  align-items: stretch;
+  align-items: center;
+  padding-right: 2rem;
+}
+
+.image-wrapper {
+  position: relative;
+  width: 700px;
+  height: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  border-radius: 10px; /* Coloca o border-radius aqui no contêiner */
+
+
+}
+.main-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  /*overflow: hidden;*/
+  /*border-radius: 10px;*/
+  object-fit: cover; /* Corta a imagem para preencher, mantendo os cantos arredondados */
+  border-radius: 0; /* Remove do elemento img para evitar conflito */
+
+}
+
+
+.nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.4);
+  color: white;
+  border: none;
+  font-size: 1.2rem;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 10;
+  border-radius: 50%;
+  transition: background 0.3s ease;
+}
+
+.nav:hover {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.nav.left {
+  left: 10px;
+}
+
+.nav.right {
+  right: 10px;
+}
+
+
+.image-hover-container {
+  position: relative;
+  width: 700px;
+  height: 400px;
+}
+
+.thumbnails-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 0.5rem;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 0 0 10px 10px;
+  z-index: 5;
+}
+
+.image-wrapper:hover .thumbnails-overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.thumbnails-scroll-wrapper {
+  display: flex;
+  overflow-x: auto;
+  max-width: 320px;
+  padding: 0.2rem;
+  scroll-behavior: smooth;
+}
+
+.thumbnail-image {
+  width: 60px;
+  height: 60px;
+  margin-right: 8px;
+  object-fit: cover;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s, border 0.2s;
+  border: 2px solid transparent;
+  flex-shrink: 0;
+}
+
+.thumbnail-image:hover,
+.thumbnail-image.selected {
+  opacity: 1;
+  border-color: #007bff;
+}
+
+
+
+.info-section{
+  grid-column: 2 / 3;
+  grid-row: 1 / 2;
+  align-content: space-between;
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+}
+
+
+.info-section h2,
+.info-section .price,
+.info-section p {
+  margin: 0px;
+  padding: 0;
+}
+
+.info-section h2 {
+  font-size: 2rem;
+  line-height: 1.2;
+}
+.info-section h3{
+  font-size: 1rem;
+}
+
+.info-section .price {
+  margin-bottom: 0.3rem;
+  font-size: 2rem;
+}
+
+.info-section p:not(:last-child) {
+  margin-bottom: 0.3rem;
+}
+
+.price-container {
+  display: flex;
+  align-items: first baseline;
+  gap: 1rem;
+}
+
+.price-details {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+}
+
+.original-price {
+  text-decoration: line-through;
+  color: #999;
+  font-size: 1.2rem;
+}
+
+.discounted-price {
+  color: #d32f2f;
+  font-weight: bold;
+  font-size: 3rem;
+  margin-left: 1rem;
+  margin-top: 0rem;
+}
+
+.normal-price {
+  font-size: 3em;
+  font-weight: bold;
+  color: #222;
+}
+
+.discount-badge {
+  background-color: #d32f2f;
+  color: white;
+  padding: 0.3rem 0.6rem;
+  border-radius: 5px;
+  font-weight: bold;
+  font-size: 1rem;
+  margin-left: -0.5rem
+}
+.negotiable-label {
+  background-color: #333333;
+  color: #999999;
+  font-size: 20px;
+  display: inline-block;
+  margin-top: 0.5rem
+}
+
+.schedule-btn {
+  margin: 58px auto 0 auto;
+  display: block;
+  padding: 16px;
+  border-radius: 20px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  padding: 16px 140px;
+
+}
+
+.schedule-btn:hover {
+  background-color: #0056b3;
+}
+
+.tag-list {
+  margin-top: -29px;
+}
+
+.tag {
+  background-color: #f0f0f0;
+  padding: 6px 12px;
+  margin-right: 8px;
+  margin-bottom: 8px;
+  display: inline-block;
+  border-radius: 16px;
+  font-size: 14px;
+}
+
+.type-and-duration {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 3rem;
+  margin-top: 0.5rem;
+}
+
+.type-and-duration h3 {
+  margin: 0;
+}
+
+.duration-info {
+  font-size: 1rem;
+  color: #555;
+  font-weight: 500;
+}
+.service-description {
+  grid-column: 1 / 3;
+  grid-row: 2 / 3;
+  background-color: #fff;
+  padding: 1rem;
+  border-radius: 1rem;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease;
+  margin: 0 3rem 2rem 3rem;
+}
+
+.service-description:hover {
+  transform: translateY(-3px);
+}
+
+.service-description h3 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  color: #007bff;
+  border-left: 5px solid #007bff;
+  padding-left: 1rem;
+  font-weight: 600;
+}
+
+.service-description p {
+  margin-left: 1.5rem;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #444;
+  text-align: justify;
+}
+
+
+
+
+
+
+
