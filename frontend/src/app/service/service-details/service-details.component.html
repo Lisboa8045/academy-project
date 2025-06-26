@@ -93,4 +93,16 @@
     <p>{{ service?.description }}</p>
   </div>
 
+  <div *ngIf="reviews && reviews.length > 0">
+    <h3>Rating</h3>
+    <div *ngFor="let review of reviews" class="review">
+      <p><strong>Rating:</strong> {{ review.rating }}/5</p>
+      <p><strong>Comment:</strong> {{ review.comment }}</p>
+    </div>
+  </div>
+
+  <div *ngIf="reviews && reviews.length === 0">
+    <p>This service doesn't have comments yet.</p>
+  </div>
+
 }

@@ -1,5 +1,6 @@
 package com.academy.controllers;
 
+import com.academy.dtos.appointment.AppointmentReviewResponseDTO;
 import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.dtos.service.UpdatePermissionsRequestDto;
@@ -92,4 +93,12 @@ public class ServiceController {
             @Valid @RequestBody UpdatePermissionsRequestDto request) throws AuthenticationException, BadRequestException {
         return ResponseEntity.ok(serviceService.updateMemberPermissions(id, request.memberId(), request.permissions()));
     }
+
+    @GetMapping("/service_with_review/{id}")
+    public ResponseEntity<List<AppointmentReviewResponseDTO>> getServiceReviews(@PathVariable Long id) {
+        System.out.println("<aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa>");
+        List<AppointmentReviewResponseDTO> reviews = serviceService.getReviewsByServiceId(id);
+        return ResponseEntity.ok(reviews);
+    }
+
 }

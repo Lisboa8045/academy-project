@@ -4,6 +4,7 @@ import {ActivatedRoute} from '@angular/router';
 import {ServiceDetailsService} from '../service-details.service';
 import {LoadingComponent} from '../../loading/loading.component';
 import {NgForOf, NgIf} from "@angular/common";
+import {AppointmentReviewModel} from '../../models/appointment-review.model';
 
 @Component({
   selector: 'app-service-details',
@@ -27,6 +28,7 @@ export class ServiceDetailsComponent implements OnInit {
   service?: ServiceModel;
   loading = signal(false);
 
+  reviews?: AppointmentReviewModel[] = [];
   async loadImages(fileNames: string[]) {
     if (!fileNames || fileNames.length === 0 || this.fetched) {
       return;
@@ -89,6 +91,16 @@ export class ServiceDetailsComponent implements OnInit {
         this.loading.set(false);
       }
     });
+
+    this.serviceDetailsService.getReviewsByServiceId(id).subscribe({
+      next: (data) => {
+        this.reviews = data;
+        console.log("Fetched reviews", this.reviews);
+      },
+      error: (err) => {
+        console.error("Error loading reviews", err);
+      }
+    })
   }
 
   prevImage(container: HTMLElement) {

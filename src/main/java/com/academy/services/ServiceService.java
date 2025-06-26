@@ -1,6 +1,8 @@
 package com.academy.services;
 
 import com.academy.config.authentication.AuthenticationFacade;
+import com.academy.dtos.appointment.AppointmentMapper;
+import com.academy.dtos.appointment.AppointmentReviewResponseDTO;
 import com.academy.dtos.service.ServiceMapper;
 import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
@@ -41,6 +43,7 @@ public class ServiceService {
     private final MemberService memberService;
     private final TagService tagService;
     private final ServiceTypeService serviceTypeService;
+    private final AppointmentMapper appointmentMapper;
 
     public ServiceService(ServiceRepository serviceRepository,
                           ServiceMapper serviceMapper,
@@ -48,7 +51,8 @@ public class ServiceService {
                           AuthenticationFacade authenticationFacade,
                           MemberService memberService,
                           TagService tagService,
-                          ServiceTypeService serviceTypeService) {
+                          ServiceTypeService serviceTypeService,
+                          AppointmentMapper appointmentMapper) {
         this.serviceRepository = serviceRepository;
         this.serviceMapper = serviceMapper;
         this.serviceProviderService = serviceProviderService;
@@ -56,6 +60,7 @@ public class ServiceService {
         this.memberService = memberService;
         this.tagService = tagService;
         this.serviceTypeService = serviceTypeService;
+        this.appointmentMapper = appointmentMapper;
     }
 
     // Create
@@ -296,4 +301,16 @@ public class ServiceService {
         return null;
     }
 
+    public List<AppointmentReviewResponseDTO> getReviewsByServiceId(Long serviceId) {
+        Service service = serviceRepository.findById(serviceId)
+                .orElseThrow(() -> new EntityNotFoundException(Service.class, serviceId));
+
+        System.out.println("Service ->> " + service);
+        System.out.println("ServiceProviders _________________ ->> " + service.getServiceProviders());
+        return service.getServiceProviders().stream()
+                .flatMap(sp -> sp.getAppointmentList().stream())
+                .filter(app -> app.getComment() != null)
+                .map(appointmentMapper::toReviewResponseDTO)
+                .toList();
+    }
 }
