@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import {CommonModule} from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { LandingPageService } from '../landing-page.service';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-highlighted-services',
@@ -15,7 +16,11 @@ export class HighlightedServicesComponent implements OnInit {
   services: any[] = [];
   defaultImage = 'https://placehold.co/300x200?text=No+Image';
 
-  constructor(private readonly landingService: LandingPageService) {}
+  constructor(
+    private readonly landingService: LandingPageService,
+    private readonly router: Router
+  ) {}
+
 
   onImgError(event: Event) {
     const imgElement = event.target as HTMLImageElement;
@@ -29,5 +34,9 @@ export class HighlightedServicesComponent implements OnInit {
       console.log(data);
     });
     console.log('[SERVICES]: ' + this.services);
+  }
+
+  onCardClick(id: number) {
+    this.router.navigate(['/services', id]);
   }
 }

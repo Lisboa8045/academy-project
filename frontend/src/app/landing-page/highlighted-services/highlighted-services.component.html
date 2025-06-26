@@ -1,5 +1,5 @@
 <div class="highlighted">
-  <div *ngFor="let service of services" class="service-card">
+  <div *ngFor="let service of services" class="service-card" (click)="onCardClick(service.id)">
     <div class="image-container">
       <img [src]="service.image_url || defaultImage"
            (error)="onImgError($event)"

@@ -1,6 +1,6 @@
 <div class="card-grid">
   <div class="card" *ngFor="let service of services()" (click)="onCardClick(service.id)">
-    <h3>{{ service.name }}</h3>
+    <h2>{{ service.name }}</h2>
     <p>{{ service.description }}</p>
     <p><strong>Price:</strong> ${{ service.price }}</p>
     <p><strong>Tags:</strong> {{ service.tagNames.join(', ') }}</p>
