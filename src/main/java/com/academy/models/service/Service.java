@@ -72,5 +72,9 @@ public class Service extends BaseEntity {
 
     @OneToMany(mappedBy = "service")
     private List<ServiceProvider> serviceProviders = new ArrayList<>();
+
+    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ServiceImages> images = new ArrayList<>();
+
 }
 
