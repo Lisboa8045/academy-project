@@ -174,15 +174,20 @@ public class ServiceService {
     private boolean hasServiceProvider(Long id, Long  serviceId){
         return serviceProviderService.existsByServiceIdAndProviderId(id, serviceId);
     }
-    public Page<ServiceResponseDTO> searchServices(String name, Double priceMin, Double priceMax, List<String> tagNames, Pageable pageable) {
+
+    public Page<ServiceResponseDTO> searchServices(String name, Double minPrice, Double maxPrice,
+                                                   Integer minDuration, Integer maxDuration, Boolean negotiable, String serviceTypeName, Pageable pageable) {
         String username = authenticationFacade.getUsername();
 
         Specification<Service> spec = Specification.where(null); // start with no specifications, add each specification after if not null/empty
 
-        spec = addIfPresent(spec, name != null && !name.isBlank(), () -> ServiceSpecifications.hasNameLike(name));
-        spec = addIfPresent(spec, tagNames != null && !tagNames.isEmpty(), () -> ServiceSpecifications.hasAnyTagNameLike(tagNames));
-        spec = addIfPresent(spec, priceMin != null, () -> ServiceSpecifications.hasPriceGreaterThanOrEqual(priceMin));
-        spec = addIfPresent(spec, priceMax != null, () -> ServiceSpecifications.hasPriceLessThanOrEqual(priceMax));
+        spec = addIfPresent(spec, name != null && !name.isBlank(), () -> ServiceSpecifications.nameOrTagMatches(name));
+        spec = addIfPresent(spec, minPrice != null, () -> ServiceSpecifications.hasPriceGreaterThanOrEqual(minPrice));
+        spec = addIfPresent(spec, maxPrice != null, () -> ServiceSpecifications.hasPriceLessThanOrEqual(maxPrice));
+        spec = addIfPresent(spec, minDuration != null, () -> ServiceSpecifications.hasDurationGreaterThanOrEqual(minDuration));
+        spec = addIfPresent(spec, maxDuration != null, () -> ServiceSpecifications.hasDurationLessThanOrEqual(maxDuration));
+        spec = addIfPresent(spec, negotiable != null, () -> ServiceSpecifications.canNegotiate(negotiable));
+        spec = addIfPresent(spec, serviceTypeName != null, () -> ServiceSpecifications.hasServiceType(serviceTypeName));
 
         return serviceRepository.findAll(spec, pageable)
                 .map(service ->  serviceMapper.toDto(service,
