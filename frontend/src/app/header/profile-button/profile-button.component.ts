@@ -21,6 +21,7 @@ export class ProfileButtonComponent implements OnInit {
   authService = inject(AuthService);
   readonly username = inject(AuthStore).username;
   readonly imageUrl = inject(UserProfileService).imageUrl;
+  readonly role = inject(AuthStore).role;
   router = inject(Router);
   menuItems: MenuItem[] = [];
 
@@ -56,6 +57,8 @@ export class ProfileButtonComponent implements OnInit {
         }
       },
     ];
+
+    this.insertByRole()
   }
 
   toggleMenu() {
@@ -64,5 +67,15 @@ export class ProfileButtonComponent implements OnInit {
 
   closeMenu() {
     this.showMenu.set(false);
+  }
+
+  insertByRole(){
+    if (this.role() === 'WORKER') {
+      this.menuItems.splice(3, 0, {
+        label: 'My Services',
+        icon: '🛎️',
+        command: () => this.router.navigate(['/my-services'])
+      });
+    }
   }
 }

@@ -1,6 +1,6 @@
 import {Component, effect, OnInit, signal} from '@angular/core';
 import {ServiceModel} from './service.model';
-import {ServiceApiService, PagedResponse} from '../shared/service-api.service';
+import {ServiceApiService, PagedServicesResponse} from '../shared/service-api.service';
 import {LoadingComponent} from '../loading/loading.component';
 import {DatePipe, NgForOf} from '@angular/common';
 
@@ -31,7 +31,7 @@ export class ServiceListComponent implements OnInit{
     this.loading.set(true);
 
     this.serviceApi.searchServices(name).subscribe({
-      next: (res: PagedResponse) => {
+      next: (res: PagedServicesResponse) => {
         this.services.set(res.content);
         this.loading.set(false);
       },

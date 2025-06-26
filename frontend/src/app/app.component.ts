@@ -18,10 +18,11 @@ export class AppComponent implements OnInit {
       withCredentials: true
     }).subscribe({
       next: res => {
-        console.log('Auto-login success, username =', res.username, ' id=', res.id);
+        console.log('Auto-login success, username =', res.username, ' id=', res.id, ' role= ', res.role);
         this.authStore.setUsername(res.username);
         this.authStore.setId(res.id);
-        this.authStore.setProfilePicture(res.profilePicture)
+        this.authStore.setProfilePicture(res.profilePicture);
+        this.authStore.setRole(res.role);
       },  error: err => {
         console.warn('Auto-login failed', err.status, err.message);
         this.authStore.clear();
