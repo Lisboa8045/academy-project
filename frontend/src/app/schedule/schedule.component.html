@@ -1,7 +1,13 @@
 <div class="schedule-container">
   <h2>Schedule appointment</h2>
+
+  <!-- Mostra mensagem se não houver providers -->
+  <div *ngIf="providers && providers.length === 0" class="no-providers-message">
+    No providers available for this service
+  </div>
+
   <app-slot-selection
-    *ngIf="(currentStep === 'slots' || currentStep === 'confirmation' || currentStep === 'provider')"
+    *ngIf="providers && providers.length > 0 && (currentStep === 'slots' || currentStep === 'confirmation' || currentStep === 'provider')"
     [slots]="slots"
     [providers]="providers"
     [selectedProvider]="selectedProvider"
@@ -16,14 +22,14 @@
   </app-slot-selection>
 
   <app-provider-selection-modal
-    *ngIf="currentStep === 'provider' && showProviderModal"
+    *ngIf="providers && providers.length > 0 && currentStep === 'provider' && showProviderModal"
     [providerOptions]="providerOptions"
     (providerSelected)="selectProviderSlot($event)"
     (backToSlots)="currentStep = 'slots'">
   </app-provider-selection-modal>
 
   <app-confirmation-modal
-    *ngIf="currentStep === 'confirmation' && showConfirmationModal"
+    *ngIf="providers && providers.length > 0 && currentStep === 'confirmation' && showConfirmationModal"
     [selectedService]="selectedService"
     [selectedSlot]="selectedSlot"
     (cancel)="cancelModal()"
