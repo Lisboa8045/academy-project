@@ -1,0 +1,12 @@
+<div class="flex items-center space-x-2 mt-4">
+  <label for="sort" class="text-gray-700 font-medium">Sort by {{ sortBy }}:</label>
+  <select
+    id="sort"
+    [(ngModel)]="order"
+    (change)="onSortChange($event)"
+    class="bg-white border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+  >
+    <option value="asc">Ascending</option>
+    <option value="desc">Descending</option>
+  </select>
+</div>

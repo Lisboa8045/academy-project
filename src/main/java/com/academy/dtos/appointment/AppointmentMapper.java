@@ -13,6 +13,7 @@ public abstract class AppointmentMapper {
             @Mapping(source= "member.id", target = "memberId"),
             @Mapping(source = "serviceProvider.provider.username", target = "serviceProviderUsername"),
             @Mapping(source = "member.username", target = "memberUsername"),
+            @Mapping(source = "serviceProvider.service.name", target="serviceName")
     })
     public abstract AppointmentResponseDTO toResponseDTO(Appointment appointment);
 

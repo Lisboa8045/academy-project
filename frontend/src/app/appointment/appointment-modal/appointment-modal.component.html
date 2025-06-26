@@ -1,0 +1,47 @@
+<div
+  class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50"
+>
+  <div
+    class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 relative animate-scale-in transition-transform duration-300"
+  >
+    <!-- Smaller Top-Right X Button -->
+    <button
+      class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-base font-bold bg-transparent border-none"
+      (click)="close.emit()"
+      aria-label="Close"
+    >
+      ✕
+    </button>
+
+    <!-- Modal Title -->
+    <h2 class="text-center text-2xl font-bold text-gray-800 mb-4">
+      Appointment Details
+    </h2>
+
+    <!-- Details Section -->
+    <div class="space-y-3 text-gray-700">
+      <div>
+        <span class="font-semibold">Service:</span>
+        <span class="ml-2">{{ appointment.serviceName }}</span>
+      </div>
+      <div>
+        <span class="font-semibold">Provider:</span>
+        <span class="ml-2">{{ appointment.serviceProviderUsername }}</span>
+      </div>
+      <div>
+        <span class="font-semibold">Date:</span>
+        <span class="ml-2">{{ appointment.startDateTime | date:'MMM d, y, h:mm a' }}</span>
+      </div>
+    </div>
+
+    <!-- Bottom Right Close Button -->
+    <div class="flex justify-end mt-6">
+      <button
+        class="px-4 py-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition"
+        (click)="close.emit()"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+</div>
