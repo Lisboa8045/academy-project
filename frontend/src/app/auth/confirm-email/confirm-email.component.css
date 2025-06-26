@@ -1,46 +1,24 @@
-:host {
-    max-width: 400px;
-    margin: auto;
-    text-align: center;
-    padding: 2rem;
+.confirm-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 5rem;
+  text-align: center;
 }
 
-.resend-section {
-    display: flex;
-    justify-content: center;
-    margin-top: 1rem;
-}
-
-.button-column {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.resend-row {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: fit-content;
-    margin: 0 auto;
+.loading {
+  font-size: 1.2rem;
+  color: #555;
 }
 
 .success {
-    color: green;
-    margin-top: 1rem;
+  color: green;
 }
 
 .error {
-    color: red;
-    margin-top: 1rem;
+  color: red;
 }
 
-.checkmark {
-    position: absolute;
-    right: -2.5rem;
-    transform: translateY(2px);
-    font-size: 1.4rem;
-    color: green;
+button {
+  margin-top: 1rem;
 }

@@ -1,46 +1,39 @@
-import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {AuthService} from "../auth.service";
-import {CommonModule} from "@angular/common";
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-confirm-email',
   templateUrl: './confirm-email.component.html',
-  imports: [CommonModule],
   styleUrls: ['./confirm-email.component.css']
 })
 export class ConfirmEmailComponent implements OnInit {
-  email: string = '';
   message: string = '';
   error: string = '';
-  resendDisabled: boolean = false;
-  showBackToLogin: boolean = false;
+  loading: boolean = true;
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
-    private authService: AuthService
-  ) {
-  }
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
-      this.email = params['email'] || '';
-    });
-  }
+    const token = this.route.snapshot.paramMap.get('token');
+    if (!token) {
+      this.error = 'Invalid verification link.';
+      this.loading = false;
+      return;
+    }
 
-  resend(): void {
-    if (!this.email || this.resendDisabled) return;
-    this.authService.resendConfirmation(this.email).subscribe({
+    this.authService.confirmEmail(token).subscribe({
       next: () => {
-        this.message = 'Verification email sent!';
-        this.error = '';
-        this.resendDisabled = true;
-        this.showBackToLogin = true;
+        this.message = '✅ Your email has been successfully confirmed!';
+        this.loading = false;
       },
-      error: () => {
-        this.message = '';
-        this.error = 'Failed to resend verification. Please try again later.';
+      error: (err) => {
+        this.error = err?.error || '❌ This confirmation link is invalid or has expired.';
+        this.loading = false;
       }
     });
   }

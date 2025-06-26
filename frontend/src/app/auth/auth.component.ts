@@ -95,7 +95,7 @@ export class AuthComponent{
         next: () => this.router.navigate(['/']),
         error: (err) => {
           if (err?.type === 'EMAIL_NOT_CONFIRMED') {
-            this.router.navigate(['/confirm-email'], {
+            this.router.navigate(['/resend-email'], {
               queryParams: {email: err.email || login}
             });
             return;

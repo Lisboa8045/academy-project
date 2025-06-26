@@ -52,6 +52,10 @@ export class AuthService {
       login: login
     });
   }
+
+  confirmEmail(token: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/confirm-email/${token}`);
+  }
 }
 
 
