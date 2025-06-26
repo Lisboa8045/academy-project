@@ -13,6 +13,7 @@ export interface PagedResponse {
   providedIn: 'root',
 })
 export class ServiceApiService {
+
   private BASE_URL = 'http://localhost:8080/auth/services/search';
 
   constructor(private http: HttpClient) {}

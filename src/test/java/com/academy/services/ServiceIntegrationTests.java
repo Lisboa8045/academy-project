@@ -112,7 +112,7 @@ public class ServiceIntegrationTests {
     }
 
     public AppointmentRequestDTO createAppDTO(Long serviceProviderID, Long memberID){
-        return new AppointmentRequestDTO(serviceProviderID, memberID, null, null);
+        return new AppointmentRequestDTO(serviceProviderID, null, null, 0, "", null);
     }
 
     public void createDummyClient(String name){
@@ -182,7 +182,7 @@ public class ServiceIntegrationTests {
         assertThat(responseDTO).isNotNull();
         assertThat(responseDTO.name()).isEqualTo("Test Service");
         assertThat(responseDTO.description()).isEqualTo("Test Description");
-        assertThat(responseDTO.serviceTypeName()).isEqualTo(defaultServiceType.getName());
+        assertThat(responseDTO.serviceType().name()).isEqualTo(defaultServiceType.getName());
         assertThat(responseDTO.tagNames()).containsExactlyInAnyOrder("tag1", "tag2"); // Ensure that tags are associated
     }
 
@@ -211,7 +211,7 @@ public class ServiceIntegrationTests {
 
         // Verify that the service was updated with the new serviceType and tags
         assertThat(updatedResponse.name()).isEqualTo("Updated Service");
-        assertThat(updatedResponse.serviceTypeName()).isEqualTo(newServiceType.getName());
+        assertThat(updatedResponse.serviceType().name()).isEqualTo(newServiceType.getName());
         assertThat(updatedResponse.tagNames()).containsExactlyInAnyOrder("tag2", "tag3");
 
         // Verify that the old serviceType does not contain a reference to the service
@@ -314,7 +314,7 @@ public class ServiceIntegrationTests {
         assertThat(updateResponseDTO).isNotNull();
         assertThat(updateResponseDTO.name()).isEqualTo("Updated Service");
         assertThat(updateResponseDTO.description()).isEqualTo("Updated Description");
-        assertThat(updateResponseDTO.serviceTypeName()).isEqualTo(defaultServiceType.getName());
+        assertThat(updateResponseDTO.serviceType().name()).isEqualTo(defaultServiceType.getName());
 
         // Verify that the tags were updated
         assertThat(updateResponseDTO.tagNames()).containsExactlyInAnyOrder("tag1", "tag3", "tag4");

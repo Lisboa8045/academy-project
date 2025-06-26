@@ -33,5 +33,5 @@ public class Tag extends BaseEntity {
     @ManyToMany(mappedBy = "tags")
     @JsonIgnore
     private List<Service> services = new ArrayList<>();
-    
+
 }

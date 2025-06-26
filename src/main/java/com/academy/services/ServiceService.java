@@ -96,7 +96,7 @@ public class ServiceService {
                 .stream()
                 .map(service ->  serviceMapper.toDto(service,
                         getPermissionsByProviderUsernameAndServiceId(username, service.getId())
-                        ))
+                ))
                 .collect(Collectors.toList());
     }
 
@@ -165,7 +165,7 @@ public class ServiceService {
     public List<ProviderPermissionEnum> getPermissionsByProviderIdAndServiceId(Long providerId, Long serviceId){
         return hasServiceProvider(providerId, serviceId) ?
                 serviceProviderService.getPermissionsByProviderIdAndServiceId(providerId, serviceId)
-        :
+                :
                 Collections.emptyList();
     }
     private boolean hasServiceProvider(String username, Long serviceId){

@@ -1,7 +1,8 @@
 package com.academy.dtos.appointment;
 
 
-import com.academy.models.Appointment;
+import com.academy.models.appointment.Appointment;
+
 import com.academy.models.shared.BaseEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -10,6 +11,7 @@ import org.mapstruct.Named;
 
 @Mapper(componentModel = "spring")
 public abstract class AppointmentMapper {
+
     @Mappings ({
             @Mapping(source= "serviceProvider", target = "serviceProviderId", qualifiedByName = "mapEntityIdOrDefault"),
             @Mapping(source= "member", target = "memberId", qualifiedByName = "mapEntityIdOrDefault")
@@ -17,8 +19,13 @@ public abstract class AppointmentMapper {
 
     public abstract AppointmentResponseDTO toResponseDTO(Appointment appointment);
 
-
-    public abstract Appointment toEntity(AppointmentRequestDTO appointmentRequestDTO);
+    @Mappings({
+            @Mapping(source = "serviceProviderId", target = "serviceProvider.id"),
+            @Mapping(source = "startDateTime", target = "startDateTime"),
+            @Mapping(source = "endDateTime", target = "endDateTime"),
+            @Mapping(source = "status", target = "status")
+    })
+    public abstract Appointment toEntity(AppointmentRequestDTO dto);
 
     @Mapping(source="member.username", target = "memberUsername")
     public abstract AppointmentReviewResponseDTO toReviewResponseDTO(Appointment appointment);

@@ -110,7 +110,7 @@ public class ServiceWorkflowTests {
     }
 
     private AppointmentRequestDTO createAppointmentDTO(Long serviceProviderId, Long memberId) {
-        return new AppointmentRequestDTO(serviceProviderId, memberId, null, null);
+        return new AppointmentRequestDTO(serviceProviderId, null, null, 0, "", null);
     }
 
     private void createDummyClient(String username) {

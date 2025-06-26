@@ -2,19 +2,23 @@
 
 package com.academy.services;
 
+import com.academy.config.authentication.AuthenticationFacade;
 import com.academy.dtos.appointment.AppointmentMapper;
 import com.academy.dtos.appointment.AppointmentRequestDTO;
 import com.academy.dtos.appointment.AppointmentResponseDTO;
 import com.academy.exceptions.EntityNotFoundException;
-import com.academy.models.Appointment;
+import com.academy.models.appointment.Appointment;
 import com.academy.models.member.Member;
+import com.academy.models.service.service_provider.ProviderPermission;
+import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.AppointmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class AppointmentService {
@@ -24,8 +28,14 @@ public class AppointmentService {
     private final AppointmentMapper appointmentMapper;
     private final MemberService memberService;
 
+    private final AuthenticationFacade authenticationFacade;
+
+    @Value("${slot.window.days:30}")
+    private int slotWindowDays;
+
     @Autowired
-    public AppointmentService(AppointmentRepository appointmentRepository, ServiceProviderService serviceProviderService, AppointmentMapper appointmentMapper, MemberService memberService) {
+
+    public AppointmentService(AppointmentRepository appointmentRepository, ServiceProviderService serviceProviderService, AppointmentMapper appointmentMapper, MemberService memberService, AuthenticationFacade authenticationFacade) {
 
         this.appointmentRepository = appointmentRepository;
 
@@ -35,38 +45,68 @@ public class AppointmentService {
 
         this.memberService = memberService;
 
+        this.authenticationFacade = authenticationFacade;
     }
 
     public List<AppointmentResponseDTO> getAllAppointments() {
-
         return appointmentRepository.findAll().stream()
-
                 .map(appointmentMapper::toResponseDTO)
-
-                .collect(Collectors.toList());
-
+                .toList();
     }
 
     public AppointmentResponseDTO getAppointmentById(Long id) {
+
         return appointmentRepository.findById(id)
+
                 .map(appointmentMapper::toResponseDTO)
                 .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
 
     }
 
     public AppointmentResponseDTO createAppointment(AppointmentRequestDTO dto) {
+        // Validate date is not in the past
+        if (dto.startDateTime().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Não é possível agendar para datas passadas");
+        }
+
+        String username = authenticationFacade.getUsername();
+        Member member = memberService.getMemberByUsername(username);
+
         ServiceProvider serviceProvider = serviceProviderService.getServiceProviderEntityById(dto.serviceProviderId());
 
-        Member member = memberService.getMemberEntityById(dto.memberId());
+        // Validate SERVE permission
+        boolean hasServePermission = serviceProvider.getPermissions().stream()
+                .map(ProviderPermission::getPermission)
+                .anyMatch(p -> p == ProviderPermissionEnum.SERVE);
+        if (!hasServePermission) {
+            throw new IllegalStateException("Service provider não possui permissão SERVE");
+        }
+
+        // Calculate end time
+        int serviceDurationMinutes = serviceProvider.getService().getDuration();
+        LocalDateTime endDateTime = dto.startDateTime().plusMinutes(serviceDurationMinutes);
+
+        // Check for conflicts
+        List<Appointment> conflictingAppointments = appointmentRepository
+                .findConflictingAppointments(
+                        serviceProvider.getId(),
+                        dto.startDateTime(),
+                        endDateTime
+                );
+        if (!conflictingAppointments.isEmpty()) {
+            throw new IllegalStateException("Já existe um agendamento para este horário");
+        }
+
+        // Create and save appointment
         Appointment appointment = appointmentMapper.toEntity(dto);
-
-        appointment.setServiceProvider(serviceProvider);
-
         appointment.setMember(member);
+        appointment.setServiceProvider(serviceProvider);
+        appointment.setEndDateTime(endDateTime);
 
         return appointmentMapper.toResponseDTO(appointmentRepository.save(appointment));
-
     }
+
+
 
 
     public AppointmentResponseDTO updateAppointment(Long id, AppointmentRequestDTO appointmentDetails) {
@@ -75,18 +115,13 @@ public class AppointmentService {
 
                 .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
 
-        if(appointmentDetails.memberId() != null){
-            Member member = memberService.getMemberEntityById(appointmentDetails.memberId());
-            appointment.setMember(member);
 
-        }
+        ServiceProvider serviceProvider = serviceProviderService.getServiceProviderEntityById(appointmentDetails.serviceProviderId());
+        appointment.setServiceProvider(serviceProvider);
 
-        if(appointmentDetails.serviceProviderId() != null) {
-            ServiceProvider serviceProvider = serviceProviderService.getServiceProviderEntityById(appointmentDetails.serviceProviderId());
-            appointment.setServiceProvider(serviceProvider);
-        }
 
-        if(appointmentDetails.rating() != appointment.getRating() )appointment.setRating(appointmentDetails.rating());
+        if(appointmentDetails.rating().equals(appointment.getRating()))
+            appointment.setRating(appointmentDetails.rating());
 
         if(appointmentDetails.comment() != null) appointment.setComment(appointmentDetails.comment());
 
@@ -116,8 +151,16 @@ public class AppointmentService {
 
     }
 
-    public List<Appointment> getAllByProviderId(Long id) {
-        return appointmentRepository.findAllByServiceProviderId(id);
+    public List<Appointment> getAppointmentsForProvider(Long providerId) {
+    if (providerId == null) {
+        throw new EntityNotFoundException(Appointment.class, providerId);
+    }
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime end = now.plusDays(slotWindowDays);
+        return appointmentRepository.findByServiceProvider_Provider_IdAndStartDateTimeBetween(providerId, now, end);
+    }
+
+    public List<Appointment> getAppointmentsForServiceProvider(Long serviceProviderId) {
+        return appointmentRepository.findByServiceProviderId(serviceProviderId);
     }
 }
-
