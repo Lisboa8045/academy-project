@@ -1,5 +1,6 @@
 package com.academy.dtos.service;
 
+import com.academy.dtos.service_type.ServiceTypeResponseDTO;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 
 import java.time.LocalDateTime;
@@ -15,7 +16,7 @@ public record ServiceResponseDTO(
         boolean negotiable,
         int duration,
         List<ProviderPermissionEnum> permissions,
-        String serviceTypeName,
+        ServiceTypeResponseDTO serviceType,
         List<String> tagNames,
         LocalDateTime createdAt,
         LocalDateTime updatedAt

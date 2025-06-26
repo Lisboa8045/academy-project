@@ -96,7 +96,7 @@ public class ServiceService {
                 .stream()
                 .map(service ->  serviceMapper.toDto(service,
                         getPermissionsByProviderUsernameAndServiceId(username, service.getId())
-                        ))
+                ))
                 .collect(Collectors.toList());
     }
 
@@ -165,7 +165,7 @@ public class ServiceService {
     public List<ProviderPermissionEnum> getPermissionsByProviderIdAndServiceId(Long providerId, Long serviceId){
         return hasServiceProvider(providerId, serviceId) ?
                 serviceProviderService.getPermissionsByProviderIdAndServiceId(providerId, serviceId)
-        :
+                :
                 Collections.emptyList();
     }
     private boolean hasServiceProvider(String username, Long serviceId){
@@ -270,16 +270,17 @@ public class ServiceService {
         service.getServiceType().getServices().remove(service);
     }
 
-    private void deleteServiceProviders(Service service) {
+    private void unlinkAndDisableServiceProviders(Service service) {
         List<ServiceProvider> providers = new ArrayList<>(service.getServiceProviders());
 
         for (ServiceProvider provider : providers) {
-            serviceProviderService.deleteServiceProvider(provider.getId());
+            provider.setService(null);
+            provider.setActive(false);
         }
     }
     private void cleanUpService(Service service) {
         removeAllTagLinks(service);
         removeServiceTypeLink(service);
-        deleteServiceProviders(service);
+        unlinkAndDisableServiceProviders(service);
     }
 }
