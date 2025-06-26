@@ -1,0 +1,12 @@
+<form class="search-form" [formGroup]="form" (ngSubmit)="onSearch()">
+  <div class="search-wrapper">
+    <input
+      type="text"
+      formControlName="query"
+      placeholder="Search services"
+      maxlength="100"
+      class="search-input"
+    />
+    <span class="search-icon" (click)="onSearch()">🔍</span>
+  </div>
+</form>
