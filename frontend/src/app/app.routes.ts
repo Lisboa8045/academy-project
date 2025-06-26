@@ -5,6 +5,8 @@ import { UnauthorizedComponent } from './unauthorized.component';
 import { SearchServicesComponent} from "./service/search/search-services.component";
 import { ScheduleComponent } from './schedule/schedule.component';
 import { LandingPageComponent } from './landing-page/landing-page.component';
+import { ResendEmailConfirmationComponent } from "./auth/resend-email/resend-email-confirmation.component";
+import { ConfirmEmailComponent } from './auth/confirm-email/confirm-email.component';
 
 export const routes: Routes = [
   { path: 'auth', component: AuthComponent },
@@ -13,4 +15,6 @@ export const routes: Routes = [
   { path: 'services', component: SearchServicesComponent},
   { path: 'schedule', component: ScheduleComponent },
   { path: '', component: LandingPageComponent},
+  { path: 'resend-email', component: ResendEmailConfirmationComponent },
+  { path: 'confirm-email/:token', component: ConfirmEmailComponent },
 ];
