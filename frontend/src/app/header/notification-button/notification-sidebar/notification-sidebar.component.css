@@ -1,0 +1,20 @@
+.notification-list {
+  list-style: none; /* Remove default list styling */
+  margin: 0;
+  background-color: #e0f7fa; /* Light blue background */
+  border: 1px solid #b2ebf2; /* Light blue border */
+  color: #000000;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  border-radius: 4px; /* Rounded corners */
+  overflow: hidden; /* Ensure content stays within rounded corners */
+
+  padding: 10px;
+
+  position: absolute;
+  transform: translateX(-10%);
+}
+
+.see-all:hover {
+  color: #3b2ff5;
+  cursor: pointer;
+}
