@@ -1,8 +1,9 @@
 package com.academy;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
+@EnableJpaAuditing(auditorAwareRef = "auditorProvider")
 @SpringBootApplication
 public class AcademyApplication {
 
@@ -10,7 +11,7 @@ public class AcademyApplication {
 		SpringApplication.run(AcademyApplication.class, args);
 	}
 
-/*
+	/*
 	@Bean
 	@ConditionalOnProperty(name = "starting.scripts.enabled", havingValue = "true", matchIfMissing = false)
 	CommandLineRunner populateData(DataSource dataSource) {
@@ -23,6 +24,5 @@ public class AcademyApplication {
 		};
 	}
  */
-
 
 }

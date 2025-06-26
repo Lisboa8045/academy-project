@@ -53,7 +53,7 @@ public class TagService {
         return tagRepository.findAll()
                 .stream()
                 .map(tagMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     // Read one
@@ -105,6 +105,10 @@ public class TagService {
 
     public Tag getTagEntityById(Long id) {
         return tagRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(Tag.class, id));
+    }
+
+    public Tag getTagEntityByName(String name) {
+        return tagRepository.findByName(name).orElseThrow(() -> new EntityNotFoundException(Tag.class, " with name " + name + " not found"));
     }
 
     private void removeTagFromAllServices(Tag tag) {

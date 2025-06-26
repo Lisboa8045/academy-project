@@ -7,12 +7,22 @@ import com.academy.exceptions.AuthenticationException;
 import com.academy.services.ServiceService;
 import jakarta.validation.Valid;
 import org.apache.coyote.BadRequestException;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -57,12 +67,16 @@ public class ServiceController {
     @GetMapping("/search")
     public ResponseEntity<Page<ServiceResponseDTO>> search(
             @RequestParam(required = false) String name,
-            @RequestParam(required = false) List<String> tags,
-            @RequestParam(required = false) Double priceMin,
-            @RequestParam(required = false) Double priceMax,
-            Pageable pageable
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) Integer minDuration,
+            @RequestParam(required = false) Integer maxDuration,
+            @RequestParam(required = false) Boolean negotiable,
+            @RequestParam(required = false) String serviceTypeName,
+            @PageableDefault(sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Page<ServiceResponseDTO> responses = serviceService.searchServices(name, priceMin, priceMax, tags, pageable);
+        Page<ServiceResponseDTO> responses = serviceService.searchServices(name, minPrice,
+                maxPrice, minDuration, maxDuration, negotiable, serviceTypeName, pageable);
         return ResponseEntity.ok(responses);
     }
 

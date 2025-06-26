@@ -29,6 +29,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -62,6 +63,7 @@ public class MemberService {
     private TestTokenStorage testTokenStorage;
 
     private final JwtCookieUtil jwtCookieUtil;
+    private final ServiceProviderService serviceProviderService;
 
     @Autowired
     public MemberService(MemberRepository memberRepository,
@@ -73,7 +75,8 @@ public class MemberService {
                          JwtCookieUtil jwtCookieUtil,
                          EmailService emailService,
                          GlobalConfigurationService globalConfigurationService,
-                         AppProperties appProperties) {
+                         AppProperties appProperties,
+                         @Lazy ServiceProviderService serviceProviderService) {
         this.memberRepository = memberRepository;
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
@@ -84,6 +87,7 @@ public class MemberService {
         this.emailService = emailService;
         this.globalConfigurationService = globalConfigurationService;
         this.appProperties = appProperties;
+        this.serviceProviderService = serviceProviderService;
     }
 
 
@@ -273,7 +277,7 @@ public class MemberService {
 
     public void deleteMember(long id) {
         if(!memberRepository.existsById(id)) throw new EntityNotFoundException(Member.class,id);
-
+        unlinkServiceProviders(id);
         memberRepository.deleteById(id);
     }
 
@@ -344,7 +348,7 @@ public class MemberService {
         sendConfirmationEmail(member, rawConfirmationToken);
     }
 
-    public Member saveProfilePic(Long id, String filename) {
+    public void saveProfilePic(Long id, String filename) {
         memberRepository.findById(id)
                 .map(m -> {
                     m.setProfilePicture(filename);
@@ -352,6 +356,13 @@ public class MemberService {
                     return m;
                 })
                 .orElseThrow(() -> new EntityNotFoundException(Member.class, id));
-        return null;
+    }
+
+    private void unlinkServiceProviders(long id) {
+        List<ServiceProvider> serviceProviders = serviceProviderService.getAllByProviderId(id);
+
+        for (ServiceProvider sp : serviceProviders) {
+            sp.setProvider(null);
+        }
     }
 }

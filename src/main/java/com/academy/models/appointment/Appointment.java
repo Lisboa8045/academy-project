@@ -1,15 +1,14 @@
-package com.academy.models;
+package com.academy.models.appointment;
 
 import com.academy.models.member.Member;
 import com.academy.models.service.service_provider.ServiceProvider;
+import com.academy.models.shared.BaseEntity;
 import com.academy.util.FieldLengths;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -19,19 +18,14 @@ import java.time.LocalDateTime;
 
 //Lombok annotations
 
-@Getter @Setter
-
+@Getter
+@Setter
 @NoArgsConstructor
-
-@ToString(exclude = {"member", "serviceProvider"})
-public class Appointment {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+@ToString(callSuper = true, exclude = {"member", "serviceProvider"})
+public class Appointment extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "member_id", nullable = true)
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -44,22 +38,16 @@ public class Appointment {
     @Column(name="comment", length = FieldLengths.REVIEW_MAX)
     private String comment;
 
-    @Column(name="created_at", updatable = false)
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @Column(name="updated_at")
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
-
     @Column(name = "start_date_time")
     private LocalDateTime startDateTime;
 
     @Column(name = "end_date_time")
     private LocalDateTime endDateTime;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private String status;
+    private AppointmentStatus status;
+
 
 }
 
