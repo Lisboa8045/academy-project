@@ -41,25 +41,39 @@ public class SchedulingService {
     }
 
     public List<SlotDTO> getFreeSlotsForService(Long serviceId) {
+        System.out.println("Fetching free slots for service with ID: " + serviceId);
+
         validateServiceId(serviceId);
 
         int serviceDurationMinutes = serviceService.getById(serviceId).duration();
+        System.out.println("Service duration: " + serviceDurationMinutes + " minutes");
+
         List<SlotDTO> allFreeSlots = new ArrayList<>();
 
         List<ServiceProvider> providersWithServePermission = serviceProviderService
                 .findProvidersByServiceIdAndPermission(serviceId, ProviderPermissionEnum.SERVE);
+        System.out.println("Found " + providersWithServePermission.size() + " providers with SERVE permission for service ID " + serviceId);
 
         for (ServiceProvider serviceProvider : providersWithServePermission) {
             Long providerId = serviceProvider.getProvider().getId();
+            System.out.println("Processing provider with ID: " + providerId);
+
             Optional<Member> memberOpt = memberService.findbyId(providerId);
-            if (memberOpt.isEmpty()) continue;
+            if (memberOpt.isEmpty()) {
+                System.out.println("Provider with ID " + providerId + " has no associated member. Skipping.");
+                continue;
+            }
+
             Member member = memberOpt.get();
+            System.out.println("Found member " + member.getUsername() + " for provider ID " + providerId);
 
             List<Availability> availabilities = availabilityService.getAvailabilitiesForProvider(providerId);
+            System.out.println("Found " + availabilities.size() + " availabilities for provider ID " + providerId);
 
             List<Appointment> appointments = appointmentService.getAppointmentsForServiceProvider(
                     serviceProvider.getId()
             );
+            System.out.println("Found " + appointments.size() + " appointments for service provider ID " + serviceProvider.getId());
 
             List<SlotDTO> freeSlots = generateFreeSlots(
                     providerId,
@@ -69,11 +83,16 @@ public class SchedulingService {
                     serviceDurationMinutes
             );
 
+            System.out.println("Generated " + freeSlots.size() + " free slots for provider ID " + providerId);
+
             allFreeSlots.addAll(freeSlots);
         }
 
+        System.out.println("Total free slots found for service ID " + serviceId + ": " + allFreeSlots.size());
+
         return allFreeSlots;
     }
+
 
     private List<SlotDTO> generateFreeSlots(Long providerId, String providerName,
                                             List<Availability> availabilities,

@@ -1,14 +1,3 @@
-.scroll-container {
-  display: flex;
-  overflow-x: auto;
-  overflow-y: hidden;
-  gap: 1rem;
-  scroll-snap-type: x mandatory;
-  align-items: center;
-  max-height: 150px;
-  box-sizing: border-box;
-}
-
 .type-card {
   flex: 0 0 auto;
   width: 100px;
@@ -21,11 +10,30 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  /* Adicionado para evitar que extrapole */
+  transform-origin: center center;
+  contain: layout; /* Previne "vazamento" */
+  z-index: 1;
 }
 
 .type-card:hover {
-  transform: scale(1.08);
+  /* Use um scale menor se possível */
+  transform: scale(1.05);
   background-color: #f0f0f0;
+  z-index: 2; /* Garante que fique acima dos vizinhos */
+}
+
+.scroll-container {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  gap: 1rem;
+  scroll-snap-type: x mandatory;
+  align-items: center;
+  max-height: 150px;
+  box-sizing: border-box;
+  /* Impede scroll extra com padding em vez de gap nas bordas */
+  padding-inline: 0.5rem;
 }
 
 .type-icon {
@@ -38,4 +46,9 @@
   height: 50px;
   object-fit: contain;
   display: inline-block;
+}
+
+h3{
+  font-family: 'Roboto', sans-serif;
+;
 }

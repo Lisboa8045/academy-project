@@ -11,12 +11,6 @@
   margin-right: 1rem;
 }
 
-.nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
 .nav-item {
   display: flex;
   align-items: center;
@@ -42,37 +36,55 @@
   gap: 1rem;
 }
 
-.search-form {
+.nav {
   display: flex;
-  align-items: stretch;
-  width: 100%;
-  max-width: 900px;
-  margin: 0 auto;
-}
-
-.search-input {
-  flex: 1;
-  height: 38px;
-  padding: 0 12px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-}
-
-.search-button {
-  height: 40px;
-  width: 45px;
-  background-color: #febd69;
-  border: 1px solid #ccc;
-  font-size: 18px;
-  display: flex;
+  justify-content: space-between;
   align-items: center;
+  height: 80px; /* 👈 Fixed height (adjust to your design) */
+}
+
+.search-form,
+.search-form-placeholder {
+  width: 100%;
+  max-width: 700px;
+  height: 40px;
+  display: flex;
+  align-items: center; /* Vertically centers the input */
   justify-content: center;
 }
 
-.search-button:hover {
-  background-color: #f3a847;
+.search-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%; /* 👈 Ensure wrapper fills the fixed height */
 }
 
+.search-input {
+  box-sizing: border-box; /* ✅ This is the key */
+  width: 100%;
+  height: 100%;
+  padding: 0 36px 0 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 25px;
+  line-height: 1;
+  margin: 0;
+}
+
+
+.search-icon {
+  position: absolute;
+  right: 12px; /* ⬅️ give it a bit more breathing room */
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 20px; /* ⬅️ Slightly larger looks more balanced */
+  color: #555;
+}
+
+.search-icon:hover {
+  color: #000;
+}
 
 
 .user-profile {
