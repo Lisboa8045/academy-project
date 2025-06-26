@@ -1,30 +1,31 @@
 package com.academy.services;
 
+import com.academy.dtos.appointment.AppointmentRequestDTO;
+import com.academy.dtos.appointment.AppointmentResponseDTO;
+import com.academy.dtos.register.RegisterRequestDto;
 import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
+import com.academy.dtos.service_type.ServiceTypeRequestDTO;
+import com.academy.dtos.service_type.ServiceTypeResponseDTO;
+import com.academy.dtos.tag.TagRequestDTO;
+import com.academy.dtos.tag.TagResponseDTO;
 import com.academy.exceptions.EntityNotFoundException;
-import com.academy.models.Member;
+import com.academy.exceptions.MemberNotFoundException;
 import com.academy.models.Role;
 import com.academy.models.ServiceType;
 import com.academy.models.Tag;
 import com.academy.models.service.Service;
-import com.academy.repositories.MemberRepository;
-import com.academy.repositories.ProviderPermissionRepository;
+import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.RoleRepository;
-import com.academy.repositories.ServiceProviderRepository;
-import com.academy.repositories.ServiceRepository;
-import com.academy.repositories.ServiceTypeRepository;
-import com.academy.repositories.TagRepository;
 import jakarta.transaction.Transactional;
 import org.apache.coyote.BadRequestException;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
@@ -37,110 +38,95 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @SpringBootTest
 @Transactional
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(SpringExtension.class)
 @WithMockUser(username = "owner")
-class ServiceIntegrationTests {
+public class ServiceIntegrationTests {
     private final ServiceService serviceService;
     private final TagService tagService;
-    private final ServiceRepository serviceRepository;
-    private final ServiceTypeRepository serviceTypeRepository;
-    private final TagRepository tagRepository;
-    private final MemberRepository memberRepository;
-    private final RoleRepository roleRepository;
-    private final ServiceProviderRepository serviceProviderRepository;
-    private final ProviderPermissionRepository providerPermissionRepository;
+    private final ServiceTypeService serviceTypeService;
+    private final RoleRepository roleRepository; // we do not have a RoleService
+    private final MemberService memberService;
+    private final ServiceProviderService serviceProviderService;
+    private final AppointmentService appointmentService;
 
     @Autowired
     public ServiceIntegrationTests(ServiceService serviceService,
                                    TagService tagService,
-                                   ServiceRepository serviceRepository,
-                                   ServiceTypeRepository serviceTypeRepository,
-                                   TagRepository tagRepository,
-                                   MemberRepository memberRepository,
+                                   ServiceTypeService serviceTypeService,
+                                   MemberService memberService,
                                    RoleRepository roleRepository,
-                                   ServiceProviderRepository serviceProviderRepository,
-                                   ProviderPermissionRepository providerPermissionRepository
+                                   ServiceProviderService serviceProviderService,
+                                   AppointmentService appointmentService
     ) {
 
         this.serviceService = serviceService;
         this.tagService = tagService;
-        this.serviceRepository = serviceRepository;
-        this.serviceTypeRepository = serviceTypeRepository;
-        this.tagRepository = tagRepository;
-        this.memberRepository = memberRepository;
+        this.serviceTypeService = serviceTypeService;
+        this.memberService = memberService;
         this.roleRepository = roleRepository;
-        this.serviceProviderRepository = serviceProviderRepository;
-        this.providerPermissionRepository = providerPermissionRepository;
+        this.serviceProviderService = serviceProviderService;
+        this.appointmentService = appointmentService;
     }
 
-    private ServiceType serviceType;
-    private Tag tag1;
+    private ServiceType defaultServiceType;
+    private Tag defaultTag;
 
     @BeforeEach
     void setUp() {
-        // Set up a ServiceType, Member and Tags before each test
-        serviceType = new ServiceType();
-        serviceType.setName("Test Service Type");
-        serviceType.setIcon("Test Icon.png");
-        serviceType = serviceTypeRepository.save(serviceType);
-
+        // Set up a Role and Member to be used on all tests
         Role role = new Role();
-        role.setId(1);
         role.setName("ADMIN");
         roleRepository.save(role);
 
-        Member member = new Member();
-        member.setUsername("owner");
-        member.setPassword("password");
-        member.setEmail("owner@email.com");
-        member.setRole(role);
-        memberRepository.save(member);
-
-        tag1 = new Tag();
-        tag1.setName("tag1");
-        tag1.setCustom(false);
-        tag1 = tagRepository.save(tag1);
-
-        Tag tag2 = new Tag();
-        tag2.setName("tag2");
-        tag2.setCustom(false);
-        tagRepository.save(tag2);
-    }
-
-    @AfterEach
-    void tearDown() {
-        /*
-        providerPermissionRepository.deleteAllInBatch();
-        serviceProviderRepository.deleteAllInBatch();
-
-        List<Service> services = serviceRepository.findAll();
-        List<Tag> tags = tagRepository.findAll();
-
-        for (Service service : services) {
-            List<Tag> serviceTags = new ArrayList<>(service.getTags());
-            for (Tag tag : serviceTags) {
-                tag.getServices().remove(service);
-            }
-            service.getTags().clear();
+        try {
+            memberService.getMemberByUsername("owner");
         }
-        serviceRepository.saveAll(services);
-        tagRepository.saveAll(tags);
+        catch (MemberNotFoundException e) {
+            RegisterRequestDto requestDTO = new RegisterRequestDto("owner", "Password123!", "owner@email.com",
+                    role.getId(), null, null, null);
+            memberService.register(requestDTO);
+        }
 
-        serviceRepository.deleteAllInBatch();
-        tagRepository.deleteAllInBatch();
-        serviceTypeRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
-        roleRepository.deleteAllInBatch();
-        */
+        // Set up a ServiceType and Tags before each test
+
+        defaultTag = createTag("tag1");
+        defaultServiceType = createServiceType("Test Service Type");
     }
 
     private ServiceRequestDTO createDTO(String name, String description, String serviceTypeName, List<String> tags) {
         return new ServiceRequestDTO(name, description, 80, 20, false, 30, serviceTypeName, tags);
     }
 
+    private ServiceType createServiceType(String name) {
+        ServiceTypeRequestDTO requestDTO = new ServiceTypeRequestDTO(name, "Test Icon.png");
+        ServiceTypeResponseDTO responseDTO = serviceTypeService.create(requestDTO);
+        return serviceTypeService.getServiceTypeEntityById(responseDTO.id());
+    }
+
+    private Tag createTag(String name) {
+        TagRequestDTO requestDTO = new TagRequestDTO(name, false, List.of());
+        TagResponseDTO responseDTO = tagService.create(requestDTO);
+        return tagService.getTagEntityById(responseDTO.id());
+    }
+
+    public AppointmentRequestDTO createAppDTO(Long serviceProviderID, Long memberID){
+        return new AppointmentRequestDTO(serviceProviderID, null, null, 0, "", null);
+    }
+
+    public void createDummyClient(String name){
+        Role role = new Role();
+        role.setName("CLIENT");
+        roleRepository.save(role);
+        RegisterRequestDto requestDTO = new RegisterRequestDto(name, "Password123!", name+"@email.com",
+                role.getId(), null, null, null);
+        memberService.register(requestDTO);
+    }
+
+
     @Test
     void updateService_serviceNotFound_throwsException() {
-        assertThatThrownBy(() -> serviceService.update(999L, createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag3"))))
+        assertThatThrownBy(() -> serviceService.update(999L, createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1"))))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
@@ -152,7 +138,7 @@ class ServiceIntegrationTests {
 
     @Test
     void updateService_invalidServiceType_throwsException() throws BadRequestException {
-        ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1", "tag2"));
+        ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag1"));
 
         ServiceResponseDTO createdResponse = serviceService.create(serviceRequestDTO);
 
@@ -164,27 +150,20 @@ class ServiceIntegrationTests {
 
     @Test
     void deleteTag_notAssociatedWithAnyService_doesNotThrowException() {
-        Tag tag3 = new Tag();
-        tag3.setName("tag3");
-        tag3.setCustom(true);
-        tagRepository.save(tag3);  // A tag that is not used in any service
+        Tag tag2 = createTag("tag2");
 
-        assertThatCode(() -> tagService.delete(tag3.getId()))
+        assertThatCode(() -> tagService.delete(tag2.getId()))
                 .doesNotThrowAnyException();
     }
 
     @Test
     void deleteTag_associatedWithService() throws BadRequestException {
-        Tag tag3 = new Tag();
-        tag3.setName("tag3");
-        tag3.setCustom(true);
-        tagRepository.save(tag3);
-
-        ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag3"));
+        Tag tag2 = createTag("tag2");
+        ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag2"));
 
         ServiceResponseDTO responseDTO = serviceService.create(serviceRequestDTO);
 
-        assertThatCode(() -> tagService.delete(tag3.getId()))
+        assertThatCode(() -> tagService.delete(tag2.getId()))
                 .doesNotThrowAnyException();
 
         ServiceResponseDTO updatedResponseDTO = serviceService.getById(responseDTO.id());
@@ -202,7 +181,7 @@ class ServiceIntegrationTests {
         assertThat(responseDTO).isNotNull();
         assertThat(responseDTO.name()).isEqualTo("Test Service");
         assertThat(responseDTO.description()).isEqualTo("Test Description");
-        assertThat(responseDTO.serviceTypeName()).isEqualTo(serviceType.getName());
+        assertThat(responseDTO.serviceTypeName()).isEqualTo(defaultServiceType.getName());
         assertThat(responseDTO.tagNames()).containsExactlyInAnyOrder("tag1", "tag2"); // Ensure that tags are associated
     }
 
@@ -223,10 +202,7 @@ class ServiceIntegrationTests {
         ServiceResponseDTO createdResponse = serviceService.create(serviceRequestDTO);
 
         // Update the service with a new serviceType and tags
-        ServiceType newServiceType = new ServiceType();
-        newServiceType.setName("New Service Type");
-        newServiceType.setIcon("New icon.png");
-        newServiceType = serviceTypeRepository.save(newServiceType);
+        ServiceType newServiceType = createServiceType("New Service Type");
 
         ServiceRequestDTO updateRequestDTO = createDTO("Updated Service", "Updated Description", "New Service Type", List.of("tag2", "tag3"));
 
@@ -236,6 +212,9 @@ class ServiceIntegrationTests {
         assertThat(updatedResponse.name()).isEqualTo("Updated Service");
         assertThat(updatedResponse.serviceTypeName()).isEqualTo(newServiceType.getName());
         assertThat(updatedResponse.tagNames()).containsExactlyInAnyOrder("tag2", "tag3");
+
+        // Verify that the old serviceType does not contain a reference to the service
+        assertThat(serviceTypeService.getServiceTypeEntityById(defaultServiceType.getId()).getServices()).isEmpty();
     }
 
     @Test
@@ -247,7 +226,8 @@ class ServiceIntegrationTests {
         serviceService.delete(createdResponse.id());
 
         // Verify that the service is deleted
-        assertThat(serviceRepository.findById(createdResponse.id())).isEmpty();
+        assertThatThrownBy(() -> serviceService.getServiceEntityById(createdResponse.id()))
+                .isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
@@ -256,21 +236,38 @@ class ServiceIntegrationTests {
 
         ServiceResponseDTO createdResponse = serviceService.create(serviceRequestDTO);
 
-        assertThat(tagRepository.findById(tag1.getId()).get().getServices()).isNotEmpty();
+        assertThat(tagService.getTagEntityById(defaultTag.getId()).getServices()).isNotEmpty();
+
+        createDummyClient("client");
+        AppointmentResponseDTO apptResponseDTO = appointmentService.createAppointment(createAppDTO(serviceProviderService.getServiceProviderByUsername("owner").getId(), memberService.getMemberByUsername("client").getId()));
+
+        assertThat(appointmentService.getAppointmentById(apptResponseDTO.id())).isNotNull();
 
         serviceService.delete(createdResponse.id());
-
         // Verify that the service is deleted
-        assertThat(serviceRepository.findById(createdResponse.id())).isEmpty();
+        assertThatThrownBy(() -> serviceService.getServiceEntityById(createdResponse.id()))
+                .isInstanceOf(EntityNotFoundException.class);
 
         // Verify that associated tag is not deleted
-        assertThat(tagRepository.findById(tag1.getId())).isNotEmpty();
+        assertThatCode(() -> tagService.getTagEntityById(defaultTag.getId()))
+                .doesNotThrowAnyException();
 
         // Verify that associated serviceType is not deleted
-        assertThat(serviceTypeRepository.findById(serviceType.getId())).isNotEmpty();
+        assertThatCode(() -> serviceTypeService.getServiceTypeEntityById(defaultServiceType.getId()))
+                .doesNotThrowAnyException();
 
         // Verify that tag has no associations after deletion
-        assertThat(tagRepository.findById(tag1.getId()).get().getServices()).isEmpty();
+        assertThat(tagService.getTagEntityById(defaultTag.getId()).getServices()).isEmpty();
+
+        // Verify that appointment is still present after service deletion
+        assertThat(appointmentService.getAppointmentById(apptResponseDTO.id())).isNotNull();
+        assertThat(apptResponseDTO.serviceProviderId()).isEqualTo(serviceProviderService.getServiceProviderByUsername("owner").getId());
+
+        ServiceProvider ownerServiceProvider = serviceProviderService.getServiceProviderByUsername("owner");
+        // Verify that the ServiceProvider still exists but is inactive and doesn't have a service
+        assertThat(ownerServiceProvider).isNotNull();
+        assertThat(ownerServiceProvider.isActive()).isFalse();
+        assertThat(ownerServiceProvider.getService()).isNull();
     }
 
     @Test
@@ -280,10 +277,10 @@ class ServiceIntegrationTests {
         ServiceResponseDTO createdResponse = serviceService.create(serviceRequestDTO);
 
         // Delete one tag (tag1)
-        tagService.delete(tag1.getId());
+        tagService.delete(defaultTag.getId());
 
         // Ensure that the tag is dissociated from the service
-        Service updatedService = serviceRepository.findById(createdResponse.id()).orElseThrow();
+        Service updatedService = serviceService.getServiceEntityById(createdResponse.id());
         List<String> remainingTags = updatedService.getTags().stream()
                 .map(Tag::getName)
                 .collect(Collectors.toList());
@@ -302,10 +299,10 @@ class ServiceIntegrationTests {
         assertThat(createResponseDTO.tagNames()).containsExactlyInAnyOrder("tag1", "tag2");
 
         // Verify that the tags have the service in their 'services' list
-        Tag tag1 = tagRepository.findByName("tag1").orElseThrow();
-        Tag tag2 = tagRepository.findByName("tag2").orElseThrow();
-        assertThat(tag1.getServices()).contains(serviceRepository.findById(createResponseDTO.id()).get());
-        assertThat(tag2.getServices()).contains(serviceRepository.findById(createResponseDTO.id()).get());
+        Tag tag1 = tagService.getTagEntityByName("tag1");
+        Tag tag2 = tagService.getTagEntityByName("tag2");
+        assertThat(tag1.getServices()).contains(serviceService.getServiceEntityById(createResponseDTO.id()));
+        assertThat(tag2.getServices()).contains(serviceService.getServiceEntityById(createResponseDTO.id()));
 
         // Prepare new tag list for update (removes "tag2" and adds "tag3" and "tag4")
         ServiceRequestDTO updateServiceDTO = createDTO("Updated Service", "Updated Description", "Test Service Type", List.of("tag1", "tag3", "tag4"));
@@ -316,23 +313,23 @@ class ServiceIntegrationTests {
         assertThat(updateResponseDTO).isNotNull();
         assertThat(updateResponseDTO.name()).isEqualTo("Updated Service");
         assertThat(updateResponseDTO.description()).isEqualTo("Updated Description");
-        assertThat(updateResponseDTO.serviceTypeName()).isEqualTo(serviceType.getName());
+        assertThat(updateResponseDTO.serviceTypeName()).isEqualTo(defaultServiceType.getName());
 
         // Verify that the tags were updated
         assertThat(updateResponseDTO.tagNames()).containsExactlyInAnyOrder("tag1", "tag3", "tag4");
         assertThat(updateResponseDTO.tagNames()).doesNotContain("tag2");
 
         // Verify that tag2 no longer has the service in their 'services' list
-        tag2 = tagRepository.findByName("tag2").orElseThrow();
-        assertThat(tag2.getServices()).doesNotContain(serviceRepository.findById(createResponseDTO.id()).get());
+        tag2 = tagService.getTagEntityByName("tag2");
+        assertThat(tag2.getServices()).doesNotContain(serviceService.getServiceEntityById(createResponseDTO.id()));
 
         // Verify that tag1, tag3 and tag4 now have the service in their 'services' list
-        tag1 = tagRepository.findByName("tag1").orElseThrow();
-        Tag tag3 = tagRepository.findByName("tag3").orElseThrow();
-        Tag tag4 = tagRepository.findByName("tag4").orElseThrow();
-        assertThat(tag1.getServices()).contains(serviceRepository.findById(createResponseDTO.id()).get());
-        assertThat(tag3.getServices()).contains(serviceRepository.findById(createResponseDTO.id()).get());
-        assertThat(tag4.getServices()).contains(serviceRepository.findById(createResponseDTO.id()).get());
+        tag1 = tagService.getTagEntityByName("tag1");
+        Tag tag3 = tagService.getTagEntityByName("tag3");
+        Tag tag4 = tagService.getTagEntityByName("tag4");
+        assertThat(tag1.getServices()).contains(serviceService.getServiceEntityById(createResponseDTO.id()));
+        assertThat(tag3.getServices()).contains(serviceService.getServiceEntityById(createResponseDTO.id()));
+        assertThat(tag4.getServices()).contains(serviceService.getServiceEntityById(createResponseDTO.id()));
     }
 
     @Test
@@ -343,21 +340,20 @@ class ServiceIntegrationTests {
         Long serviceId = responseDTO.id();
 
         // Verify tag-service association exists
-        Tag tag2 = tagRepository.findByName("delete-tag1").orElseThrow();
-        Tag tag3 = tagRepository.findByName("delete-tag2").orElseThrow();
+        Tag tag2 = tagService.getTagEntityByName("delete-tag1");
+        Tag tag3 = tagService.getTagEntityByName("delete-tag2");
         assertThat(tag2.getServices()).extracting("id").contains(serviceId);
         assertThat(tag3.getServices()).extracting("id").contains(serviceId);
 
         serviceService.delete(serviceId);
 
         // Verify that service is deleted
-        assertThat(serviceRepository.findById(serviceId)).isEmpty();
-
-        serviceTypeRepository.findAll();
+        assertThatThrownBy(() -> serviceService.getServiceEntityById(serviceId))
+                .isInstanceOf(EntityNotFoundException.class);
 
         // Verify that tags no longer reference the deleted service
-        tag2 = tagRepository.findByName("delete-tag1").orElseThrow();
-        tag3 = tagRepository.findByName("delete-tag2").orElseThrow();
+        tag2 = tagService.getTagEntityByName("delete-tag1");
+        tag3 = tagService.getTagEntityByName("delete-tag2");
         assertThat(tag2.getServices()).extracting("id").doesNotContain(serviceId);
         assertThat(tag3.getServices()).extracting("id").doesNotContain(serviceId);
     }

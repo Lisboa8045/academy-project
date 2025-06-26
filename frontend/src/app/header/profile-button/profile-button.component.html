@@ -1,0 +1,11 @@
+<div (blur)="closeMenu()" tabindex="-1">
+  <div (click)="toggleMenu()" class="wrapper">
+    <span class="username">{{ username() }}</span>
+    @if (imageUrl()){
+      <img class="profile-picture" [src]="imageUrl()" alt="Profile">
+    }@else{
+      <span class="placeholder-avatar">🧑</span>
+    }
+  </div>
+  <app-menu *ngIf="showMenu()" [items]="menuItems" (click)="closeMenu()"></app-menu>
+</div>

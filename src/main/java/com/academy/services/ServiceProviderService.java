@@ -1,4 +1,3 @@
-// ServiceProviderService.java
 package com.academy.services;
 
 import com.academy.config.authentication.AuthenticationFacade;
@@ -7,17 +6,17 @@ import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
 import com.academy.dtos.service_provider.ServiceProviderResponseDTO;
 import com.academy.exceptions.AuthenticationException;
 import com.academy.exceptions.EntityNotFoundException;
-import com.academy.models.Member;
+import com.academy.exceptions.MemberNotFoundException;
+import com.academy.models.member.Member;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
-import com.academy.repositories.MemberRepository;
-import com.academy.utils.Utils;
 import com.academy.repositories.ServiceProviderRepository;
+import com.academy.utils.Utils;
 import jakarta.transaction.Transactional;
-import com.academy.repositories.ServiceRepository;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +36,7 @@ public class ServiceProviderService {
                                   ServiceProviderMapper serviceProviderMapper,
                                   ProviderPermissionService providerPermissionService,
                                   MemberService memberService,
-                                  ServiceService serviceService,
+                                  @Lazy ServiceService serviceService,
                                   AuthenticationFacade authenticationFacade) {
         this.serviceProviderRepository = serviceProviderRepository;
         this.serviceProviderMapper = serviceProviderMapper;
@@ -63,10 +62,24 @@ public class ServiceProviderService {
         return serviceProviderRepository.findById(id)
                 .map(serviceProviderMapper::toResponseDTO);
     }
+
+    public ServiceProvider getServiceProviderByUsername(String username){
+        Optional<ServiceProvider> optionalServiceProvider = serviceProviderRepository.findByProviderUsername(username);
+        if(optionalServiceProvider.isEmpty())
+            throw new MemberNotFoundException(username);
+        return optionalServiceProvider.get();
+    }
+
+    public List<ServiceProvider> getAllByProviderId(Long id) {
+        return serviceProviderRepository.findAllByProviderId(id);
+    }
+
+    @Transactional
     public ServiceProviderResponseDTO createServiceProviderWithDTO(ServiceProviderRequestDTO dto) throws BadRequestException {
         ServiceProvider serviceProvider = createServiceProvider(dto);
         return serviceProviderMapper.toResponseDTO(serviceProvider);
     }
+
     @Transactional
     public ServiceProvider createServiceProvider(ServiceProviderRequestDTO dto) throws BadRequestException {
         Member member = memberService.getMemberEntityById(dto.memberId());
@@ -100,26 +113,18 @@ public class ServiceProviderService {
             return false;
         }
         List<ProviderPermissionEnum> permissions = getPermissions(loggedMemberServiceProvider.getId());
-        if(!Utils.hasPermission(permissions, ProviderPermissionEnum.ADD_SERVICE_PROVIDER))
-            return false;
-
-        return true;
+        return Utils.hasPermission(permissions, ProviderPermissionEnum.ADD_SERVICE_PROVIDER);
     }
+
     private void validatePermissions(List<ProviderPermissionEnum> permissions, boolean isServiceCreation) throws BadRequestException {
         if(!isServiceCreation && permissions.contains(ProviderPermissionEnum.OWNER))
             throw new BadRequestException("Can't give the Owner permission to a new worker!");
     }
 
+    @Transactional
     public ServiceProviderResponseDTO updateServiceProvider(long id, ServiceProviderRequestDTO details) {
         ServiceProvider serviceProvider = serviceProviderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
-
-
-//        if(details.getMemberId() != null){
-//            Member member = memberRepository.findById(details.getMemberId())
-//                    .orElseThrow(()-> new EntityNotFoundException(Member.class, details.getMemberId()));
-//            serviceProvider.setProvider(member);
-//        }
 
         if(details.serviceId() != null) {
             Service service = serviceService.getServiceEntityById(details.serviceId());
@@ -139,8 +144,7 @@ public class ServiceProviderService {
                 .orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
 
         providerPermissionService.deletePermissionsFromServiceProvider(serviceProvider);
-
-        serviceProviderRepository.delete(serviceProvider);
+        serviceProvider.setActive(false);
     }
 
     public List<ProviderPermissionEnum> getPermissionsByProviderUsernameAndServiceId(String username, Long serviceId){
@@ -160,13 +164,18 @@ public class ServiceProviderService {
                     " not found for user " + username + " and serviceId " + serviceId);
         return optionalServiceProvider.get();
     }
-    private ServiceProvider getServiceProviderByProviderIdAndServiceID(Long id, Long serviceId) {
+    public ServiceProvider getServiceProviderByProviderIdAndServiceID(Long id, Long serviceId) {
         Optional<ServiceProvider> optionalServiceProvider =
                 serviceProviderRepository.findByProviderIdAndServiceId(id, serviceId);
         if(optionalServiceProvider.isEmpty())
             throw new EntityNotFoundException(ServiceProvider.class,
                     " not found for user with id" + id + " and serviceId " + serviceId);
         return optionalServiceProvider.get();
+    }
+
+    public ServiceProviderResponseDTO getServiceProviderDTOByProviderIdAndServiceID(Long providerId, Long serviceId){
+        ServiceProvider sp = getServiceProviderByProviderIdAndServiceID(providerId, serviceId);
+        return serviceProviderMapper.toResponseDTO(sp);
     }
 
     public List<ProviderPermissionEnum> getPermissions(Long id){
@@ -191,15 +200,17 @@ public class ServiceProviderService {
         return optionalServiceProvider.get();
     }
 
-
+    @Transactional
     public void deleteAllPermissions(Long serviceProviderId) {
         ServiceProvider serviceProvider = getServiceProviderEntityById(serviceProviderId);
         providerPermissionService.deleteAllByServiceProvider(serviceProvider.getId());
     }
 
+    @Transactional
     public void addPermissions(ServiceProvider serviceProvider,List<ProviderPermissionEnum> permissions){
         providerPermissionService.createPermissionsViaList(permissions, serviceProvider);
     }
+
     public List<Long> findMemberIdsByServiceId(Long serviceId) {
         return serviceProviderRepository.findMemberIdsByServiceId(serviceId);
     }
@@ -207,4 +218,9 @@ public class ServiceProviderService {
     public ServiceProvider getServiceProviderEntityById(long id){
         return serviceProviderRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
     }
+
+    public List<ServiceProvider> findProvidersByServiceIdAndPermission(Long serviceId, ProviderPermissionEnum permission) {
+        return serviceProviderRepository.findProvidersByServiceIdAndPermission(serviceId, permission);
+    }
+
 }

@@ -1,0 +1,30 @@
+.profile-picture {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ccc;
+  vertical-align: middle;
+  margin-right: 50px;
+}
+
+.username {
+  font-size: 1.2rem;
+  color: white;
+  display: inline-block;
+  line-height: 1;
+  vertical-align: middle;
+  margin-right: 15px;
+}
+
+.placeholder-avatar {
+  font-size: 2.5rem;
+  vertical-align: middle;
+  margin-right: 50px;
+}
+
+.wrapper:hover {
+  cursor: pointer;
+  transform: scale(1.08);
+}
+

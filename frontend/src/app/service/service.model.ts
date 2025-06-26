@@ -1,3 +1,5 @@
+import {ServiceTypeModel} from '../models/service-type.model';
+
 export interface ServiceModel {
   id: number;
   name: string;
