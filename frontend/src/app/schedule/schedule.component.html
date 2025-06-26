@@ -1,7 +1,7 @@
 <div class="schedule-container">
   <h2>Schedule appointment</h2>
   <app-slot-selection
-    *ngIf="(currentStep === 'slots' || currentStep === 'confirmation' || currentStep === 'provider') && slots.length > 0"
+    *ngIf="(currentStep === 'slots' || currentStep === 'confirmation' || currentStep === 'provider')"
     [slots]="slots"
     [providers]="providers"
     [selectedProvider]="selectedProvider"
