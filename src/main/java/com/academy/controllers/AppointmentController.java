@@ -68,12 +68,10 @@ public class AppointmentController {
     }
 
     @GetMapping("/member")
-    public ResponseEntity<Page<AppointmentCardDTO>> getAppointmentsForAuthenticatedMember(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+    public ResponseEntity<List<AppointmentCardDTO>> getAppointmentsForAuthenticatedMember(
             @RequestParam(defaultValue = "asc") String dateOrder
     ) {
-        return ResponseEntity.ok(appointmentService.getAppointmentsForAuthenticatedMember(page, size, dateOrder));
+        return ResponseEntity.ok(appointmentService.getAppointmentsForAuthenticatedMember(dateOrder));
     }
 /*
     @GetMapping("/provider")

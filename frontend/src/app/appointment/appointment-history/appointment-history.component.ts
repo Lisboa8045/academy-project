@@ -1,13 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {AppointmentResponseDetailedDTO, AppointmentResponseDTO} from '../appointment-response-dto.model';
 import {AppointmentService} from '../appointment.service';
 import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
-import { Router } from '@angular/router';
+import {Router} from '@angular/router';
 import {Page} from '../page.model';
 import {FormsModule} from '@angular/forms';
 import {AppointmentModalComponent} from '../appointment-modal/appointment-modal.component';
 import {SortingOrderComponent} from '../../shared/sorting-order/sorting-order.component';
-import {CancelConfirmationModalComponent} from '../../shared/confirmation-component/confirmation-modal.component';
+import {ConfirmationModalComponent} from '../../shared/confirmation-component/confirmation-modal.component';
+import {StatusFilterComponent} from '../status-filter/status-filter.component';
+import {AppointmentStatusEnumModel} from '../appointment-status.model';
 
 @Component({
   selector: 'app-appointment-history',
@@ -23,11 +25,13 @@ import {CancelConfirmationModalComponent} from '../../shared/confirmation-compon
     NgClass,
     AppointmentModalComponent,
     SortingOrderComponent,
-    CancelConfirmationModalComponent
+    ConfirmationModalComponent,
+    StatusFilterComponent
   ]
 })
 export class AppointmentHistoryComponent implements OnInit {
   appointments: AppointmentResponseDTO[] = [];
+  filteredAppointments: AppointmentResponseDTO[] = [];
   selectedAppointment?: AppointmentResponseDetailedDTO | null;
   viewAppointmentModal?: boolean = false;
   cancelAppointmentModal?: boolean = false;
@@ -37,6 +41,7 @@ export class AppointmentHistoryComponent implements OnInit {
   dateOrder: 'asc' | 'desc' = 'desc';
   totalPages = 0;
   page: Page<AppointmentResponseDTO> | null = null;
+  status: AppointmentStatusEnumModel = AppointmentStatusEnumModel.ALL;
 
   constructor(private appointmentHistoryService: AppointmentService,
               private router: Router,
@@ -47,27 +52,32 @@ export class AppointmentHistoryComponent implements OnInit {
       this.loadAppointments();
     }
 
-    loadAppointments(){
-      this.appointmentHistoryService.getUserAppointments({
-          page: this.currentPage,
-          pageSize: this.pageSize,
-          dateOrder: this.dateOrder
+  loadAppointments() {
+    this.appointmentHistoryService.getUserAppointments(this.dateOrder).subscribe({
+      next: (allAppointments: AppointmentResponseDTO[]) => {
+        this.appointments = allAppointments;
+        this.applyFiltersAndPagination();
+      },
+      error: (error) => {
+        alert(error.error.message);
       }
-      ).subscribe({
-        next:(page: Page<AppointmentResponseDTO>) => {
-          this.appointments = page.content;
-          this.totalItems = this.appointments.length;
-          this.currentPage = page.number;
-          this.totalPages = page.totalPages;
-          this.page = page;
-        },
-        error:(error) => {
-          alert(error.error.message);
-        }
-      })
-      console.log("APPOINTMENTS");
-      console.log(this.appointments);
-    }
+    });
+  }
+
+  applyFiltersAndPagination() {
+    // Apply filter
+    let filtered = this.status === AppointmentStatusEnumModel.ALL
+      ? this.appointments
+      : this.appointments.filter(a => a.status === this.status);
+
+    this.totalItems = filtered.length;
+    this.totalPages = Math.ceil(this.totalItems / this.pageSize);
+
+    // Apply pagination to filtered results
+    const startIndex = this.currentPage * this.pageSize;
+    this.filteredAppointments = filtered.slice(startIndex, startIndex + this.pageSize);
+  }
+
 
   selectAppointment(id: number, callback?: () => void) {
     this.appointmentHistoryService.getAppointmentById(id).subscribe({
@@ -90,7 +100,7 @@ export class AppointmentHistoryComponent implements OnInit {
   changePage(page: number) {
     if (page < 0 || page >= this.totalPages || page === this.currentPage) return;
     this.currentPage = page;
-    this.loadAppointments();
+    this.applyFiltersAndPagination();
   }
 
   onOrderChange(newOrder: 'asc' | 'desc') {
@@ -128,5 +138,11 @@ export class AppointmentHistoryComponent implements OnInit {
   cancelCancelAppointment() {
     this.cancelAppointmentModal = false;
     this.selectedAppointment = null;
+  }
+
+  statusChange(newStatus: AppointmentStatusEnumModel) {
+    this.status = newStatus;
+    this.currentPage = 0;
+    this.applyFiltersAndPagination();
   }
 }

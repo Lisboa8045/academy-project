@@ -14,17 +14,15 @@ export class AppointmentService {
 
   constructor(private http: HttpClient) {}
 
-  getUserAppointments(query : AppointmentQuery){
+  getUserAppointments(dateOrder: string){
     return this.http
-      .get<Page<AppointmentResponseDTO>>(
+      .get<AppointmentResponseDTO[]>(
       `${this.apiUrl}/member`
-      ,{
-        params:{
-          page: query.page,
-          size:query.pageSize,
-          dateOrder: query.dateOrder,
+        ,{
+          params: {
+            dateOrder: dateOrder,
+          }
         }
-      },
     );
   }
 

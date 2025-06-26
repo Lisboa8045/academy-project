@@ -1,5 +1,7 @@
 package com.academy.dtos.appointment;
 
+import com.academy.models.appointment.AppointmentStatus;
+
 import java.time.LocalDateTime;
 
 public record AppointmentCardDTO(
@@ -7,6 +9,7 @@ public record AppointmentCardDTO(
         String serviceProviderUsername,
         String memberUsername,
         String serviceName,
-        LocalDateTime startDateTime
+        LocalDateTime startDateTime,
+        AppointmentStatus status
 ) {
 }

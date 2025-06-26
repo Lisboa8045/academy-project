@@ -1,5 +1,3 @@
-// AppointmentService.java
-
 package com.academy.services;
 
 import com.academy.config.authentication.AuthenticationFacade;
@@ -36,21 +34,19 @@ public class AppointmentService {
     private final MemberService memberService;
     private final AuthenticationFacade authenticationFacade;
 
-    private final AuthenticationFacade authenticationFacade;
-
     @Value("${slot.window.days:30}")
     private int slotWindowDays;
 
     @Autowired
 
-    public AppointmentService(AppointmentRepository appointmentRepository, ServiceProviderService serviceProviderService, AppointmentMapper appointmentMapper, MemberService memberService, AuthenticationFacade authenticationFacade) {
-
+    public AppointmentService(AppointmentRepository appointmentRepository
+            , ServiceProviderService serviceProviderService,
+                              AppointmentMapper appointmentMapper,
+                              MemberService memberService,
+                              AuthenticationFacade authenticationFacade) {
         this.appointmentRepository = appointmentRepository;
-
         this.serviceProviderService = serviceProviderService;
-
         this.appointmentMapper = appointmentMapper;
-
         this.memberService = memberService;
         this.authenticationFacade = authenticationFacade;
     }
@@ -61,7 +57,7 @@ public class AppointmentService {
                 .toList();
     }
 
-    public AppointmentResponseDTO getAppointmentById(int id) {
+    public AppointmentResponseDTO getAppointmentById(Long id) {
         return appointmentRepository.findById(id)
                 .map(appointmentMapper::toResponseDTO)
                 .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
@@ -167,14 +163,13 @@ public class AppointmentService {
 
     }
 
-    public Page<AppointmentCardDTO> getAppointmentsForAuthenticatedMember(int page, int size, String dateOrder) {
+    public List<AppointmentCardDTO> getAppointmentsForAuthenticatedMember(String dateOrder) {
         Sort sort = dateOrder.equalsIgnoreCase("desc") ? Sort.by("startDateTime").descending() : Sort.by("startDateTime").ascending();
-        Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Appointment> appointmentPage = appointmentRepository
-                .findByMember_Username(authenticationFacade.getUsername(), pageable);
+        List<Appointment> appointmentList = appointmentRepository
+                .findByMember_Username(authenticationFacade.getUsername(), sort);
 
-        return appointmentPage.map(appointmentMapper::toAppointmentCardDTO);
+        return appointmentList.stream().map(appointmentMapper::toAppointmentCardDTO).toList();
 
     }
 
@@ -186,7 +181,7 @@ public class AppointmentService {
     }
 
  */
-}
+
     public List<Appointment> getAppointmentsForProvider(Long providerId) {
     if (providerId == null) {
         throw new EntityNotFoundException(Appointment.class, providerId);

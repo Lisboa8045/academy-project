@@ -1,7 +1,4 @@
 import { Routes } from '@angular/router';
-import {AuthComponent} from './auth/auth.component';
-import {ProfileComponent} from './profile/profile.component';
-import {UnauthorizedComponent} from './unauthorized.component';
 import {AppointmentHistoryComponent} from './appointment/appointment-history/appointment-history.component';
 import { AuthComponent } from './auth/auth.component';
 import { ProfileComponent } from './profile/profile.component';

@@ -1,3 +1,5 @@
+import {AppointmentStatusEnumModel} from './appointment-status.model';
+
 export interface AppointmentResponseDetailedDTO {
   id: number;
   serviceProviderId: string;
@@ -16,5 +18,6 @@ export interface AppointmentResponseDTO{
   memberUsername: string;
   serviceName: string;
   startDateTime: Date;
+  status: AppointmentStatusEnumModel;
 }
 
