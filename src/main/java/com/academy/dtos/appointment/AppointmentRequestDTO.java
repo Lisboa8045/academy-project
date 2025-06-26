@@ -1,5 +1,6 @@
 package com.academy.dtos.appointment;
 
+import com.academy.models.appointment.AppointmentStatus;
 import com.academy.util.FieldLengths;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -14,5 +15,5 @@ public record AppointmentRequestDTO(
         @NotNull LocalDateTime endDateTime,
         @Min(0) @Max(5) Integer rating,
         @Size(max = FieldLengths.REVIEW_MAX) String comment,
-        String status
+        @NotNull AppointmentStatus status // agora obrigatório e validado
 ) {}

@@ -8,6 +8,7 @@
     import com.academy.services.ServiceProviderService;
     import jakarta.validation.Valid;
     import org.apache.coyote.BadRequestException;
+    import org.springframework.http.HttpStatus;
     import org.springframework.http.ResponseEntity;
     import org.springframework.web.bind.annotation.*;
 
@@ -21,9 +22,11 @@
         public ServiceProviderController(ServiceProviderService serviceProviderService) {
             this.serviceProviderService = serviceProviderService;
         }
+
         @GetMapping
-        public List<ServiceProviderResponseDTO> getAllServiceProviders() {
-            return serviceProviderService.getAllServiceProviders();
+        public ResponseEntity<List<ServiceProviderResponseDTO>> getAllServiceProviders() {
+            List<ServiceProviderResponseDTO> serviceProviders = serviceProviderService.getAllServiceProviders();
+            return ResponseEntity.ok(serviceProviders);
         }
 
         @GetMapping("/{id}")
@@ -34,9 +37,13 @@
         }
 
         @PostMapping
-        public ServiceProviderResponseDTO createServiceProvider(@Valid @RequestBody ServiceProviderRequestDTO serviceProvider) throws BadRequestException {
-            return serviceProviderService.createServiceProviderWithDTO(serviceProvider);
+        public ResponseEntity<ServiceProviderResponseDTO> createServiceProvider(
+                @Valid @RequestBody ServiceProviderRequestDTO serviceProvider) throws BadRequestException {
+
+            ServiceProviderResponseDTO createdServiceProvider = serviceProviderService.createServiceProviderWithDTO(serviceProvider);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdServiceProvider);
         }
+
 
         @PutMapping("/{id}")
         public ResponseEntity<ServiceProviderResponseDTO> updateServiceProvider(@PathVariable long id, @Valid @RequestBody ServiceProviderRequestDTO serviceProvider) {

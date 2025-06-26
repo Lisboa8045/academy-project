@@ -1,6 +1,6 @@
 package com.academy.dtos.appointment;
 
-import jakarta.validation.constraints.NotNull;
+import com.academy.models.appointment.AppointmentStatus;
 
 import java.time.LocalDateTime;
 
@@ -11,5 +11,6 @@ public record AppointmentResponseDTO(
         LocalDateTime startDateTime,
         LocalDateTime endDateTime,
         Integer rating,
-        String comment
+        String comment,
+        AppointmentStatus status
 ) {}

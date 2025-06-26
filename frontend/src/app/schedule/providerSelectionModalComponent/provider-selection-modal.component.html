@@ -1,7 +1,7 @@
 <!-- provider-selection-modal.component.html -->
 <div class="modal-backdrop">
   <div class="modal provider-modal">
-    <h3>Escolha um prestador para as {{ providerOptions[0]?.start | date:'shortTime' }}</h3>
+    <h3>Choose a provider for {{ providerOptions[0]?.start | date:'shortTime' }}</h3>
     <ul class="provider-list">
       <li *ngFor="let slot of providerOptions"
           (click)="providerSelected.emit(slot)"
@@ -9,6 +9,6 @@
         {{ slot.providerName }}
       </li>
     </ul>
-    <button (click)="backToSlots.emit()">Voltar para horários</button>
+    <button (click)="backToSlots.emit()">Return to calendar</button>
   </div>
 </div>

@@ -124,13 +124,6 @@ export class ScheduleComponent implements OnInit {
   }
 
   loadServices() {
-    this.serviceApi.searchServices().subscribe({
-      next: (res: ServiceModel[]) => {
-        this.services = res;
-        this.filteredServices = res; // inicialmente todos
-      },
-      error: err => console.error('Erro ao carregar serviços:', err)
-    });
   }
 
   loadServiceTypes() {
@@ -147,7 +140,7 @@ export class ScheduleComponent implements OnInit {
     this.filteredSlots = this.slots.filter(slot =>
       !provider || slot.providerName === provider
     );
-    this.organizeSlotsByDay(); // <-- Atualizar visualização
+    this.organizeSlotsByDay();
   }
 
   onSearchChange(searchTerm: string) {
@@ -163,7 +156,7 @@ export class ScheduleComponent implements OnInit {
     applyFilters() {
       this.filteredServices = this.services.filter(service => {
         const matchesType =
-          this.selectedServiceTypeId == null || service.serviceTypeId === this.selectedServiceTypeId;
+          this.selectedServiceTypeId == null || service.serviceType.id === this.selectedServiceTypeId;
         const matchesSearch =
           !this.searchTerm || service.name.toLowerCase().includes(this.searchTerm);
         return matchesType && matchesSearch;
@@ -199,13 +192,10 @@ export class ScheduleComponent implements OnInit {
 
     selectSlot(slot: SlotModel) {
       const slotTime = new Date(slot.start).toISOString();
-
-      // Obter todos slots com o mesmo horário
       const sameTimeSlots = this.slots.filter(s =>
         new Date(s.start).toISOString() === slotTime
       );
 
-      // Criar map único de providers
       const uniqueProviderMap = new Map<string, SlotModel>();
       for (const s of sameTimeSlots) {
         if (!uniqueProviderMap.has(s.providerName)) {
@@ -215,7 +205,6 @@ export class ScheduleComponent implements OnInit {
 
       this.providerOptions = Array.from(uniqueProviderMap.values());
 
-      // Se filtro por provider estiver ativo E provider do slot for esse filtro
       if (this.selectedProvider && slot.providerName === this.selectedProvider) {
         this.selectedSlot = slot;
         this.currentStep = 'confirmation';
@@ -245,13 +234,13 @@ export class ScheduleComponent implements OnInit {
 
     cancelModal() {
       this.showConfirmationModal = false;
-      this.currentStep = 'slots'; // Volta para escolher slot
+      this.currentStep = 'slots';
     }
 
     confirmInModal() {
       this.showConfirmationModal = false;
       this.confirmAppointment();
-      this.currentStep = 'service'; // Volta para começar
+      this.currentStep = 'service';
     }
 
     confirmAppointment() {

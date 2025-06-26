@@ -1,14 +1,13 @@
-<!-- confirmation-modal.component.html -->
 <div class="modal-backdrop">
   <div class="modal">
-    <h3>Confirmar Marcação</h3>
-    <p class="modal-title"><strong>Serviço: </strong> {{ selectedService?.name }}</p>
-    <p class="modal-title"><strong>Data: </strong> {{ selectedSlot?.start | date:'short' }}</p>
-    <p class="modal-title"><strong>Prestador: </strong> {{ selectedSlot?.providerName }}</p>
+    <h3>Confirm appointment</h3>
+    <p class="modal-line"><strong>Service: </strong> {{ selectedService?.name }}</p>
+    <p class="modal-line"><strong>Date: </strong> {{ selectedSlot?.start | date:'short' }}</p>
+    <p class="modal-line"><strong>Provider: </strong> {{ selectedSlot?.providerName }}</p>
 
     <div class="modal-buttons">
-      <button (click)="cancel.emit()">Cancelar</button>  <!-- Note .emit() -->
-      <button (click)="confirm.emit()">Confirmar</button>  <!-- Note .emit() -->
+      <button (click)="cancel.emit()">Cancel</button>
+      <button (click)="confirm.emit()">Confirm</button>
     </div>
   </div>
 </div>

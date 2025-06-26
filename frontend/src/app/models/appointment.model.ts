@@ -1,3 +1,5 @@
+export type AppointmentStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'FINISHED';
+
 export interface AppointmentModel {
   serviceProviderId: number;
   startDateTime: string;
@@ -5,5 +7,5 @@ export interface AppointmentModel {
   rating?: number;
   comment?: string;
   id?: number;
-  status?: string;
+  status?: AppointmentStatus;
 }

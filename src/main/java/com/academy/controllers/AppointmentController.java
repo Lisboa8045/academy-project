@@ -9,11 +9,9 @@ import com.academy.services.SchedulingService;
 
 import jakarta.validation.Valid;
 
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -34,38 +32,36 @@ public class AppointmentController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AppointmentResponseDTO> getAppointmentById(@PathVariable int id) {
+    public ResponseEntity<AppointmentResponseDTO> getAppointmentById(@PathVariable Long id) {
         return ResponseEntity.ok(appointmentService.getAppointmentById(id));
     }
 
     @PostMapping
     public ResponseEntity<AppointmentResponseDTO> createAppointment(@Valid @RequestBody AppointmentRequestDTO dto) {
-        System.out.println("CREATE APPOINTMENT CHAMADO");
         AppointmentResponseDTO response = appointmentService.createAppointment(dto);
-        System.out.println("Successfully created appointment with ID: " + response.id());
         return ResponseEntity.ok(response);
     }
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<AppointmentResponseDTO> updateAppointment(@PathVariable int id, @RequestBody AppointmentRequestDTO appointmentDetails) {
+    public ResponseEntity<AppointmentResponseDTO> updateAppointment(@PathVariable Long id, @RequestBody AppointmentRequestDTO appointmentDetails) {
         AppointmentResponseDTO updated = appointmentService.updateAppointment(id, appointmentDetails);
         return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAppointment(@PathVariable int id) {
+    public ResponseEntity<Void> deleteAppointment(@PathVariable Long id) {
         appointmentService.deleteAppointment(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/review")
-    public ResponseEntity<AppointmentResponseDTO> createReview(@PathVariable int id, @RequestBody AppointmentRequestDTO appointmentDetails) {
+    public ResponseEntity<AppointmentResponseDTO> createReview(@PathVariable Long id, @RequestBody AppointmentRequestDTO appointmentDetails) {
         return updateAppointment(id, appointmentDetails);
     }
 
     @DeleteMapping("/{id}/review")
-    public ResponseEntity<Void> deleteReview(@PathVariable int id) {
+    public ResponseEntity<Void> deleteReview(@PathVariable Long id) {
         appointmentService.deleteReview(id);
         return ResponseEntity.noContent().build();
     }
@@ -73,7 +69,6 @@ public class AppointmentController {
     @GetMapping("/services/{serviceId}/free-slots")
     public ResponseEntity<List<SlotDTO>> getFreeSlots(@PathVariable Long serviceId) {
         List<SlotDTO> slots = schedulingService.getFreeSlotsForService(serviceId);
-        System.out.println("[DEBUG] Number of free slots found: " + slots.size());
         return ResponseEntity.ok(slots);
     }
 }
