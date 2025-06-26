@@ -1,9 +1,6 @@
-
-@if(loading()) {
-  <app-loading/>
-} @else {
-
-
+  @if(loading()) {
+    <app-loading/>
+  } @else {
     <div class ="service-page">
 
       <div class="image-section card">
@@ -83,7 +80,7 @@
                 <div class="normal-price" style="font-weight: bold;">{{ service?.price }}€</div>
             </ng-template>
 
-            <button class="schedule-btn">Schedule Appointment</button>
+            <button class="schedule-btn" (click)="onClick(service?.id)">Schedule Appointment</button>
 
         </div>
     </div>

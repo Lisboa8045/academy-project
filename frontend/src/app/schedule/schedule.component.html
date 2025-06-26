@@ -1,20 +1,5 @@
 <div class="schedule-container">
   <h2>Schedule appointment</h2>
-  <app-service-search
-    *ngIf="currentStep === 'service' && serviceTypes.length > 0"
-    [serviceTypes]="serviceTypes"
-    [selectedServiceTypeId]="selectedServiceTypeId"
-    (searchChange)="onSearchChange($event)"
-    (typeChange)="filterByType($event)">
-  </app-service-search>
-
-  <app-service-list
-    *ngIf="currentStep === 'service' && filteredServices.length > 0"
-    [services]="filteredServices"
-    [selectedServiceId]="form.get('serviceId')?.value"
-    (serviceSelected)="selectService($event)">
-  </app-service-list>
-
   <app-slot-selection
     *ngIf="(currentStep === 'slots' || currentStep === 'confirmation' || currentStep === 'provider') && slots.length > 0"
     [slots]="slots"
