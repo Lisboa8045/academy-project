@@ -7,6 +7,7 @@ import com.academy.exceptions.EntityNotFoundException;
 import com.academy.exceptions.NotFoundException;
 import com.academy.exceptions.RegistrationConflictException;
 import com.academy.exceptions.SendEmailException;
+import com.academy.exceptions.TokenExpiredException;
 import com.academy.exceptions.UnavailableUserException;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
@@ -69,6 +70,11 @@ public class ExceptionController {
     @ExceptionHandler(SendEmailException.class)
     public ResponseEntity<Object> handleInvalidValue(SendEmailException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(TokenExpiredException.class)
+    public ResponseEntity<Object> handleInvalidValue(TokenExpiredException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.GONE);
     }
 
     @ExceptionHandler(EmailTemplateLoadingException.class)

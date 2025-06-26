@@ -18,6 +18,7 @@ import com.academy.exceptions.InvalidArgumentException;
 import com.academy.exceptions.MemberNotFoundException;
 import com.academy.exceptions.NotFoundException;
 import com.academy.exceptions.RegistrationConflictException;
+import com.academy.exceptions.TokenExpiredException;
 import com.academy.exceptions.UnavailableUserException;
 import com.academy.models.Role;
 import com.academy.models.member.Member;
@@ -203,10 +204,10 @@ public class MemberService {
                 .filter(m -> m.getConfirmationToken() != null &&
                         passwordEncoder.matches(confirmationToken, m.getConfirmationToken()))
                 .findFirst()
-                .orElseThrow(() -> new NotFoundException("Confirmation Token not found"));
+                .orElseThrow(() -> new BadRequestException("Confirmation Token is Invalid/Not found"));
 
         if (member.getTokenExpiry().isBefore(LocalDateTime.now()))
-            throw new AuthenticationException("Confirmation Token has Expired");
+            throw new TokenExpiredException("Confirmation Token has Expired");
 
         member.setTokenExpiry(null);
         member.setEnabled(true);

@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common'
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-confirm-email',
   templateUrl: './confirm-email.component.html',
-  styleUrls: ['./confirm-email.component.css']
+  styleUrls: ['./confirm-email.component.css'],
+  imports: [CommonModule],
 })
 export class ConfirmEmailComponent implements OnInit {
   message: string = '';
@@ -28,17 +30,25 @@ export class ConfirmEmailComponent implements OnInit {
 
     this.authService.confirmEmail(token).subscribe({
       next: () => {
-        this.message = '✅ Your email has been successfully confirmed!';
+        this.message = 'Your email has been successfully confirmed!';
         this.loading = false;
       },
       error: (err) => {
-        this.error = err?.error || '❌ This confirmation link is invalid or has expired.';
-        this.loading = false;
+        console.error('Email confirmation failed', err);
+        if (err.status === 400) {
+          this.message = 'This confirmation link is invalid.';
+        }
+        else if (err.status === 410) {
+          this.message = 'This confirmation link has expired.'
+        }
+        else {
+          this.message = 'An unexpected error occurred.';
+        }
       }
     });
   }
 
   goToLogin(): void {
-    this.router.navigate(['/auth']);
+    //this.router.navigate(['/auth']);
   }
 }
