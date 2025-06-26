@@ -23,12 +23,11 @@ export class AuthService {
           this.authStore.setProfilePicture(res.profilePicture);
         }),
         catchError((error: HttpErrorResponse) => {
-          if (error.status === 403 && error.error === 'Member is Inactive with status WAITING_FOR_EMAIL_APPROVAL') {
-            console.log("TEST")
-            console.log(error);
+          if (error.status === 403 && error.error?.startsWith('Member is Inactive with status WAITING_FOR_EMAIL_APPROVAL')) {
+            const email = error.error.split(':')[1] || '';
             return throwError(() => ({
               type: 'EMAIL_NOT_CONFIRMED',
-              email: 'example@email.com' // TODO change
+              email
             }));
           }
 
@@ -46,6 +45,12 @@ export class AuthService {
 
   signup(email: string, username: string, roleId: string, password: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/register`, { email: email, username: username, roleId: roleId, password: password });
+  }
+
+  resendConfirmation(login: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/recreate-confirmation-token`, {
+      login: login
+    });
   }
 }
 

@@ -90,7 +90,7 @@ public class AuthController {
     @PostMapping("/recreate-confirmation-token")
     public ResponseEntity<RecreateConfirmationTokenResponseDto> recreateConfirmationToken(
             @RequestBody RecreateConfirmationTokenRequestDto request) {
-        memberService.recreateConfirmationToken(request.login(), request.password());
+        memberService.recreateConfirmationToken(request.login());
         return ResponseEntity.ok(new RecreateConfirmationTokenResponseDto("Confirmation token recreated"));
     }
 }
