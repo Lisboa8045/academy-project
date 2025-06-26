@@ -10,9 +10,9 @@ export interface ServiceModel {
   negotiable: boolean;
   duration: number;
   permissions: string[];
-  serviceTypeName: ServiceTypeModel;
+  serviceTypeName: string;
   tagNames: string[];
   createdAt: string;
   updatedAt: string;
-  imageUrl: string
+  images: string[];
 }

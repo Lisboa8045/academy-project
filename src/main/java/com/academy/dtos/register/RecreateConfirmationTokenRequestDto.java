@@ -1,4 +1,4 @@
 package com.academy.dtos.register;
 
-public record RecreateConfirmationTokenRequestDto(String login, String password) {
+public record RecreateConfirmationTokenRequestDto(String login) {
 }
