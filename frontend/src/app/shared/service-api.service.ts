@@ -45,4 +45,25 @@ export class ServiceApiService {
   getServiceTypes(): Observable<ServiceTypeResponseDTO[]> {
     return this.http.get<ServiceTypeResponseDTO[]>(this.SERVICE_TYPE_URL);
   }
+
+  getServicesOfCurrentlyLoggedMember(query: ServiceQuery): Observable<PagedResponse>{
+    let params = new HttpParams()
+      .set('page', query.page.toString())
+      .set('size', query.pageSize.toString())
+      .set('sort', query.sortOrder);
+    return this.http.get<PagedResponse>(this.BASE_URL + '/my-services', {params});
+  }
+
+  createService(){
+    return this.http.post<ServiceModel>(this.BASE_URL, {
+      "name": "a",
+      "description": "asdasdasd",
+      "price": 100,
+      "discount": 1,
+      "negotiable": false,
+      "duration": 1,
+      "serviceTypeName": "Beauty",
+      "tagNames": ["omg", "jesus", "piccolo"]
+    });
+  }
 }

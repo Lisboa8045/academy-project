@@ -1,1 +1,31 @@
-<h1>works</h1>
+@if (loading()) {
+  <app-loading/>
+} @else {
+  <app-controls-bar
+    [pageSize]="pageSize"
+    [sortOrder]="sortOrder">
+  </app-controls-bar>
+  <div class="main-content">
+    <button (click)="buildDummyData()"></button>
+    <div class="results-container">
+      @if (services().length === 0) {
+        <div class="no-services-message">
+          <h2>No services found</h2>
+          <p>Try checking spelling, using more general terms, or removing filters.</p>
+        </div>
+      } @else {
+        <app-service-list [services]="services"></app-service-list>
+      }
+
+      <app-pagination-bar
+        [currentPage]="currentPage"
+        [totalPages]="totalPages"
+        [goToPageFn]="goToPage.bind(this)"
+        [goToPreviousPageFn]="goToPreviousPage.bind(this)"
+        [goToNextPageFn]="goToNextPage.bind(this)"
+      ></app-pagination-bar>
+
+    </div>
+  </div>
+}
+

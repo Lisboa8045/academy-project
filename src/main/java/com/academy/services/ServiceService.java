@@ -145,7 +145,7 @@ public class ServiceService {
         if (previousType != null) {
             removeServiceTypeLink(service);
         }
-
+        System.out.println("AA" + serviceTypeName);
         ServiceType type = serviceTypeService.getServiceTypeEntityByName(serviceTypeName);
         service.setServiceType(type);
         type.getServices().add(service);
@@ -282,5 +282,10 @@ public class ServiceService {
         removeAllTagLinks(service);
         removeServiceTypeLink(service);
         unlinkAndDisableServiceProviders(service);
+    }
+
+    public Page<ServiceResponseDTO> getServicesByMemberId(Long memberId, Pageable pageable) {
+       return serviceRepository.queryServicesByMemberId(memberId, pageable).map(service ->  serviceMapper.toDto(service,
+               getPermissionsByProviderIdAndServiceId(memberId, service.getId())));
     }
 }
