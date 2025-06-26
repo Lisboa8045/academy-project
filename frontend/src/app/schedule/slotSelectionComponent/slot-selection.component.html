@@ -1,0 +1,42 @@
+<h3>Escolher prestador</h3>
+<div class="service-type-scroll">
+  <button
+    class="type-button"
+    [class.active]="!selectedProvider"
+    (click)="filterByProvider(null)">
+    Todos
+  </button>
+  <button
+    *ngFor="let provider of providers"
+    class="type-button"
+    [class.active]="selectedProvider === provider"
+    (click)="filterByProvider(provider)">
+    {{ provider }}
+  </button>
+</div>
+<div class="week-navigation">
+  <button (click)="goToPreviousWeek()">« Semana Anterior</button>
+  <span>
+    {{ currentWeekStart | date: 'dd/MM/yyyy' }} - {{ currentWeekEnd | date: 'dd/MM/yyyy' }}
+  </span>
+  <button (click)="goToNextWeek()">Semana Seguinte »</button>
+</div>
+<h3>Calendar</h3>
+<div class="weekly-slots">
+  <div class="day-column"
+       *ngFor="let day of getWeekDays()"
+       [class.empty]="getSlotsForDay(day).length === 0">
+    <h4>{{ day | date: 'EEE dd/MM' }}</h4>
+    <ul *ngIf="getSlotsForDay(day).length > 0; else emptyDay">
+      <li *ngFor="let slot of getSlotsForDay(day)" (click)="selectSlot(slot)">
+        <div class="slot-hour">{{ slot.start | date: 'HH:mm' }}</div>
+      </li>
+    </ul>
+    <ng-template #emptyDay>
+      <div class="empty-day">No availability for this day</div>
+    </ng-template>
+  </div>
+</div>
+<div class="top-bar">
+  <button class="back-button" (click)="backToServices.emit()">Back to services</button>
+</div>

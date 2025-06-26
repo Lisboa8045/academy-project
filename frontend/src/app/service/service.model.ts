@@ -1,3 +1,5 @@
+import {ServiceTypeModel} from '../models/service-type.model';
+
 export interface ServiceModel {
   id: number;
   name: string;
@@ -8,8 +10,9 @@ export interface ServiceModel {
   negotiable: boolean;
   duration: number;
   permissions: string[];
-  serviceType: string;
+  serviceType: ServiceTypeModel;
   tagNames: string[];
   createdAt: string;
   updatedAt: string;
+  imageUrl: string
 }

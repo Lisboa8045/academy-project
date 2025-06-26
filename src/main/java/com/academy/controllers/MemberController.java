@@ -28,6 +28,7 @@ public class MemberController {
         this.userDetailsService = userDetailsService;
         this.jwtCookieUtil = jwtCookieUtil;
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMember(@PathVariable Long id) {
         memberService.deleteMember(id);
@@ -54,4 +55,6 @@ public class MemberController {
     public ResponseEntity<MemberResponseDTO> getMemberById(@PathVariable Long id) {
         return ResponseEntity.ok(memberService.getMemberById(id));
     }
+
+
 }

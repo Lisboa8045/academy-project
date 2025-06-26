@@ -4,10 +4,11 @@ import {AppHeaderComponent} from './header/app-header.component';
 import {HttpClient} from '@angular/common/http';
 import {AuthStore} from './auth/auth.store';
 import {MemberResponseDTO} from "./auth/member-response-dto.model";
+import {AppFooterComponent} from './footer/app-footer.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, AppHeaderComponent],
+  imports: [RouterOutlet, AppHeaderComponent, AppFooterComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

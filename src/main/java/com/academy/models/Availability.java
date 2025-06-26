@@ -38,4 +38,5 @@ public class Availability extends BaseEntity {
     @Column(name = "end_date_time")
     private LocalDateTime endDateTime;
 
+
 }
