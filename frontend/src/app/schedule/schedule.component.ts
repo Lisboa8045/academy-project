@@ -7,7 +7,7 @@ import { SlotModel } from '../models/slot.model';
 import { ServiceModel } from '../service/service.model';
 import { AppointmentModel } from '../models/appointment.model';
 import { ServiceTypeModel } from '../models/service-type.model';
-import {CommonModule, DatePipe} from '@angular/common';
+import {CommonModule} from '@angular/common';
 import {ServiceSearchComponent} from './serviceSearchComponent/service-search.component';
 import {ServiceListComponent} from './serviceListComponent/service-list.component';
 import {ProviderSelectionModalComponent} from './providerSelectionModalComponent/provider-selection-modal.component';
@@ -156,7 +156,7 @@ export class ScheduleComponent implements OnInit {
     applyFilters() {
       this.filteredServices = this.services.filter(service => {
         const matchesType =
-          this.selectedServiceTypeId == null || service.serviceTypeId === this.selectedServiceTypeId;
+          this.selectedServiceTypeId == null || service.serviceType.id === this.selectedServiceTypeId;
         const matchesSearch =
           !this.searchTerm || service.name.toLowerCase().includes(this.searchTerm);
         return matchesType && matchesSearch;

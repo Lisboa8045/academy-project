@@ -113,7 +113,7 @@ public class ServiceProviderService {
             return false;
         }
         List<ProviderPermissionEnum> permissions = getPermissions(loggedMemberServiceProvider.getId());
-        return !Utils.hasPermission(permissions, ProviderPermissionEnum.ADD_SERVICE_PROVIDER);
+        return Utils.hasPermission(permissions, ProviderPermissionEnum.ADD_SERVICE_PROVIDER);
     }
 
     private void validatePermissions(List<ProviderPermissionEnum> permissions, boolean isServiceCreation) throws BadRequestException {
@@ -173,8 +173,8 @@ public class ServiceProviderService {
         return optionalServiceProvider.get();
     }
 
-    public ServiceProviderResponseDTO getServiceProviderDTOByProviderIdAndServiceID(Long id, Long serviceId){
-        ServiceProvider sp = getServiceProviderByProviderIdAndServiceID(id, serviceId);
+    public ServiceProviderResponseDTO getServiceProviderDTOByProviderIdAndServiceID(Long providerId, Long serviceId){
+        ServiceProvider sp = getServiceProviderByProviderIdAndServiceID(providerId, serviceId);
         return serviceProviderMapper.toResponseDTO(sp);
     }
 

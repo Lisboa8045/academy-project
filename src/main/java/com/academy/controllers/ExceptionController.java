@@ -111,4 +111,14 @@ public class ExceptionController {
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Object> handleIllegalStateException(IllegalStateException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+    }
+
 }
