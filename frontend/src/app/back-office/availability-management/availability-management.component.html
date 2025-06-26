@@ -1,78 +1,144 @@
+<!-- availability-management.component.html -->
 <div class="availability-management">
+  <!-- Header Section -->
+  <div class="management-header">
+    <h2 class="management-title">Gestão de Disponibilidades</h2>
 
-  <!-- Navegação semanal -->
-  <div class="week-navigation">
-    <button (click)="goToPreviousWeek()">← Semana anterior</button>
-    <span>
-      {{ currentWeekStart | date: 'dd/MM/yyyy' }} - {{ currentWeekEnd | date: 'dd/MM/yyyy' }}
-    </span>
-    <button (click)="goToNextWeek()">Semana seguinte →</button>
-  </div>
+    <div class="week-navigation">
+      <button (click)="goToPreviousWeek()" class="nav-button">
+        ← Semana anterior
+      </button>
+      <span class="week-range">
+        {{ currentWeekStart | date: 'dd/MM/yyyy' }} - {{ currentWeekEnd | date: 'dd/MM/yyyy' }}
+      </span>
+      <button (click)="goToNextWeek()" class="nav-button">
+        Semana seguinte →
+      </button>
+      <button (click)="goToCurrentWeek()" class="nav-button today-button">Hoje</button>
+    </div>
 
-  <!-- Dias da semana -->
-  <div class="weekly-slots">
-    <div *ngFor="let day of getWeekDays()" class="day-column">
-      <h4>
-        {{ day | date: 'EEEE' }}<br />
-        <small>{{ day | date: 'dd/MM' }}</small>
-      </h4>
-
-      <ul>
-        <li *ngFor="let avail of getAvailabilityForDay(day)">
-          <span class="slot-hour">
-            {{ avail.startDateTime | date: 'HH:mm' }} - {{ avail.endDateTime | date: 'HH:mm' }}
-          </span>
-          <span class="slot-actions">
-            <button (click)="editAvailability(avail)">Editar</button>
-            <button (click)="removeAvailability(avail)">Remover</button>
-          </span>
-        </li>
-      </ul>
-
-      <div *ngIf="getAvailabilityForDay(day).length === 0" class="empty-day">
-        Sem disponibilidade
-      </div>
-
-      <button (click)="addAvailability(day)">+ Disponibilidade</button>
+    <div class="bulk-actions">
+      <button (click)="openBulkAddModal()" class="nav-button bulk-add-button">
+        ＋ Adicionar em massa
+      </button>
     </div>
   </div>
 
-  <!-- Modal -->
-  <div class="modal" *ngIf="showAvailabilityModal">
+  <!-- Weekly Slots Grid -->
+  <div class="weekly-slots">
+    <div *ngFor="let day of getWeekDays()" class="day-column" [class.today]="isToday(day)">
+      <div class="day-header">
+        <div>
+          <h4 class="day-title">{{ day | date: 'EEEE' }}</h4>
+          <small class="day-date">{{ day | date: 'dd/MM' }}</small>
+        </div>
+        <button (click)="addAvailability(day)" class="add-slot-button">＋</button>
+      </div>
+
+      <div class="slots-container" *ngIf="getAvailabilityForDay(day).length > 0; else emptyDay">
+        <div *ngFor="let avail of getAvailabilityForDay(day)" class="slot-item">
+          <div class="slot-info">
+            <span class="slot-time">
+              {{ avail.startDateTime | date: 'HH:mm' }} - {{ avail.endDateTime | date: 'HH:mm' }}
+            </span>
+            <span class="slot-status" [class.booked]="isSlotBooked(avail)">
+              {{ isSlotBooked(avail) ? 'Reservado' : 'Disponível' }}
+            </span>
+          </div>
+          <div class="slot-actions">
+            <button (click)="editAvailability(avail)" class="action-button edit" [disabled]="isSlotBooked(avail)">
+              ✏️
+            </button>
+            <button (click)="removeAvailability(avail)" class="action-button delete" [disabled]="isSlotBooked(avail)">
+              🗑️
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #emptyDay>
+        <div class="empty-day">
+          <span class="empty-icon">📅</span>
+          Sem disponibilidade
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+  <!-- Availability Modal -->
+  <div class="modal-overlay" *ngIf="showAvailabilityModal" (click)="closeAvailabilityModal()"></div>
+  <div class="modal" *ngIf="showAvailabilityModal" [class.bulk-modal]="modalMode === 'bulk'">
     <div class="modal-content">
-      <h3>{{ modalMode === 'add' ? 'Nova' : 'Editar' }} Disponibilidade</h3>
+      <button class="modal-close" (click)="closeAvailabilityModal()">×</button>
+      <h3 class="modal-title">{{ getModalTitle() }}</h3>
 
-      <label>Hora de início:
-        <input type="time" [(ngModel)]="modalStartTime" />
-      </label>
+      <div class="time-inputs">
+        <div class="time-group">
+          <label class="time-label">Hora de início</label>
+          <input type="time" [(ngModel)]="modalStartTime" class="time-input" />
+        </div>
+        <div class="time-group">
+          <label class="time-label">Hora de fim</label>
+          <input type="time" [(ngModel)]="modalEndTime" class="time-input" />
+        </div>
+      </div>
 
-      <label>Hora de fim:
-        <input type="time" [(ngModel)]="modalEndTime" />
-      </label>
-
-      <label>Aplicar em:
-        <select [(ngModel)]="applyType" (change)="onApplyTypeChange()">
-          <option value="one-day">Só neste dia</option>
-          <option value="all-year">Mesmo dia todos os meses</option>
-          <option value="some-months">Alguns meses</option>
-        </select>
-      </label>
+      <div class="recurrence-section">
+        <label class="recurrence-label">Repetir:</label>
+        <div class="recurrence-options">
+          <button *ngFor="let option of recurrenceOptions"
+                  class="recurrence-option"
+                  [class.active]="applyType === option.value"
+                  (click)="applyType = option.value; onApplyTypeChange()">
+            {{ option.label }}
+          </button>
+        </div>
+      </div>
 
       <div *ngIf="applyType === 'some-months'" class="month-selection">
-        <label *ngFor="let month of monthsList">
-          <input type="checkbox"
-                 [value]="month.value"
-                 [(ngModel)]="selectedMonths"
-                 [checked]="selectedMonths.includes(month.value)" />
-          {{ month.label }}
-        </label>
+        <h4 class="selection-title">Selecione os meses:</h4>
+        <div class="month-grid">
+          <button *ngFor="let month of monthsList"
+                  class="selection-button"
+                  [class.selected]="selectedMonths.includes(month.value)"
+                  (click)="toggleMonthSelection(month.value)">
+            {{ month.label }}
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="modalMode === 'bulk'" class="days-selection">
+        <h4 class="selection-title">Selecione os dias da semana:</h4>
+        <div class="days-grid">
+          <button *ngFor="let day of daysOfWeek"
+                  class="selection-button"
+                  [class.selected]="selectedDays.includes(day.value)"
+                  (click)="toggleDaySelection(day.value)">
+            {{ day.label }}
+          </button>
+        </div>
       </div>
 
       <div class="modal-actions">
-        <button (click)="saveAvailability()">Guardar</button>
-        <button (click)="closeAvailabilityModal()">Cancelar</button>
+        <button (click)="saveAvailability()" class="nav-button save-button">
+          {{ modalMode === 'edit' ? 'Atualizar' : 'Guardar' }}
+        </button>
+        <button (click)="closeAvailabilityModal()" class="nav-button cancel-button">
+          Cancelar
+        </button>
       </div>
     </div>
   </div>
 
+  <!-- Delete Confirmation Modal -->
+  <div class="confirmation-modal" *ngIf="showDeleteConfirmation">
+    <div class="confirmation-content">
+      <h3 class="confirmation-title">Confirmar exclusão</h3>
+      <p class="confirmation-message">Tem certeza que deseja remover esta disponibilidade?</p>
+      <div class="confirmation-actions">
+        <button (click)="confirmDelete()" class="nav-button confirm-button">Sim, remover</button>
+        <button (click)="cancelDelete()" class="nav-button">Cancelar</button>
+      </div>
+    </div>
+  </div>
 </div>
