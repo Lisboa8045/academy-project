@@ -18,7 +18,7 @@ export const routes: Routes = [
   { path: 'services', component: SearchServicesComponent},
   { path: 'schedule', component: ScheduleComponent },
   { path: '', component: LandingPageComponent},
-  { path: 'my-services', component: MyServicesComponent}
+  { path: 'my-services', component: MyServicesComponent},
   { path: 'resend-email', component: ResendEmailConfirmationComponent },
   { path: 'confirm-email/:token', component: ConfirmEmailComponent },
 ];

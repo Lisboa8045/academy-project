@@ -90,6 +90,7 @@ export class MyServicesComponent implements OnInit{
     this.serviceApiService.createService().subscribe({
       next: (res) => {
         console.log(res);
+        this.loading.set(false);
       },
       error: (err) => {
         console.error('Failed to create service', err);
