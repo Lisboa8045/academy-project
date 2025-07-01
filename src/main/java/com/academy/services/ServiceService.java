@@ -58,6 +58,7 @@ public class ServiceService {
         this.serviceTypeService = serviceTypeService;
     }
 
+    @Transactional
     public Service createToEntity(ServiceRequestDTO dto) throws BadRequestException {
         Member member = memberService.getMemberByUsername(authenticationFacade.getUsername());
         Service service = serviceMapper.toEntity(dto, member.getId());

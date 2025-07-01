@@ -28,10 +28,10 @@ public class Notification extends BaseEntity {
     @Column(name="title", length = FieldLengths.NOTIFICATION_TITLE_MAX)
     private String title;
 
-    @Column(name="body")
+    @Column(name="body", length = FieldLengths.NOTIFICATION_BODY_MAX)
     private String body;
 
-    @Column(name="url")
+    @Column(name="url", length = FieldLengths.URL_MAX)
     private String url;
 
     @Column(name="seen")
