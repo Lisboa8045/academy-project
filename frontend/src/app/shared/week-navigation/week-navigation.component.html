@@ -1,0 +1,11 @@
+<div class="week-navigation">
+  <button (click)="onPreviousWeek()" class="nav-button">← Previous Week</button>
+
+  <span class="week-range">
+    {{ currentWeekStart | date: 'dd/MM/yyyy' }} - {{ currentWeekEnd | date: 'dd/MM/yyyy' }}
+  </span>
+
+  <button (click)="onNextWeek()" class="nav-button">Next Week →</button>
+
+  <button (click)="onCurrentWeek()" class="nav-button today-button">Today</button>
+</div>
