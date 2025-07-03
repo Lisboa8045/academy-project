@@ -1,3 +1,4 @@
+<div class = "tailwind-scope">
 <div class="bg-white rounded-2xl shadow-lg p-6 w-full max-w-8xl">
   <div class="flex items-center space-x-6 mb-4">
 
@@ -50,6 +51,12 @@
           (click)="onCancelAppointmentClick(appointment.id)"
         >
           Cancel
+        </button>
+        <button
+          class="w-20 py-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition"
+          (click)="onReviewAppointmentClick(appointment.id)"
+        >
+          Review
         </button>
       </div>
     </td>
@@ -109,12 +116,19 @@
   (close)="closeModal()"
 ></app-appointment-modal>
 
+
+
 <app-confirmation-modal *ngIf="cancelAppointmentModal"
   [title]="'Cancel Appointment'"
   [text]="getCancelText()"
   (confirm)="confirmCancelAppointment()"
   (close)="cancelCancelAppointment()"
->
+></app-confirmation-modal>
 
-</app-confirmation-modal>
+
+  <app-review-modal *ngIf="reviewAppointmentModal"
+    (submitReview)="submitReview($event)"
+    (close)="cancelReview()"
+  ></app-review-modal>
     </div>
+</div>

@@ -5,6 +5,7 @@ import {Observable} from 'rxjs';
 import {AppointmentResponseDetailedDTO, AppointmentResponseDTO} from './appointment-response-dto.model';
 import {AppointmentQuery} from './appointment-query-service.model';
 import {Page} from './page.model';
+import {Review} from './review/review.model';
 
 @Injectable({
   providedIn: 'root'
@@ -34,6 +35,10 @@ export class AppointmentService {
 
   cancelAppointment(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  sendReview(id: number, review: Review): Observable<{ message: string }> {
+    return this.http.patch<{ message: string }>(`${this.apiUrl}/${id}/review`, review);
   }
 
 }

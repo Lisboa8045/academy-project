@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewEncapsulation} from '@angular/core';
 import {AppointmentResponseDetailedDTO, AppointmentResponseDTO} from '../appointment-response-dto.model';
 import {AppointmentService} from '../appointment.service';
 import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
@@ -13,11 +13,14 @@ import {AppointmentStatusEnumModel} from '../appointment-status.model';
 import {snackBarSuccess} from '../../shared/snackbar/snackbar-success';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {snackBarError} from '../../shared/snackbar/snackbar-error';
+import {ReviewModalComponent} from '../review/review-modal/review-modal.component';
+import {Review} from '../review/review.model';
 
 @Component({
   selector: 'app-appointment-history',
   templateUrl: './appointment-history.component.html',
   styleUrls: ['./appointment-history.component.css'],
+  encapsulation: ViewEncapsulation.None, // <- this is key
   standalone: true,
   providers: [DatePipe],
   imports: [
@@ -29,7 +32,8 @@ import {snackBarError} from '../../shared/snackbar/snackbar-error';
     AppointmentModalComponent,
     SortingOrderComponent,
     ConfirmationModalComponent,
-    StatusFilterComponent
+    StatusFilterComponent,
+    ReviewModalComponent
   ]
 })
 export class AppointmentHistoryComponent implements OnInit {
@@ -38,6 +42,7 @@ export class AppointmentHistoryComponent implements OnInit {
   selectedAppointment: AppointmentResponseDetailedDTO | null | undefined;
   viewAppointmentModal?: boolean = false;
   cancelAppointmentModal?: boolean = false;
+  reviewAppointmentModal?: boolean = false;
   totalItems = 0;
   pageSize = 10;
   currentPage = 0;
@@ -159,4 +164,32 @@ export class AppointmentHistoryComponent implements OnInit {
     this.currentPage = 0;
     this.applyFiltersAndPagination();
   }
+
+  onReviewAppointmentClick(id: number) {
+    this.selectAppointment(id, () => {
+      if(this.selectedAppointment?.status !== AppointmentStatusEnumModel.FINISHED)
+        snackBarError(this.snackBar,"Can't review an appointment that is not Finished");
+      else
+        this.reviewAppointmentModal = true
+    });
+
+  }
+
+  cancelReview() {
+    this.selectedAppointment = null;
+    this.reviewAppointmentModal = false;
+  }
+
+  submitReview(review: Review) {
+    this.appointmentHistoryService.sendReview(this.selectedAppointment!.id, review).subscribe({
+      next: () => {
+        snackBarSuccess(this.snackBar, "Review added Successfully");
+        this.loadAppointments();
+      },
+      error: (err) => {
+        snackBarError(this.snackBar, "Failed to submit review");
+      }
+    });
+  }
+
 }

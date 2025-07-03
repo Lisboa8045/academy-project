@@ -7,6 +7,8 @@ import com.academy.config.authentication.AuthenticationFacade;
 import com.academy.dtos.appointment.AppointmentMapper;
 import com.academy.dtos.appointment.AppointmentRequestDTO;
 import com.academy.dtos.appointment.AppointmentResponseDTO;
+import com.academy.dtos.appointment.review.ReviewRequestDTO;
+import com.academy.dtos.appointment.review.ReviewResponseDTO;
 import com.academy.exceptions.BadRequestException;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.appointment.Appointment;
@@ -22,6 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -198,5 +201,15 @@ public class AppointmentService {
 
         appointment.setStatus(AppointmentStatus.CANCELLED);
         appointmentRepository.save(appointment);
+    }
+
+    public ResponseEntity<ReviewResponseDTO> addReview(Long appointmentId, ReviewRequestDTO request) {
+        Appointment appointment = getAppointmentEntityById(appointmentId);
+
+        appointment.setRating(request.rating());
+        appointment.setComment(request.comment());
+        appointmentRepository.save(appointment);
+
+        return ResponseEntity.ok(new ReviewResponseDTO("Review added successfully"));
     }
 }

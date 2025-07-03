@@ -5,6 +5,8 @@ import com.academy.dtos.appointment.AppointmentCardDTO;
 import com.academy.dtos.SlotDTO;
 import com.academy.dtos.appointment.AppointmentRequestDTO;
 import com.academy.dtos.appointment.AppointmentResponseDTO;
+import com.academy.dtos.appointment.review.ReviewRequestDTO;
+import com.academy.dtos.appointment.review.ReviewResponseDTO;
 import com.academy.services.AppointmentService;
 import com.academy.services.SchedulingService;
 
@@ -56,9 +58,15 @@ public class AppointmentController {
         return ResponseEntity.noContent().build();
     }
 
+    @Deprecated
     @PostMapping("/{id}/review")
     public ResponseEntity<AppointmentResponseDTO> createReview(@PathVariable Long id, @RequestBody AppointmentRequestDTO appointmentDetails) {
         return updateAppointment(id, appointmentDetails);
+    }
+
+    @PatchMapping("/{id}/review")
+    public ResponseEntity<ReviewResponseDTO> addReview(@PathVariable Long id, @RequestBody @Valid ReviewRequestDTO reviewRequestDTO) {
+        return appointmentService.addReview(id, reviewRequestDTO);
     }
 
     @DeleteMapping("/{id}/review")

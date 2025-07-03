@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import {DatePipe, NgForOf, NgIf} from '@angular/common';
+import {CurrencyPipe, DatePipe, NgForOf, NgIf} from '@angular/common';
 import {AppointmentResponseDetailedDTO} from '../appointment-response-dto.model';
 
 @Component({
@@ -8,6 +8,7 @@ import {AppointmentResponseDetailedDTO} from '../appointment-response-dto.model'
   imports: [
     DatePipe,
     NgForOf,
+    CurrencyPipe,
   ]
 })
 export class AppointmentModalComponent {
