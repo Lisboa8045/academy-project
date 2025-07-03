@@ -21,6 +21,7 @@ export class AuthService {
           this.authStore.setUsername(res.username);
           this.authStore.setId(res.memberId);
           this.authStore.setProfilePicture(res.profilePicture);
+          this.authStore.setRole(res.role);
         }),
         catchError((error: HttpErrorResponse) => {
           if (error.status === 403 && error.error?.startsWith('Member is Inactive with status WAITING_FOR_EMAIL_APPROVAL')) {

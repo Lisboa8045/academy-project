@@ -1,4 +1,4 @@
-import {Component, inject, OnInit, signal} from '@angular/core';
+import {Component, effect, inject, OnInit, signal} from '@angular/core';
 import {NgIf} from '@angular/common';
 import {MenuComponent} from '../../shared/menu/menu.component';
 import {MenuItem} from '../../shared/menu/menu.model';
@@ -24,6 +24,10 @@ export class ProfileButtonComponent implements OnInit {
   readonly role = inject(AuthStore).role;
   router = inject(Router);
   menuItems: MenuItem[] = [];
+
+  constructor(private authStore: AuthStore) {
+    effect(() =>{ console.log(authStore.role()), this.insertByRole()});
+  }
 
   ngOnInit() {
     this.menuItems = [
@@ -58,7 +62,6 @@ export class ProfileButtonComponent implements OnInit {
       },
     ];
 
-    this.insertByRole()
   }
 
   toggleMenu() {
@@ -70,6 +73,8 @@ export class ProfileButtonComponent implements OnInit {
   }
 
   insertByRole(){
+    console.log("Entered role");
+    this.menuItems = this.menuItems.filter(item => item.label !== 'My Services');
     if (this.role() === 'WORKER') {
       this.menuItems.splice(3, 0, {
         label: 'My Services',

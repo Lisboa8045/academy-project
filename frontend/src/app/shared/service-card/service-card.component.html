@@ -1,0 +1,15 @@
+<div class="service-card" (click)="onClick()">
+  <div class="image-container">
+    <img [src]="service.image_url || defaultImage"
+         (error)="onImgError($event)"
+         alt="Service Image" />
+    <div class="rating-badge" *ngIf="service.averageRating !== undefined && service.averageRating !== null">
+      ★ {{ service.averageRating }}
+    </div>
+  </div>
+  <div class="service-info">
+    <h3>{{ service.name }}</h3>
+    <p>{{ service.price | currency:'EUR' }}</p>
+    <small>{{formattedDuration}}</small>
+  </div>
+</div>

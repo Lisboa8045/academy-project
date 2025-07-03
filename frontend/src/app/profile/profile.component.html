@@ -115,8 +115,10 @@
             </div>
 
           } @else {
-            <button type="button" class="edit-button" (click)="toggleEdit()">Edit</button>
-            <button type="button" class="logout-button" (click)="logout()">Logout</button>
+            @if (canEdit()){
+              <button type="button" class="edit-button" (click)="toggleEdit()">Edit</button>
+              <button type="button" class="logout-button" (click)="logout()">Logout</button>
+            }
           }
         </div>
       </form>
