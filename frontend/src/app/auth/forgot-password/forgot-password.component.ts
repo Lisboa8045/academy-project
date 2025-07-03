@@ -41,9 +41,17 @@ export class ForgotPasswordComponent {
         this.resetSent = true;
       },
       error: (err) => {
-        this.loading = false;
-        this.error = 'Failed to send reset link. Please try again later.';
-        console.error(err);
+        if (err.status === 404) {
+          // Email not found — still show success message
+          this.message = `If an account with "${email}" exists, a reset link was sent.`;
+          this.loading = false;
+          this.resetSent = true;
+        }
+        else {
+          this.loading = false;
+          this.error = 'Failed to send reset link. Please try again later.';
+          console.error(err);
+        }
       }
     });
   }
