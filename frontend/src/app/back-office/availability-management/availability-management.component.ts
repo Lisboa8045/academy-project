@@ -5,6 +5,7 @@ import { AvailabilityModel } from '../../models/availability.model';
 import { AuthStore } from '../../auth/auth.store';
 import { FormsModule } from '@angular/forms';
 import {WeekNavigationComponent} from '../../shared/week-navigation/week-navigation.component';
+import { WeekNavigationService } from '../../shared/week-navigation.service';
 
 interface AvailabilityCreateModel {
   startDateTime: string;
@@ -74,20 +75,23 @@ export class AvailabilityManagementComponent implements OnInit {
 
   constructor(
     private availabilityService: AvailabilityService,
-    private authStore: AuthStore
+    private authStore: AuthStore,
+    private weekNavigationService: WeekNavigationService // <-- inject the service
   ) {}
 
+
   ngOnInit(): void {
-    this.initCurrentWeek();
-    this.loadAvailabilities();
+    this.weekNavigationService.currentDate$.subscribe(date => {
+      this.setWeekFromDate(date);
+      this.loadAvailabilities();
+    });
   }
 
-  private initCurrentWeek(): void {
-    const now = new Date();
-    const day = now.getDay();
+  private setWeekFromDate(date: Date): void {
+    const day = date.getDay();
     const diffToMonday = (day === 0 ? -6 : 1) - day;
-    this.currentWeekStart = new Date(now);
-    this.currentWeekStart.setDate(now.getDate() + diffToMonday);
+    this.currentWeekStart = new Date(date);
+    this.currentWeekStart.setDate(date.getDate() + diffToMonday);
     this.currentWeekStart.setHours(0, 0, 0, 0);
     this.currentWeekEnd = new Date(this.currentWeekStart);
     this.currentWeekEnd.setDate(this.currentWeekStart.getDate() + 6);
@@ -125,27 +129,7 @@ export class AvailabilityManagementComponent implements OnInit {
     // Implement actual booking check logic here
     return false;
   }
-
-  // Week navigation
-  goToPreviousWeek(): void {
-    this.adjustWeek(-7);
-  }
-
-  goToNextWeek(): void {
-    this.adjustWeek(7);
-  }
-
-  goToCurrentWeek(): void {
-    this.initCurrentWeek();
-    this.loadAvailabilities();
-  }
-
-  private adjustWeek(days: number): void {
-    this.currentWeekStart.setDate(this.currentWeekStart.getDate() + days);
-    this.currentWeekEnd.setDate(this.currentWeekEnd.getDate() + days);
-    this.loadAvailabilities();
-  }
-
+  
   // Availability CRUD
   addAvailability(day: Date): void {
     this.modalDay = new Date(day);
@@ -351,4 +335,4 @@ export class AvailabilityManagementComponent implements OnInit {
       endDateTime: this.combineDateAndTime(date, this.modalEndTime)
     };
   }
-}
+  }
