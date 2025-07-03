@@ -8,6 +8,7 @@ import com.academy.dtos.appointment.AppointmentRequestDTO;
 import com.academy.dtos.appointment.AppointmentResponseDTO;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.appointment.Appointment;
+import com.academy.models.appointment.AppointmentStatus;
 import com.academy.models.member.Member;
 import com.academy.models.service.service_provider.ProviderPermission;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
@@ -81,9 +82,10 @@ public class AppointmentService {
         if (!hasServePermission) {
             throw new IllegalStateException("Service provider não possui permissão SERVE");
         }
+        com.academy.models.service.Service service = serviceProvider.getService();
 
         // Calculate end time
-        int serviceDurationMinutes = serviceProvider.getService().getDuration();
+        int serviceDurationMinutes = service.getDuration();
         LocalDateTime endDateTime = dto.startDateTime().plusMinutes(serviceDurationMinutes);
 
         // Check for conflicts
@@ -98,10 +100,13 @@ public class AppointmentService {
         }
 
         // Create and save appointment
+        double price = service.getPrice();
         Appointment appointment = appointmentMapper.toEntity(dto);
         appointment.setMember(member);
         appointment.setServiceProvider(serviceProvider);
         appointment.setEndDateTime(endDateTime);
+        appointment.setStatus(AppointmentStatus.PENDING);
+        appointment.setPrice(price - ( price * service.getDiscount()/100));
 
         return appointmentMapper.toResponseDTO(appointmentRepository.save(appointment));
     }
