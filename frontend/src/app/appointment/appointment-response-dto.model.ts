@@ -10,6 +10,9 @@ export interface AppointmentResponseDetailedDTO {
   comment: string;
   serviceName: string;
   startDateTime: Date;
+  price: number;
+  duration: number;
+  status:AppointmentStatusEnumModel;
 }
 
 export interface AppointmentResponseDTO{

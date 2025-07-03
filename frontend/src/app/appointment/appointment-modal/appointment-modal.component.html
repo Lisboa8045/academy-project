@@ -2,7 +2,7 @@
   class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50"
 >
   <div
-    class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 relative animate-scale-in transition-transform duration-300"
+    class="h-[75vh] bg-white rounded-2xl shadow-xl w-full max-w-5xl p-6 relative animate-scale-in transition-transform duration-300 flex flex-col"
   >
     <!-- Smaller Top-Right X Button -->
     <button
@@ -18,24 +18,58 @@
       Appointment Details
     </h2>
 
-    <!-- Details Section -->
-    <div class="space-y-3 text-gray-700">
-      <div>
-        <span class="font-semibold">Service:</span>
-        <span class="ml-2">{{ appointment.serviceName }}</span>
-      </div>
-      <div>
-        <span class="font-semibold">Provider:</span>
-        <span class="ml-2">{{ appointment.serviceProviderUsername }}</span>
-      </div>
-      <div>
-        <span class="font-semibold">Date:</span>
-        <span class="ml-2">{{ appointment.startDateTime | date:'MMM d, y, h:mm a' }}</span>
+    <!-- Centered container with left/right layout preserved -->
+    <div class="max-w-3xl w-full mx-auto">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 text-gray-700">
+        <div>
+          <span class="font-semibold">Service:</span>
+          <span class="ml-2">{{ appointment.serviceName }}</span>
+        </div>
+        <div>
+          <span class="font-semibold">Provider:</span>
+          <span class="ml-2">{{ appointment.serviceProviderUsername }}</span>
+        </div>
+        <div>
+          <span class="font-semibold">Status:</span>
+          <span class="ml-2">{{ appointment.status }}</span>
+        </div>
+        <div>
+          <span class="font-semibold">Price:</span>
+          <span class="ml-2">{{ appointment.price }}</span>
+        </div>
+        <div>
+          <span class="font-semibold">Start Time:</span>
+          <span class="ml-2">{{ appointment.startDateTime | date:'MMM d, y, h:mm a' }}</span>
+        </div>
+        <div>
+          <span class="font-semibold">Duration:</span>
+          <span class="ml-2">{{ appointment.duration }} minutes</span>
+        </div>
+        <div class="sm:col-span-2 flex items-center">
+          <span class="font-semibold mr-2">Rating:</span>
+          <span class="text-yellow-500">
+        <ng-container *ngFor="let star of [1,2,3,4,5]">
+          <span>{{ star <= appointment.rating ? '★' : '☆' }}</span>
+        </ng-container>
+      </span>
+        </div>
+        <div class="sm:col-span-2">
+          <span class="font-semibold">Comment:</span>
+          <div
+            class="mt-1 p-4 rounded-md bg-gray-50 border border-gray-200 text-sm text-gray-700 whitespace-pre-wrap min-h-[60px]"
+          >
+            {{ appointment.comment || 'No comment provided.' }}
+          </div>
+        </div>
       </div>
     </div>
 
+
+
+
+
     <!-- Bottom Right Close Button -->
-    <div class="flex justify-end mt-6">
+    <div class="flex justify-end mt-auto pt-6">
       <button
         class="px-4 py-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition"
         (click)="close.emit()"

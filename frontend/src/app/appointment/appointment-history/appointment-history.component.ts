@@ -32,7 +32,7 @@ import {AppointmentStatusEnumModel} from '../appointment-status.model';
 export class AppointmentHistoryComponent implements OnInit {
   appointments: AppointmentResponseDTO[] = [];
   filteredAppointments: AppointmentResponseDTO[] = [];
-  selectedAppointment?: AppointmentResponseDetailedDTO | null;
+  selectedAppointment: AppointmentResponseDetailedDTO | null | undefined;
   viewAppointmentModal?: boolean = false;
   cancelAppointmentModal?: boolean = false;
   totalItems = 0;

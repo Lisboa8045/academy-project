@@ -17,5 +17,7 @@ public record AppointmentResponseDTO(
         Integer rating,
         String comment,
         AppointmentStatus status,
-        String serviceName
-) {}
+        String serviceName,
+        double price,
+        int duration //TODO trocar isto no frontend e trocar o .html que utiliza isto
+        ) {}
