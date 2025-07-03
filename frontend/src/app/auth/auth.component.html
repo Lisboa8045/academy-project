@@ -92,7 +92,14 @@
       </button>
       <span *ngIf="loading" class="spinner"></span>
     </div>
+
   </form>
+
+  @if (isLoginMode()) {
+    <div class="forgot-password">
+      <a [routerLink]="['/forgot-password']">Forgot password?</a>
+    </div>
+  }
 
   <p>
     {{ isLoginMode() ? "Don't have an account?" : 'Already have an account?' }}

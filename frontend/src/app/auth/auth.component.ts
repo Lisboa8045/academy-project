@@ -9,14 +9,14 @@ import {
   Validators
 } from '@angular/forms';
 import {AuthService} from './auth.service';
-import {Router} from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
 import {strongPasswordValidator} from '../shared/validators/password.validator';
 import {noSpecialCharsValidator} from '../shared/validators/no-special-chars.validator';
 
 @Component({
   selector: 'app-auth',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.css']
 })

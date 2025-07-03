@@ -8,6 +8,7 @@ import { LandingPageComponent } from './landing-page/landing-page.component';
 import { ResendEmailConfirmationComponent } from "./auth/resend-email/resend-email-confirmation.component";
 import { ConfirmEmailComponent } from './auth/confirm-email/confirm-email.component';
 import {ServiceDetailsComponent} from './service/service-details/service-details.component';
+import {ForgotPasswordComponent} from './auth/forgot-password/forgot-password.component';
 
 export const routes: Routes = [
   { path: 'auth', component: AuthComponent },
@@ -19,4 +20,5 @@ export const routes: Routes = [
   { path: '', component: LandingPageComponent},
   { path: 'resend-email', component: ResendEmailConfirmationComponent },
   { path: 'confirm-email/:token', component: ConfirmEmailComponent },
+  { path: 'forgot-password', component: ForgotPasswordComponent }
 ];
