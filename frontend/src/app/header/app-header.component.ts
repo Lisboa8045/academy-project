@@ -4,12 +4,13 @@ import {Router, RouterModule} from '@angular/router';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {AuthStore} from '../auth/auth.store';
 import {ProfileButtonComponent} from './profile-button/profile-button.component';
-import {UserProfileService} from "../profile/user-profile.service";
+import {NotificationButtonComponent} from './notification-button/notification-button.component';
+import {UserProfileService} from '../profile/user-profile.service';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, ProfileButtonComponent],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, NotificationButtonComponent, ProfileButtonComponent],
   templateUrl: './app-header.component.html',
   styleUrls: ['./app-header.component.css']
 })
