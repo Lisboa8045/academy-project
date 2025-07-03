@@ -35,7 +35,7 @@ public class Member extends BaseEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Availability> availabilities = new ArrayList<>();
 
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "member")
     private List<Appointment> appointments = new ArrayList<>();
 
     @Column(name = "username", unique = true, nullable = false, length = FieldLengths.USERNAME_MAX)

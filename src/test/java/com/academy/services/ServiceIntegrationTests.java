@@ -28,20 +28,19 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
-@SuppressWarnings("OptionalGetWithoutIsPresent")
 @SpringBootTest
 @Transactional
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(SpringExtension.class)
 @WithMockUser(username = "owner")
-public class ServiceIntegrationTests {
+class ServiceIntegrationTests {
     private final ServiceService serviceService;
     private final TagService tagService;
     private final ServiceTypeService serviceTypeService;
@@ -110,8 +109,8 @@ public class ServiceIntegrationTests {
         return tagService.getTagEntityById(responseDTO.id());
     }
 
-    public AppointmentRequestDTO createAppDTO(Long serviceProviderID, Long memberID){
-        return new AppointmentRequestDTO(serviceProviderID, null, null, 0, "", null);
+    public AppointmentRequestDTO createAppDTO(Long serviceProviderID){
+        return new AppointmentRequestDTO(serviceProviderID, LocalDateTime.now(), null, 0, "", null);
     }
 
     public void createDummyClient(String name){
@@ -239,7 +238,7 @@ public class ServiceIntegrationTests {
         assertThat(tagService.getTagEntityById(defaultTag.getId()).getServices()).isNotEmpty();
 
         createDummyClient("client");
-        AppointmentResponseDTO apptResponseDTO = appointmentService.createAppointment(createAppDTO(serviceProviderService.getServiceProviderByUsername("owner").getId(), memberService.getMemberByUsername("client").getId()));
+        AppointmentResponseDTO apptResponseDTO = appointmentService.createAppointment(createAppDTO(serviceProviderService.getServiceProviderByUsername("owner").getId()));
 
         assertThat(appointmentService.getAppointmentById(apptResponseDTO.id())).isNotNull();
 
@@ -283,10 +282,9 @@ public class ServiceIntegrationTests {
         Service updatedService = serviceService.getServiceEntityById(createdResponse.id());
         List<String> remainingTags = updatedService.getTags().stream()
                 .map(Tag::getName)
-                .collect(Collectors.toList());
+                .toList();
 
-        assertThat(remainingTags).doesNotContain("tag1");
-        assertThat(remainingTags).contains("tag2");
+        assertThat(remainingTags).doesNotContain("tag1").contains("tag2");
     }
 
     @Test
