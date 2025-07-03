@@ -204,7 +204,7 @@ public class MemberService {
                 .orElseThrow(() -> new BadRequestException("Password Reset Token is Invalid/Not found"));
 
         if (member.getPasswordResetTokenExpiry().isBefore(LocalDateTime.now()))
-            throw new TokenExpiredException("Password Reset Token has Expired");
+            throw new TokenExpiredException("Password Reset Token has expired. Please request a new email.");
 
         return member;
     }
