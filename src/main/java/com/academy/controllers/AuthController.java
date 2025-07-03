@@ -60,6 +60,12 @@ public class AuthController {
         return ResponseEntity.ok(new PasswordResetResponseDto("Password can be reset"));
     }
 
+    @PatchMapping("/password-reset/{token}")
+    public ResponseEntity<PasswordResetResponseDto> resetPassword(@PathVariable String token, @RequestBody PasswordResetRequestDto requestDto) {
+        memberService.resetPassword(token, requestDto.newPassword());
+        return ResponseEntity.ok(new PasswordResetResponseDto("Password reset successful"));
+    }
+
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@Valid @RequestBody LoginRequestDto request, HttpServletResponse httpResponse){
         LoginResponseDto response = memberService.login(request, httpResponse);
@@ -101,7 +107,7 @@ public class AuthController {
     }
 
     @PostMapping("/password-reset-token")
-    public ResponseEntity<CreatePasswordResetTokenResponseDto> recreateConfirmationToken(
+    public ResponseEntity<CreatePasswordResetTokenResponseDto> createPasswordResetToken(
             @RequestBody CreatePasswordResetTokenRequestDto request) {
         memberService.createPasswordResetToken(request.email());
         return ResponseEntity.ok(new CreatePasswordResetTokenResponseDto("Password reset token created"));

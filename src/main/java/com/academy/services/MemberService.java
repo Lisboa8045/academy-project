@@ -188,6 +188,7 @@ public class MemberService {
         if (member.getTokenExpiry().isBefore(LocalDateTime.now()))
             throw new TokenExpiredException("Confirmation Token has Expired");
 
+        member.setConfirmationToken(null);
         member.setTokenExpiry(null);
         member.setEnabled(true);
         member.setStatus(MemberStatusEnum.ACTIVE);
@@ -195,7 +196,7 @@ public class MemberService {
     }
 
 
-    public void verifyPasswordResetToken(String passwordResetToken) {
+    public Member verifyPasswordResetToken(String passwordResetToken) {
         Member member = memberRepository.findAll().stream()
                 .filter(m -> m.getPasswordResetToken() != null &&
                         passwordEncoder.matches(passwordResetToken, m.getPasswordResetToken()))
@@ -204,6 +205,8 @@ public class MemberService {
 
         if (member.getPasswordResetTokenExpiry().isBefore(LocalDateTime.now()))
             throw new TokenExpiredException("Password Reset Token has Expired");
+
+        return member;
     }
 
     private boolean isValidPassword(String password) {
@@ -381,5 +384,17 @@ public class MemberService {
         memberRepository.save(member);
 
         emailService.sendPasswordResetEmail(member, rawPasswordResetToken);
+    }
+
+    @Transactional
+    public void resetPassword(String token, String newPassword) {
+        Member member = verifyPasswordResetToken(token);
+        if (!isValidPassword(newPassword)) {
+            throw new InvalidArgumentException(messageSource.getMessage("register.invalidpassword", null, LocaleContextHolder.getLocale()));
+        }
+        member.setPassword(passwordEncoder.encode(newPassword));
+        member.setPasswordResetToken(null);
+        member.setPasswordResetTokenExpiry(null);
+        memberRepository.save(member);
     }
 }

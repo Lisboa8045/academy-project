@@ -66,6 +66,12 @@ export class AuthService {
   verifyResetToken(token: string) {
     return this.http.get(`${this.apiUrl}/password-reset/${token}`);
   }
+
+  resetPassword(token: string, password: string) {
+    return this.http.patch(`${this.apiUrl}/password-reset/${token}`, {
+      newPassword: password
+    });
+  }
 }
 
 

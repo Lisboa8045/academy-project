@@ -57,7 +57,7 @@ export class ResetPasswordComponent implements OnInit {
         if (err.status === 400) {
           this.errorMessage.set('This reset link is invalid.');
         } else if (err.status === 410) {
-          this.errorMessage.set('This reset link has expired.');
+          this.errorMessage.set('This reset link has expired. Please request a new one.');
         } else {
           this.errorMessage.set('An unexpected error occurred.');
         }
@@ -105,28 +105,20 @@ export class ResetPasswordComponent implements OnInit {
 
     const { password } = this.resetForm.value;
 
-    fakeResetPasswordApi(this.token, password)
-      .then(() => {
+    this.authService.resetPassword(this.token, password).subscribe({
+      next: () => {
+        this.successMessage.set('Password reset successful! You can now log in.');
         this.loading.set(false);
         this.resetSuccessful.set(true);
-        this.successMessage.set('Password reset successful! You can now log in.');
-      })
-      .catch((err: any) => {
+      },
+      error: (err) => {
         this.loading.set(false);
         this.errorMessage.set(err?.error || 'Failed to reset password. Please try again.');
-      });
+      }
+    });
   }
 
   goToForgotPassword() {
     this.router.navigate(['/forgot-password']);
   }
-}
-
-function fakeResetPasswordApi(token: string, password: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      if (token && password) resolve();
-      else reject({ error: 'Invalid token or password' });
-    }, 1000);
-  });
 }
