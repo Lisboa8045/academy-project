@@ -1,0 +1,93 @@
+.reviews-section {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: #fff;
+  padding: 1rem;
+  border-radius: 1rem;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease;
+  margin: 0 3rem 2rem 3rem;
+}
+
+.review {
+  border-top: 1px solid #eee;
+  padding: 1rem 0;
+}
+
+.review:first-child {
+  border-top: none;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.reviewer-name {
+  font-weight: bold;
+  color: #333;
+}
+
+.review-stars {
+  color: #FFD700;
+  font-size: 1.2rem;
+}
+
+.review-stars .filled {
+  color: #FFD700;
+}
+
+.review-stars .empty {
+  color: #ccc;
+}
+
+.review-comment {
+  margin-top: 0.5rem;
+  color: #555;
+}
+
+.star-rating span {
+  font-size: 1.4rem;
+  margin-right: 2px;
+}
+
+.star-rating .filled {
+  color: #FFD700;
+}
+
+.star-rating .empty {
+  color: #ccc;
+}
+
+.reviewer-info {
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.profile-and-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.profile-picture {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ccc;
+  vertical-align: middle;
+  margin-right: 5px;
+}
+
+.review-date {
+  font-size: 0.85rem;
+  color: #777;
+  white-space: nowrap;
+  margin-top: -3rem;
+  margin-right: 2rem;
+}

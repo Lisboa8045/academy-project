@@ -2,7 +2,6 @@ package com.academy.dtos.appointment;
 
 
 import com.academy.models.appointment.Appointment;
-
 import com.academy.models.shared.BaseEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -28,6 +27,7 @@ public abstract class AppointmentMapper {
     public abstract Appointment toEntity(AppointmentRequestDTO dto);
 
     @Mapping(source="member.username", target = "memberUsername")
+    @Mapping(source = "member.profilePicture", target = "memberProfilePicture")
     public abstract AppointmentReviewResponseDTO toReviewResponseDTO(Appointment appointment);
 
     @Named("mapEntityIdOrDefault")

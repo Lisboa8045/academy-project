@@ -96,7 +96,6 @@ public class ServiceController {
 
     @GetMapping("/service_with_review/{id}")
     public ResponseEntity<List<AppointmentReviewResponseDTO>> getServiceReviews(@PathVariable Long id) {
-        System.out.println("<aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa>");
         List<AppointmentReviewResponseDTO> reviews = serviceService.getReviewsByServiceId(id);
         return ResponseEntity.ok(reviews);
     }

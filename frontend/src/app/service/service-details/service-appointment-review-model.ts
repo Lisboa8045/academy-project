@@ -4,4 +4,6 @@ export interface ServiceAppointmentReviewModel {
   rating: number;
   comment: string;
   memberUsername: string;
+  memberProfilePicture: string;
+  createdAt: string;
 }

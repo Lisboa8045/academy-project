@@ -4,14 +4,16 @@ import {ActivatedRoute} from '@angular/router';
 import {ServiceDetailsService} from '../service-details.service';
 import {LoadingComponent} from '../../loading/loading.component';
 import {NgForOf, NgIf} from "@angular/common";
-import {AppointmentReviewModel} from '../../models/appointment-review.model';
+import {UserProfileService} from '../../profile/user-profile.service';
+import {ServiceReviewComponent} from '../service-review/service-review.component';
 
 @Component({
   selector: 'app-service-details',
   imports: [
     LoadingComponent,
     NgIf,
-    NgForOf
+    NgForOf,
+    ServiceReviewComponent
   ],
   templateUrl: './service-details.component.html',
   styleUrl: './service-details.component.css'
@@ -19,51 +21,26 @@ import {AppointmentReviewModel} from '../../models/appointment-review.model';
 export class ServiceDetailsComponent implements OnInit {
   private apiUrl = 'http://localhost:8080/auth/uploads';
   fetched = false;
-  imageUrls: string[] = [];
   currentImageIndex = 0;
   discountedPrice: number | null = null;
   formatedTimeHours: number | null = null;
   formatedTimeMinutes: number | null = null;
-
+  serviceId!: number;
   service?: ServiceModel;
   loading = signal(false);
 
-  reviews?: AppointmentReviewModel[] = [];
-  async loadImages(fileNames: string[]) {
-    if (!fileNames || fileNames.length === 0 || this.fetched) {
-      return;
-    }
-
-    for (const fileName of fileNames) {
-      try {
-        console.log("Fetching image..." + fileName);
-        const res = await fetch(`${this.apiUrl}/${fileName}`);
-        if (!res.ok) return;
-
-        console.log("Fetched image..." + fileName);
-
-        const blob = await res.blob();
-        const objectUrl = URL.createObjectURL(blob);
-        this.imageUrls.push(objectUrl);
-        this.fetched = true;
-      } catch (error) {
-        console.error("Error loading the image", fileName, error)
-      }
-
-    }
-  }
-
   constructor(
     private route: ActivatedRoute,
-    private serviceDetailsService: ServiceDetailsService
+    private serviceDetailsService: ServiceDetailsService,
+    protected userProfileService: UserProfileService
   ) {
   }
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
+    this.serviceId = Number(this.route.snapshot.paramMap.get('id'));
 
     this.loading.set(true);
-    this.serviceDetailsService.getServiceById(id).subscribe({
+    this.serviceDetailsService.getServiceById(this.serviceId).subscribe({
       next: (data) => {
         this.service = data;
         if (this.service?.price && this.service?.discount && this.service.discount > 0) {
@@ -80,9 +57,8 @@ export class ServiceDetailsComponent implements OnInit {
 
 
         if (this.service?.images && this.service.images.length > 0) {
-          this.loadImages(this.service.images);
+          this.userProfileService.loadImages(this.service.images);
         }
-
 
         this.loading.set(false);
       },
@@ -92,15 +68,7 @@ export class ServiceDetailsComponent implements OnInit {
       }
     });
 
-    this.serviceDetailsService.getReviewsByServiceId(id).subscribe({
-      next: (data) => {
-        this.reviews = data;
-        console.log("Fetched reviews", this.reviews);
-      },
-      error: (err) => {
-        console.error("Error loading reviews", err);
-      }
-    })
+
   }
 
   prevImage(container: HTMLElement) {
@@ -110,7 +78,7 @@ export class ServiceDetailsComponent implements OnInit {
   }
 
   nextImage(container: HTMLElement) {
-    if (this.currentImageIndex < this.imageUrls.length - 1) {
+    if (this.currentImageIndex < this.userProfileService.serviceImageUrls.length - 1) {
       this.currentImageIndex++;
       this.scrollToThumbnail(container);
     }
