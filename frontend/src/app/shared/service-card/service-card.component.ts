@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import {CurrencyPipe, NgIf} from '@angular/common';
-import {RatedServiceModel} from '../../service/service.model';
+import {ServiceModel} from '../../service/service.model';
 
 @Component({
   selector: 'app-service-card',
@@ -11,8 +11,9 @@ import {RatedServiceModel} from '../../service/service.model';
   ],
   styleUrls: ['./service-card.component.css']
 })
+
 export class ServiceCardComponent {
-  @Input() service!: RatedServiceModel;
+  @Input() service!: ServiceModel;
   @Input() defaultImage: string = 'https://placehold.co/300x200?text=No+Image';
   @Output() cardClick = new EventEmitter<number>();
 

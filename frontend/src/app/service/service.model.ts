@@ -14,9 +14,5 @@ export interface ServiceModel {
   createdAt: string;
   updatedAt: string;
   images: string[];
+  averageRating?: number;
 }
-
-export interface RatedServiceModel extends ServiceModel {
-  averageRating: number;
-}
-

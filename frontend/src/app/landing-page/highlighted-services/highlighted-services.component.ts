@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { LandingPageService } from '../landing-page.service';
 import {Router} from '@angular/router';
 import {ServiceCardComponent} from '../../shared/service-card/service-card.component';
-import {RatedServiceModel} from '../../service/service.model';
+import {ServiceModel} from '../../service/service.model';
 
 @Component({
   selector: 'app-highlighted-services',
@@ -16,7 +16,7 @@ import {RatedServiceModel} from '../../service/service.model';
   styleUrls: ['./highlighted-services.component.css']
 })
 export class HighlightedServicesComponent implements OnInit {
-  services: RatedServiceModel[] = [];
+  services: ServiceModel[] = [];
   defaultImage = 'https://placehold.co/300x200?text=No+Image';
 
   constructor(

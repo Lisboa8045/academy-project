@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {Observable, map, forkJoin} from 'rxjs';
 import {AppointmentModel} from '../models/appointment.model';
-import {ServiceModel, RatedServiceModel} from '../service/service.model';
+import {ServiceModel} from '../service/service.model';
 import {ServiceProviderModel} from '../models/service-provider.model';
 
 @Injectable({
@@ -27,7 +27,7 @@ export class LandingPageService {
     return this.http.get<AppointmentModel[]>(`${this.BASE_URL}/appointments`);
   }
 
-  getTopRatedServices(): Observable<RatedServiceModel[]> {
+  getTopRatedServices(): Observable<ServiceModel[]> {
     return forkJoin({
       appointments: this.getAppointments(),
       services: this.getServices(),
@@ -53,7 +53,7 @@ export class LandingPageService {
         }, new Map<number, { total: number; count: number }>());
 
         // Serviços avaliados
-        const ratedServices: RatedServiceModel[] = Array.from(
+        const ratedServices: ServiceModel[] = Array.from(
           ratings.entries() as Iterable<[number, { total: number; count: number }]>
         ).map(([id, { total, count }]) => ({
           ...servicesMap.get(id)!,
