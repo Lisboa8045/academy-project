@@ -15,6 +15,7 @@ import com.academy.exceptions.BadRequestException;
 import com.academy.exceptions.EmailTemplateLoadingException;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.exceptions.InvalidArgumentException;
+import com.academy.exceptions.MemberNotFoundByEmailException;
 import com.academy.exceptions.MemberNotFoundException;
 import com.academy.exceptions.NotFoundException;
 import com.academy.exceptions.RegistrationConflictException;
@@ -33,6 +34,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -136,50 +138,8 @@ public class MemberService {
                 Integer.parseInt(globalConfigurationService.getConfigValue("confirmation_token_expiry_minutes"))));
         memberRepository.save(member);
 
-        sendConfirmationEmail(member, rawConfirmationToken);
+        emailService.sendConfirmationEmail(member, rawConfirmationToken);
         return member;
-    }
-
-    private void sendConfirmationEmail(Member member, String rawToken) {
-        String confirmationUrl = appProperties.getFrontendUrl() + "/confirm-email/" + rawToken;
-
-        String html = loadVerificationEmailHtml()
-                .replace("[User Name]", member.getUsername())
-                .replace("[CONFIRMATION_LINK]", confirmationUrl)
-                .replace("[App Name]", appProperties.getName())
-                        .replace("[HOURS]", formatHours(globalConfigurationService.getConfigValue("confirmation_token_expiry_minutes")));
-
-        emailService.send(
-                member.getEmail(),
-                "Confirm your account",
-                "Clique no link para confirmar: " + confirmationUrl,
-                html
-        );
-    }
-    private String formatHours(String minutesStr){
-        long totalMinutes = Long.parseLong(minutesStr);
-
-        long hours = totalMinutes / 60;
-        long minutes = totalMinutes % 60;
-        String formattedTime;
-        if (hours > 0 && minutes > 0) {
-            formattedTime = hours + " hour" + (hours > 1 ? "s" : "") + " and " + minutes + " minute" + (minutes > 1 ? "s" : "");
-        } else if (hours > 0) {
-            formattedTime = hours + " hour" + (hours > 1 ? "s" : "");
-        } else {
-            formattedTime = minutes + " minute" + (minutes > 1 ? "s" : "");
-        }
-        return formattedTime;
-    }
-
-    private String loadVerificationEmailHtml(){
-            try {
-                ClassPathResource resource = new ClassPathResource("templates/verification-email.html");
-                byte[] bytes = Files.readAllBytes(resource.getFile().toPath());
-                return new String(bytes, StandardCharsets.UTF_8);
-            } catch (IOException e) {
-                throw new EmailTemplateLoadingException("Erro ao carregar template de e-mail");
-            }
     }
 
     private String generateUniqueConfirmationToken() {
@@ -198,6 +158,21 @@ public class MemberService {
         return rawToken;
     }
 
+    private String generateUniquePasswordResetToken() {
+        String rawToken;
+        Optional<Member> optionalMember;
+
+        do {
+            rawToken = generateEncodedToken();
+            String finalRawToken = rawToken;
+            optionalMember = memberRepository.findAll().stream()
+                    .filter(m -> m.getPasswordResetToken() != null &&
+                            passwordEncoder.matches(finalRawToken, m.getPasswordResetToken()))
+                    .findFirst();
+        } while (optionalMember.isPresent());
+
+        return rawToken;
+    }
 
     private String generateEncodedToken(){
         return UUID.randomUUID().toString();
@@ -218,6 +193,8 @@ public class MemberService {
         member.setStatus(MemberStatusEnum.ACTIVE);
         memberRepository.save(member);
     }
+
+    // adicionar reset password aqui
 
     private boolean isValidPassword(String password) {
         return password.length() >= 8
@@ -260,6 +237,13 @@ public class MemberService {
                     member.getUsername(),
                     member.getProfilePicture()
             );
+    }
+
+    public Member getMemberByEmail(String email){
+        Optional<Member> optionalMember = memberRepository.findByEmail(email);
+        if(optionalMember.isEmpty())
+            throw new MemberNotFoundByEmailException(email);
+        return optionalMember.get();
     }
 
     public Member getMemberByUsername(String username){
@@ -354,7 +338,7 @@ public class MemberService {
         }
         member.setConfirmationToken(passwordEncoder.encode(rawConfirmationToken));
         memberRepository.save(member);
-        sendConfirmationEmail(member, rawConfirmationToken);
+        emailService.sendConfirmationEmail(member, rawConfirmationToken);
     }
 
     public void saveProfilePic(Long id, String filename) {
@@ -373,5 +357,19 @@ public class MemberService {
         for (ServiceProvider sp : serviceProviders) {
             sp.setProvider(null);
         }
+    }
+
+    public void createPasswordResetToken(String email) {
+        Member member = getMemberByEmail(email);
+        String rawPasswordResetToken = generateUniquePasswordResetToken();
+        if (testTokenStorage != null) {
+            testTokenStorage.storeToken(rawPasswordResetToken);
+        }
+        member.setPasswordResetToken(passwordEncoder.encode(rawPasswordResetToken));
+        member.setPasswordResetTokenExpiry(LocalDateTime.now().plusMinutes(
+                Integer.parseInt(globalConfigurationService.getConfigValue("password_reset_token_expiry_minutes"))));
+        memberRepository.save(member);
+
+        emailService.sendPasswordResetEmail(member, rawPasswordResetToken);
     }
 }

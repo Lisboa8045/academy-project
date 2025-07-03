@@ -93,4 +93,11 @@ public class AuthController {
         memberService.recreateConfirmationToken(request.login());
         return ResponseEntity.ok(new RecreateConfirmationTokenResponseDto("Confirmation token recreated"));
     }
+
+    @PostMapping("/password-reset-token")
+    public ResponseEntity<CreatePasswordResetTokenResponseDto> recreateConfirmationToken(
+            @RequestBody CreatePasswordResetTokenRequestDto request) {
+        memberService.createPasswordResetToken(request.email());
+        return ResponseEntity.ok(new CreatePasswordResetTokenResponseDto("Password reset token created"));
+    }
 }
