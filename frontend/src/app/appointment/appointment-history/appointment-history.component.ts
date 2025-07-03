@@ -10,6 +10,9 @@ import {SortingOrderComponent} from '../../shared/sorting-order/sorting-order.co
 import {ConfirmationModalComponent} from '../../shared/confirmation-component/confirmation-modal.component';
 import {StatusFilterComponent} from '../status-filter/status-filter.component';
 import {AppointmentStatusEnumModel} from '../appointment-status.model';
+import {snackBarSuccess} from '../../shared/snackbar/snackbar-success';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {snackBarError} from '../../shared/snackbar/snackbar-error';
 
 @Component({
   selector: 'app-appointment-history',
@@ -45,7 +48,8 @@ export class AppointmentHistoryComponent implements OnInit {
 
   constructor(private appointmentHistoryService: AppointmentService,
               private router: Router,
-              private datePipe: DatePipe,) {
+              private datePipe: DatePipe,
+              private snackBar: MatSnackBar,) {
 
   }
     ngOnInit(): void {
@@ -130,9 +134,19 @@ export class AppointmentHistoryComponent implements OnInit {
   }
 
   confirmCancelAppointment() {
-    this.cancelAppointmentModal = false;
-    this.selectedAppointment = null;
-    alert("canceled appointment");
+    this.appointmentHistoryService.cancelAppointment(this.selectedAppointment!.id).subscribe({
+      next: data => {
+        this.selectedAppointment = null;
+        this.cancelAppointmentModal = false;
+        snackBarSuccess(this.snackBar, 'Appointment cancelled successfully');
+        this.loadAppointments();
+      },
+      error: err => {
+        this.selectedAppointment = null;
+        this.cancelAppointmentModal = false;
+        snackBarError(this.snackBar, err.error);
+      }
+    });
   }
 
   cancelCancelAppointment() {

@@ -7,8 +7,10 @@ import com.academy.config.authentication.AuthenticationFacade;
 import com.academy.dtos.appointment.AppointmentMapper;
 import com.academy.dtos.appointment.AppointmentRequestDTO;
 import com.academy.dtos.appointment.AppointmentResponseDTO;
+import com.academy.exceptions.BadRequestException;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.appointment.Appointment;
+import com.academy.models.appointment.AppointmentStatus;
 import com.academy.models.member.Member;
 import com.academy.models.service.service_provider.ProviderPermission;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
@@ -56,11 +58,12 @@ public class AppointmentService {
                 .map(appointmentMapper::toResponseDTO)
                 .toList();
     }
-
-    public AppointmentResponseDTO getAppointmentById(Long id) {
+    public Appointment getAppointmentEntityById(long id) {
         return appointmentRepository.findById(id)
-                .map(appointmentMapper::toResponseDTO)
                 .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
+    }
+    public AppointmentResponseDTO getAppointmentById(Long id) {
+        return appointmentMapper.toResponseDTO(getAppointmentEntityById(id));
     }
 /*
     public AppointmentResponseDTO getAppointmentById(Long id) {
@@ -141,13 +144,6 @@ public class AppointmentService {
 
     }
 
-    public void deleteAppointment(Long id) {
-
-        if(!appointmentRepository.existsById(id)) throw new EntityNotFoundException(Appointment.class, id);
-
-        appointmentRepository.deleteById(id);
-
-    }
 
     public void deleteReview(Long id){
 
@@ -193,5 +189,14 @@ public class AppointmentService {
 
     public List<Appointment> getAppointmentsForServiceProvider(Long serviceProviderId) {
         return appointmentRepository.findByServiceProviderId(serviceProviderId);
+    }
+
+    public void cancelAppointment(Long id) {
+        Appointment appointment = getAppointmentEntityById(id);
+        if(appointment.getStatus() != AppointmentStatus.PENDING)
+            throw new BadRequestException("Appointment can't be canceled with status " + appointment.getStatus());
+
+        appointment.setStatus(AppointmentStatus.CANCELLED);
+        appointmentRepository.save(appointment);
     }
 }
