@@ -22,9 +22,17 @@
   vertical-align: middle;
   margin-right: 50px;
 }
+.wrapper {
+  transition: transform 0.25s ease, color 0.2s ease-in-out;
+}
 
 .wrapper:hover {
   cursor: pointer;
-  transform: scale(1.08);
+  color: #e0f7ff;
+  transform: scale(1.08)
+}
+
+.profile-menu {
+  z-index: 100;
 }
 

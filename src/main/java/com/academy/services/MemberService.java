@@ -18,6 +18,7 @@ import com.academy.exceptions.InvalidArgumentException;
 import com.academy.exceptions.MemberNotFoundException;
 import com.academy.exceptions.NotFoundException;
 import com.academy.exceptions.RegistrationConflictException;
+import com.academy.exceptions.TokenExpiredException;
 import com.academy.exceptions.UnavailableUserException;
 import com.academy.models.Role;
 import com.academy.models.member.Member;
@@ -140,7 +141,7 @@ public class MemberService {
     }
 
     private void sendConfirmationEmail(Member member, String rawToken) {
-        String confirmationUrl = appProperties.getUrl() + "/auth/confirm-email/" + rawToken;
+        String confirmationUrl = appProperties.getFrontendUrl() + "/confirm-email/" + rawToken;
 
         String html = loadVerificationEmailHtml()
                 .replace("[User Name]", member.getUsername())
@@ -207,10 +208,10 @@ public class MemberService {
                 .filter(m -> m.getConfirmationToken() != null &&
                         passwordEncoder.matches(confirmationToken, m.getConfirmationToken()))
                 .findFirst()
-                .orElseThrow(() -> new NotFoundException("Confirmation Token not found"));
+                .orElseThrow(() -> new BadRequestException("Confirmation Token is Invalid/Not found"));
 
         if (member.getTokenExpiry().isBefore(LocalDateTime.now()))
-            throw new AuthenticationException("Confirmation Token has Expired");
+            throw new TokenExpiredException("Confirmation Token has Expired");
 
         member.setTokenExpiry(null);
         member.setEnabled(true);
@@ -227,10 +228,14 @@ public class MemberService {
 
     }
 
-    private Member tryToAuthenticateMember(String login, String password) {
-        Optional<Member> optionalMember = login.contains("@")
+    private Optional<Member> getMemberByLogin(String login) {
+        return login.contains("@")
                 ? memberRepository.findByEmail(login)
                 : memberRepository.findByUsername(login);
+    }
+
+    private Member tryToAuthenticateMember(String login, String password) {
+        Optional<Member> optionalMember = getMemberByLogin(login);
 
         if(optionalMember.isEmpty() ||  !passwordEncoder.matches(password, optionalMember.get().getPassword()))
             throw new AuthenticationException(messageSource.getMessage("auth.invalid", null, LocaleContextHolder.getLocale()));
@@ -241,7 +246,7 @@ public class MemberService {
             Member member = tryToAuthenticateMember(request.login(), request.password());
 
             if(!member.isEnabled())
-                throw new UnavailableUserException(member.getStatus());
+                throw new UnavailableUserException(member.getStatus(), member.getEmail());
             UserDetails userDetails = new org.springframework.security.core.userdetails.User(
                     member.getUsername(), member.getPassword(), new ArrayList<>()
             );
@@ -301,14 +306,19 @@ public class MemberService {
             member.setUsername(memberRequestDTO.username());
         }
 
-        if(memberRequestDTO.password() != null){
-            member.setPassword(memberRequestDTO.password());
-        }
-
         if(memberRequestDTO.roleId() != null){
             Role newRole = roleRepository.findById(memberRequestDTO.roleId())
                     .orElseThrow(() -> new EntityNotFoundException(Role.class, memberRequestDTO.roleId()));
             member.setRole(newRole);
+        }
+
+        if(memberRequestDTO.oldPassword() != null){
+            if(!passwordEncoder.matches(memberRequestDTO.oldPassword(), member.getPassword()))
+                throw new AuthenticationException("Incorrect password");
+            if(!isValidPassword(memberRequestDTO.newPassword()))
+                throw new InvalidArgumentException(messageSource.getMessage("register.invalidpassword", null, LocaleContextHolder.getLocale()));
+
+            member.setPassword(passwordEncoder.encode(memberRequestDTO.newPassword()));
         }
         return memberMapper.toResponseDTO(memberRepository.save(member));
     }
@@ -328,8 +338,12 @@ public class MemberService {
         return memberRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
     }
 
-    public void recreateConfirmationToken(String login, String password) {
-        Member member = tryToAuthenticateMember(login, password);
+    public void recreateConfirmationToken(String login) {
+        Optional<Member> optionalMember = getMemberByLogin(login);
+        if(optionalMember.isEmpty())
+            throw new EntityNotFoundException(Member.class, login);
+        Member member = optionalMember.get();
+
         if(member.isEnabled())
             throw new BadRequestException("Member already enabled");
         member.setTokenExpiry(LocalDateTime.now().plusMinutes(

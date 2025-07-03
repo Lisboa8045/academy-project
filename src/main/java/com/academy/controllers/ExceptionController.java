@@ -7,6 +7,7 @@ import com.academy.exceptions.EntityNotFoundException;
 import com.academy.exceptions.NotFoundException;
 import com.academy.exceptions.RegistrationConflictException;
 import com.academy.exceptions.SendEmailException;
+import com.academy.exceptions.TokenExpiredException;
 import com.academy.exceptions.UnavailableUserException;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
@@ -60,7 +61,7 @@ public class ExceptionController {
     public ResponseEntity<Object> handleInvalidValue(BadRequestException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
-
+        
     @ExceptionHandler(com.academy.exceptions.BadRequestException.class)
     public ResponseEntity<Object> handleInvalidValue(com.academy.exceptions.BadRequestException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -69,6 +70,11 @@ public class ExceptionController {
     @ExceptionHandler(SendEmailException.class)
     public ResponseEntity<Object> handleInvalidValue(SendEmailException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(TokenExpiredException.class)
+    public ResponseEntity<Object> handleInvalidValue(TokenExpiredException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.GONE);
     }
 
     @ExceptionHandler(EmailTemplateLoadingException.class)
@@ -109,6 +115,16 @@ public class ExceptionController {
         body.put("error", "An unexpected error occurred. Please contact support.");
 
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Object> handleIllegalStateException(IllegalStateException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
     }
 
 }

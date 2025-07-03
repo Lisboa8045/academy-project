@@ -19,25 +19,6 @@ app-root {
   flex-grow: 1;
 }
 
-input {
-  width: 100%;
-  padding: 0.75rem;
-  margin: 0.5rem 0;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-}
-
-
-button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 0.6rem 1rem;
-  cursor: pointer;
-  border-radius: 4px;
-  margin-top: 0.5rem;
-}
-
 button:hover {
   background-color: #0056b3;
 }
@@ -61,3 +42,19 @@ button[disabled] {
   background-color: #ccc;
   color: #666;
 }
+
+/* Apply the color to the actual snackbar surface inside MDC */
+
+.success-snackbar .mdc-snackbar__surface {
+  background-color: #4caf50 !important;
+  color: white !important;
+}
+
+.error-snackbar .mdc-snackbar__surface {
+  background-color: #f44336 !important;
+  color: white !important;
+}
+
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

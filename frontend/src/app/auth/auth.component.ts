@@ -1,15 +1,15 @@
 import {Component, inject, signal} from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {CommonModule} from '@angular/common';
 import {
-  ReactiveFormsModule,
-  FormBuilder,
-  Validators,
-  FormGroup,
   AbstractControl,
-  ValidationErrors
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators
 } from '@angular/forms';
-import { AuthService } from './auth.service';
-import { Router } from '@angular/router';
+import {AuthService} from './auth.service';
+import {Router} from '@angular/router';
 import {strongPasswordValidator} from '../shared/validators/password.validator';
 import {noSpecialCharsValidator} from '../shared/validators/no-special-chars.validator';
 
@@ -29,6 +29,7 @@ export class AuthComponent{
   errorMessage = '';
   passwordVisible = false;
   confirmPasswordVisible = false;
+  loading = false;
 
   constructor(private authService: AuthService, private router: Router) {
     this.buildForm()
@@ -90,10 +91,22 @@ export class AuthComponent{
 
     if (!this.authForm.valid) return;
 
+    this.loading = true;
+
     if (this.isLoginMode()) {
       this.authService.login(login!, password!).subscribe({
-        next: () => this.router.navigate(['/']),
+        next: () => {
+          this.router.navigate(['/']);
+          this.loading = false;
+        },
         error: (err) => {
+          this.loading = false;
+          if (err?.type === 'EMAIL_NOT_CONFIRMED') {
+            this.router.navigate(['/resend-email'], {
+              queryParams: {email: err.email || login}
+            });
+            return;
+          }
           console.error('Login failed:', err);
           this.errorMessage = err?.error || 'Login failed. Please try again.';
         }
@@ -103,9 +116,11 @@ export class AuthComponent{
         next: () => {
           alert('Signup successful! Please log in.');
           this.toggleMode()
+          this.loading = false;
         },
         error: (err) => {
           console.error('Signup failed:', err);
+          this.loading = false;
 
           this.errorMessage = '';
           const errors = this.getHttpErrors(err);
