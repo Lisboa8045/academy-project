@@ -40,52 +40,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 80px; /* 👈 Fixed height (adjust to your design) */
+  height: 55px;
 }
-
-.search-form,
-.search-form-placeholder {
-  width: 100%;
-  max-width: 700px;
-  height: 40px;
-  display: flex;
-  align-items: center; /* Vertically centers the input */
-  justify-content: center;
-}
-
-.search-wrapper {
-  position: relative;
-  width: 100%;
-  height: 100%; /* 👈 Ensure wrapper fills the fixed height */
-}
-
-.search-input {
-  box-sizing: border-box; /* ✅ This is the key */
-  width: 100%;
-  height: 100%;
-  padding: 0 36px 0 12px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 25px;
-  line-height: 1;
-  margin: 0;
-}
-
-
-.search-icon {
-  position: absolute;
-  right: 12px; /* ⬅️ give it a bit more breathing room */
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-  font-size: 20px; /* ⬅️ Slightly larger looks more balanced */
-  color: #555;
-}
-
-.search-icon:hover {
-  color: #000;
-}
-
 
 .user-profile {
   display: flex;

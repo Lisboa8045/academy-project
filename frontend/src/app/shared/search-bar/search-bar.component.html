@@ -1,4 +1,4 @@
-<form class="search-form" [formGroup]="form" (ngSubmit)="onSearch()">
+<form class="search-form" [class.header-search]="isHeader" [formGroup]="form" (ngSubmit)="onSearch()">
   <div class="search-wrapper">
     <input
       type="text"

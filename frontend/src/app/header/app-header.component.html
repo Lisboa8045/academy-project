@@ -7,7 +7,7 @@
     @if (isLandingPage()) {
       <div class="search-form" style="visibility: hidden; width: 500px;"></div>
     } @else {
-      <app-search-bar (search)="onSearchFromChild($event)" />
+      <app-search-bar [isHeader]="true" (search)="onSearchFromChild($event)" />
     }
 
     <div class="right-links">
