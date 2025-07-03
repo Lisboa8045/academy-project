@@ -5,11 +5,13 @@
 }
 
 .service-card {
+  display: flex;
+  flex-direction: column;
   background: #fff;
   border: 1px solid #ddd;
   border-radius: 8px;
   transition: transform 0.2s;
-  min-height: 370px;
+  height: 350px;
 }
 
 .service-card:hover {
@@ -35,6 +37,7 @@
 
 .image-container {
   position: relative;
+  display: inline-block;
   width: 100%;
   height: 200px;
   overflow: hidden;
@@ -42,12 +45,81 @@
   border-top-right-radius: 8px;
 }
 
+.discount-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: red;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-size: 1.5rem;
+  z-index: 1;
+}
+
 .service-info {
+  display: flex;
+  flex-direction: column;
+  font-size: 16px;
   padding: 1rem;
+}
+
+.service-info h3 {
+  margin:0;
+}
+
+.service-info p {
+  margin-top: 5px;
+}
+
+.price-container{
+  display: flex;
+  flex-direction: row;
+  margin-top: 8px;
+  font-size: 20px;
+  gap: 0.5rem;
 }
 
 img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.service-type-hours{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-size: 16px;
+  gap: 4px;
+}
+
+.role-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 1rem;
+  padding: 4px 10px 4px 6px;
+  border-radius: 999px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background-color: #3f51b5; /* fallback color */
+  width: fit-content;
+}
+
+
+.role-tag .circle {
+  width: 8px;
+  height: 8px;
+  background-color: white;
+  border-radius: 50%;
+}
+
+.role-tag.owner {
+  background-color: #3f51b5; /* Blue for owner */
+}
+
+.role-tag.worker {
+  background-color: #4caf50; /* Green for worker */
 }

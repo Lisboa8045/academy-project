@@ -115,6 +115,7 @@
   padding: 0;
   margin: 0.5rem 0 0.5rem;
   transition: border-color 0.3s ease;
+  max-width: 100%;
 }
 
 .username-input:focus {

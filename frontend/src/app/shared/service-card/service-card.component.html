@@ -1,15 +1,42 @@
 <div class="service-card" (click)="onClick()">
   <div class="image-container">
-    <img [src]="service.image_url || defaultImage"
+    <img [src]="service.image_url || serviceImage()"
          (error)="onImgError($event)"
          alt="Service Image" />
     <div class="rating-badge" *ngIf="service.averageRating !== undefined && service.averageRating !== null">
       ★ {{ service.averageRating }}
     </div>
+    <div *ngIf="discountedPrice" class="discount-badge">
+      -{{ service?.discount }}%
+    </div>
   </div>
   <div class="service-info">
     <h3>{{ service.name }}</h3>
-    <p>{{ service.price | currency:'EUR' }}</p>
-    <small>{{formattedDuration}}</small>
+    <div class="service-type-hours">
+      <small>{{ service.serviceTypeName }}</small> <small>🕒 {{formattedDuration}}</small>
+    </div>
+    <div class="price-container">
+    @if(discountedPrice){
+
+          <div class="original-price" style="text-decoration: line-through; color: grey;">
+            {{ service?.price }}€
+          </div>
+          <div class="discounted-price" style="font-weight: bold;">
+            {{ discountedPrice }}€
+          </div>
+    }@else{
+      <div style="font-weight: bold">
+        {{ service?.price }}€
+      </div>
+    }
+    </div>
+
+
+    @if(workerTag){
+      <span class="role-tag" [ngClass]="workerTag">
+        <span class="circle"></span>
+        {{ workerTag }}
+      </span>
+    }
   </div>
 </div>

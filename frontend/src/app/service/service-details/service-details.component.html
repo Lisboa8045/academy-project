@@ -42,7 +42,7 @@
           <div class ="type-and-duration">
             <h3> {{ service?.serviceTypeName }}</h3>
             <div *ngIf="formatedTimeMinutes != null && formatedTimeMinutes > 0; else onlyHours">
-              <span class="duration-info">🕒 {{ formatedTimeHours }}h:{{ formatedTimeMinutes }} min</span>
+              <span class="duration-info">🕒 {{ formatedTimeHours }}h{{ formatedTimeMinutes }}m</span>
             </div>
           </div>
 

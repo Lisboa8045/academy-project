@@ -49,6 +49,7 @@ export class ProfileComponent implements OnInit {
     private route: ActivatedRoute,
   ) {
     effect(() => {
+      if(this.route.snapshot.paramMap.get('id')) return;
       this.loading.set(true);
       if (this.authStore.id() > -1) this.getMember(this.authStore.id());
     });
