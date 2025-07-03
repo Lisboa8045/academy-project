@@ -57,6 +57,12 @@ public class ServiceProviderService {
                 .toList();
     }
 
+    public List<ServiceProviderResponseDTO> getServiceProvidersByServiceId(Long serviceId) {
+        return serviceProviderRepository.findByServiceId(serviceId).stream()
+                .map(serviceProviderMapper::toResponseDTO)
+                .toList();
+    }
+
     //TODO refactor deste método para dar return de um não Optional
     public Optional<ServiceProviderResponseDTO> getServiceProviderById(long id) {
         return serviceProviderRepository.findById(id)
@@ -226,5 +232,4 @@ public class ServiceProviderService {
     public List<ServiceProvider> findProvidersByServiceIdAndPermission(Long serviceId, ProviderPermissionEnum permission) {
         return serviceProviderRepository.findProvidersByServiceIdAndPermission(serviceId, permission);
     }
-
 }

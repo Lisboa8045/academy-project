@@ -2,5 +2,10 @@
 @if(loading()) {
   <app-loading/>
 } @else {
+  <p>{{ service | json }}</p>
+  @for (serviceProvider of serviceProviders; track serviceProvider.id) {
+    <p>{{ serviceProvider.memberName }}</p>
+    <p>{{ serviceProvider.permissions }}</p>
+  }
 
 }

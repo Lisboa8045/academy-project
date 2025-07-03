@@ -20,5 +20,5 @@ export const routes: Routes = [
   { path: '', component: LandingPageComponent},
   { path: 'resend-email', component: ResendEmailConfirmationComponent },
   { path: 'confirm-email/:token', component: ConfirmEmailComponent },
-  { path: 'backoffice/service/:id', component: EditServiceComponent },
+  { path: 'backoffice/services/:id', component: EditServiceComponent },
 ];
