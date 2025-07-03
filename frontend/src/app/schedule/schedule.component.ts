@@ -7,13 +7,12 @@ import { SlotModel } from '../models/slot.model';
 import { ServiceModel } from '../service/service.model';
 import { AppointmentModel } from '../models/appointment.model';
 import {CommonModule} from '@angular/common';
-import { Router } from '@angular/router';
 import {ProviderSelectionModalComponent} from './providerSelectionModalComponent/provider-selection-modal.component';
 import {ConfirmationModalComponent} from './confirmationModalComponent/confirmation-modal.component';
 import {SlotSelectionComponent} from './slotSelectionComponent/slot-selection.component';
 import { ServiceProviderModel } from '../models/service-provider.model';
 import {AuthStore} from '../auth/auth.store';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {ServiceDetailsService} from "../service/service-details.service";
 
 @Component({
@@ -127,7 +126,6 @@ export class ScheduleComponent implements OnInit {
     // Fetch the service details
     this.serviceDetailsService.getServiceById(serviceId).subscribe({
       next: (service) => {
-        this.services = [service]; // Optional, depends on your UI needs
         this.selectedServiceId = service.id;
         this.form.get('serviceId')?.setValue(service.id); // Keeps form state updated
 
@@ -136,7 +134,6 @@ export class ScheduleComponent implements OnInit {
         this.scheduleApi.getFreeSlots(service.id).subscribe({
           next: data => {
             this.slots = data;
-            console.log('Loaded slots:', data);
             this.providers = [...new Set(data.map(slot => slot.providerName))];
             this.filteredSlots = data;
             this.currentStep = 'slots';
@@ -144,7 +141,7 @@ export class ScheduleComponent implements OnInit {
             this.currentWeekEnd = endOfWeek(new Date(), { weekStartsOn: 1 });
             this.updateWeekDays();
           },
-          error: err => console.error('Erro ao carregar slots:', err)
+          error: err => console.error('Failed to load slots', err)
         });
       },
       error: () => {
@@ -229,18 +226,12 @@ export class ScheduleComponent implements OnInit {
           status: 'CONFIRMED'
         };
 
-        console.log('[LOG] Creating appointment with the following details:');
-        console.log('Service Provider ID:', appointment.serviceProviderId);
-        console.log('Start DateTime:', appointment.startDateTime);
-        console.log('End DateTime:', appointment.endDateTime);
-        console.log('Status:', appointment.status);
-
         this.scheduleApi.confirmAppointment(appointment).subscribe({
-          next: () => alert('Marcação efetuada com sucesso!'),
-          error: err => alert('Erro ao marcar: ' + err.message)
+          next: () => alert('Appointment scheduled successfully!'),
+          error: err => alert('Error scheduling appointment: ' + err.message)
         });
       },
-      error: err => alert('Erro ao obter prestador de serviço: ' + err.message)
+      error: err => alert('Error obtaining service provider: ' + err.message)
     });
   }
 

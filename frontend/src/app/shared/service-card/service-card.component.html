@@ -1,6 +1,6 @@
 <div class="service-card" (click)="onClick()">
   <div class="image-container">
-    <img [src]="service.image_url || defaultImage"
+    <img [src]="service.images[0] || defaultImage"
          (error)="onImgError($event)"
          alt="Service Image" />
     <div class="rating-badge" *ngIf="service.averageRating !== undefined && service.averageRating !== null">

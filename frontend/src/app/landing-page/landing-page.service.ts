@@ -2,13 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {Observable, map, forkJoin} from 'rxjs';
 import {AppointmentModel} from '../models/appointment.model';
-import {ServiceModel} from '../service/service.model';
+import {ServiceModel, RatedServiceModel} from '../service/service.model';
 import {ServiceProviderModel} from '../models/service-provider.model';
-
-
-interface RatedServiceModel extends ServiceModel {
-  averageRating: number;
-}
 
 @Injectable({
   providedIn: 'root'

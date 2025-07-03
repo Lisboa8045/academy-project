@@ -41,39 +41,30 @@ public class SchedulingService {
     }
 
     public List<SlotDTO> getFreeSlotsForService(Long serviceId) {
-        System.out.println("Fetching free slots for service with ID: " + serviceId);
 
         validateServiceId(serviceId);
 
         int serviceDurationMinutes = serviceService.getById(serviceId).duration();
-        System.out.println("Service duration: " + serviceDurationMinutes + " minutes");
 
         List<SlotDTO> allFreeSlots = new ArrayList<>();
 
         List<ServiceProvider> providersWithServePermission = serviceProviderService
                 .findProvidersByServiceIdAndPermission(serviceId, ProviderPermissionEnum.SERVE);
-        System.out.println("Found " + providersWithServePermission.size() + " providers with SERVE permission for service ID " + serviceId);
 
         for (ServiceProvider serviceProvider : providersWithServePermission) {
             Long providerId = serviceProvider.getProvider().getId();
-            System.out.println("Processing provider with ID: " + providerId);
 
             Optional<Member> memberOpt = memberService.findbyId(providerId);
             if (memberOpt.isEmpty()) {
-                System.out.println("Provider with ID " + providerId + " has no associated member. Skipping.");
                 continue;
             }
 
             Member member = memberOpt.get();
-            System.out.println("Found member " + member.getUsername() + " for provider ID " + providerId);
 
             List<Availability> availabilities = availabilityService.getAvailabilitiesForProvider(providerId);
-            System.out.println("Found " + availabilities.size() + " availabilities for provider ID " + providerId);
-
             List<Appointment> appointments = appointmentService.getAppointmentsForServiceProvider(
                     serviceProvider.getId()
             );
-            System.out.println("Found " + appointments.size() + " appointments for service provider ID " + serviceProvider.getId());
 
             List<SlotDTO> freeSlots = generateFreeSlots(
                     providerId,
@@ -82,14 +73,8 @@ public class SchedulingService {
                     appointments,
                     serviceDurationMinutes
             );
-
-            System.out.println("Generated " + freeSlots.size() + " free slots for provider ID " + providerId);
-
             allFreeSlots.addAll(freeSlots);
         }
-
-        System.out.println("Total free slots found for service ID " + serviceId + ": " + allFreeSlots.size());
-
         return allFreeSlots;
     }
 
@@ -122,20 +107,19 @@ public class SchedulingService {
         return freeSlots;
     }
 
-
     public static List<SlotDTO> generateCompleteSlots(Long providerId, String providerName,
                                                       LocalDateTime start, LocalDateTime end, int slotDurationMinutes) {
         if (start == null || end == null)
-            throw new IllegalArgumentException("Datas entre início e fim não podem ser nulas.");
+            throw new IllegalArgumentException("Start and end dates cannot be null.");
         if (!end.isAfter(start))
-            throw new IllegalArgumentException("Data final deve ser maior que início.");
+            throw new IllegalArgumentException("The end date must be after the start date.");
         if (slotDurationMinutes <= 0)
-            throw new IllegalArgumentException("Duração dos slots deve ser positiva.");
+            throw new IllegalArgumentException("Slot duration must be a positive value.");
 
         long totalDuration = Duration.between(start, end).toMinutes();
         if (slotDurationMinutes > totalDuration) {
             throw new IllegalArgumentException(
-                    "Duração do slot maior do que o intervalo total. Nenhum slot pode ser criado.");
+                    "Slot duration is greater than the total interval. No slots can be created.");
         }
 
         List<SlotDTO> slots = new ArrayList<>();

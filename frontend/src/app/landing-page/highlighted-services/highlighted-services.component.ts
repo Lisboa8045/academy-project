@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { LandingPageService } from '../landing-page.service';
 import {Router} from '@angular/router';
 import {ServiceCardComponent} from '../../shared/service-card/service-card.component';
+import {RatedServiceModel} from '../../service/service.model';
 
 @Component({
   selector: 'app-highlighted-services',
@@ -15,7 +16,7 @@ import {ServiceCardComponent} from '../../shared/service-card/service-card.compo
   styleUrls: ['./highlighted-services.component.css']
 })
 export class HighlightedServicesComponent implements OnInit {
-  services: any[] = [];
+  services: RatedServiceModel[] = [];
   defaultImage = 'https://placehold.co/300x200?text=No+Image';
 
   constructor(
@@ -23,19 +24,11 @@ export class HighlightedServicesComponent implements OnInit {
     private readonly router: Router
   ) {}
 
-
-  onImgError(event: Event) {
-    const imgElement = event.target as HTMLImageElement;
-    imgElement.src = this.defaultImage;
-  }
-
   ngOnInit(): void {
-    console.log('LOADING SERVICES');
     this.landingService.getTopRatedServices().subscribe(data => {
       this.services = data;
       console.log(data);
     });
-    console.log('[SERVICES]: ' + this.services);
   }
 
   onCardClick(id: number) {
