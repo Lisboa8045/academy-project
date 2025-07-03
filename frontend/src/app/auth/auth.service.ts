@@ -62,6 +62,10 @@ export class AuthService {
       email: email
     });
   }
+
+  verifyResetToken(token: string) {
+    return this.http.get(`${this.apiUrl}/password-reset/${token}`);
+  }
 }
 
 

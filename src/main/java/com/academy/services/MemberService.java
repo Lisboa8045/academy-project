@@ -194,7 +194,17 @@ public class MemberService {
         memberRepository.save(member);
     }
 
-    // adicionar reset password aqui
+
+    public void verifyPasswordResetToken(String passwordResetToken) {
+        Member member = memberRepository.findAll().stream()
+                .filter(m -> m.getPasswordResetToken() != null &&
+                        passwordEncoder.matches(passwordResetToken, m.getPasswordResetToken()))
+                .findFirst()
+                .orElseThrow(() -> new BadRequestException("Password Reset Token is Invalid/Not found"));
+
+        if (member.getPasswordResetTokenExpiry().isBefore(LocalDateTime.now()))
+            throw new TokenExpiredException("Password Reset Token has Expired");
+    }
 
     private boolean isValidPassword(String password) {
         return password.length() >= 8

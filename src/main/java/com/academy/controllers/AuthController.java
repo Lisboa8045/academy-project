@@ -51,7 +51,13 @@ public class AuthController {
     @GetMapping("/confirm-email/{token}")
     public ResponseEntity<ConfirmEmailResponseDto> confirmEmail(@PathVariable String token) {
        memberService.confirmEmail(token);
-       return  ResponseEntity.ok(new ConfirmEmailResponseDto("Email confirmed successfully"));
+       return ResponseEntity.ok(new ConfirmEmailResponseDto("Email confirmed successfully"));
+    }
+
+    @GetMapping("/password-reset/{token}")
+    public ResponseEntity<PasswordResetResponseDto> verifyPasswordResetToken(@PathVariable String token) {
+        memberService.verifyPasswordResetToken(token);
+        return ResponseEntity.ok(new PasswordResetResponseDto("Password can be reset"));
     }
 
     @PostMapping("/login")
