@@ -2,7 +2,7 @@ package com.academy.models;
 
 import com.academy.models.service.Service;
 import com.academy.models.shared.BaseEntity;
-import com.academy.util.FieldLengths;
+import com.academy.utils.FieldLengths;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
