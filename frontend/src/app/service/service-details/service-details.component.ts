@@ -4,6 +4,7 @@ import {ActivatedRoute} from '@angular/router';
 import {ServiceDetailsService} from '../service-details.service';
 import {LoadingComponent} from '../../loading/loading.component';
 import {NgForOf, NgIf} from "@angular/common";
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-service-details',
@@ -53,7 +54,8 @@ export class ServiceDetailsComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private serviceDetailsService: ServiceDetailsService
+    private serviceDetailsService: ServiceDetailsService,
+    private router: Router
   ) {
   }
 
@@ -138,4 +140,9 @@ export class ServiceDetailsComponent implements OnInit {
     });
   }
 
+  onClick(id: number | undefined) {
+    if (id) {
+      this.router.navigate(['/schedule', id]);
+    }
+  }
 }

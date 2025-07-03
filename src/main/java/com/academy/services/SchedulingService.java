@@ -41,9 +41,11 @@ public class SchedulingService {
     }
 
     public List<SlotDTO> getFreeSlotsForService(Long serviceId) {
+
         validateServiceId(serviceId);
 
         int serviceDurationMinutes = serviceService.getById(serviceId).duration();
+
         List<SlotDTO> allFreeSlots = new ArrayList<>();
 
         List<ServiceProvider> providersWithServePermission = serviceProviderService
@@ -51,12 +53,15 @@ public class SchedulingService {
 
         for (ServiceProvider serviceProvider : providersWithServePermission) {
             Long providerId = serviceProvider.getProvider().getId();
+
             Optional<Member> memberOpt = memberService.findbyId(providerId);
-            if (memberOpt.isEmpty()) continue;
+            if (memberOpt.isEmpty()) {
+                continue;
+            }
+
             Member member = memberOpt.get();
 
             List<Availability> availabilities = availabilityService.getAvailabilitiesForProvider(providerId);
-
             List<Appointment> appointments = appointmentService.getAppointmentsForServiceProvider(
                     serviceProvider.getId()
             );
@@ -68,12 +73,11 @@ public class SchedulingService {
                     appointments,
                     serviceDurationMinutes
             );
-
             allFreeSlots.addAll(freeSlots);
         }
-
         return allFreeSlots;
     }
+
 
     private List<SlotDTO> generateFreeSlots(Long providerId, String providerName,
                                             List<Availability> availabilities,
@@ -103,20 +107,19 @@ public class SchedulingService {
         return freeSlots;
     }
 
-
     public static List<SlotDTO> generateCompleteSlots(Long providerId, String providerName,
                                                       LocalDateTime start, LocalDateTime end, int slotDurationMinutes) {
         if (start == null || end == null)
-            throw new IllegalArgumentException("Datas entre início e fim não podem ser nulas.");
+            throw new IllegalArgumentException("Start and end dates cannot be null.");
         if (!end.isAfter(start))
-            throw new IllegalArgumentException("Data final deve ser maior que início.");
+            throw new IllegalArgumentException("The end date must be after the start date.");
         if (slotDurationMinutes <= 0)
-            throw new IllegalArgumentException("Duração dos slots deve ser positiva.");
+            throw new IllegalArgumentException("Slot duration must be a positive value.");
 
         long totalDuration = Duration.between(start, end).toMinutes();
         if (slotDurationMinutes > totalDuration) {
             throw new IllegalArgumentException(
-                    "Duração do slot maior do que o intervalo total. Nenhum slot pode ser criado.");
+                    "Slot duration is greater than the total interval. No slots can be created.");
         }
 
         List<SlotDTO> slots = new ArrayList<>();

@@ -66,7 +66,7 @@ public class AppointmentService {
     public AppointmentResponseDTO createAppointment(AppointmentRequestDTO dto) {
         // Validate date is not in the past
         if (dto.startDateTime().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Não é possível agendar para datas passadas");
+            throw new IllegalArgumentException("Cant schedule in the past");
         }
 
         String username = authenticationFacade.getUsername();
@@ -79,7 +79,7 @@ public class AppointmentService {
                 .map(ProviderPermission::getPermission)
                 .anyMatch(p -> p == ProviderPermissionEnum.SERVE);
         if (!hasServePermission) {
-            throw new IllegalStateException("Service provider não possui permissão SERVE");
+            throw new IllegalStateException("Service provider doesn't have SERVE permission");
         }
 
         // Calculate end time
@@ -94,7 +94,7 @@ public class AppointmentService {
                         endDateTime
                 );
         if (!conflictingAppointments.isEmpty()) {
-            throw new IllegalStateException("Já existe um agendamento para este horário");
+            throw new IllegalStateException("An appointment already exists for this time");
         }
 
         // Create and save appointment
