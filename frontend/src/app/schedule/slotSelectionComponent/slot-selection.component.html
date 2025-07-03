@@ -4,7 +4,7 @@
     class="type-button"
     [class.active]="!selectedProvider"
     (click)="filterByProvider(null)">
-    Todos
+    All
   </button>
   <button
     *ngFor="let provider of providers"
@@ -14,13 +14,7 @@
     {{ provider }}
   </button>
 </div>
-<div class="week-navigation">
-  <button (click)="goToPreviousWeek()">« Semana Anterior</button>
-  <span>
-    {{ currentWeekStart | date: 'dd/MM/yyyy' }} - {{ currentWeekEnd | date: 'dd/MM/yyyy' }}
-  </span>
-  <button (click)="goToNextWeek()">Semana Seguinte »</button>
-</div>
+<app-week-navigation></app-week-navigation>
 <h3>Calendar</h3>
 <div class="weekly-slots">
   <div class="day-column"

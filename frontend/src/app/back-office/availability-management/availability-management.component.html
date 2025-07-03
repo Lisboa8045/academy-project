@@ -3,24 +3,9 @@
   <!-- Header Section -->
   <div class="management-header">
     <h2 class="management-title">Gestão de Disponibilidades</h2>
-
-    <div class="week-navigation">
-      <button (click)="goToPreviousWeek()" class="nav-button">
-        ← Semana anterior
-      </button>
-      <span class="week-range">
-        {{ currentWeekStart | date: 'dd/MM/yyyy' }} - {{ currentWeekEnd | date: 'dd/MM/yyyy' }}
-      </span>
-      <button (click)="goToNextWeek()" class="nav-button">
-        Semana seguinte →
-      </button>
-      <button (click)="goToCurrentWeek()" class="nav-button today-button">Hoje</button>
-    </div>
-
+    <app-week-navigation></app-week-navigation>
     <div class="bulk-actions">
-      <button (click)="openBulkAddModal()" class="nav-button bulk-add-button">
-        ＋ Adicionar em massa
-      </button>
+      <button (click)="openBulkAddModal()" class="nav-button bulk-add-button">＋ Add in bulk</button>
     </div>
   </div>
 

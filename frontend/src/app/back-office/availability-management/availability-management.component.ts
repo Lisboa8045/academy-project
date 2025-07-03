@@ -4,6 +4,7 @@ import { AvailabilityService } from './availability-management.service';
 import { AvailabilityModel } from '../../models/availability.model';
 import { AuthStore } from '../../auth/auth.store';
 import { FormsModule } from '@angular/forms';
+import {WeekNavigationComponent} from '../../shared/week-navigation/week-navigation.component';
 
 interface AvailabilityCreateModel {
   startDateTime: string;
@@ -26,7 +27,7 @@ interface DayOfWeekOption {
   templateUrl: './availability-management.component.html',
   styleUrls: ['./availability-management.component.css'],
   standalone: true,
-  imports: [CommonModule, DatePipe, FormsModule]
+  imports: [CommonModule, DatePipe, FormsModule, WeekNavigationComponent]
 })
 export class AvailabilityManagementComponent implements OnInit {
   availabilities: AvailabilityModel[] = [];
