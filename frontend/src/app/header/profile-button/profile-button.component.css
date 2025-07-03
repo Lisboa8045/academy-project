@@ -28,3 +28,7 @@
   transform: scale(1.08);
 }
 
+.profile-menu {
+  z-index: 100;
+}
+

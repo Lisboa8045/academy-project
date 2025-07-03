@@ -12,6 +12,7 @@
 
   position: absolute;
   transform: translateX(-10%);
+  z-index: 100;
 }
 
 .see-all:hover {
