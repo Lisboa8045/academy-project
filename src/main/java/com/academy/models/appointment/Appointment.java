@@ -48,6 +48,7 @@ public class Appointment extends BaseEntity {
     @Column(name = "status")
     private AppointmentStatus status;
 
-
+    @Column(name="price")
+    private double price;
 }
 
