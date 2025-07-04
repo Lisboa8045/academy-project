@@ -46,12 +46,12 @@ export class ServiceApiService {
     return this.http.get<ServiceTypeResponseDTO[]>(this.SERVICE_TYPE_URL);
   }
 
-  getServicesOfCurrentlyLoggedMember(query: ServiceQuery): Observable<PagedResponse>{
+  getServicesOfMember(query: ServiceQuery, id: number): Observable<PagedResponse>{
     let params = new HttpParams()
       .set('page', query.page.toString())
       .set('size', query.pageSize.toString())
       .set('sort', query.sortOrder);
-    return this.http.get<PagedResponse>(this.BASE_URL + '/my-services', {params});
+    return this.http.get<PagedResponse>(this.BASE_URL + '/my-services/'+id, {params});
   }
 
   createService(){

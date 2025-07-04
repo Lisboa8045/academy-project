@@ -125,4 +125,10 @@
 
     </div>
 </div>
+  @if (user) {
+    <div class="card">
+      <h2 style="margin-top: 0">{{user.username}}'s services</h2>
+      <app-my-services [memberIdInput]="user!.id"></app-my-services>
+    </div>
+  }
 }

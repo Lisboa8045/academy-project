@@ -99,9 +99,8 @@ public class ServiceController {
         return ResponseEntity.ok(serviceService.updateMemberPermissions(id, request.memberId(), request.permissions()));
     }
 
-    @GetMapping("/my-services")
-    public ResponseEntity<Page<ServiceResponseDTO>> getMyServices(Pageable pageable){
-        Long memberId = memberService.getMemberByUsername(authenticationFacade.getUsername()).getId();
-        return ResponseEntity.ok(serviceService.getServicesByMemberId(memberId, pageable));
+    @GetMapping("/my-services/{id}")
+    public ResponseEntity<Page<ServiceResponseDTO>> getMyServices(@PathVariable Long id, Pageable pageable){
+        return ResponseEntity.ok(serviceService.getServicesByMemberId(id, pageable));
     }
 }

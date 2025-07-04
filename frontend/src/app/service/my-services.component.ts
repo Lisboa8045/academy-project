@@ -1,4 +1,4 @@
-import {Component, OnInit, signal} from '@angular/core';
+import {Component, computed, effect, Input, OnInit, signal} from '@angular/core';
 import {PagedResponse, ServiceApiService} from '../shared/service-api.service';
 import {ServiceModel} from './service.model';
 import {ControlsBarComponent} from './search/controls-bar/controls-bar.component';
@@ -7,6 +7,7 @@ import {PaginationBarComponent} from './search/pagination-bar/pagination-bar.com
 import {SearchSidebarFiltersComponent} from './search/search-sidebar-filters/search-sidebar-filters.component';
 import {ServiceListComponent} from './service-list/service-list.component';
 import {ServiceQuery} from '../shared/models/service-query.model';
+import {AuthStore} from '../auth/auth.store';
 
 @Component({
   selector: 'app-my-services',
@@ -19,7 +20,9 @@ import {ServiceQuery} from '../shared/models/service-query.model';
     ServiceListComponent
   ]
 })
-export class MyServicesComponent implements OnInit{
+export class MyServicesComponent{
+  @Input() memberIdInput : number | undefined;
+  memberId = computed(() => this.memberIdInput ?? this.authStore.id());
   services = signal<ServiceModel[]>([]);
   loading = signal(false);
   currentPage = signal(0);
@@ -27,15 +30,18 @@ export class MyServicesComponent implements OnInit{
   pageSize = signal(10);
   sortOrder = signal("price,asc");
 
-  constructor(private serviceApiService: ServiceApiService) {}
-
-    ngOnInit(): void {
-      this.fetchServices(this.buildQuery({ page: 0 }))
-    }
+  constructor(private serviceApiService: ServiceApiService, private authStore: AuthStore) {
+    this.loading.set(true);
+    effect(() => {
+      const id = this.memberId();
+      if (id !== undefined && id !== null && id > 0) {
+        this.fetchServices(this.buildQuery({ page: 0 }));
+      }
+    });
+  }
 
     fetchServices(query: ServiceQuery){
-      this.loading.set(true);
-      this.serviceApiService.getServicesOfCurrentlyLoggedMember(query).subscribe({
+      this.serviceApiService.getServicesOfMember(query, this.memberId()).subscribe({
         next: (res: PagedResponse) => {
           this.services.set(res.content);
           this.totalPages.set(res.totalPages);
