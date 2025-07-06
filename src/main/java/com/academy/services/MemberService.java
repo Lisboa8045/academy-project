@@ -12,7 +12,6 @@ import com.academy.dtos.register.MemberMapper;
 import com.academy.dtos.register.RegisterRequestDto;
 import com.academy.exceptions.AuthenticationException;
 import com.academy.exceptions.BadRequestException;
-import com.academy.exceptions.EmailTemplateLoadingException;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.exceptions.InvalidArgumentException;
 import com.academy.exceptions.MemberNotFoundByEmailException;
@@ -33,15 +32,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -332,7 +326,7 @@ public class MemberService {
                 .orElseThrow(() -> new EntityNotFoundException(Member.class, id));
     }
     public Member getMemberEntityById(long id){
-        return memberRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
+        return memberRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(Member.class, id));
     }
 
     public void recreateConfirmationToken(String login) {
