@@ -1,6 +1,6 @@
 package com.academy.dtos.member;
 
-import com.academy.util.FieldLengths;
+import com.academy.utils.FieldLengths;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;

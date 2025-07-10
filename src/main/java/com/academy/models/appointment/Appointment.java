@@ -3,7 +3,7 @@ package com.academy.models.appointment;
 import com.academy.models.member.Member;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.models.shared.BaseEntity;
-import com.academy.util.FieldLengths;
+import com.academy.utils.FieldLengths;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

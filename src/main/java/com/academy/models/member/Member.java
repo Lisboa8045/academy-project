@@ -5,7 +5,7 @@ import com.academy.models.Availability;
 import com.academy.models.Role;
 import com.academy.models.service.Service;
 import com.academy.models.shared.BaseEntity;
-import com.academy.util.FieldLengths;
+import com.academy.utils.FieldLengths;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -57,8 +57,14 @@ public class Member extends BaseEntity {
     @Column(name = "confirmation_token")
     private String confirmationToken;
 
+    @Column(name = "password_reset_token")
+    private String passwordResetToken;
+
     @Column(name = "token_expiry")
     private LocalDateTime tokenExpiry;
+
+    @Column(name = "password_reset_token_expiry")
+    private LocalDateTime passwordResetTokenExpiry;
 
     @Column(name = "address", length = FieldLengths.ADDRESS_MAX)
     private String address;
@@ -79,7 +85,8 @@ public class Member extends BaseEntity {
     @Column(name = "profile_picture")
     private String profilePicture;
 
+    public Long getId(){
+        return id;
+    }
 
 }
-
-

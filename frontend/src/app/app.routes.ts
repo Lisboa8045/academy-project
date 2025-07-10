@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import {AppointmentHistoryComponent} from './appointment/appointment-history/appointment-history.component';
 import { AuthComponent } from './auth/auth.component';
 import { ProfileComponent } from './profile/profile.component';
 import { UnauthorizedComponent } from './unauthorized.component';
@@ -11,10 +12,13 @@ import { ServiceDetailsComponent } from './service/service-details/service-detai
 import { AboutComponent } from './info-pages/about/about.component';
 import { TermsComponent } from './info-pages/terms/terms.component';
 import { PrivacyComponent } from './info-pages/privacy/privacy.component';
+import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './auth/reset-password/reset-password.component';
 
 export const routes: Routes = [
   { path: 'auth', component: AuthComponent },
   { path: 'profile', component: ProfileComponent },
+  {path: 'appointments', component: AppointmentHistoryComponent },
   { path: 'unauthorized', component: UnauthorizedComponent },
   { path: 'services/:id', component: ServiceDetailsComponent},
   { path: 'services', component: SearchServicesComponent},
@@ -25,4 +29,6 @@ export const routes: Routes = [
   { path: 'about', component: AboutComponent },
   { path: 'terms', component: TermsComponent },
   { path: 'privacy', component: PrivacyComponent },
+  { path: 'forgot-password', component: ForgotPasswordComponent },
+  { path: 'reset-password/:token', component: ResetPasswordComponent }
 ];
