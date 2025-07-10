@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import {AppointmentHistoryComponent} from './appointment/appointment-history/appointment-history.component';
 import { AuthComponent } from './auth/auth.component';
 import { ProfileComponent } from './profile/profile.component';
 import { UnauthorizedComponent } from './unauthorized.component';
@@ -14,10 +15,11 @@ import {ResetPasswordComponent} from './auth/reset-password/reset-password.compo
 export const routes: Routes = [
   { path: 'auth', component: AuthComponent },
   { path: 'profile', component: ProfileComponent },
+  {path: 'appointments', component: AppointmentHistoryComponent },
   { path: 'unauthorized', component: UnauthorizedComponent },
   { path: 'services/:id', component: ServiceDetailsComponent},
   { path: 'services', component: SearchServicesComponent},
-  { path: 'schedule', component: ScheduleComponent },
+  { path: 'schedule/:id', component: ScheduleComponent },
   { path: '', component: LandingPageComponent},
   { path: 'resend-email', component: ResendEmailConfirmationComponent },
   { path: 'confirm-email/:token', component: ConfirmEmailComponent },

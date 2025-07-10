@@ -5,11 +5,6 @@ import {AppointmentModel} from '../models/appointment.model';
 import {ServiceModel} from '../service/service.model';
 import {ServiceProviderModel} from '../models/service-provider.model';
 
-
-interface RatedServiceModel extends ServiceModel {
-  averageRating: number;
-}
-
 @Injectable({
   providedIn: 'root'
 })
@@ -32,7 +27,7 @@ export class LandingPageService {
     return this.http.get<AppointmentModel[]>(`${this.BASE_URL}/appointments`);
   }
 
-  getTopRatedServices(): Observable<RatedServiceModel[]> {
+  getTopRatedServices(): Observable<ServiceModel[]> {
     return forkJoin({
       appointments: this.getAppointments(),
       services: this.getServices(),
@@ -57,17 +52,28 @@ export class LandingPageService {
           return acc;
         }, new Map<number, { total: number; count: number }>());
 
-        // Calcula média e cria array de serviços com rating
-        const ratedServices: RatedServiceModel[] = Array.from(
+        // Serviços avaliados
+        const ratedServices: ServiceModel[] = Array.from(
           ratings.entries() as Iterable<[number, { total: number; count: number }]>
         ).map(([id, { total, count }]) => ({
           ...servicesMap.get(id)!,
           averageRating: parseFloat((total / count).toFixed(1)),
         }));
 
+        // Serviços sem avaliação (nota 0)
+        const ratedIds = new Set(ratedServices.map(s => s.id));
+        const unratedServices = services
+          .filter(s => !ratedIds.has(s.id))
+          .map(s => ({
+            ...s,
+            averageRating: 0,
+          }));
 
-        // Ordena por rating decrescente e pega os top 10
-        return ratedServices.sort((a, b) => b.averageRating - a.averageRating).slice(0, 10);
+        // Junta ambos e ordena
+        const allServices = [...ratedServices, ...unratedServices];
+        return allServices
+          .sort((a, b) => b.averageRating - a.averageRating)
+          .slice(0, 10);
       })
     );
   }
