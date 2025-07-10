@@ -1,5 +1,4 @@
 package com.academy.dtos.service;
-
 import com.academy.util.FieldLengths;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;

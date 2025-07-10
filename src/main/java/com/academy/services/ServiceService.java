@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -153,9 +154,12 @@ public class ServiceService {
             removeServiceTypeLink(service);
         }
 
-        ServiceType type = serviceTypeService.getServiceTypeEntityByName(serviceTypeName);
+        Optional<ServiceType> optionalType = serviceTypeService.getServiceTypeEntityByName(serviceTypeName);
+        ServiceType type = optionalType.orElseThrow(() -> new IllegalArgumentException("ServiceType not found: " + serviceTypeName));
+
         service.setServiceType(type);
         type.getServices().add(service);
+
     }
 
     private void createAndLinkServiceOwner(Service service, Long memberId) throws BadRequestException {

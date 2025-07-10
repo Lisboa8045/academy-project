@@ -27,6 +27,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -98,7 +99,8 @@ class ServiceWorkflowTests {
     private ServiceType createServiceType(String name) {
         ServiceTypeRequestDTO requestDTO = new ServiceTypeRequestDTO(name, "Test Icon.png");
         ServiceTypeResponseDTO responseDTO = serviceTypeService.create(requestDTO);
-        return serviceTypeService.getServiceTypeEntityById(responseDTO.id());
+        return serviceTypeService.getServiceTypeEntityById(responseDTO.id())
+                .orElseThrow(() -> new RuntimeException("ServiceType not found with ID: " + responseDTO.id()));
     }
 
     private Tag createTag(String name) {
@@ -141,11 +143,13 @@ class ServiceWorkflowTests {
         // Delete the ServiceProvider
         serviceProviderService.deleteServiceProvider(ownerServiceProvider.getId());
         // Verify that the Appointment still exists and the serviceProvider is Inactive
-        AppointmentResponseDTO appointmentRspDTO = appointmentService.getAppointmentById(appointment.id());
-        assertThat(appointmentRspDTO).isNotNull();
-        assertThat(appointmentRspDTO.serviceProviderId()).isGreaterThan(-1);
-        assertThat(serviceProviderService.getServiceProviderById(appointmentRspDTO.serviceProviderId())).isNotNull();
-        assertFalse(serviceProviderService.getServiceProviderById(appointmentRspDTO.serviceProviderId()).get().active());
+        Optional<AppointmentResponseDTO> appointmentRspDTO = appointmentService.getAppointmentById(appointment.id());
+        assertThat(appointmentRspDTO).isPresent();
+        AppointmentResponseDTO dto = appointmentRspDTO.get();
+        assertThat(dto.serviceProviderId()).isGreaterThan(-1);
+        assertThat(serviceProviderService.getServiceProviderById(dto.serviceProviderId())).isPresent();
+        assertFalse(serviceProviderService.getServiceProviderById(dto.serviceProviderId()).get().active());
+
     }
 
     @Test
@@ -168,6 +172,8 @@ class ServiceWorkflowTests {
         assertThat(serviceProviderService.getServiceProviderById(ownerServiceProviderId)).isNotNull();
         assertThat(serviceProviderService.getServiceProviderById(ownerServiceProviderId).get().memberName()).isEqualTo("Deleted User");
         assertThat(appointmentService.getAppointmentById(appointment.id())).isNotNull();
-        assertThat(appointmentService.getAppointmentById(appointment.id()).serviceProviderId()).isEqualTo(ownerServiceProviderId);
+        Optional<AppointmentResponseDTO> appointmentRspDTO = appointmentService.getAppointmentById(appointment.id());
+        assertThat(appointmentRspDTO).isPresent();
+        assertThat(appointmentRspDTO.get().serviceProviderId()).isEqualTo(ownerServiceProviderId);
     }
 }

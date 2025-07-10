@@ -3,6 +3,7 @@ package com.academy.services;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.academy.models.member.Member;
 import com.academy.models.service.Service;
@@ -82,16 +83,12 @@ public class AvailabilityService {
         return availabilities;
     }
 
-    // Get a specific availability by its ID
-    public AvailabilityResponseDTO getAvailabilityById(Long availabilityId) {
+    public Optional<AvailabilityResponseDTO> getAvailabilityById(Long availabilityId) {
         if (availabilityId == null) {
             throw new InvalidArgumentException("Availability ID cannot be null");
         }
-        if (!availabilityRepository.existsById(availabilityId)) {
-            throw new EntityNotFoundException(Availability.class, " with ID " + availabilityId + " does not exist.");
-        }
-        Availability availability = availabilityRepository.findById(availabilityId).orElse(null);
-        return availabilityMapper.toResponseDTOWithMember(availability);
+        return availabilityRepository.findById(availabilityId)
+                .map(availabilityMapper::toResponseDTOWithMember);
     }
 
     // Create a new availability

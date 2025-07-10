@@ -13,4 +13,5 @@ public record AppointmentResponseDTO(
         Integer rating,
         String comment,
         AppointmentStatus status
-) {}
+) {
+}
