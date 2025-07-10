@@ -2,7 +2,7 @@ package com.academy.models.notification;
 
 import com.academy.models.member.Member;
 import com.academy.models.shared.BaseEntity;
-import com.academy.util.FieldLengths;
+import com.academy.utils.FieldLengths;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

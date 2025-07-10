@@ -1,4 +1,4 @@
-package com.academy.util;
+package com.academy.utils;
 
 public final class FieldLengths {
 
