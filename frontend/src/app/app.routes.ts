@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import {AppointmentHistoryComponent} from './appointment/appointment-history/appointment-history.component';
 import { AuthComponent } from './auth/auth.component';
 import { ProfileComponent } from './profile/profile.component';
 import { UnauthorizedComponent } from './unauthorized.component';
@@ -12,6 +13,7 @@ import {ServiceDetailsComponent} from './service/service-details/service-details
 export const routes: Routes = [
   { path: 'auth', component: AuthComponent },
   { path: 'profile', component: ProfileComponent },
+  {path: 'appointments', component: AppointmentHistoryComponent },
   { path: 'unauthorized', component: UnauthorizedComponent },
   { path: 'services/:id', component: ServiceDetailsComponent},
   { path: 'services', component: SearchServicesComponent},
