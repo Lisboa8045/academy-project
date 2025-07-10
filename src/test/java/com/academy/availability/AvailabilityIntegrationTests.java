@@ -3,8 +3,10 @@ package com.academy.availability;
 import com.academy.config.authentication.AuthenticationFacade;
 import com.academy.dtos.availability.AvailabilityRequestDTO;
 import com.academy.dtos.availability.AvailabilityResponseDTO;
+import com.academy.dtos.register.RegisterRequestDto;
 import com.academy.dtos.service.ServiceMapper;
 import com.academy.dtos.service.ServiceRequestDTO;
+import com.academy.dtos.service_type.ServiceTypeRequestDTO;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.exceptions.InvalidArgumentException;
 import com.academy.models.member.Member;
@@ -18,8 +20,10 @@ import com.academy.repositories.RoleRepository;
 import com.academy.repositories.ServiceRepository;
 import com.academy.repositories.ServiceTypeRepository;
 import com.academy.services.AvailabilityService;
+import com.academy.services.MemberService;
 import com.academy.services.ServiceProviderService;
 import com.academy.services.ServiceService;
+import com.academy.services.ServiceTypeService;
 import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
@@ -46,34 +50,44 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 public class AvailabilityIntegrationTests {
 
     @Autowired private AvailabilityService availabilityService;
-    @Autowired private AvailabilityRepository availabilityRepository;
-    @Autowired private MemberRepository memberRepository;
     @Autowired private ServiceService serviceService;
-    @Autowired private ServiceTypeRepository serviceTypeRepository;
+    @Autowired private ServiceTypeService serviceTypeService;
     @Autowired private RoleRepository roleRepository;
 
     @MockBean
     private AuthenticationFacade authenticationFacade; // ✅ MockBean, not Autowired constructor
 
     private Member defaultMember;
+    private Role defaultRole;
+    @Autowired
+    private MemberService memberService;
 
     @BeforeEach
     void setUp() {
+        defaultRole = new Role();
+        defaultRole.setName("USER");
+        defaultRole = roleRepository.save(defaultRole);
         defaultMember = saveMember("testuser", "CLIENT");
     }
 
     private Member saveMember(String username, String roleName) {
+
         Role role = new Role();
         role.setName(roleName);
         Role savedRole = roleRepository.save(role);
 
-        Member member = new Member();
-        member.setUsername(username);
-        member.setPassword("password");
-        member.setEmail(username + "@email.com");
-        member.setRole(savedRole);
+        RegisterRequestDto registerRequest = new RegisterRequestDto(
+                username,
+                "Password1!",
+                username + "@email.com",
+                savedRole.getId(),
+                "Rua Teste 1",
+                "1000-100",
+                "912345678"
+        );
 
-        return memberRepository.save(member);
+        long id = memberService.register(registerRequest);
+        return memberService.getMemberEntityById(id);
     }
 
     private AvailabilityRequestDTO createDTO(Long memberId, DayOfWeek day, LocalDateTime start, LocalDateTime end) {
@@ -97,10 +111,8 @@ public class AvailabilityIntegrationTests {
         Mockito.when(authenticationFacade.getUsername()).thenReturn("provider1");
         Mockito.when(authenticationFacade.getAuthentication()).thenReturn(authentication);
 
-        ServiceType type = new ServiceType();
-        type.setName("Basic Type");
-        type.setIcon("type.png");
-        serviceTypeRepository.save(type);
+        ServiceTypeRequestDTO serviceTypeRequestDTO = new ServiceTypeRequestDTO("Basic Type", "type.png");
+        serviceTypeService.create(serviceTypeRequestDTO);
 
         Service service = serviceService.createToEntity(new ServiceRequestDTO(
                 "Basic Service",
@@ -109,7 +121,7 @@ public class AvailabilityIntegrationTests {
                 1,
                 false,
                 100,
-                type.getName(),
+                serviceTypeRequestDTO.name(),
                 new ArrayList<>()
         ));
 
@@ -171,11 +183,21 @@ public class AvailabilityIntegrationTests {
 
     @Test
     void deleteAvailability_shouldSucceed() {
-        var dto = createDTO(defaultMember.getId(), DayOfWeek.SATURDAY, LocalDateTime.now().plusDays(6), LocalDateTime.now().plusDays(6).plusHours(2));
+        var dto = createDTO(
+                defaultMember.getId(),
+                DayOfWeek.SATURDAY,
+                LocalDateTime.of(2025, 1, 1, 10, 0).plusDays(5),
+                LocalDateTime.of(2025, 1, 1, 10, 0).plusDays(5).plusHours(2));
         var created = availabilityService.createAvailability(dto);
 
+        // Verify it exists
+        assertThat(availabilityService.getAvailabilityById(created.id())).isPresent();
+
+        // Delete it
         availabilityService.deleteAvailabilityById(created.id());
-        assertThat(availabilityRepository.findById(created.id())).isEmpty();
+
+        // Verify deletion - now expects empty Optional
+        assertThat(availabilityService.getAvailabilityById(created.id())).isEmpty();
     }
 
     @Test
