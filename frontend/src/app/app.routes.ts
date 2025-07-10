@@ -7,7 +7,10 @@ import { ScheduleComponent } from './schedule/schedule.component';
 import { LandingPageComponent } from './landing-page/landing-page.component';
 import { ResendEmailConfirmationComponent } from "./auth/resend-email/resend-email-confirmation.component";
 import { ConfirmEmailComponent } from './auth/confirm-email/confirm-email.component';
-import {ServiceDetailsComponent} from './service/service-details/service-details.component';
+import { ServiceDetailsComponent } from './service/service-details/service-details.component';
+import { AboutComponent } from './info-pages/about/about.component';
+import { TermsComponent } from './info-pages/terms/terms.component';
+import { PrivacyComponent } from './info-pages/privacy/privacy.component';
 
 export const routes: Routes = [
   { path: 'auth', component: AuthComponent },
@@ -19,4 +22,7 @@ export const routes: Routes = [
   { path: '', component: LandingPageComponent},
   { path: 'resend-email', component: ResendEmailConfirmationComponent },
   { path: 'confirm-email/:token', component: ConfirmEmailComponent },
+  { path: 'about', component: AboutComponent },
+  { path: 'terms', component: TermsComponent },
+  { path: 'privacy', component: PrivacyComponent },
 ];
