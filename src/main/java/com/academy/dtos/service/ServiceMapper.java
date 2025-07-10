@@ -2,6 +2,7 @@ package com.academy.dtos.service;
 
 import com.academy.models.Tag;
 import com.academy.models.service.Service;
+import com.academy.models.service.ServiceImages;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.repositories.MemberRepository;
 import org.mapstruct.Mapper;
@@ -28,9 +29,10 @@ public abstract class ServiceMapper {
     public abstract Service toEntity(ServiceRequestDTO dto, Long ownerId);
 
     @Mapping(source = "service.tags", target = "tagNames", qualifiedByName = "mapTagsToNames")
-    @Mapping(source = "service.serviceType", target = "serviceType")
+    @Mapping(source = "service.serviceType.name", target = "serviceTypeName")
     @Mapping(expression = "java(service.getOwner().getId())", target = "ownerId")
     @Mapping(expression = "java(permissions)", target = "permissions")
+    @Mapping(source = "service.images", target = "images", qualifiedByName = "mapImagesToStrings")
     public abstract ServiceResponseDTO toDto(Service service, List<ProviderPermissionEnum> permissions);
 
     @Mapping(target = "id", ignore = true)
@@ -39,6 +41,14 @@ public abstract class ServiceMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     public abstract void updateEntityFromDto(ServiceRequestDTO dto, @MappingTarget Service service);
+
+    @Named("mapImagesToStrings")
+    public List<String> mapImagesToStrings(List<ServiceImages> images) {
+        if (images == null) return List.of();
+        return images.stream()
+                .map(ServiceImages::getImage)
+                .toList();
+    }
 
     @Named("mapTagsToNames")
     protected List<String> mapTagsToNames(List<Tag> tags) {
@@ -56,4 +66,5 @@ public abstract class ServiceMapper {
                 .map(service -> toDto(service, null))
                 .collect(Collectors.toList());
     }
+
 }

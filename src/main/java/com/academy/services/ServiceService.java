@@ -11,6 +11,7 @@ import com.academy.models.ServiceType;
 import com.academy.models.Tag;
 import com.academy.models.member.Member;
 import com.academy.models.service.Service;
+import com.academy.models.service.ServiceImages;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.ServiceRepository;
@@ -57,9 +58,8 @@ public class ServiceService {
         this.serviceTypeService = serviceTypeService;
     }
 
-    // Create
     @Transactional
-    public ServiceResponseDTO create(ServiceRequestDTO dto) throws AuthenticationException, BadRequestException {
+    public Service createToEntity(ServiceRequestDTO dto) throws BadRequestException {
         Member member = memberService.getMemberByUsername(authenticationFacade.getUsername());
         Service service = serviceMapper.toEntity(dto, member.getId());
 
@@ -68,8 +68,15 @@ public class ServiceService {
 
         Service savedService = serviceRepository.save(service);
         createAndLinkServiceOwner(savedService, member.getId());
+        return savedService;
+    }
 
-        return serviceMapper.toDto(savedService, getPermissionsByProviderUsernameAndServiceId(member.getUsername(), savedService.getId()));
+    // Create
+    @Transactional
+    public ServiceResponseDTO create(ServiceRequestDTO dto) throws AuthenticationException, BadRequestException {
+        Service service = createToEntity(dto);
+        String username = authenticationFacade.getUsername();
+        return serviceMapper.toDto(service, getPermissionsByProviderUsernameAndServiceId(username, service.getId()));
     }
 
     // Update
@@ -283,4 +290,16 @@ public class ServiceService {
         removeServiceTypeLink(service);
         unlinkAndDisableServiceProviders(service);
     }
+
+    // este saveImages será para usado depois para o endpoint de criação do serviço
+    public Service saveImages(Long id, List<ServiceImages> images) {
+        serviceRepository.findById(id).map(s -> {
+                    s.setImages(images);
+                    serviceRepository.save(s);
+                    return s;
+                })
+                .orElseThrow(() -> new EntityNotFoundException(Service.class, id));
+        return null;
+    }
+
 }

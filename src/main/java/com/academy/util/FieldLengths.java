@@ -33,6 +33,7 @@ public final class FieldLengths {
 
     // Notifications
     public static final int NOTIFICATION_TITLE_MAX = 60;
+    public static final int NOTIFICATION_BODY_MAX = 240;
 
     // Role
     public static final int ROLE_MAX = 30;

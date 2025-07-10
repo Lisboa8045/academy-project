@@ -26,7 +26,7 @@ export class AppComponent implements OnInit {
       },  error: err => {
         console.warn('Auto-login failed', err.status, err.message);
         this.authStore.clear();
-        this.router.navigate(['/auth']);
+        //this.router.navigate(['/auth']);
       }
     });
   }

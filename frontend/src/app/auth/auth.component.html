@@ -86,14 +86,17 @@
     <div class="validation-error" *ngIf="errorMessage">
       {{ errorMessage }}
     </div>
-    <button type="submit" [disabled]="authForm.invalid">
-      {{ isLoginMode() ? 'Login' : 'Create Account' }}
-    </button>
+    <div class="button-container">
+      <button type="submit" [disabled]="authForm.invalid || loading">
+        {{ isLoginMode() ? 'Login' : 'Create Account' }}
+      </button>
+      <span *ngIf="loading" class="spinner"></span>
+    </div>
   </form>
 
   <p>
     {{ isLoginMode() ? "Don't have an account?" : 'Already have an account?' }}
-    <button type="button" (click)="toggleMode() ">
+    <button type="button" [disabled]="loading" (click)="toggleMode() ">
       {{ isLoginMode() ? 'Sign up' : 'Login' }}
     </button>
   </p>
