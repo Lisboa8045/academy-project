@@ -20,7 +20,7 @@ export class AboutComponent implements OnInit {
     private readonly usernames = ['Adriano-Queiroz','BCorreia02','Calmskyy', 'FlavioMiguel27', 'Lisboa8045','Shrimpo22'];
 
     ngOnInit(): void {
-        this.fetchUsers();
+       // this.fetchUsers();
     }
 
     fetchUsers(): void {

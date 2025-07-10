@@ -18,7 +18,7 @@ import { ResetPasswordComponent } from './auth/reset-password/reset-password.com
 export const routes: Routes = [
   { path: 'auth', component: AuthComponent },
   { path: 'profile', component: ProfileComponent },
-  {path: 'appointments', component: AppointmentHistoryComponent },
+  { path: 'appointments', component: AppointmentHistoryComponent },
   { path: 'unauthorized', component: UnauthorizedComponent },
   { path: 'services/:id', component: ServiceDetailsComponent},
   { path: 'services', component: SearchServicesComponent},
