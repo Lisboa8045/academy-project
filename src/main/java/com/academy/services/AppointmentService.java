@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AppointmentService {
@@ -54,12 +55,12 @@ public class AppointmentService {
                 .toList();
     }
 
-    public AppointmentResponseDTO getAppointmentById(Long id) {
+    public Optional<AppointmentResponseDTO> getAppointmentById(Long id) {
 
-        return appointmentRepository.findById(id)
+        return Optional.ofNullable(appointmentRepository.findById(id)
 
                 .map(appointmentMapper::toResponseDTO)
-                .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
+                .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id)));
 
     }
 

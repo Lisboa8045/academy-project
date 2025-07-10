@@ -30,6 +30,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -90,14 +91,15 @@ class ServiceIntegrationTests {
         // Set up a ServiceType and Tags before each test
 
         defaultTag = createTag("tag1");
-        defaultServiceType = createServiceType("Test Service Type");
+        defaultServiceType = createServiceType("Test Service Type")
+                .orElseThrow(() -> new RuntimeException("Failed to create ServiceType"));
     }
 
     private ServiceRequestDTO createDTO(String name, String description, String serviceTypeName, List<String> tags) {
         return new ServiceRequestDTO(name, description, 80, 20, false, 30, serviceTypeName, tags);
     }
 
-    private ServiceType createServiceType(String name) {
+    private Optional<ServiceType> createServiceType(String name) {
         ServiceTypeRequestDTO requestDTO = new ServiceTypeRequestDTO(name, "Test Icon.png");
         ServiceTypeResponseDTO responseDTO = serviceTypeService.create(requestDTO);
         return serviceTypeService.getServiceTypeEntityById(responseDTO.id());
@@ -201,7 +203,8 @@ class ServiceIntegrationTests {
         ServiceResponseDTO createdResponse = serviceService.create(serviceRequestDTO);
 
         // Update the service with a new serviceType and tags
-        ServiceType newServiceType = createServiceType("New Service Type");
+        ServiceType newServiceType = createServiceType("New Service Type")
+                .orElseThrow(() -> new RuntimeException("Failed to create ServiceType"));
 
         ServiceRequestDTO updateRequestDTO = createDTO("Updated Service", "Updated Description", "New Service Type", List.of("tag2", "tag3"));
 
@@ -212,8 +215,10 @@ class ServiceIntegrationTests {
         assertThat(updatedResponse.serviceTypeName()).isEqualTo(newServiceType.getName());
         assertThat(updatedResponse.tagNames()).containsExactlyInAnyOrder("tag2", "tag3");
 
-        // Verify that the old serviceType does not contain a reference to the service
-        assertThat(serviceTypeService.getServiceTypeEntityById(defaultServiceType.getId()).getServices()).isEmpty();
+        Optional<ServiceType> optionalEntity = serviceTypeService.getServiceTypeEntityById(defaultServiceType.getId());
+        assertThat(optionalEntity).isPresent();
+        assertThat(optionalEntity.get().getServices()).isEmpty();
+
     }
 
     @Test

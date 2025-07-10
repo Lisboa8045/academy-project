@@ -48,11 +48,8 @@ public class AvailabilityIntegrationTests {
     @Autowired private AvailabilityService availabilityService;
     @Autowired private AvailabilityRepository availabilityRepository;
     @Autowired private MemberRepository memberRepository;
-    @Autowired private ServiceRepository serviceRepository;
     @Autowired private ServiceService serviceService;
-    @Autowired private ServiceMapper serviceMapper;
     @Autowired private ServiceTypeRepository serviceTypeRepository;
-    @Autowired private ServiceProviderService serviceProviderService;
     @Autowired private RoleRepository roleRepository;
 
     @MockBean

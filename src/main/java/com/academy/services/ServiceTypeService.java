@@ -10,6 +10,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,7 +36,8 @@ public class ServiceTypeService {
     // Update
     @Transactional
     public ServiceTypeResponseDTO update(Long id, ServiceTypeRequestDTO dto) {
-        ServiceType existing = getServiceTypeEntityById(id);
+        ServiceType existing = getServiceTypeEntityById(id)
+                .orElseThrow(() -> new RuntimeException("ServiceType not found with ID: " + id));
 
         serviceTypeMapper.updateEntityFromDto(dto, existing);
         ServiceType updated = serviceTypeRepository.save(existing);
@@ -52,7 +54,8 @@ public class ServiceTypeService {
 
     // Read one
     public ServiceTypeResponseDTO getById(Long id) {
-        ServiceType serviceType = getServiceTypeEntityById(id);
+        ServiceType serviceType = getServiceTypeEntityById(id)
+                .orElseThrow(() -> new RuntimeException("ServiceType not found with ID: " + id));;
         return serviceTypeMapper.toDto(serviceType);
     }
     public ServiceType getEntityById(Long id) {
@@ -64,16 +67,17 @@ public class ServiceTypeService {
     // Delete
     @Transactional
     public void delete(Long id) {
-        ServiceType serviceType = getServiceTypeEntityById(id);
+        ServiceType serviceType = getServiceTypeEntityById(id)
+                .orElseThrow(() -> new RuntimeException("ServiceType not found with ID: " + id));;
         serviceTypeRepository.delete(serviceType);
     }
 
-    public ServiceType getServiceTypeEntityByName(String name) {
-        return serviceTypeRepository.findByName(name)
-                .orElseThrow(() -> new EntityNotFoundException(ServiceType.class, " with name " + name + " not found"));
+    public Optional<ServiceType> getServiceTypeEntityByName(String name) {
+        return Optional.ofNullable(serviceTypeRepository.findByName(name)
+                .orElseThrow(() -> new EntityNotFoundException(ServiceType.class, " with name " + name + " not found")));
     }
 
-    public ServiceType getServiceTypeEntityById(Long id) {
-        return serviceTypeRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(ServiceType.class, id));
+    public Optional<ServiceType> getServiceTypeEntityById(Long id) {
+        return Optional.ofNullable(serviceTypeRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(ServiceType.class, id)));
     }
 }
