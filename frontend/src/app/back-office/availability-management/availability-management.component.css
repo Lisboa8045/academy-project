@@ -30,49 +30,19 @@
   margin-bottom: 1rem;
 }
 
-.nav-button {
-  background: #3498db;
-  color: white;
-  border: none;
-  border-radius: 0.375rem;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  font-size: 0.875rem;
-  transition: all 0.2s ease;
-}
-
-.nav-button:hover {
-  background: #2980b9;
-}
-
 .week-range {
   font-weight: 600;
   min-width: 220px;
   text-align: center;
 }
 
-.today-button {
-  background: #2ecc71;
-  margin-left: auto;
-}
-
-.today-button:hover {
-  background: #27ae60;
-}
 
 /* Bulk Actions */
 .bulk-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
 }
 
-.bulk-add-button {
-  background: #9b59b6;
-}
-
-.bulk-add-button:hover {
-  background: #8e44ad;
-}
 
 /* Weekly Slots Grid */
 .weekly-slots {
@@ -118,22 +88,7 @@
 }
 
 .add-slot-button {
-  background: #2ecc71;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 2rem;
-  height: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.add-slot-button:hover {
-  background: #27ae60;
-  transform: scale(1.1);
+  border-radius: 25px;
 }
 
 /* Slots Container */
@@ -330,23 +285,17 @@
   gap: 0.5rem;
 }
 
-.recurrence-option {
+.recurrence-option{
   background: #ecf0f1;
-  border: none;
-  border-radius: 1rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.8125rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
 }
 
+
 .recurrence-option.active {
-  background: #3498db;
-  color: white;
+  background: #007bff;
 }
 
 .recurrence-option:hover:not(.active) {
-  background: #d6eaf8;
+  background: #007bff;
 }
 
 /* Month/Day Selection */
@@ -370,24 +319,6 @@
   grid-template-columns: repeat(3, 1fr);
 }
 
-.selection-button {
-  background: #ecf0f1;
-  border: none;
-  border-radius: 0.375rem;
-  padding: 0.5rem;
-  font-size: 0.8125rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.selection-button.selected {
-  background: #3498db;
-  color: white;
-}
-
-.selection-button:hover:not(.selected) {
-  background: #d6eaf8;
-}
 
 /* Modal Actions */
 .modal-actions {
@@ -473,6 +404,11 @@
 
 .confirm-button:hover {
   background: #c0392b;
+}
+
+.slot-item.pending {
+  opacity: 0.8;
+  border-left: 3px solid #ffc107;
 }
 
 /* Responsive Adjustments */

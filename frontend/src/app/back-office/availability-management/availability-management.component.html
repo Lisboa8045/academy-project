@@ -1,11 +1,14 @@
-<!-- availability-management.component.html -->
 <div class="availability-management">
   <!-- Header Section -->
   <div class="management-header">
-    <h2 class="management-title">Gestão de Disponibilidades</h2>
+    <h2 class="management-title">Availability Management</h2>
     <app-week-navigation></app-week-navigation>
     <div class="bulk-actions">
-      <button (click)="openBulkAddModal()" class="nav-button bulk-add-button">＋ Add in bulk</button>
+      <button (click)="openBulkAddForm()" class="nav-button bulk-add-button">＋ Add in bulk</button>
+      <button (click)="saveAllChanges()" class="nav-button save-all-button"
+              [disabled]="(localChanges.length === 0) && (deletedIds.length === 0)">
+        💾 Generate
+      </button>
     </div>
   </div>
 
@@ -17,21 +20,21 @@
           <h4 class="day-title">{{ day | date: 'EEEE' }}</h4>
           <small class="day-date">{{ day | date: 'dd/MM' }}</small>
         </div>
-        <button (click)="addAvailability(day)" class="add-slot-button">＋</button>
+        <button (click)="openAddForm(day)" class="add-slot-button">＋</button>
       </div>
 
       <div class="slots-container" *ngIf="getAvailabilityForDay(day).length > 0; else emptyDay">
-        <div *ngFor="let avail of getAvailabilityForDay(day)" class="slot-item">
+        <div *ngFor="let avail of getAvailabilityForDay(day)" class="slot-item" [class.pending]="isPending(avail)">
           <div class="slot-info">
             <span class="slot-time">
               {{ avail.startDateTime | date: 'HH:mm' }} - {{ avail.endDateTime | date: 'HH:mm' }}
             </span>
             <span class="slot-status" [class.booked]="isSlotBooked(avail)">
-              {{ isSlotBooked(avail) ? 'Reservado' : 'Disponível' }}
+              {{ isSlotBooked(avail) ? 'Booked' : 'Available' }}
             </span>
           </div>
           <div class="slot-actions">
-            <button (click)="editAvailability(avail)" class="action-button edit" [disabled]="isSlotBooked(avail)">
+            <button (click)="openEditForm(avail)" class="action-button edit" [disabled]="isSlotBooked(avail)">
               ✏️
             </button>
             <button (click)="removeAvailability(avail)" class="action-button delete" [disabled]="isSlotBooked(avail)">
@@ -44,85 +47,90 @@
       <ng-template #emptyDay>
         <div class="empty-day">
           <span class="empty-icon">📅</span>
-          Sem disponibilidade
+          No availability
         </div>
       </ng-template>
     </div>
   </div>
 
-  <!-- Availability Modal -->
-  <div class="modal-overlay" *ngIf="showAvailabilityModal" (click)="closeAvailabilityModal()"></div>
-  <div class="modal" *ngIf="showAvailabilityModal" [class.bulk-modal]="modalMode === 'bulk'">
-    <div class="modal-content">
-      <button class="modal-close" (click)="closeAvailabilityModal()">×</button>
+  <!-- Availability Form Modal -->
+  <div class="modal-overlay" *ngIf="showFormModal" (click)="closeFormModal()"></div>
+  <div class="modal" *ngIf="showFormModal" [class.bulk-modal]="formMode === 'bulk'">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="closeFormModal()">×</button>
       <h3 class="modal-title">{{ getModalTitle() }}</h3>
 
-      <div class="time-inputs">
-        <div class="time-group">
-          <label class="time-label">Hora de início</label>
-          <input type="time" [(ngModel)]="modalStartTime" class="time-input" />
+      <form [formGroup]="availabilityForm" (ngSubmit)="saveLocalChanges()">
+        <div class="time-inputs">
+          <div class="time-group">
+            <label class="time-label">Start time</label>
+            <input type="time" formControlName="startTime" class="time-input" required />
+          </div>
+          <div class="time-group">
+            <label class="time-label">End time</label>
+            <input type="time" formControlName="endTime" class="time-input" required />
+          </div>
         </div>
-        <div class="time-group">
-          <label class="time-label">Hora de fim</label>
-          <input type="time" [(ngModel)]="modalEndTime" class="time-input" />
-        </div>
-      </div>
 
-      <div class="recurrence-section">
-        <label class="recurrence-label">Repetir:</label>
-        <div class="recurrence-options">
-          <button *ngFor="let option of recurrenceOptions"
-                  class="recurrence-option"
-                  [class.active]="applyType === option.value"
-                  (click)="applyType = option.value; onApplyTypeChange()">
-            {{ option.label }}
+        <div class="recurrence-section">
+          <label class="recurrence-label">Repeat:</label>
+          <div class="recurrence-options">
+            <button *ngFor="let option of recurrenceOptions"
+                    type="button"
+                    class="recurrence-option"
+                    [class.active]="availabilityForm.get('applyType')?.value === option.value"
+                    (click)="availabilityForm.get('applyType')?.setValue(option.value)">
+              {{ option.label }}
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="availabilityForm.get('applyType')?.value === 'some-months'" class="month-selection">
+          <h4 class="selection-title">Select months:</h4>
+          <div class="month-grid">
+            <button *ngFor="let month of monthsList"
+                    type="button"
+                    class="recurrence-option"
+                    [class.selected]="isMonthSelected(month.value)"
+                    (click)="toggleMonthSelection(month.value)">
+              {{ month.label }}
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="formMode === 'bulk' || availabilityForm.get('applyType')?.value !== 'one-day'" class="days-selection">
+          <h4 class="selection-title">Select week days:</h4>
+          <div class="days-grid">
+            <button *ngFor="let day of daysOfWeek"
+                    type="button"
+                    class="recurrence-option"
+                    [class.selected]="isDaySelected(day.value)"
+                    (click)="toggleDaySelection(day.value)">
+              {{ day.label }}
+            </button>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="submit" class="nav-button save-button" [disabled]="!availabilityForm.valid">
+            {{ formMode === 'edit' ? 'Update' : 'Save' }}
+          </button>
+          <button type="button" (click)="closeFormModal()" class="nav-button cancel-button">
+            Cancel
           </button>
         </div>
-      </div>
-
-      <div *ngIf="applyType === 'some-months'" class="month-selection">
-        <h4 class="selection-title">Selecione os meses:</h4>
-        <div class="month-grid">
-          <button *ngFor="let month of monthsList"
-                  class="selection-button"
-                  [class.selected]="selectedMonths.includes(month.value)"
-                  (click)="toggleMonthSelection(month.value)">
-            {{ month.label }}
-          </button>
-        </div>
-      </div>
-
-      <div *ngIf="modalMode === 'bulk'" class="days-selection">
-        <h4 class="selection-title">Selecione os dias da semana:</h4>
-        <div class="days-grid">
-          <button *ngFor="let day of daysOfWeek"
-                  class="selection-button"
-                  [class.selected]="selectedDays.includes(day.value)"
-                  (click)="toggleDaySelection(day.value)">
-            {{ day.label }}
-          </button>
-        </div>
-      </div>
-
-      <div class="modal-actions">
-        <button (click)="saveAvailability()" class="nav-button save-button">
-          {{ modalMode === 'edit' ? 'Atualizar' : 'Guardar' }}
-        </button>
-        <button (click)="closeAvailabilityModal()" class="nav-button cancel-button">
-          Cancelar
-        </button>
-      </div>
+      </form>
     </div>
   </div>
 
   <!-- Delete Confirmation Modal -->
   <div class="confirmation-modal" *ngIf="showDeleteConfirmation">
     <div class="confirmation-content">
-      <h3 class="confirmation-title">Confirmar exclusão</h3>
-      <p class="confirmation-message">Tem certeza que deseja remover esta disponibilidade?</p>
+      <h3 class="confirmation-title">Confirm deletion</h3>
+      <p class="confirmation-message">Are you sure you want to delete this availability?</p>
       <div class="confirmation-actions">
-        <button (click)="confirmDelete()" class="nav-button confirm-button">Sim, remover</button>
-        <button (click)="cancelDelete()" class="nav-button">Cancelar</button>
+        <button (click)="confirmDelete()" class="nav-button confirm-button">Yes, delete</button>
+        <button (click)="cancelDelete()" class="nav-button">Cancel</button>
       </div>
     </div>
   </div>
