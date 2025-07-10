@@ -14,7 +14,6 @@ export const routes: Routes = [
   { path: 'auth', component: AuthComponent },
   { path: 'profile', component: ProfileComponent },
   {path: 'appointments', component: AppointmentHistoryComponent },
-  //{path: 'appointments/:id', component: AppointmentComponent},
   { path: 'unauthorized', component: UnauthorizedComponent },
   { path: 'services/:id', component: ServiceDetailsComponent},
   { path: 'services', component: SearchServicesComponent},

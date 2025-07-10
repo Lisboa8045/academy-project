@@ -20,7 +20,7 @@ import {Review} from '../review/review.model';
   selector: 'app-appointment-history',
   templateUrl: './appointment-history.component.html',
   styleUrls: ['./appointment-history.component.css'],
-  encapsulation: ViewEncapsulation.None, // <- this is key
+  encapsulation: ViewEncapsulation.None,
   standalone: true,
   providers: [DatePipe],
   imports: [
@@ -68,7 +68,7 @@ export class AppointmentHistoryComponent implements OnInit {
         this.applyFiltersAndPagination();
       },
       error: (error) => {
-        alert(error.error.message);
+        snackBarError(this.snackBar, error.error.message);
       }
     });
   }

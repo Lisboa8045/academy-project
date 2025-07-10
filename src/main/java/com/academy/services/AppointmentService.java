@@ -68,18 +68,6 @@ public class AppointmentService {
     public AppointmentResponseDTO getAppointmentById(Long id) {
         return appointmentMapper.toResponseDTO(getAppointmentEntityById(id));
     }
-/*
-    public AppointmentResponseDTO getAppointmentById(Long id) {
-
-        return appointmentRepository.findById(id)
-
-                .map(appointmentMapper::toResponseDTO)
-
-                .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
-
-    }
-
- */
 
     public AppointmentResponseDTO createAppointment(AppointmentRequestDTO dto) {
         // Validate date is not in the past

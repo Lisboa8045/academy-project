@@ -25,6 +25,6 @@ export class ReviewModalComponent {
 
   submit() {
     this.submitReview.emit({ rating: this.rating, comment: this.comment });
-    this.close.emit(); // optionally close after submit
+    this.close.emit();
   }
 }

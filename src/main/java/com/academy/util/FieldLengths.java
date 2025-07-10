@@ -7,7 +7,7 @@ public final class FieldLengths {
     }
 
     // Reviews
-    public static final int REVIEW_MAX = 255;
+    public static final int REVIEW_MAX = 1000;
 
     // Addresses & contact info
     public static final int ADDRESS_MAX = 255;

@@ -8,9 +8,9 @@ import java.time.LocalDateTime;
 
 public record AppointmentResponseDTO(
         Long id,
-        Long serviceProviderId, //TODO isto não deve estar aqui
+        Long serviceProviderId,
         String serviceProviderUsername,
-        Long memberId, //TODO isto não deve estar aqui
+        Long memberId,
         String memberUsername,
         LocalDateTime startDateTime,
         LocalDateTime endDateTime,
@@ -19,5 +19,5 @@ public record AppointmentResponseDTO(
         AppointmentStatus status,
         String serviceName,
         double price,
-        int duration //TODO trocar isto no frontend e trocar o .html que utiliza isto
+        int duration
         ) {}
