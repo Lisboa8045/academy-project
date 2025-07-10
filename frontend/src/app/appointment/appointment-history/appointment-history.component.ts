@@ -97,7 +97,7 @@ export class AppointmentHistoryComponent implements OnInit {
         if(callback)
           callback();
       },
-      error: err => alert('Error loading appointment.')
+      error: err => snackBarSuccess(this.snackBar,'Error loading appointment.')
     });
   }
 
