@@ -251,7 +251,6 @@ public class MemberService {
                     member.getUsername(), member.getPassword(), new ArrayList<>()
             );
             String token = jwtUtil.generateToken(userDetails);
-            System.out.println("Token generated:" + token);
             jwtCookieUtil.addJwtCookie(response, token);
             return new LoginResponseDto(
                     messageSource.getMessage("user.loggedin", null, LocaleContextHolder.getLocale()),
