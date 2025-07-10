@@ -9,6 +9,7 @@ import { ResendEmailConfirmationComponent } from "./auth/resend-email/resend-ema
 import { ConfirmEmailComponent } from './auth/confirm-email/confirm-email.component';
 import { ServiceDetailsComponent } from './service/service-details/service-details.component';
 import { EditServiceComponent } from './back-office/edit-service/edit-service.component';
+import {CreateServiceComponent} from './back-office/create-service/create-service.component';
 
 export const routes: Routes = [
   { path: 'auth', component: AuthComponent },
@@ -21,4 +22,5 @@ export const routes: Routes = [
   { path: 'resend-email', component: ResendEmailConfirmationComponent },
   { path: 'confirm-email/:token', component: ConfirmEmailComponent },
   { path: 'backoffice/services/:id', component: EditServiceComponent },
+  { path: 'backoffice/create-service', component: CreateServiceComponent },
 ];

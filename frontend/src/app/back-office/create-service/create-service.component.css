@@ -1,0 +1,90 @@
+.card {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  gap: 2rem;
+}
+
+fieldset{
+  display: flex;
+  flex-direction: column;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+legend{
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #626262;
+  background: white;
+  position: relative;
+  top: -0.5rem;
+  left: -1.2rem ;
+}
+
+h2{
+  font-size: 2rem;
+  margin: 0 0 1rem;
+}
+
+.input-wrapper{
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+input {
+  padding: 0.75rem;
+  margin: 0.2rem 0;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+textarea {
+  padding: 0.75rem;
+  margin: 0.5rem 0;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+label, span{
+  margin: 0;
+  padding: 0;
+  font-size: 1rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+button {
+  background-color: #3B82F6;
+  color: white;
+  padding: 0.7rem 1.2rem;
+  border: none;
+  border-radius: 1rem;
+  cursor: pointer;
+  min-width: 100px;
+  text-align: center;
+  transition: background 0.3s;
+  margin-top: 0;
+}
+.button-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #ccc;
+  border-top: 2px solid #007bff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+

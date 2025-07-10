@@ -1,0 +1,46 @@
+<div class="card">
+  <h2>Create Service</h2>
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <fieldset>
+      <legend>Service Info</legend>
+      <div class="input-wrapper">
+        <label>Name:</label>
+        <input placeholder="Enter Service Name" formControlName="name"/>
+        <div class="validation-error" *ngIf="form.get('name')?.invalid && form.get('name')?.touched">
+          Name is required
+        </div>
+      </div>
+
+      <div class="input-wrapper">
+        <label>Description:</label>
+        <textarea formControlName="description"></textarea>
+      </div>
+      <div class="input-wrapper">
+        <label>Service Type Name:</label>
+        <input formControlName="serviceTypeName"/>
+        <div class="validation-error" *ngIf="form.get('serviceTypeName')?.invalid && form.get('serviceTypeName')?.touched">
+          Required field.
+        </div>
+      </div>
+
+      <div class="input-wrapper">
+        <label>Duration (minutes):</label>
+        <input type="number" formControlName="duration"/>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Pricing</legend>
+      <div class="input-wrapper">
+        <label>Price:</label>
+        <input type="number" formControlName="price"/>
+      </div>
+      <div class="input-wrapper">
+        <label>Discount (%):</label>
+        <input type="number" formControlName="discount"/>
+      </div>
+    </fieldset>
+
+    <button type="submit" [disabled]="form.invalid">Submit</button>
+  </form>
+</div>

@@ -21,7 +21,8 @@ export class ServiceApiService {
   private BASE_URL = 'http://localhost:8080/services';
   private SERVICE_TYPE_URL = 'http://localhost:8080/service-types';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+  }
 
   searchServices(name: string, options: ServiceQuery): Observable<PagedResponse> {
     let params = new HttpParams()
@@ -44,5 +45,10 @@ export class ServiceApiService {
 
   getServiceTypes(): Observable<ServiceTypeResponseDTO[]> {
     return this.http.get<ServiceTypeResponseDTO[]>(this.SERVICE_TYPE_URL);
+  }
+
+  //TODO
+  createService(payload: any): Observable<any> {
+    return this.http.post<any>(this.BASE_URL, payload);
   }
 }
