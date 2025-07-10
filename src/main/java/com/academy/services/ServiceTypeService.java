@@ -80,4 +80,10 @@ public class ServiceTypeService {
     public Optional<ServiceType> getServiceTypeEntityById(Long id) {
         return Optional.ofNullable(serviceTypeRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(ServiceType.class, id)));
     }
+
+    @Transactional
+    public ServiceType createToEntity(ServiceTypeRequestDTO serviceTypeRequestDTO) {
+        ServiceType serviceType = serviceTypeMapper.toEntity(serviceTypeRequestDTO);
+        return serviceTypeRepository.save(serviceType);
+    }
 }
