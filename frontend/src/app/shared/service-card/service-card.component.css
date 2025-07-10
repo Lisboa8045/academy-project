@@ -112,14 +112,13 @@ img {
 .role-tag .circle {
   width: 8px;
   height: 8px;
+  max-width: 8px;
+  max-height: 8px;
   background-color: white;
   border-radius: 50%;
 }
 
-.role-tag.owner {
-  background-color: #3f51b5; /* Blue for owner */
-}
-
-.role-tag.worker {
-  background-color: #4caf50; /* Green for worker */
+.labels-container{
+  display: flex;
+  gap: 0.5rem;
 }

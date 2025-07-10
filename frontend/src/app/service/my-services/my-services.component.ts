@@ -1,13 +1,14 @@
 import {Component, computed, effect, Input, OnInit, signal} from '@angular/core';
-import {PagedResponse, ServiceApiService} from '../shared/service-api.service';
-import {ServiceModel} from './service.model';
-import {ControlsBarComponent} from './search/controls-bar/controls-bar.component';
-import {LoadingComponent} from '../loading/loading.component';
-import {PaginationBarComponent} from './search/pagination-bar/pagination-bar.component';
-import {SearchSidebarFiltersComponent} from './search/search-sidebar-filters/search-sidebar-filters.component';
-import {ServiceListComponent} from './service-list/service-list.component';
-import {ServiceQuery} from '../shared/models/service-query.model';
-import {AuthStore} from '../auth/auth.store';
+import {PagedResponse, ServiceApiService} from '../../shared/service-api.service';
+import {ServiceModel} from '../service.model';
+import {ControlsBarComponent} from '../search/controls-bar/controls-bar.component';
+import {LoadingComponent} from '../../loading/loading.component';
+import {PaginationBarComponent} from '../search/pagination-bar/pagination-bar.component';
+import {ServiceListComponent} from '../service-list/service-list.component';
+import {ServiceQuery} from '../../shared/models/service-query.model';
+import {AuthStore} from '../../auth/auth.store';
+import {NgIf, NgTemplateOutlet} from '@angular/common';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-my-services',
@@ -17,7 +18,9 @@ import {AuthStore} from '../auth/auth.store';
     ControlsBarComponent,
     LoadingComponent,
     PaginationBarComponent,
-    ServiceListComponent
+    ServiceListComponent,
+    RouterLink,
+    NgTemplateOutlet
   ]
 })
 export class MyServicesComponent{

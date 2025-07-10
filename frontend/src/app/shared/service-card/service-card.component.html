@@ -31,12 +31,13 @@
     }
     </div>
 
-
-    @if(workerTag){
-      <span class="role-tag" [ngClass]="workerTag">
+    <div class="labels-container">
+    @for (label of labels; track label){
+      <span class="role-tag" [ngStyle]="{ backgroundColor: label.color }">
         <span class="circle"></span>
-        {{ workerTag }}
+        {{ label.label }}
       </span>
     }
+    </div>
   </div>
 </div>

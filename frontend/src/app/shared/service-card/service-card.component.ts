@@ -1,16 +1,20 @@
 import {Component, Input, Output, EventEmitter, OnInit, signal} from '@angular/core';
-import {CurrencyPipe, NgClass, NgForOf, NgIf} from '@angular/common';
-import {ServiceModel} from '../../service/service.model';
+import {NgIf, NgStyle} from '@angular/common';
 import {UserProfileService} from '../../profile/user-profile.service';
 import {AuthStore} from '../../auth/auth.store';
 import {Router} from '@angular/router';
+
+type Tag = {
+  label: string;
+  color: `#${string}`;
+};
 
 @Component({
   selector: 'app-service-card',
   templateUrl: './service-card.component.html',
   imports: [
     NgIf,
-    NgClass
+    NgStyle
   ],
   styleUrls: ['./service-card.component.css']
 })
@@ -19,7 +23,8 @@ export class ServiceCardComponent implements OnInit {
   serviceImage = signal('https://placehold.co/300x200?text=No+Image');
   @Output() cardClick = new EventEmitter<number>();
   discountedPrice: number | null = null;
-  workerTag: string | null = null;
+  labels: (Tag)[] = [];
+
 
   constructor(private userProfileService: UserProfileService, private authStore: AuthStore, private router :Router) {
   }
@@ -38,9 +43,7 @@ export class ServiceCardComponent implements OnInit {
     if(this.service.discount){
       this.calcDiscountPrice();
     }
-    if (this.router.url.includes('my-services')) {
-      this.loadWorkTag()
-    }
+    this.loadTags()
   }
 
   loadServiceImage() {
@@ -73,7 +76,21 @@ export class ServiceCardComponent implements OnInit {
     }
   }
 
-  private loadWorkTag(){
-    this.workerTag = this.service.ownerId === this.authStore.id() ? 'owner' : 'worker'
+  private loadTags(){
+    if(this.router.url.includes('my-services') || this.router.url.includes('profile')){
+      this.labels.push({label: this.service.ownerId === this.authStore.id() ? 'owner' : 'worker', color: this.service.ownerId === this.authStore.id() ?'#3f51b5':'#4caf50'});
+    }
+    if (this.service.createdAt) {
+      const createdDate = new Date(this.service.createdAt);
+      const twoMonthsAgo = new Date();
+      twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+
+      const isNew = createdDate >= twoMonthsAgo;
+
+      if (isNew) {
+        this.labels.push({label: 'new', color: '#FFC107'});
+      }
+    }
   }
 }
+

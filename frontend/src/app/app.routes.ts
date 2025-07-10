@@ -5,7 +5,7 @@ import { UnauthorizedComponent } from './unauthorized.component';
 import { SearchServicesComponent} from "./service/search/search-services.component";
 import { ScheduleComponent } from './schedule/schedule.component';
 import { LandingPageComponent } from './landing-page/landing-page.component';
-import {MyServicesComponent} from './service/my-services.component';
+import {MyServicesComponent} from './service/my-services/my-services.component';
 import { ResendEmailConfirmationComponent } from "./auth/resend-email/resend-email-confirmation.component";
 import { ConfirmEmailComponent } from './auth/confirm-email/confirm-email.component';
 import {ServiceDetailsComponent} from './service/service-details/service-details.component';
