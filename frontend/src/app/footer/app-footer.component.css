@@ -1,10 +1,21 @@
 .footer {
   background: linear-gradient(90deg, #3b2ff5 0%, #00d4ff 100%);
   color: white;
-  padding: 0.5rem 0 0.75rem; /* 🔽 less padding */
+  padding: 0.5rem 0 0.75rem;
   text-align: center;
   font-size: 0.8rem;
   font-family: 'Poppins', sans-serif;
+}
+
+.footer a {
+  color: lightgrey;
+  margin: 0 0.5rem;
+  text-decoration: none;
+  transition: text-decoration 0.3s ease;
+}
+
+.footer a:hover {
+  text-decoration: underline;
 }
 
 .footer h2 {

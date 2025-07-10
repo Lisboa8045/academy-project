@@ -1,16 +1,9 @@
 <footer class="footer">
-  <h2>Who made the project ?</h2>
-
-  <div class="avatar-group">
-    <a *ngFor="let user of users"
-       [href]="user.html_url"
-       target="_blank"
-       rel="noopener noreferrer"
-       class="avatar-link">
-      <img [src]="user.avatar_url" [alt]="user.login" />
-      <div class="username">{{ user.login }}</div>
-    </a>
-  </div>
+    <div class="text-white py-4 text-center text-sm">
+        <a routerLink="/about" class="mx-2 hover:underline">About Me</a> |
+        <a routerLink="/terms" class="mx-2 hover:underline">Terms & Conditions</a> |
+        <a routerLink="/privacy" class="mx-2 hover:underline">Privacy Policy</a>
+    </div>
 
   <p class="copyright">
     ©2025 Polarising Champions Academy. All rights reserved.
