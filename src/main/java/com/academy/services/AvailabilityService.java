@@ -1,186 +1,217 @@
 package com.academy.services;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import com.academy.models.member.Member;
-import com.academy.models.service.Service;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-
+import com.academy.dtos.availability.DefaultAvailabilityRequest;
 import com.academy.dtos.availability.AvailabilityMapper;
 import com.academy.dtos.availability.AvailabilityRequestDTO;
 import com.academy.dtos.availability.AvailabilityResponseDTO;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.exceptions.InvalidArgumentException;
 import com.academy.models.Availability;
+import com.academy.models.member.Member;
+import com.academy.models.service.service_provider.ProviderPermissionEnum;
+import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.AvailabilityRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import com.academy.utils.DateRange;
-
-
-@org.springframework.stereotype.Service
+@Service
 public class AvailabilityService {
 
     private final AvailabilityRepository availabilityRepository;
-    private final ServiceProviderService serviceProviderService;
-    private final ServiceService serviceService;
     private final MemberService memberService;
     private final AvailabilityMapper availabilityMapper;
-
-    @Value("${slot.window.days:30}")
-    private int slotWindowDays;
-
+    private final ServiceProviderService serviceProviderService;
 
     @Autowired
     public AvailabilityService(
             AvailabilityRepository availabilityRepository,
-            ServiceProviderService serviceProviderService,
             MemberService memberService,
-            ServiceService serviceService,
-            AvailabilityMapper availabilityMapper) {
-
+            AvailabilityMapper availabilityMapper, ServiceProviderService serviceProviderService) {
         this.availabilityRepository = availabilityRepository;
-        this.serviceProviderService = serviceProviderService;
         this.memberService = memberService;
-        this.serviceService = serviceService;
         this.availabilityMapper = availabilityMapper;
+        this.serviceProviderService = serviceProviderService;
     }
 
-    // Get all availabilities for a specific member by their ID
     public List<AvailabilityResponseDTO> getAvailabilitiesByMemberId(Long memberId) {
-        if (memberId == null) {
-            throw new InvalidArgumentException("Member ID cannot be null");
-        }
-        if (!memberService.existsById(memberId)) {
-            throw new EntityNotFoundException(Member.class, " with ID " + memberId + " does not exist.");
-        }
+        validateMemberExists(memberId);
         List<Availability> availabilities = availabilityRepository.findByMember_Id(memberId);
-        return availabilities.stream()
-                .map(availabilityMapper::toResponseDTOWithMember)
-                .toList();
+        return mapToResponseDTOs(availabilities);
     }
 
-    // Get all availabilities for a specific service by its ID
-    public List<AvailabilityResponseDTO> getAvailabilitiesByServiceId(Long serviceId) {
-        if (serviceId == null) {
-            throw new InvalidArgumentException("Service ID cannot be null");
-        }
-        if (!serviceService.existsById(serviceId)) {
-            throw new EntityNotFoundException(Service.class, " with ID " + serviceId + " does not exist.");
-        }
-
-        List<Long> memberIds = serviceProviderService.findMemberIdsByServiceId(serviceId);
-
-        List<AvailabilityResponseDTO> availabilities = new ArrayList<>();
-        for (Long memberId : memberIds) {
-            availabilities.addAll(getAvailabilitiesByMemberId(memberId));
-        }
-
-        return availabilities;
+    public List<AvailabilityResponseDTO> getDefaultAvailabilitiesByMemberId(Long memberId) {
+        validateMemberExists(memberId);
+        List<Availability> availabilities = availabilityRepository.findByMember_IdAndIsDefaultTrue(memberId);
+        return mapToResponseDTOs(availabilities);
     }
 
-    // Get a specific availability by its ID
-    public AvailabilityResponseDTO getAvailabilityById(Long availabilityId) {
-        if (availabilityId == null) {
-            throw new InvalidArgumentException("Availability ID cannot be null");
-        }
-        if (!availabilityRepository.existsById(availabilityId)) {
-            throw new EntityNotFoundException(Availability.class, " with ID " + availabilityId + " does not exist.");
-        }
-        Availability availability = availabilityRepository.findById(availabilityId).orElse(null);
-        return availabilityMapper.toResponseDTOWithMember(availability);
+    public boolean hasDefaultAvailability(Long memberId) {
+        validateMemberExists(memberId);
+        return availabilityRepository.existsByMember_IdAndIsDefaultTrue(memberId);
     }
 
-    // Create a new availability
     @Transactional
-    public AvailabilityResponseDTO createAvailability(AvailabilityRequestDTO requestDTO) {
-
-        if (!requestDTO.isEndAfterStart()) {
-            throw new InvalidArgumentException("EndDateTime must be after StartDateTime");
-        }
-
-        Long memberId = requestDTO.memberId();
+    public List<AvailabilityResponseDTO> createDefaultAvailability(Long memberId, DefaultAvailabilityRequest request) {
         Member member = memberService.findbyId(memberId)
-                .orElseThrow(() -> new EntityNotFoundException(Member.class, " with ID " + memberId + " not found."));
+                .orElseThrow(() -> new EntityNotFoundException(Member.class, memberId));
 
-        boolean overlaps = availabilityRepository.existsByMember_IdAndDayOfWeekAndTimeOverlap(
-                memberId,
-                requestDTO.dayOfWeek(),
-                requestDTO.startDateTime(),
-                requestDTO.endDateTime()
-        );
+        // Delete existing defaults
+        availabilityRepository.deleteByMember_IdAndIsDefaultTrue(memberId);
 
-        if (overlaps) {
-            throw new InvalidArgumentException("Availability overlaps with existing availability for this member.");
+        List<Availability> defaultAvailabilities = new ArrayList<>();
+
+        // Create morning slots
+        for (DayOfWeek day : request.days()) {
+            // Morning slot
+            Availability morning = new Availability();
+            morning.setMember(member);
+            morning.setDayOfWeek(day);
+            morning.setStartDateTime(request.morningStartTime().atDate(LocalDateTime.now().toLocalDate()));
+            morning.setEndDateTime(request.morningEndTime().atDate(LocalDateTime.now().toLocalDate()));
+            morning.setDefault(true);
+            defaultAvailabilities.add(morning);
+
+            // Afternoon slot (if provided)
+            if (request.afternoonStartTime() != null && request.afternoonEndTime() != null) {
+                Availability afternoon = new Availability();
+                afternoon.setMember(member);
+                afternoon.setDayOfWeek(day);
+                afternoon.setStartDateTime(request.afternoonStartTime().atDate(LocalDateTime.now().toLocalDate()));
+                afternoon.setEndDateTime(request.afternoonEndTime().atDate(LocalDateTime.now().toLocalDate()));
+                afternoon.setDefault(true);
+                defaultAvailabilities.add(afternoon);
+            }
         }
+
+        List<Availability> saved = availabilityRepository.saveAll(defaultAvailabilities);
+        return mapToResponseDTOs(saved);
+    }
+
+    @Transactional
+    public AvailabilityResponseDTO createException(Long memberId, AvailabilityRequestDTO requestDTO) {
+        validateAvailabilityRequest(requestDTO);
+        Member member = validateMemberExists(memberId);
 
         Availability availability = availabilityMapper.toEntity(requestDTO);
         availability.setMember(member);
+        availability.setException(true);
+        availability.setDefault(false);
+
         Availability saved = availabilityRepository.save(availability);
         return availabilityMapper.toResponseDTOWithMember(saved);
     }
 
-    // Update an existing availability
-    @Transactional
-    public AvailabilityResponseDTO updateAvailability(Long availabilityId, AvailabilityRequestDTO requestDTO) {
-        if (requestDTO == null) {
-            throw new InvalidArgumentException("Availability cannot be null");
-        }
+    public AvailabilityResponseDTO createAvailability(AvailabilityRequestDTO requestDTO) {
+        validateAvailabilityRequest(requestDTO);
+        Member member = validateMemberExists(requestDTO.memberId());
 
-        Availability availability = availabilityRepository.findById(availabilityId)
-                .orElseThrow(() -> new EntityNotFoundException(Availability.class, " with ID " + availabilityId + " does not exist."));
+        Availability availability = availabilityMapper.toEntity(requestDTO);
+        availability.setMember(member);
+        availability.setException(false);
+        availability.setDefault(false);
 
-        // Atualiza campos simples
-        availability.setDayOfWeek(requestDTO.dayOfWeek());
-        availability.setStartDateTime(requestDTO.startDateTime());
-        availability.setEndDateTime(requestDTO.endDateTime());
-
-        // Verifica se é necessário atualizar o membro associado
-        if (availability.getMember().getId().equals(requestDTO.memberId())) {
-            Member newMember = memberService.findbyId(requestDTO.memberId())
-                    .orElseThrow(() -> new EntityNotFoundException(Member.class, " with ID " + requestDTO.memberId() + " not found."));
-            availability.setMember(newMember);
-        }
-
-        return availabilityMapper.toResponseDTOWithMember(availability);
+        Availability saved = availabilityRepository.save(availability);
+        return availabilityMapper.toResponseDTOWithMember(saved);
     }
-
-    @Transactional
-    public void deleteAvailabilityById(Long availabilityId) {
-        if (availabilityId == null) {
-            throw new InvalidArgumentException("Availability ID cannot be null");
-        }
-        if (!availabilityRepository.existsById(availabilityId)) {
-            throw new EntityNotFoundException(Availability.class, " with ID " + availabilityId + " does not exist.");
-        }
-        availabilityRepository.deleteById(availabilityId);
-    }
-
-
-
-    // Get all availabilities
-    public List<AvailabilityResponseDTO> getAllAvailabilities() {
-        return availabilityRepository.findAll()
-                .stream()
-                .map(availabilityMapper::toResponseDTOWithMember)
-                .toList();
-    }
-
-    private DateRange calculateCurrentSlotWindow() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime end = now.plusDays(slotWindowDays);
-        return new DateRange(now, end);
-    }
-
 
     public List<Availability> getAvailabilitiesForProvider(Long providerId) {
         if (providerId == null) {
             throw new InvalidArgumentException("Provider ID cannot be null");
         }
-        DateRange slotWindow = calculateCurrentSlotWindow();
-        return availabilityRepository.findByMember_IdAndStartDateTimeBetween(providerId, slotWindow.start(), slotWindow.end());
+
+        // First check if the member exists
+        memberService.findbyId(providerId)
+                .orElseThrow(() -> new EntityNotFoundException(Member.class, providerId));
+
+        // Get current date range (next 30 days by default)
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime endDate = now.plusDays(30);
+
+        // Get availabilities for this provider within the date range
+        List<Availability> availabilities = availabilityRepository.findByMember_IdAndStartDateTimeBetween(
+                providerId,
+                now,
+                endDate
+        );
+
+        return availabilities;
+    }
+
+    public AvailabilityResponseDTO updateAvailability(Long availabilityId, AvailabilityRequestDTO requestDTO) {
+        Availability availability = availabilityRepository.findById(availabilityId)
+                .orElseThrow(() -> new EntityNotFoundException(Availability.class, availabilityId));
+
+        availability.setDayOfWeek(requestDTO.dayOfWeek());
+        availability.setStartDateTime(requestDTO.startDateTime());
+        availability.setEndDateTime(requestDTO.endDateTime());
+
+        if (!availability.getMember().getId().equals(requestDTO.memberId())) {
+            Member newMember = memberService.findbyId(requestDTO.memberId())
+                    .orElseThrow(() -> new EntityNotFoundException(Member.class, requestDTO.memberId()));
+            availability.setMember(newMember);
+        }
+
+        Availability updated = availabilityRepository.save(availability);
+        return availabilityMapper.toResponseDTOWithMember(updated);
+    }
+
+    public void deleteAvailabilityById(Long availabilityId) {
+        if (!availabilityRepository.existsById(availabilityId)) {
+            throw new EntityNotFoundException(Availability.class, availabilityId);
+        }
+        availabilityRepository.deleteById(availabilityId);
+    }
+
+    public List<AvailabilityResponseDTO> getAllAvailabilities() {
+        List<Availability> availabilities = availabilityRepository.findAll();
+        return mapToResponseDTOs(availabilities);
+    }
+
+    private Member validateMemberExists(Long memberId) {
+        return memberService.findbyId(memberId)
+                .orElseThrow(() -> new EntityNotFoundException(Member.class, memberId));
+    }
+
+    private void validateAvailabilityRequest(AvailabilityRequestDTO requestDTO) {
+        if (!requestDTO.isEndAfterStart()) {
+            throw new InvalidArgumentException("EndDateTime must be after StartDateTime");
+        }
+    }
+
+    private List<AvailabilityResponseDTO> mapToResponseDTOs(List<Availability> availabilities) {
+        return availabilities.stream()
+                .map(availabilityMapper::toResponseDTOWithMember)
+                .collect(Collectors.toList());
+    }
+
+    public List<AvailabilityResponseDTO> getAvailabilitiesByServiceId(Long serviceId) {
+        if (serviceId == null) {
+            throw new InvalidArgumentException("Service ID cannot be null");
+        }
+
+        // Get all providers who can serve this service
+        List<ServiceProvider> providers = serviceProviderService
+                .findProvidersByServiceIdAndPermission(serviceId, ProviderPermissionEnum.SERVE);
+
+        List<AvailabilityResponseDTO> result = new ArrayList<>();
+
+        for (ServiceProvider provider : providers) {
+            Long providerId = provider.getProvider().getId();
+            // Get all availabilities for this provider
+            List<Availability> providerAvailabilities = availabilityRepository.findByMember_Id(providerId);
+            // Convert to DTOs and add to result
+            result.addAll(providerAvailabilities.stream()
+                    .map(availabilityMapper::toResponseDTOWithMember)
+                    .collect(Collectors.toList()));
+        }
+
+        return result;
     }
 }

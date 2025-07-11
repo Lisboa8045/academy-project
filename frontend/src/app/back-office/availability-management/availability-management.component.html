@@ -1,15 +1,23 @@
 <div class="availability-management">
   <!-- Header Section -->
   <div class="management-header">
-    <h2 class="management-title">Availability Management</h2>
-    <app-week-navigation></app-week-navigation>
+    <h2 class="management-title">
+      {{ isSettingDefaults ? 'Set Default Weekly Availability' : 'Availability Management' }}
+    </h2>
+    <app-week-navigation *ngIf="!isSettingDefaults"></app-week-navigation>
     <div class="bulk-actions">
-      <button (click)="openBulkAddForm()" class="nav-button bulk-add-button">＋ Add in bulk</button>
+      <button *ngIf="!isSettingDefaults" (click)="openBulkAddForm()" class="nav-button bulk-add-button">＋ Add in bulk</button>
       <button (click)="saveAllChanges()" class="nav-button save-all-button"
               [disabled]="(localChanges.length === 0) && (deletedIds.length === 0)">
-        💾 Generate
+        {{ isSettingDefaults ? 'Save Defaults' : 'Save Changes' }}
       </button>
     </div>
+  </div>
+
+  <!-- Help text for default setup -->
+  <div *ngIf="isSettingDefaults" class="setup-instructions">
+    <p>Please set your default weekly availability. These will be your regular working hours.</p>
+    <p>You can add exceptions for specific dates later.</p>
   </div>
 
   <!-- Weekly Slots Grid -->
@@ -24,14 +32,12 @@
       </div>
 
       <div class="slots-container" *ngIf="getAvailabilityForDay(day).length > 0; else emptyDay">
-        <div *ngFor="let avail of getAvailabilityForDay(day)" class="slot-item" [class.pending]="isPending(avail)">
+        <div *ngFor="let avail of getAvailabilityForDay(day); trackBy: trackByAvailability" class="slot-item" [class.pending]="isPending(avail)">
           <div class="slot-info">
             <span class="slot-time">
               {{ avail.startDateTime | date: 'HH:mm' }} - {{ avail.endDateTime | date: 'HH:mm' }}
             </span>
-            <span class="slot-status" [class.booked]="isSlotBooked(avail)">
-              {{ isSlotBooked(avail) ? 'Booked' : 'Available' }}
-            </span>
+            <span *ngIf="!isSettingDefaults && avail.isException" class="exception-badge">Exception</span>
           </div>
           <div class="slot-actions">
             <button (click)="openEditForm(avail)" class="action-button edit" [disabled]="isSlotBooked(avail)">
@@ -47,15 +53,14 @@
       <ng-template #emptyDay>
         <div class="empty-day">
           <span class="empty-icon">📅</span>
-          No availability
+          {{ isSettingDefaults ? 'No availability set' : 'Using default availability' }}
         </div>
       </ng-template>
     </div>
   </div>
 
   <!-- Availability Form Modal -->
-  <div class="modal-overlay" *ngIf="showFormModal" (click)="closeFormModal()"></div>
-  <div class="modal" *ngIf="showFormModal" [class.bulk-modal]="formMode === 'bulk'">
+  <div class="modal" *ngIf="showFormModal">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <button class="modal-close" (click)="closeFormModal()">×</button>
       <h3 class="modal-title">{{ getModalTitle() }}</h3>
@@ -63,51 +68,20 @@
       <form [formGroup]="availabilityForm" (ngSubmit)="saveLocalChanges()">
         <div class="time-inputs">
           <div class="time-group">
-            <label class="time-label">Start time</label>
-            <input type="time" formControlName="startTime" class="time-input" required />
+            <label class="time-label">Morning</label>
+            <div class="interval-row">
+              <input type="time" formControlName="startTime1" class="time-input" required />
+              <span>to</span>
+              <input type="time" formControlName="endTime1" class="time-input" required />
+            </div>
           </div>
           <div class="time-group">
-            <label class="time-label">End time</label>
-            <input type="time" formControlName="endTime" class="time-input" required />
-          </div>
-        </div>
-
-        <div class="recurrence-section">
-          <label class="recurrence-label">Repeat:</label>
-          <div class="recurrence-options">
-            <button *ngFor="let option of recurrenceOptions"
-                    type="button"
-                    class="recurrence-option"
-                    [class.active]="availabilityForm.get('applyType')?.value === option.value"
-                    (click)="availabilityForm.get('applyType')?.setValue(option.value)">
-              {{ option.label }}
-            </button>
-          </div>
-        </div>
-
-        <div *ngIf="availabilityForm.get('applyType')?.value === 'some-months'" class="month-selection">
-          <h4 class="selection-title">Select months:</h4>
-          <div class="month-grid">
-            <button *ngFor="let month of monthsList"
-                    type="button"
-                    class="recurrence-option"
-                    [class.selected]="isMonthSelected(month.value)"
-                    (click)="toggleMonthSelection(month.value)">
-              {{ month.label }}
-            </button>
-          </div>
-        </div>
-
-        <div *ngIf="formMode === 'bulk' || availabilityForm.get('applyType')?.value !== 'one-day'" class="days-selection">
-          <h4 class="selection-title">Select week days:</h4>
-          <div class="days-grid">
-            <button *ngFor="let day of daysOfWeek"
-                    type="button"
-                    class="recurrence-option"
-                    [class.selected]="isDaySelected(day.value)"
-                    (click)="toggleDaySelection(day.value)">
-              {{ day.label }}
-            </button>
+            <label class="time-label">Afternoon</label>
+            <div class="interval-row">
+              <input type="time" formControlName="startTime2" class="time-input" />
+              <span>to</span>
+              <input type="time" formControlName="endTime2" class="time-input" />
+            </div>
           </div>
         </div>
 

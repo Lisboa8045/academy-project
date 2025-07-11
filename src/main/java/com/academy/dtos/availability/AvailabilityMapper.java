@@ -1,18 +1,22 @@
 package com.academy.dtos.availability;
 
+import com.academy.models.Availability;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import com.academy.models.Availability;
-
 @Mapper(componentModel = "spring")
-public abstract class AvailabilityMapper {
+public interface AvailabilityMapper {
 
     @Mapping(target = "memberId", source = "member.id")
-    public abstract AvailabilityResponseDTO toResponseDTOWithMember(Availability availability);
+    @Mapping(target = "isDefault", source = "default")
+    @Mapping(target = "isException", source = "exception")
+    AvailabilityResponseDTO toResponseDTOWithMember(Availability availability);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    public abstract Availability toEntity(AvailabilityRequestDTO requestDTO);
+    @Mapping(target = "member", ignore = true)
+    @Mapping(target = "default", constant = "false")
+    @Mapping(target = "exception", constant = "false")
+    Availability toEntity(AvailabilityRequestDTO requestDTO);
 }

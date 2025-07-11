@@ -17,6 +17,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -160,10 +162,11 @@ public class MemberIntegrationTests {
 
     @Test
     void getMemberById_shouldReturnCorrectMember() {
-        MemberResponseDTO response = memberService.getMemberById(member.getId());
+        Optional<MemberResponseDTO> response = memberService.getMemberById(member.getId());
 
-        assertThat(response.email()).isEqualTo(member.getEmail());
-        assertThat(response.address()).isEqualTo(member.getAddress());
+        assertThat(response).isPresent();
+        assertThat(response.get().email()).isEqualTo(member.getEmail());
+        assertThat(response.get().address()).isEqualTo(member.getAddress());
     }
 
     @Test

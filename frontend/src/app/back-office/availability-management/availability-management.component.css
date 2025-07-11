@@ -319,6 +319,21 @@
   grid-template-columns: repeat(3, 1fr);
 }
 
+.interval-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.time-group {
+  margin-bottom: 16px;
+}
+
+.time-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
 
 /* Modal Actions */
 .modal-actions {
@@ -408,7 +423,7 @@
 
 .slot-item.pending {
   opacity: 0.8;
-  border-left: 3px solid #ffc107;
+  border-left: 3px solid #007bff;
 }
 
 /* Responsive Adjustments */

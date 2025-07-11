@@ -1,396 +1,403 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
-import { AvailabilityService } from './availability-management.service';
-import { AvailabilityModel } from '../../models/availability.model';
-import { AuthStore } from '../../auth/auth.store';
-import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { WeekNavigationComponent } from '../../shared/week-navigation/week-navigation.component';
-import { WeekNavigationService } from '../../shared/week-navigation.service';
-import { addDays, startOfWeek, endOfWeek, isSameDay, format, parseISO, getDay, setHours, setMinutes } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+  import {Component, effect, inject, Injector, OnInit, runInInjectionContext} from '@angular/core';
+  import { CommonModule, DatePipe } from '@angular/common';
+  import { AvailabilityService } from './availability-management.service';
+  import { AvailabilityModel } from '../../models/availability.model';
+  import { AuthStore } from '../../auth/auth.store';
+  import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+  import { WeekNavigationComponent } from '../../shared/week-navigation/week-navigation.component';
+  import { WeekNavigationService } from '../../shared/week-navigation.service';
+  import { addDays, startOfWeek, endOfWeek, isSameDay, format, parseISO, getDay, setHours, setMinutes } from 'date-fns';
+  import { ptBR } from 'date-fns/locale';
+  import {filter, take} from 'rxjs';
+  import {toObservable} from '@angular/core/rxjs-interop';
 
-interface RecurrenceOption {
-  value: 'one-day' | 'all-year' | 'some-months' | 'weekly';
-  label: string;
-}
+  @Component({
+    selector: 'app-availability-management',
+    templateUrl: './availability-management.component.html',
+    styleUrls: ['./availability-management.component.css'],
+    standalone: true,
+    imports: [CommonModule, DatePipe, FormsModule, WeekNavigationComponent, ReactiveFormsModule]
+  })
+  export class AvailabilityManagementComponent implements OnInit {
+    availabilities: AvailabilityModel[] = [];
+    currentWeekStart: Date = new Date();
+    currentWeekEnd: Date = new Date();
+    today = new Date();
+    isSettingDefaults = true; // Track if we're setting defaults
+    hasDefaults = false; // Track if defaults exist
 
-interface DayOfWeekOption {
-  value: number;
-  label: string;
-}
+    // Form state
+    availabilityForm: FormGroup;
+    showFormModal = false;
+    formMode: 'add' | 'edit' | 'bulk' = 'add';
+    availabilityToDelete: AvailabilityModel | null = null;
+    showDeleteConfirmation = false;
+    localChanges: AvailabilityModel[] = [];
+    deletedIds: number[] = [];
+    selectedDay: Date | null = null;
 
-interface MonthOption {
-  value: number;
-  label: string;
-}
+    private readonly injector = inject(Injector);
 
-@Component({
-  selector: 'app-availability-management',
-  templateUrl: './availability-management.component.html',
-  styleUrls: ['./availability-management.component.css'],
-  standalone: true,
-  imports: [CommonModule, DatePipe, FormsModule, WeekNavigationComponent, ReactiveFormsModule]
-})
-export class AvailabilityManagementComponent implements OnInit {
-  availabilities: AvailabilityModel[] = [];
-  currentWeekStart: Date = new Date();
-  currentWeekEnd: Date = new Date();
-  today = new Date();
-
-  // Form state
-  availabilityForm: FormGroup;
-  showFormModal = false;
-  formMode: 'add' | 'edit' | 'bulk' = 'add';
-  availabilityToDelete: AvailabilityModel | null = null;
-  showDeleteConfirmation = false;
-  localChanges: AvailabilityModel[] = [];
-  deletedIds: number[] = [];
-  selectedDay: Date | null = null;
-
-  recurrenceOptions: RecurrenceOption[] = [
-    { value: 'one-day', label: 'Only this day' },
-    { value: 'weekly', label: 'Every week' },
-    { value: 'some-months', label: 'Specific months' },
-    { value: 'all-year', label: 'Entire year' }
-  ];
-
-  monthsList: MonthOption[] = [
-    { value: 0, label: 'Jan' }, { value: 1, label: 'Feb' }, { value: 2, label: 'Mar' },
-    { value: 3, label: 'Apr' }, { value: 4, label: 'May' }, { value: 5, label: 'Jun' },
-    { value: 6, label: 'Jul' }, { value: 7, label: 'Aug' }, { value: 8, label: 'Sep' },
-    { value: 9, label: 'Oct' }, { value: 10, label: 'Nov' }, { value: 11, label: 'Dec' }
-  ];
-
-  daysOfWeek: DayOfWeekOption[] = [
-    { value: 0, label: 'Sun' },
-    { value: 1, label: 'Mon' },
-    { value: 2, label: 'Tue' },
-    { value: 3, label: 'Wed' },
-    { value: 4, label: 'Thu' },
-    { value: 5, label: 'Fri' },
-    { value: 6, label: 'Sat' }
-  ];
-
-  constructor(
-    private availabilityService: AvailabilityService,
-    private authStore: AuthStore,
-    private weekNavigationService: WeekNavigationService,
-    private fb: FormBuilder
-  ) {
-    this.availabilityForm = this.fb.group({
-      startTime: ['09:00', Validators.required],
-      endTime: ['17:00', Validators.required],
-      applyType: ['one-day', Validators.required],
-      selectedMonths: this.fb.array([]),
-      selectedDays: this.fb.array(
-        this.daysOfWeek
-          .filter(day => [1, 2, 3, 4, 5].includes(day.value))
-          .map(day => this.fb.control(day.value))
-      )
-    });
-  }
-
-  ngOnInit(): void {
-    this.weekNavigationService.currentDate$.subscribe(date => {
-      this.setWeekFromDate(date);
-      this.loadAvailabilities();
-    });
-  }
-
-  // View methods
-  getWeekDays(): Date[] {
-    return Array.from({ length: 7 }, (_, i) => addDays(this.currentWeekStart, i));
-  }
-
-  getAvailabilityForDay(day: Date): AvailabilityModel[] {
-    return this.availabilities
-      .filter(a => isSameDay(parseISO(a.startDateTime as string), day))
-      .sort((a, b) => parseISO(a.startDateTime as string).getTime() - parseISO(b.startDateTime as string).getTime());
-  }
-
-  isToday(day: Date): boolean {
-    return isSameDay(day, this.today);
-  }
-
-  isSlotBooked(avail: AvailabilityModel): boolean {
-    return false; // Implement actual booking check logic here
-  }
-
-  isDaySelected(dayValue: number): boolean {
-    return this.selectedDaysFormArray.value.includes(dayValue);
-  }
-
-  isMonthSelected(monthValue: number): boolean {
-    return this.selectedMonthsFormArray.value.includes(monthValue);
-  }
-
-  // Form operations
-  openAddForm(day: Date): void {
-    this.selectedDay = day;
-    this.availabilityForm.reset({
-      startTime: '09:00',
-      endTime: '17:00',
-      applyType: 'one-day',
-      selectedMonths: [],
-      selectedDays: this.daysOfWeek
-        .filter(day => [1, 2, 3, 4, 5].includes(day.value))
-        .map(day => day.value)
-    });
-    this.formMode = 'add';
-    this.showFormModal = true;
-  }
-
-  openEditForm(avail: AvailabilityModel): void {
-    const startDate = parseISO(avail.startDateTime as string);
-    const endDate = parseISO(avail.endDateTime as string);
-
-    this.availabilityForm.patchValue({
-      startTime: format(startDate, 'HH:mm'),
-      endTime: format(endDate, 'HH:mm'),
-      applyType: 'one-day'
-    });
-
-    this.formMode = 'edit';
-    this.showFormModal = true;
-  }
-
-  openBulkAddForm(): void {
-    this.availabilityForm.reset({
-      startTime: '09:00',
-      endTime: '17:00',
-      applyType: 'weekly',
-      selectedMonths: [],
-      selectedDays: [1, 2, 3, 4, 5] // Default: Monday to Friday
-    });
-    this.formMode = 'bulk';
-    this.showFormModal = true;
-  }
-
-  saveLocalChanges(): void {
-    if (this.availabilityForm.invalid) return;
-
-    const formValue = this.availabilityForm.value;
-    const newAvailabilities = this.generateAvailabilitiesFromForm(formValue);
-
-    this.localChanges = [
-      ...this.localChanges,
-      ...newAvailabilities.map(avail => ({
-        ...avail,
-        id: avail.id || this.generateTemporaryId(),
-        memberId: this.authStore.id()
-      }))
-    ];
-
-    this.updateView();
-    this.closeFormModal();
-  }
-
-  closeFormModal(): void {
-    this.showFormModal = false;
-    this.selectedDay = null;
-  }
-
-  getModalTitle(): string {
-    switch (this.formMode) {
-      case 'add': return 'New availability';
-      case 'edit': return 'Edit availability';
-      case 'bulk': return 'Add in bulk';
-      default: return 'Availability';
+    constructor(
+      private readonly availabilityService: AvailabilityService,
+      private readonly authStore: AuthStore,
+      private readonly weekNavigationService: WeekNavigationService,
+      private readonly fb: FormBuilder
+    ) {
+      this.availabilityForm = this.fb.group({
+        startTime1: ['09:00', Validators.required],
+        endTime1: ['12:00', Validators.required],
+        startTime2: ['13:00', Validators.required],
+        endTime2: ['17:00', Validators.required],
+      });
     }
-  }
 
-  get selectedDaysFormArray(): FormArray {
-    return this.availabilityForm.get('selectedDays') as FormArray;
-  }
+    ngOnInit(): void {
+      runInInjectionContext(this.injector, () => {
+        effect(() => {
+          const userId = this.authStore.id();
 
-  get selectedMonthsFormArray(): FormArray {
-    return this.availabilityForm.get('selectedMonths') as FormArray;
-  }
+          if (userId > 0) {
+            this.checkExistingDefaults();
 
-  toggleDaySelection(dayValue: number): void {
-    const index = this.selectedDaysFormArray.value.indexOf(dayValue);
-    if (index === -1) {
-      this.selectedDaysFormArray.push(this.fb.control(dayValue));
-    } else {
-      this.selectedDaysFormArray.removeAt(index);
+            this.weekNavigationService.currentDate$.subscribe(date => {
+              this.setWeekFromDate(date);
+              this.loadAvailabilities();
+            });
+          }
+        });
+      });
     }
-  }
 
-  toggleMonthSelection(monthValue: number): void {
-    const index = this.selectedMonthsFormArray.value.indexOf(monthValue);
-    if (index === -1) {
-      this.selectedMonthsFormArray.push(this.fb.control(monthValue));
-    } else {
-      this.selectedMonthsFormArray.removeAt(index);
-    }
-  }
-
-  // Delete operations
-  confirmDelete(): void {
-    if (this.availabilityToDelete) {
-      if (this.availabilityToDelete.id && this.availabilityToDelete.id > 0) {
-        this.deletedIds.push(this.availabilityToDelete.id);
+    // Update the checkExistingDefaults method
+    private checkExistingDefaults(): void {
+      const memberId = this.authStore.id();
+      if (!memberId || memberId <= 0) {  // Add validation for positive ID
+        console.error('Invalid member ID:', memberId);
+        return;
       }
 
-      this.localChanges = this.localChanges.filter(a => a.id !== this.availabilityToDelete?.id);
-      this.updateView();
+      this.availabilityService.hasDefaultAvailability(memberId).subscribe({
+        next: (hasDefaults) => {
+          this.hasDefaults = hasDefaults;
+          this.isSettingDefaults = !hasDefaults;
+        },
+        error: (err) => {
+          console.error('Error checking default availability:', err);
+          // Handle error appropriately
+        }
+      });
+    }
+
+    // View methods
+    getWeekDays(): Date[] {
+      return Array.from({ length: 7 }, (_, i) => addDays(this.currentWeekStart, i));
+    }
+
+    getAvailabilityForDay(day: Date): AvailabilityModel[] {
+      // Combine server data and local changes, excluding deleted items
+      const combined = [
+        ...this.availabilities.filter(a => !this.deletedIds.includes(a.id as number)),
+        ...this.localChanges
+      ];
+
+      return combined
+        .filter(a => isSameDay(parseISO(a.startDateTime as string), day))
+        .sort((a, b) => parseISO(a.startDateTime as string).getTime() - parseISO(b.startDateTime as string).getTime());
+    }
+
+    trackByAvailability(index: number, avail: AvailabilityModel): number {
+      return avail.id || index;
+    }
+
+    isToday(day: Date): boolean {
+      return isSameDay(day, this.today);
+    }
+
+    isSlotBooked(avail: AvailabilityModel): boolean {
+      return false;
+    }
+
+    // Form operations
+    openAddForm(day: Date): void {
+      this.selectedDay = day;
+      this.availabilityForm.reset({
+        startTime1: '09:00',
+        endTime1: '12:00',
+        startTime2: '13:00',
+        endTime2: '17:00'
+      });
+      this.formMode = 'add';
+      this.showFormModal = true;
+    }
+
+    openEditForm(avail: AvailabilityModel): void {
+      const day = parseISO(avail.startDateTime as string);
+      const dayAvailabilities = this.getAvailabilityForDay(day);
+
+      this.selectedDay = day;
+
+      if (dayAvailabilities.length > 0) {
+        const firstInterval = dayAvailabilities[0];
+        this.availabilityForm.patchValue({
+          startTime1: format(parseISO(firstInterval.startDateTime as string), 'HH:mm'),
+          endTime1: format(parseISO(firstInterval.endDateTime as string), 'HH:mm')
+        });
+
+        if (dayAvailabilities.length > 1) {
+          const secondInterval = dayAvailabilities[1];
+          this.availabilityForm.patchValue({
+            startTime2: format(parseISO(secondInterval.startDateTime as string), 'HH:mm'),
+            endTime2: format(parseISO(secondInterval.endDateTime as string), 'HH:mm')
+          });
+        }
+      }
+
+      this.formMode = 'edit';
+      this.showFormModal = true;
+    }
+
+    openBulkAddForm(): void {
+      this.availabilityForm.reset({
+        startTime: '09:00',
+        endTime: '17:00',
+        applyType: 'weekly',
+        selectedMonths: [],
+        selectedDays: [1, 2, 3, 4, 5]
+      });
+      this.formMode = 'bulk';
+      this.showFormModal = true;
+    }
+
+    saveLocalChanges(): void {
+      if (this.availabilityForm.invalid) return;
+
+      const formValue = this.availabilityForm.value;
+      const newAvailabilities = this.generateAvailabilitiesFromForm(formValue);
+
+      if (this.selectedDay) {
+        const selectedDay = this.selectedDay;
+
+        this.localChanges = this.localChanges.filter(a => {
+          const availDate = parseISO(a.startDateTime as string);
+          return !isSameDay(availDate, selectedDay);
+        });
+
+        this.availabilities = this.availabilities.filter(a => {
+          const availDate = parseISO(a.startDateTime as string);
+          return !isSameDay(availDate, selectedDay) || this.deletedIds.includes(a.id as number);
+        });
+      }
+
+      this.localChanges = [
+        ...this.localChanges,
+        ...newAvailabilities.map(avail => ({
+          ...avail,
+          id: avail.id || this.generateTemporaryId(),
+          memberId: this.authStore.id(),
+          isException: !this.isSettingDefaults // Mark as exception if not setting defaults
+        }))
+      ];
+
+      this.closeFormModal();
+    }
+
+    closeFormModal(): void {
+      this.showFormModal = false;
+      this.selectedDay = null;
+    }
+
+    getModalTitle(): string {
+      switch (this.formMode) {
+        case 'add': return this.isSettingDefaults ? 'Add Default Availability' : 'Add Exception';
+        case 'edit': return this.isSettingDefaults ? 'Edit Default Availability' : 'Edit Exception';
+        case 'bulk': return 'Add in bulk';
+        default: return 'Availability';
+      }
+    }
+
+    // Delete operations
+    confirmDelete(): void {
+      if (this.availabilityToDelete) {
+        if (this.availabilityToDelete.id && this.availabilityToDelete.id > 0) {
+          this.deletedIds.push(this.availabilityToDelete.id);
+        }
+
+        this.localChanges = this.localChanges.filter(a => a.id !== this.availabilityToDelete?.id);
+        this.updateView();
+        this.showDeleteConfirmation = false;
+        this.availabilityToDelete = null;
+      }
+    }
+
+    cancelDelete(): void {
       this.showDeleteConfirmation = false;
       this.availabilityToDelete = null;
     }
-  }
 
-  cancelDelete(): void {
-    this.showDeleteConfirmation = false;
-    this.availabilityToDelete = null;
-  }
+    removeAvailability(avail: AvailabilityModel): void {
+      this.localChanges = this.localChanges.filter(a => a.id !== avail.id);
 
-  removeAvailability(avail: AvailabilityModel): void {
-    this.availabilityToDelete = avail;
-    this.showDeleteConfirmation = true;
-  }
-
-  // Save operations
-  saveAllChanges(): void {
-    const memberId = this.authStore.id();
-    if (!memberId) return;
-
-    const deleteObservables = this.deletedIds
-      .filter(id => id !== undefined)
-      .map(id => this.availabilityService.deleteAvailability(id));
-
-    const createObservables = this.localChanges.map(change => {
-      if (change.id && change.id > 0) {
-        return this.availabilityService.updateAvailability(change);
+      if (avail.id && avail.id > 0) {
+        this.deletedIds.push(avail.id);
+        this.availabilities = this.availabilities.filter(a => a.id !== avail.id);
       } else {
-        return this.availabilityService.createAvailability(memberId, change);
-      }
-    });
-
-    Promise.all([...deleteObservables, ...createObservables])
-      .then(() => {
-        this.resetLocalState();
-        this.loadAvailabilities();
-      });
-  }
-
-  isPending(avail: AvailabilityModel): boolean {
-    return this.localChanges.some(a =>
-      a.id === avail.id ||
-      (a.startDateTime === avail.startDateTime && a.endDateTime === avail.endDateTime)
-    );
-  }
-
-  // Private helper methods
-  private updateView(): void {
-    const combined = [
-      ...this.availabilities.filter(a => !this.deletedIds.includes(a.id as number)),
-      ...this.localChanges
-    ];
-
-    this.availabilities = combined.filter((avail, index, self) =>
-        index === self.findIndex(a =>
-          a.id === avail.id ||
-          (a.startDateTime === avail.startDateTime && a.endDateTime === avail.endDateTime)
-        )
-    );
-  }
-
-  private setWeekFromDate(date: Date): void {
-    this.currentWeekStart = startOfWeek(date, { weekStartsOn: 1 });
-    this.currentWeekEnd = endOfWeek(date, { weekStartsOn: 1 });
-  }
-
-  private loadAvailabilities(): void {
-    const memberId = this.authStore.id();
-    if (!memberId) return;
-
-    this.availabilityService.getAvailabilitiesByWorker(memberId)
-      .subscribe(avail => {
-        this.availabilities = avail
-          .filter(a => !this.deletedIds.includes(a.id as number))
-          .map(a => {
-            const localChange = this.localChanges.find(lc => lc.id === a.id);
-            return localChange || a;
-          });
-
-        // Add new local changes that don't exist in the server data
-        const newLocalChanges = this.localChanges.filter(lc =>
-          !this.availabilities.some(a => a.id === lc.id)
+        this.availabilities = this.availabilities.filter(a =>
+          a.startDateTime !== avail.startDateTime ||
+          a.endDateTime !== avail.endDateTime
         );
-        this.availabilities = [...this.availabilities, ...newLocalChanges];
-      });
-  }
-
-  private generateAvailabilitiesFromForm(formValue: any): AvailabilityModel[] {
-    const newAvailabilities: AvailabilityModel[] = [];
-    const daysToProcess = this.getDaysToProcess(formValue);
-
-    daysToProcess.forEach(day => {
-      const startDateTime = this.combineDateAndTime(day, formValue.startTime);
-      const endDateTime = this.combineDateAndTime(day, formValue.endTime);
-
-      newAvailabilities.push({
-        startDateTime,
-        endDateTime,
-        dayOfWeek: ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'][day.getDay()]
-      });
-    });
-
-    return newAvailabilities;
-  }
-
-  private getDaysToProcess(formValue: any): Date[] {
-    const days: Date[] = [];
-    const weekDays = this.getWeekDays();
-
-    switch(formValue.applyType) {
-      case 'one-day':
-        if (this.selectedDay) {
-          days.push(this.selectedDay);
-        }
-        break;
-
-      case 'weekly':
-        weekDays.forEach(day => {
-          if (formValue.selectedDays.includes(day.getDay())) {
-            days.push(day);
-          }
-        });
-        break;
-
-      case 'some-months':
-        weekDays.forEach(day => {
-          if (formValue.selectedDays.includes(day.getDay()) &&
-            formValue.selectedMonths.includes(day.getMonth())) {
-            days.push(day);
-          }
-        });
-        break;
-
-      case 'all-year':
-        weekDays.forEach(day => {
-          if (formValue.selectedDays.includes(day.getDay())) {
-            days.push(day);
-          }
-        });
-        break;
+      }
     }
 
-    return days;
-  }
+    saveAllChanges(): void {
+      const memberId = this.authStore.id();
+      if (!memberId) return;
 
-  private combineDateAndTime(date: Date, time: string): string {
-    const [hours, minutes] = time.split(':').map(Number);
-    const newDate = setMinutes(setHours(date, hours), minutes);
-    return newDate.toISOString();
-  }
+      if (this.isSettingDefaults) {
+        const days = [...new Set(this.localChanges.map(avail => avail.dayOfWeek))];
+        const firstMorning = this.localChanges.find(a =>
+          format(parseISO(a.startDateTime), 'HH:mm') === '09:00' // Adjust based on your morning start
+        );
+        const firstAfternoon = this.localChanges.find(a =>
+          format(parseISO(a.startDateTime), 'HH:mm') === '13:00' // Adjust based on your afternoon start
+        );
 
-  private generateTemporaryId(): number {
-    return Math.floor(Math.random() * -1000000);
-  }
+        this.availabilityService.saveDefaultAvailability(
+          memberId,
+          days,
+          firstMorning ? format(parseISO(firstMorning.startDateTime), 'HH:mm') : '09:00',
+          firstMorning ? format(parseISO(firstMorning.endDateTime), 'HH:mm') : '12:00',
+          firstAfternoon ? format(parseISO(firstAfternoon.startDateTime), 'HH:mm') : '13:00',
+          firstAfternoon ? format(parseISO(firstAfternoon.endDateTime), 'HH:mm') : '17:00'
+        ).subscribe(() => {
+          this.isSettingDefaults = false;
+          this.hasDefaults = true;
+          this.resetLocalState();
+          this.loadAvailabilities();
+        });
+      } else {
+        // Original save logic for exceptions
+        const deleteObservables = this.deletedIds
+          .filter(id => id !== undefined)
+          .map(id => this.availabilityService.deleteAvailability(id));
 
-  private resetLocalState(): void {
-    this.localChanges = [];
-    this.deletedIds = [];
+        const createObservables = this.localChanges.map(change => {
+          if (change.id && change.id > 0) {
+            return this.availabilityService.updateAvailability(change);
+          } else {
+            return this.availabilityService.createAvailability(memberId, {
+              ...change,
+              isException: true
+            });
+          }
+        });
+
+        Promise.all([...deleteObservables, ...createObservables])
+          .then(() => {
+            this.resetLocalState();
+            this.loadAvailabilities();
+          });
+      }
+    }
+
+    isPending(avail: AvailabilityModel): boolean {
+      return this.localChanges.some(a =>
+        a.id === avail.id ||
+        (a.startDateTime === avail.startDateTime && a.endDateTime === avail.endDateTime)
+      );
+    }
+
+    // Private helper methods
+    private updateView(): void {
+      const combined = [
+        ...this.availabilities.filter(a => !this.deletedIds.includes(a.id as number)),
+        ...this.localChanges
+      ];
+
+      this.availabilities = combined.filter((avail, index, self) =>
+          index === self.findIndex(a =>
+            a.id === avail.id ||
+            (a.startDateTime === avail.startDateTime && a.endDateTime === avail.endDateTime)
+          )
+      );
+    }
+
+    private setWeekFromDate(date: Date): void {
+      this.currentWeekStart = startOfWeek(date, { weekStartsOn: 1 });
+      this.currentWeekEnd = endOfWeek(date, { weekStartsOn: 1 });
+    }
+
+    private loadAvailabilities(): void {
+      const memberId = this.authStore.id();
+      if (!memberId) return;
+
+      if (this.isSettingDefaults) {
+        // Load empty template for setting defaults
+        this.availabilities = [];
+      } else {
+        this.availabilityService.getAvailabilitiesByWorker(memberId)
+          .subscribe(avail => {
+            this.availabilities = avail
+              .filter(a => !this.deletedIds.includes(a.id as number))
+              .map(a => {
+                const localChange = this.localChanges.find(lc => lc.id === a.id);
+                return localChange || a;
+              });
+
+            const newLocalChanges = this.localChanges.filter(lc =>
+              !this.availabilities.some(a => a.id === lc.id)
+            );
+            this.availabilities = [...this.availabilities, ...newLocalChanges];
+          });
+      }
+    }
+
+    private generateAvailabilitiesFromForm(formValue: any): AvailabilityModel[] {
+      const newAvailabilities: AvailabilityModel[] = [];
+
+      if (!this.selectedDay) return newAvailabilities;
+
+      // First interval
+      if (formValue.startTime1 && formValue.endTime1) {
+        const startDateTime1 = this.combineDateAndTime(this.selectedDay, formValue.startTime1);
+        const endDateTime1 = this.combineDateAndTime(this.selectedDay, formValue.endTime1);
+
+        newAvailabilities.push({
+          startDateTime: startDateTime1,
+          endDateTime: endDateTime1,
+          dayOfWeek: ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'][this.selectedDay.getDay()],
+          isException: false
+        });
+      }
+
+      // Second interval if provided
+      if (formValue.startTime2 && formValue.endTime2) {
+        const startDateTime2 = this.combineDateAndTime(this.selectedDay, formValue.startTime2);
+        const endDateTime2 = this.combineDateAndTime(this.selectedDay, formValue.endTime2);
+
+        newAvailabilities.push({
+          startDateTime: startDateTime2,
+          endDateTime: endDateTime2,
+          dayOfWeek: ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'][this.selectedDay.getDay()],
+          isException: false
+        });
+      }
+
+      return newAvailabilities;
+    }
+
+    private combineDateAndTime(date: Date, time: string): string {
+      const [hours, minutes] = time.split(':').map(Number);
+      const newDate = setMinutes(setHours(date, hours), minutes);
+      return newDate.toISOString();
+    }
+
+    private generateTemporaryId(): number {
+      return Math.floor(Math.random() * -1000000);
+    }
+
+    private resetLocalState(): void {
+      this.localChanges = [];
+      this.deletedIds = [];
+    }
   }
-}
