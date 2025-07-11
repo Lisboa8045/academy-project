@@ -32,18 +32,23 @@
       </div>
 
       <div class="slots-container" *ngIf="getAvailabilityForDay(day).length > 0; else emptyDay">
-        <div *ngFor="let avail of getAvailabilityForDay(day); trackBy: trackByAvailability" class="slot-item" [class.pending]="isPending(avail)">
+        <div *ngFor="let avail of getAvailabilityForDay(day); trackBy: trackByAvailability"
+             class="slot-item"
+             [class.pending]="isPending(avail)"
+             [class.default-slot]="!avail.isException"
+             [class.exception-slot]="avail.isException">
           <div class="slot-info">
-            <span class="slot-time">
-              {{ avail.startDateTime | date: 'HH:mm' }} - {{ avail.endDateTime | date: 'HH:mm' }}
-            </span>
-            <span *ngIf="!isSettingDefaults && avail.isException" class="exception-badge">Exception</span>
+      <span class="slot-time">
+        {{ avail.startDateTime | date: 'HH:mm' }} - {{ avail.endDateTime | date: 'HH:mm' }}
+      </span>
+            <span *ngIf="avail.isException" class="exception-badge">Exception</span>
+            <span *ngIf="!avail.isException" class="default-badge">Default</span>
           </div>
           <div class="slot-actions">
-            <button (click)="openEditForm(avail)" class="action-button edit" [disabled]="isSlotBooked(avail)">
+            <button (click)="openEditForm(avail)" class="action-button edit">
               ✏️
             </button>
-            <button (click)="removeAvailability(avail)" class="action-button delete" [disabled]="isSlotBooked(avail)">
+            <button *ngIf="avail.isException" (click)="removeAvailability(avail)" class="action-button delete">
               🗑️
             </button>
           </div>
@@ -53,7 +58,7 @@
       <ng-template #emptyDay>
         <div class="empty-day">
           <span class="empty-icon">📅</span>
-          {{ isSettingDefaults ? 'No availability set' : 'Using default availability' }}
+          No availability set
         </div>
       </ng-template>
     </div>

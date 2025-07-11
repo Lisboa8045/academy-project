@@ -95,15 +95,60 @@
     }
 
     getAvailabilityForDay(day: Date): AvailabilityModel[] {
-      // Combine server data and local changes, excluding deleted items
-      const combined = [
-        ...this.availabilities.filter(a => !this.deletedIds.includes(a.id as number)),
-        ...this.localChanges
+      const dayOfWeek = day.getDay();
+
+      // Get all availabilities for this specific day (both exceptions and local changes)
+      const dayAvailabilities = [
+        ...this.availabilities.filter(a =>
+          isSameDay(parseISO(a.startDateTime as string), day) &&
+          !this.deletedIds.includes(a.id as number)
+        ),
+        ...this.localChanges.filter(a =>
+          isSameDay(parseISO(a.startDateTime as string), day)
+        )
       ];
 
-      return combined
-        .filter(a => isSameDay(parseISO(a.startDateTime as string), day))
-        .sort((a, b) => parseISO(a.startDateTime as string).getTime() - parseISO(b.startDateTime as string).getTime());
+      // If there are any exceptions (or local changes), return only those
+      if (dayAvailabilities.length > 0) {
+        return dayAvailabilities.sort((a, b) =>
+          parseISO(a.startDateTime as string).getTime() - parseISO(b.startDateTime as string).getTime()
+        );
+      }
+
+      // If no exceptions and we have defaults, return default intervals
+      if (this.hasDefaults && !this.isSettingDefaults) {
+        return this.getDefaultIntervalsForDay(day);
+      }
+
+      return [];
+    }
+
+    private getDefaultIntervalsForDay(day: Date): AvailabilityModel[] {
+      const dayName = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'][day.getDay()];
+
+      const defaultIntervals: AvailabilityModel[] = [];
+
+      // Morning interval (09:00-12:00)
+      defaultIntervals.push({
+        startDateTime: this.combineDateAndTime(day, '09:00'),
+        endDateTime: this.combineDateAndTime(day, '12:00'),
+        dayOfWeek: dayName,
+        isException: false,  // This is a default
+        id: undefined,
+        memberId: this.authStore.id()
+      });
+
+      // Afternoon interval (13:00-17:00)
+      defaultIntervals.push({
+        startDateTime: this.combineDateAndTime(day, '13:00'),
+        endDateTime: this.combineDateAndTime(day, '17:00'),
+        dayOfWeek: dayName,
+        isException: false,  // This is a default
+        id: undefined,
+        memberId: this.authStore.id()
+      });
+
+      return defaultIntervals;
     }
 
     trackByAvailability(index: number, avail: AvailabilityModel): number {
@@ -211,7 +256,6 @@
       switch (this.formMode) {
         case 'add': return this.isSettingDefaults ? 'Add Default Availability' : 'Add Exception';
         case 'edit': return this.isSettingDefaults ? 'Edit Default Availability' : 'Edit Exception';
-        case 'bulk': return 'Add in bulk';
         default: return 'Availability';
       }
     }
@@ -332,24 +376,32 @@
       if (!memberId) return;
 
       if (this.isSettingDefaults) {
-        // Load empty template for setting defaults
         this.availabilities = [];
       } else {
         this.availabilityService.getAvailabilitiesByWorker(memberId)
           .subscribe(avail => {
-            this.availabilities = avail
-              .filter(a => !this.deletedIds.includes(a.id as number))
-              .map(a => {
-                const localChange = this.localChanges.find(lc => lc.id === a.id);
-                return localChange || a;
-              });
+            // Only keep exceptions (filter out defaults)
+            this.availabilities = avail.filter(a =>
+              a.isException && !this.deletedIds.includes(a.id as number)
+            );
 
+            // Merge with local changes
             const newLocalChanges = this.localChanges.filter(lc =>
               !this.availabilities.some(a => a.id === lc.id)
             );
             this.availabilities = [...this.availabilities, ...newLocalChanges];
           });
       }
+    }
+
+    private dayHasExceptions(day: Date): boolean {
+      return [
+        ...this.availabilities,
+        ...this.localChanges
+      ].some(a =>
+        isSameDay(parseISO(a.startDateTime as string), day) &&
+        (a.isException || !a.hasOwnProperty('isException'))
+      );
     }
 
     private generateAvailabilitiesFromForm(formValue: any): AvailabilityModel[] {
