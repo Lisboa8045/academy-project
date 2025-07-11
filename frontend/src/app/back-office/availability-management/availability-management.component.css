@@ -1,7 +1,6 @@
 /* availability-management.component.css */
 .availability-management {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  max-width: 1200px;
   margin: 0 auto;
   padding: 1rem;
   color: #333;
@@ -40,7 +39,7 @@
 /* Bulk Actions */
 .bulk-actions {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
 }
 
 

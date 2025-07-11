@@ -6,10 +6,9 @@
     </h2>
     <app-week-navigation *ngIf="!isSettingDefaults"></app-week-navigation>
     <div class="bulk-actions">
-      <button *ngIf="!isSettingDefaults" (click)="openBulkAddForm()" class="nav-button bulk-add-button">＋ Add in bulk</button>
       <button (click)="saveAllChanges()" class="nav-button save-all-button"
               [disabled]="(localChanges.length === 0) && (deletedIds.length === 0)">
-        {{ isSettingDefaults ? 'Save Defaults' : 'Save Changes' }}
+        {{ isSettingDefaults ? 'Save Defaults' : '💾 Save Changes' }}
       </button>
     </div>
   </div>
@@ -28,7 +27,7 @@
           <h4 class="day-title">{{ day | date: 'EEEE' }}</h4>
           <small class="day-date">{{ day | date: 'dd/MM' }}</small>
         </div>
-        <button (click)="openAddForm(day)" class="add-slot-button">＋</button>
+        <button *ngIf="isSettingDefaults" (click)="openAddForm(day)" class="add-slot-button">＋</button>
       </div>
 
       <div class="slots-container" *ngIf="getAvailabilityForDay(day).length > 0; else emptyDay">
@@ -38,9 +37,9 @@
              [class.default-slot]="!avail.isException"
              [class.exception-slot]="avail.isException">
           <div class="slot-info">
-      <span class="slot-time">
-        {{ avail.startDateTime | date: 'HH:mm' }} - {{ avail.endDateTime | date: 'HH:mm' }}
-      </span>
+            <span class="slot-time">
+              {{ avail.startDateTime | date: 'HH:mm' }} - {{ avail.endDateTime | date: 'HH:mm' }}
+            </span>
             <span *ngIf="avail.isException" class="exception-badge">Exception</span>
             <span *ngIf="!avail.isException" class="default-badge">Default</span>
           </div>
