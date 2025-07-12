@@ -111,7 +111,7 @@ export class AuthComponent{
             return;
           }
           console.error('Login failed:', err);
-          this.errorMessage = err?.error || 'Login failed. Please try again.';
+          this.errorMessage.set(err?.error || 'Login failed. Please try again.');
         }
       });
     } else {
