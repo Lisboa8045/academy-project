@@ -11,6 +11,7 @@ import { ConfirmEmailComponent } from './auth/confirm-email/confirm-email.compon
 import {ServiceDetailsComponent} from './service/service-details/service-details.component';
 import {ForgotPasswordComponent} from './auth/forgot-password/forgot-password.component';
 import {ResetPasswordComponent} from './auth/reset-password/reset-password.component';
+import {GlobalConfigurationEditComponent} from './global-configuration/global-configuration-edit.component';
 
 export const routes: Routes = [
   { path: 'auth', component: AuthComponent },
@@ -24,5 +25,6 @@ export const routes: Routes = [
   { path: 'resend-email', component: ResendEmailConfirmationComponent },
   { path: 'confirm-email/:token', component: ConfirmEmailComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
-  { path: 'reset-password/:token', component: ResetPasswordComponent }
+  { path: 'reset-password/:token', component: ResetPasswordComponent },
+  {path: 'config', component: GlobalConfigurationEditComponent}
 ];

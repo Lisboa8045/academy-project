@@ -9,6 +9,7 @@ import com.academy.models.global_configuration.GlobalConfiguration;
 import com.academy.models.global_configuration.GlobalConfigurationTypeEnum;
 import com.academy.repositories.GlobalConfigurationRepository;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -56,6 +57,13 @@ public class GlobalConfigurationService {
         return globalConfigurationMapper.toDTO(configurationRepository.save(config));
     }
 
+    @Transactional
+    public void editConfigs(@Valid List<GlobalConfigurationRequestDTO> request) {
+        for (GlobalConfigurationRequestDTO config: request){
+            updateConfigValue(config.configKey(),  config);
+        }
+    }
+
     private boolean isNotAValidValue(String value, GlobalConfigurationTypeEnum type) {
         try {
             switch (type) {
@@ -67,7 +75,7 @@ public class GlobalConfigurationService {
                         return true;
                     }
                     break;
-                case STRING:
+                case STRING, PASSWORD:
                     // All values are valid strings
                     break;
                 default:
@@ -79,8 +87,4 @@ public class GlobalConfigurationService {
         }
 
     }
-
-
-
-
 }
