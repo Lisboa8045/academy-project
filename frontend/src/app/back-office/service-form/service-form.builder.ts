@@ -10,7 +10,7 @@ export function buildServiceForm(fb: FormBuilder, initialData: any = {}): FormGr
     negotiable: [initialData.negotiable ?? false],
     duration: [initialData.duration ?? 30, Validators.min(1)],
     serviceTypeName: [initialData.serviceTypeName || '', Validators.required],
-    permissions: [initialData.permissions || []], // simple array input
+    permissions: [initialData.permissions || []],
     tagNames: fb.array(
       (initialData.tagNames || []).map((t: string) => fb.control(t))
     ),

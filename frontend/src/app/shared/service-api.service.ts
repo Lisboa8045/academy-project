@@ -20,6 +20,7 @@ export interface PagedResponse {
 export class ServiceApiService {
   private BASE_URL = 'http://localhost:8080/services';
   private SERVICE_TYPE_URL = 'http://localhost:8080/service-types';
+  private UPLOADS_URL = 'http://localhost:8080/auth/uploads/service-image';
 
   constructor(private http: HttpClient) {
   }
@@ -50,5 +51,12 @@ export class ServiceApiService {
   //TODO
   createService(payload: any): Observable<any> {
     return this.http.post<any>(this.BASE_URL, payload);
+  }
+
+  uploadServiceImages(formData: FormData, id : number) {
+    return this.http.post<{imageUrl: string}>(
+      `${this.UPLOADS_URL}?id=${id}`,
+      formData,
+    );
   }
 }

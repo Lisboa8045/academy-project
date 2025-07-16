@@ -11,7 +11,7 @@ import com.academy.models.ServiceType;
 import com.academy.models.Tag;
 import com.academy.models.member.Member;
 import com.academy.models.service.Service;
-import com.academy.models.service.ServiceImages;
+import com.academy.models.service.ServiceImage;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.ServiceRepository;
@@ -292,8 +292,9 @@ public class ServiceService {
     }
 
     // este saveImages será para usado depois para o endpoint de criação do serviço
-    public Service saveImages(Long id, List<ServiceImages> images) {
+    public Service saveImages(Long id, List<ServiceImage> images) {
         serviceRepository.findById(id).map(s -> {
+                    s.getImages().clear();
                     s.setImages(images);
                     serviceRepository.save(s);
                     return s;
