@@ -450,8 +450,18 @@
 
     private combineDateAndTime(date: Date, time: string): string {
       const [hours, minutes] = time.split(':').map(Number);
-      const newDate = setMinutes(setHours(date, hours), minutes);
-      return newDate.toISOString();
+      // Create a new date in local timezone without timezone conversion
+      const newDate = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate(),
+        hours,
+        minutes
+      );
+
+      // Format as ISO string without timezone adjustment
+      const pad = (n: number) => n < 10 ? '0' + n : n;
+      return `${newDate.getFullYear()}-${pad(newDate.getMonth() + 1)}-${pad(newDate.getDate())}T${pad(hours)}:${pad(minutes)}:00`;
     }
 
     private generateTemporaryId(): number {
