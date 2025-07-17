@@ -29,9 +29,6 @@ public class Availability extends BaseEntity {
     @Column(name = "end_date_time")
     private LocalDateTime endDateTime;
 
-    @Column(name = "is_default")
-    private boolean isDefault;
-
     @Column(name = "is_exception")
     private boolean isException;
 }

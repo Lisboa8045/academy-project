@@ -48,13 +48,13 @@ public class AvailabilityService {
 
     public List<AvailabilityResponseDTO> getDefaultAvailabilitiesByMemberId(Long memberId) {
         validateMemberExists(memberId);
-        List<Availability> availabilities = availabilityRepository.findByMember_IdAndIsDefaultTrue(memberId);
+        List<Availability> availabilities = availabilityRepository.findByMember_IdAndIsExceptionFalse(memberId);
         return mapToResponseDTOs(availabilities);
     }
 
     public boolean hasDefaultAvailability(Long memberId) {
         validateMemberExists(memberId);
-        return availabilityRepository.existsByMember_IdAndIsDefaultTrue(memberId);
+        return availabilityRepository.existsByMember_IdAndIsExceptionFalse(memberId);
     }
 
     @Transactional
@@ -62,30 +62,27 @@ public class AvailabilityService {
         Member member = memberService.findbyId(memberId)
                 .orElseThrow(() -> new EntityNotFoundException(Member.class, memberId));
 
-        // Delete existing defaults
-        availabilityRepository.deleteByMember_IdAndIsDefaultTrue(memberId);
+        // Delete existing non-exceptions (default availabilities)
+        availabilityRepository.deleteByMember_IdAndIsExceptionFalse(memberId);
 
         List<Availability> defaultAvailabilities = new ArrayList<>();
 
-        // Create morning slots
         for (DayOfWeek day : request.days()) {
-            // Morning slot
             Availability morning = new Availability();
             morning.setMember(member);
             morning.setDayOfWeek(day);
             morning.setStartDateTime(request.morningStartTime().atDate(LocalDateTime.now().toLocalDate()));
             morning.setEndDateTime(request.morningEndTime().atDate(LocalDateTime.now().toLocalDate()));
-            morning.setDefault(true);
+            morning.setException(false); // normal slot
             defaultAvailabilities.add(morning);
 
-            // Afternoon slot (if provided)
             if (request.afternoonStartTime() != null && request.afternoonEndTime() != null) {
                 Availability afternoon = new Availability();
                 afternoon.setMember(member);
                 afternoon.setDayOfWeek(day);
                 afternoon.setStartDateTime(request.afternoonStartTime().atDate(LocalDateTime.now().toLocalDate()));
                 afternoon.setEndDateTime(request.afternoonEndTime().atDate(LocalDateTime.now().toLocalDate()));
-                afternoon.setDefault(true);
+                afternoon.setException(false); // normal slot
                 defaultAvailabilities.add(afternoon);
             }
         }
@@ -102,7 +99,6 @@ public class AvailabilityService {
         Availability availability = availabilityMapper.toEntity(requestDTO);
         availability.setMember(member);
         availability.setException(true);
-        availability.setDefault(false);
 
         Availability saved = availabilityRepository.save(availability);
         return availabilityMapper.toResponseDTOWithMember(saved);
@@ -115,7 +111,6 @@ public class AvailabilityService {
         Availability availability = availabilityMapper.toEntity(requestDTO);
         availability.setMember(member);
         availability.setException(false);
-        availability.setDefault(false);
 
         Availability saved = availabilityRepository.save(availability);
         return availabilityMapper.toResponseDTOWithMember(saved);

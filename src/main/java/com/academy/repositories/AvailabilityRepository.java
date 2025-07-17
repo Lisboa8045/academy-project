@@ -16,13 +16,13 @@ public interface AvailabilityRepository extends JpaRepository<Availability, Long
 
     List<Availability> findByMember_Id(Long memberId);
 
-    List<Availability> findByMember_IdAndIsDefaultTrue(Long memberId);
+    List<Availability> findByMember_IdAndIsExceptionFalse(Long memberId);
 
-    boolean existsByMember_IdAndIsDefaultTrue(Long memberId);
+    boolean existsByMember_IdAndIsExceptionFalse(Long memberId);
 
     @Modifying
-    @Query("DELETE FROM Availability a WHERE a.member.id = :memberId AND a.isDefault = true")
-    void deleteByMember_IdAndIsDefaultTrue(@Param("memberId") Long memberId);
+    @Query("DELETE FROM Availability a WHERE a.member.id = :memberId AND a.isException = false")
+    void deleteByMember_IdAndIsExceptionFalse(@Param("memberId") Long memberId);
 
     @Query("SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END " +
             "FROM Availability a " +
