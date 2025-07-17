@@ -42,11 +42,7 @@ export class ProfileButtonComponent implements OnInit {
       },
       {
         label: 'BackOffice',
-        icon: '👔',
-        command: () => {
-          this.router.navigate(['/backoffice/availability'])
-        }
-
+        icon: '👔'
       },
       {
         label: 'Settings',
