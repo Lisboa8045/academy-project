@@ -160,11 +160,10 @@ public class MemberIntegrationTests {
 
     @Test
     void getMemberById_shouldReturnCorrectMember() {
-        Optional<MemberResponseDTO> response = memberService.getMemberById(member.getId());
+        MemberResponseDTO response = memberService.getMemberById(member.getId());
 
-        assertThat(response).isPresent();
-        assertThat(response.get().email()).isEqualTo(member.getEmail());
-        assertThat(response.get().address()).isEqualTo(member.getAddress());
+        assertThat(response.email()).isEqualTo(member.getEmail());
+        assertThat(response.address()).isEqualTo(member.getAddress());
     }
 
     @Test

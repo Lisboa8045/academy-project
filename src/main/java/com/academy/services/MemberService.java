@@ -319,10 +319,10 @@ public class MemberService {
                 .collect(Collectors.toList());
     }
 
-    public Optional<MemberResponseDTO> getMemberById(long id) {
-        return Optional.ofNullable(memberRepository.findById(id)
+    public MemberResponseDTO getMemberById(long id) {
+        return memberRepository.findById(id)
                 .map(memberMapper::toResponseDTO)
-                .orElseThrow(() -> new EntityNotFoundException(Member.class, id)));
+                .orElseThrow(() -> new EntityNotFoundException(Member.class, id));
     }
     public Member getMemberEntityById(long id){
         return memberRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(Member.class, id));

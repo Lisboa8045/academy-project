@@ -18,8 +18,20 @@
 }
 
 .save-all-button {
-  background: #2ecc71;
+  background-color: #4caf50;
   color: white;
+  border: none;
+  border-radius: 1rem;
+  padding: 0.7rem 1.2rem;
+  min-width: 100px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.3s;
+  margin-top: 0;
+}
+.save-all-button:hover:not(:disabled) {
+  background-color: #388e3c;
 }
 
 .save-all-button:disabled {
