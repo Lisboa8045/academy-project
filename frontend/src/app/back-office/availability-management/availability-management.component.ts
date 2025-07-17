@@ -81,56 +81,47 @@ export class AvailabilityManagementComponent implements OnInit {
     return Array.from({ length: 7 }, (_, i) => addDays(this.currentWeekStart, i));
   }
 
-    getAvailabilityForDay(day: Date): AvailabilityModel[] {
-    // If setting up defaults, only show intervals from localChanges
+  getAvailabilityForDay(day: Date): AvailabilityModel[] {
     if (this.isSettingDefaults) {
-      return this.localChanges.filter(a =>
-        isSameDay(parseISO(a.startDateTime), day) && !a.isException
-      ).sort((a, b) =>
-        parseISO(a.startDateTime).getTime() - parseISO(b.startDateTime).getTime()
+      return this.sortByStartTime(
+        this.localChanges.filter(a =>
+          isSameDay(parseISO(a.startDateTime), day) && !a.isException
+        )
       );
     }
 
-    // Gather local exceptions for the day
-    const localExceptions = this.localChanges.filter(a =>
+    const localExceptions = this.getExceptionsForDay(this.localChanges, day);
+    const backendExceptions = this.getExceptionsForDay(this.availabilities, day)
+      .filter(a => !this.deletedIds.includes(a.id as number) &&
+        !localExceptions.some(exc =>
+          exc.startDateTime === a.startDateTime && exc.endDateTime === a.endDateTime
+        )
+      );
+
+    const allExceptions = [...localExceptions, ...backendExceptions];
+    if (allExceptions.length > 0) {
+      return this.sortByStartTime(allExceptions);
+    }
+
+    return this.sortByStartTime(this.hasDefaults ? this.getDefaultIntervalsForDay(day) : []);
+  }
+
+  private getExceptionsForDay(arr: AvailabilityModel[], day: Date): AvailabilityModel[] {
+    return arr.filter(a =>
       isSameDay(parseISO(a.startDateTime), day) && a.isException
     );
+  }
 
-    // Gather backend exceptions for the day, excluding those that overlap with local exceptions
-    const backendExceptions = this.availabilities.filter(a =>
-      isSameDay(parseISO(a.startDateTime), day) &&
-      a.isException &&
-      !this.deletedIds.includes(a.id as number) &&
-      !localExceptions.some(exc =>
-        exc.startDateTime === a.startDateTime && exc.endDateTime === a.endDateTime
-      )
-    );
-
-    // Get default intervals for the day
-    const defaults = this.hasDefaults ? this.getDefaultIntervalsForDay(day) : [];
-
-    // If there are any exceptions for the day, show only exceptions (local + backend, excluding deleted)
-    const allExceptions = [
-      ...localExceptions,
-      ...backendExceptions
-    ];
-    if (allExceptions.length > 0) {
-      return allExceptions.sort((a, b) =>
-        parseISO(a.startDateTime).getTime() - parseISO(b.startDateTime).getTime()
-      );
-    }
-
-    // Otherwise, show defaults
-    return defaults.sort((a, b) =>
+  private sortByStartTime(arr: AvailabilityModel[]): AvailabilityModel[] {
+    return arr.slice().sort((a, b) =>
       parseISO(a.startDateTime).getTime() - parseISO(b.startDateTime).getTime()
     );
-    }
+  }
 
   isToday(day: Date): boolean {
     return isSameDay(day, this.today);
   }
 
-  // Child component event handlers
   onAddSlot(day: Date): void {
     this.selectedDay = day;
     this.formMode = 'add';
@@ -166,8 +157,6 @@ export class AvailabilityManagementComponent implements OnInit {
           isException: !this.isSettingDefaults
         }))
       ];
-
-      // If editing a default, immediately update the view so only exceptions show for that day
       this.updateView();
     }
     this.showFormModal = false;
