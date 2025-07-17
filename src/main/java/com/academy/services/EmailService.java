@@ -51,6 +51,24 @@ public class EmailService{
     }
 
     @Async
+    protected void sendAppointmentConfirmationEmail(Member member, Long appointmentId) {
+        String resetUrl = appProperties.getFrontendUrl() + "/" + appointmentId;
+
+        String html = loadPasswordResetEmailHtml()
+                .replace("[User Name]", member.getUsername())
+                .replace("[PASSWORD_RESET_LINK]", resetUrl)
+                .replace("[App Name]", appProperties.getName())
+                .replace("[HOURS]", formatHours(globalConfigurationService.getConfigValue("password_reset_token_expiry_minutes")));
+
+        send(
+                member.getEmail(),
+                "Password Reset Request",
+                "Click on the link to proceed: " + resetUrl,
+                html
+        );
+    }
+
+    @Async
     protected void sendPasswordResetEmail(Member member, String rawToken) {
         String resetUrl = appProperties.getFrontendUrl() + "/reset-password/" + rawToken;
 

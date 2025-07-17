@@ -1,16 +1,13 @@
 package com.academy.services;
 
 import com.academy.config.authentication.AuthenticationFacade;
-import com.academy.dtos.appointment.AppointmentDetailedDTO;
-import com.academy.dtos.appointment.AppointmentCardDTO;
+import com.academy.dtos.appointment.*;
 import com.academy.config.authentication.AuthenticationFacade;
-import com.academy.dtos.appointment.AppointmentMapper;
-import com.academy.dtos.appointment.AppointmentRequestDTO;
-import com.academy.dtos.appointment.AppointmentResponseDTO;
 import com.academy.dtos.appointment.review.ReviewRequestDTO;
 import com.academy.dtos.appointment.review.ReviewResponseDTO;
 import com.academy.exceptions.BadRequestException;
 import com.academy.exceptions.EntityNotFoundException;
+import com.academy.exceptions.TokenExpiredException;
 import com.academy.models.appointment.Appointment;
 import com.academy.models.appointment.AppointmentStatus;
 import com.academy.models.member.Member;
@@ -183,7 +180,9 @@ public class AppointmentService {
     }
 
     public List<Appointment> getAppointmentsForServiceProvider(Long serviceProviderId) {
-        return appointmentRepository.findByServiceProviderId(serviceProviderId);
+        return appointmentRepository.findByServiceProviderId(serviceProviderId).stream().filter(
+                appointment -> !appointment.getStatus().equals(AppointmentStatus.CANCELLED)
+        ).toList();
     }
 
     public void cancelAppointment(Long id) {
@@ -203,5 +202,17 @@ public class AppointmentService {
         appointmentRepository.save(appointment);
 
         return ResponseEntity.ok(new ReviewResponseDTO("Review added successfully"));
+    }
+
+    public ResponseEntity<ConfirmAppointmentResponseDTO> confirmAppointment(Long id) {
+        Appointment appointment = getAppointmentEntityById(id);
+        if(AppointmentStatus.CANCELLED.equals(appointment.getStatus()))
+            throw new TokenExpiredException("Time to confirm appointment has passed" + appointment.getStatus());
+        if(!AppointmentStatus.PENDING.equals(appointment.getStatus()))
+            throw new BadRequestException("Appointment can't be confirmed with status " + appointment.getStatus());
+
+        appointment.setStatus(AppointmentStatus.CONFIRMED);
+        appointmentRepository.save(appointment);
+        return ResponseEntity.ok(new ConfirmAppointmentResponseDTO("Appointment confirmed successfully"));
     }
 }

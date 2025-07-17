@@ -1,0 +1,13 @@
+<div class="confirm-container">
+  <div *ngIf="loading" class="loading">Loading</div>
+
+  <div *ngIf="message" class="success">
+    <p>{{ message }}</p>
+    <button (click)="goToLogin()">Back to Login</button>
+  </div>
+
+  <div *ngIf="error" class="error">
+    <p>{{ error }}</p>
+    <button (click)="goToLogin()">Back to Login</button>
+  </div>
+</div>
