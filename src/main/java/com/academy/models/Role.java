@@ -1,7 +1,7 @@
 package com.academy.models;
 
 import com.academy.models.shared.BaseEntity;
-import com.academy.util.FieldLengths;
+import com.academy.utils.FieldLengths;
 import com.academy.models.member.Member;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

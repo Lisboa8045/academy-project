@@ -1,14 +1,23 @@
 package com.academy.services;
 
 import com.academy.config.AppProperties;
+import com.academy.exceptions.EmailTemplateLoadingException;
 import com.academy.exceptions.SendEmailException;
+import com.academy.models.member.Member;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+
+import static com.academy.utils.Utils.formatHours;
 
 @Service
 public class EmailService{
@@ -41,5 +50,59 @@ public class EmailService{
         }
     }
 
+    @Async
+    protected void sendPasswordResetEmail(Member member, String rawToken) {
+        String resetUrl = appProperties.getFrontendUrl() + "/reset-password/" + rawToken;
 
+        String html = loadPasswordResetEmailHtml()
+                .replace("[User Name]", member.getUsername())
+                .replace("[PASSWORD_RESET_LINK]", resetUrl)
+                .replace("[App Name]", appProperties.getName())
+                .replace("[HOURS]", formatHours(globalConfigurationService.getConfigValue("password_reset_token_expiry_minutes")));
+
+        send(
+                member.getEmail(),
+                "Password Reset Request",
+                "Click on the link to proceed: " + resetUrl,
+                html
+        );
+    }
+
+    @Async
+    protected void sendConfirmationEmail(Member member, String rawToken) {
+        String confirmationUrl = appProperties.getFrontendUrl() + "/confirm-email/" + rawToken;
+
+        String html = loadVerificationEmailHtml()
+                .replace("[User Name]", member.getUsername())
+                .replace("[CONFIRMATION_LINK]", confirmationUrl)
+                .replace("[App Name]", appProperties.getName())
+                .replace("[HOURS]", formatHours(globalConfigurationService.getConfigValue("confirmation_token_expiry_minutes")));
+
+        send(
+                member.getEmail(),
+                "Confirm your account",
+                "Click on the link to proceed: " + confirmationUrl,
+                html
+        );
+    }
+
+    private String loadVerificationEmailHtml(){
+        try {
+            ClassPathResource resource = new ClassPathResource("templates/verification-email.html");
+            byte[] bytes = Files.readAllBytes(resource.getFile().toPath());
+            return new String(bytes, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new EmailTemplateLoadingException("Error loading e-mail template");
+        }
+    }
+
+    private String loadPasswordResetEmailHtml(){
+        try {
+            ClassPathResource resource = new ClassPathResource("templates/password-reset-email.html");
+            byte[] bytes = Files.readAllBytes(resource.getFile().toPath());
+            return new String(bytes, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new EmailTemplateLoadingException("Error loading e-mail template");
+        }
+    }
 }

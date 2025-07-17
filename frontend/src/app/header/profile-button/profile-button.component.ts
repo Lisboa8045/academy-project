@@ -40,7 +40,10 @@ export class ProfileButtonComponent implements OnInit {
       },
       {
         label: 'Appointments',
-        icon: '📅'
+        icon: '📅',
+        command: () => {
+          this.router.navigate(['/appointments'])
+        }
       },
       {
         label: 'BackOffice',

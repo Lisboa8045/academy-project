@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import {AppointmentHistoryComponent} from './appointment/appointment-history/appointment-history.component';
 import { AuthComponent } from './auth/auth.component';
 import { ProfileComponent } from './profile/profile.component';
 import { UnauthorizedComponent } from './unauthorized.component';
@@ -9,17 +10,22 @@ import {MyServicesComponent} from './service/my-services/my-services.component';
 import { ResendEmailConfirmationComponent } from "./auth/resend-email/resend-email-confirmation.component";
 import { ConfirmEmailComponent } from './auth/confirm-email/confirm-email.component';
 import {ServiceDetailsComponent} from './service/service-details/service-details.component';
+import {ForgotPasswordComponent} from './auth/forgot-password/forgot-password.component';
+import {ResetPasswordComponent} from './auth/reset-password/reset-password.component';
 
 export const routes: Routes = [
   { path: 'auth', component: AuthComponent },
   { path: 'profile', component: ProfileComponent },
+  {path: 'appointments', component: AppointmentHistoryComponent },
   { path: 'profile/:id', component: ProfileComponent },
   { path: 'unauthorized', component: UnauthorizedComponent },
   { path: 'services/:id', component: ServiceDetailsComponent},
   { path: 'services', component: SearchServicesComponent},
-  { path: 'schedule', component: ScheduleComponent },
+  { path: 'schedule/:id', component: ScheduleComponent },
   { path: '', component: LandingPageComponent},
   { path: 'my-services', component: MyServicesComponent},
   { path: 'resend-email', component: ResendEmailConfirmationComponent },
   { path: 'confirm-email/:token', component: ConfirmEmailComponent },
+  { path: 'forgot-password', component: ForgotPasswordComponent },
+  { path: 'reset-password/:token', component: ResetPasswordComponent }
 ];

@@ -1,4 +1,3 @@
-import {ServiceTypeModel} from '../models/service-type.model';
 
 export interface ServiceModel {
   id: number;
@@ -15,4 +14,5 @@ export interface ServiceModel {
   createdAt: string;
   updatedAt: string;
   images: string[];
+  averageRating?: number;
 }

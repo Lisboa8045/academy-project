@@ -12,9 +12,9 @@ import com.academy.dtos.register.MemberMapper;
 import com.academy.dtos.register.RegisterRequestDto;
 import com.academy.exceptions.AuthenticationException;
 import com.academy.exceptions.BadRequestException;
-import com.academy.exceptions.EmailTemplateLoadingException;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.exceptions.InvalidArgumentException;
+import com.academy.exceptions.MemberNotFoundByEmailException;
 import com.academy.exceptions.MemberNotFoundException;
 import com.academy.exceptions.NotFoundException;
 import com.academy.exceptions.RegistrationConflictException;
@@ -32,14 +32,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -136,50 +132,8 @@ public class MemberService {
                 Integer.parseInt(globalConfigurationService.getConfigValue("confirmation_token_expiry_minutes"))));
         memberRepository.save(member);
 
-        sendConfirmationEmail(member, rawConfirmationToken);
+        emailService.sendConfirmationEmail(member, rawConfirmationToken);
         return member;
-    }
-
-    private void sendConfirmationEmail(Member member, String rawToken) {
-        String confirmationUrl = appProperties.getFrontendUrl() + "/confirm-email/" + rawToken;
-
-        String html = loadVerificationEmailHtml()
-                .replace("[User Name]", member.getUsername())
-                .replace("[CONFIRMATION_LINK]", confirmationUrl)
-                .replace("[App Name]", appProperties.getName())
-                        .replace("[HOURS]", formatHours(globalConfigurationService.getConfigValue("confirmation_token_expiry_minutes")));
-
-        emailService.send(
-                member.getEmail(),
-                "Confirm your account",
-                "Clique no link para confirmar: " + confirmationUrl,
-                html
-        );
-    }
-    private String formatHours(String minutesStr){
-        long totalMinutes = Long.parseLong(minutesStr);
-
-        long hours = totalMinutes / 60;
-        long minutes = totalMinutes % 60;
-        String formattedTime;
-        if (hours > 0 && minutes > 0) {
-            formattedTime = hours + " hour" + (hours > 1 ? "s" : "") + " and " + minutes + " minute" + (minutes > 1 ? "s" : "");
-        } else if (hours > 0) {
-            formattedTime = hours + " hour" + (hours > 1 ? "s" : "");
-        } else {
-            formattedTime = minutes + " minute" + (minutes > 1 ? "s" : "");
-        }
-        return formattedTime;
-    }
-
-    private String loadVerificationEmailHtml(){
-            try {
-                ClassPathResource resource = new ClassPathResource("templates/verification-email.html");
-                byte[] bytes = Files.readAllBytes(resource.getFile().toPath());
-                return new String(bytes, StandardCharsets.UTF_8);
-            } catch (IOException e) {
-                throw new EmailTemplateLoadingException("Erro ao carregar template de e-mail");
-            }
     }
 
     private String generateUniqueConfirmationToken() {
@@ -198,6 +152,21 @@ public class MemberService {
         return rawToken;
     }
 
+    private String generateUniquePasswordResetToken() {
+        String rawToken;
+        Optional<Member> optionalMember;
+
+        do {
+            rawToken = generateEncodedToken();
+            String finalRawToken = rawToken;
+            optionalMember = memberRepository.findAll().stream()
+                    .filter(m -> m.getPasswordResetToken() != null &&
+                            passwordEncoder.matches(finalRawToken, m.getPasswordResetToken()))
+                    .findFirst();
+        } while (optionalMember.isPresent());
+
+        return rawToken;
+    }
 
     private String generateEncodedToken(){
         return UUID.randomUUID().toString();
@@ -213,10 +182,25 @@ public class MemberService {
         if (member.getTokenExpiry().isBefore(LocalDateTime.now()))
             throw new TokenExpiredException("Confirmation Token has Expired");
 
+        member.setConfirmationToken(null);
         member.setTokenExpiry(null);
         member.setEnabled(true);
         member.setStatus(MemberStatusEnum.ACTIVE);
         memberRepository.save(member);
+    }
+
+
+    public Member verifyPasswordResetToken(String passwordResetToken) {
+        Member member = memberRepository.findAll().stream()
+                .filter(m -> m.getPasswordResetToken() != null &&
+                        passwordEncoder.matches(passwordResetToken, m.getPasswordResetToken()))
+                .findFirst()
+                .orElseThrow(() -> new BadRequestException("Password Reset Token is Invalid/Not found"));
+
+        if (member.getPasswordResetTokenExpiry().isBefore(LocalDateTime.now()))
+            throw new TokenExpiredException("Password Reset Token has expired. Please request a new email.");
+
+        return member;
     }
 
     private boolean isValidPassword(String password) {
@@ -251,7 +235,6 @@ public class MemberService {
                     member.getUsername(), member.getPassword(), new ArrayList<>()
             );
             String token = jwtUtil.generateToken(userDetails);
-            System.out.println("Token generated:" + token);
             jwtCookieUtil.addJwtCookie(response, token);
             return new LoginResponseDto(
                     messageSource.getMessage("user.loggedin", null, LocaleContextHolder.getLocale()),
@@ -261,6 +244,13 @@ public class MemberService {
                     member.getProfilePicture(),
                     member.getRole().getName()
             );
+    }
+
+    public Member getMemberByEmail(String email){
+        Optional<Member> optionalMember = memberRepository.findByEmail(email);
+        if(optionalMember.isEmpty())
+            throw new MemberNotFoundByEmailException(email);
+        return optionalMember.get();
     }
 
     public Member getMemberByUsername(String username){
@@ -336,7 +326,7 @@ public class MemberService {
                 .orElseThrow(() -> new EntityNotFoundException(Member.class, id));
     }
     public Member getMemberEntityById(long id){
-        return memberRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
+        return memberRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(Member.class, id));
     }
 
     public void recreateConfirmationToken(String login) {
@@ -355,7 +345,7 @@ public class MemberService {
         }
         member.setConfirmationToken(passwordEncoder.encode(rawConfirmationToken));
         memberRepository.save(member);
-        sendConfirmationEmail(member, rawConfirmationToken);
+        emailService.sendConfirmationEmail(member, rawConfirmationToken);
     }
 
     public void saveProfilePic(Long id, String filename) {
@@ -374,5 +364,31 @@ public class MemberService {
         for (ServiceProvider sp : serviceProviders) {
             sp.setProvider(null);
         }
+    }
+
+    public void createPasswordResetToken(String email) {
+        Member member = getMemberByEmail(email);
+        String rawPasswordResetToken = generateUniquePasswordResetToken();
+        if (testTokenStorage != null) {
+            testTokenStorage.storeToken(rawPasswordResetToken);
+        }
+        member.setPasswordResetToken(passwordEncoder.encode(rawPasswordResetToken));
+        member.setPasswordResetTokenExpiry(LocalDateTime.now().plusMinutes(
+                Integer.parseInt(globalConfigurationService.getConfigValue("password_reset_token_expiry_minutes"))));
+        memberRepository.save(member);
+
+        emailService.sendPasswordResetEmail(member, rawPasswordResetToken);
+    }
+
+    @Transactional
+    public void resetPassword(String token, String newPassword) {
+        Member member = verifyPasswordResetToken(token);
+        if (!isValidPassword(newPassword)) {
+            throw new InvalidArgumentException(messageSource.getMessage("register.invalidpassword", null, LocaleContextHolder.getLocale()));
+        }
+        member.setPassword(passwordEncoder.encode(newPassword));
+        member.setPasswordResetToken(null);
+        member.setPasswordResetTokenExpiry(null);
+        memberRepository.save(member);
     }
 }

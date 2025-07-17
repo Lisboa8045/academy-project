@@ -4,7 +4,6 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { SlotModel } from '../models/slot.model';
 import { AppointmentModel } from '../models/appointment.model';
-import { ServiceTypeModel } from '../models/service-type.model';
 import { environment } from '../../enviroments/environments';
 
 @Injectable({
@@ -18,10 +17,6 @@ export class ScheduleApiService {
 
   getFreeSlots(serviceId: number): Observable<SlotModel[]> {
     return this.http.get<SlotModel[]>(`${this.BASE_URL}/appointments/services/${serviceId}/free-slots`);
-  }
-
-  getServiceTypes(): Observable<ServiceTypeModel[]> {
-    return this.http.get<ServiceTypeModel[]>(`${this.BASE_URL}/service-types`);
   }
 
   getServiceProvider(serviceId: number, providerId: number): Observable<any> {

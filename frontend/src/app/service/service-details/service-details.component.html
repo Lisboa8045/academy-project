@@ -1,9 +1,6 @@
-
-@if(loading()) {
-  <app-loading/>
-} @else {
-
-
+  @if(loading()) {
+    <app-loading/>
+  } @else {
     <div class ="service-page">
 
       <div class="image-section card">
@@ -12,11 +9,22 @@
             <button class="nav left" (click)="prevImage(thumbContainer)" [disabled]="currentImageIndex === 0">&#10094;
             </button>
 
-            <img
-              [src]="imageUrls[currentImageIndex]"
-              alt="Service Image"
-              class="main-image"
-            />
+            <<img
+            *ngIf="imageUrls.length > 0; else noImage"
+            [src]="imageUrls[currentImageIndex]"
+            alt="Service Image"
+            class="main-image"
+          />
+
+
+            <ng-template #noImage>
+              <img
+                src="https://placehold.co/300x200?text=No+Image"
+                alt="No image available"
+                class="main-image placeholder"
+              />
+            </ng-template>
+
 
             <button class="nav right" (click)="nextImage(thumbContainer)"
                     [disabled]="currentImageIndex === imageUrls.length - 1">&#10095;
@@ -31,6 +39,7 @@
                   [class.selected]="i === currentImageIndex"
                   (click)="selectThumbnail(i, thumbContainer)"
                 />
+
               </div>
             </div>
           </div>
@@ -83,7 +92,7 @@
                 <div class="normal-price" style="font-weight: bold;">{{ service?.price }}€</div>
             </ng-template>
 
-            <button class="schedule-btn">Schedule Appointment</button>
+            <button class="schedule-btn" (click)="onClick(service?.id)">Schedule Appointment</button>
 
         </div>
     </div>

@@ -46,6 +46,9 @@ button {
   transition: background 0.3s;
   margin-top: 0;
 }
+button:hover {
+  background-color: #2563EB;
+}
 .button-container {
   display: inline-flex;
   align-items: center;
@@ -64,4 +67,21 @@ button {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+.forgot-password {
+  text-align: right;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.forgot-password a {
+  color: #3B82F6;
+  font-size: 0.9rem;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.forgot-password a:hover {
+  text-decoration: underline;
 }

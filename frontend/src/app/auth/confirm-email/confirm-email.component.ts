@@ -39,7 +39,7 @@ export class ConfirmEmailComponent implements OnInit {
           this.error = 'This confirmation link is invalid.';
         }
         else if (err.status === 410) {
-          this.error = 'This confirmation link has expired.'
+          this.error = 'This confirmation link has expired. Please request a new one.'
         }
         else {
           this.error = 'An unexpected error occurred.';
