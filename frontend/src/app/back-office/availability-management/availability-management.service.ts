@@ -52,46 +52,6 @@ export class AvailabilityService {
     );
   }
 
-  // Get default availability template
-  getDefaultAvailability(memberId: number): Observable<AvailabilityModel[]> {
-    return this.http.get<AvailabilityModel[]>(
-      `${this.BASE_URL}/availabilities/members/${memberId}/default`
-    );
-  }
-
-  // Delete an availability slot
-  deleteAvailability(id: number): Observable<any> {
-    return this.http.delete(
-      `${this.BASE_URL}/availabilities/${id}`
-    );
-  }
-
-  // Update an availability slot
-  updateAvailability(availability: AvailabilityModel): Observable<AvailabilityModel> {
-    return this.http.put<AvailabilityModel>(
-      `${this.BASE_URL}/availabilities/${availability.id}`,
-      availability
-    );
-  }
-
-  // Create a new availability slot
-  createAvailability(memberId: number, availability: {
-    id?: number;
-    memberId?: number;
-    dayOfWeek: string;
-    startDateTime: string;
-    endDateTime: string;
-    isException: boolean;
-  }): Observable<AvailabilityModel> {
-    return this.http.post<AvailabilityModel>(
-      `${this.BASE_URL}/availabilities/members/${memberId}`,
-      {
-        ...availability,
-        memberId: memberId
-      }
-    );
-  }
-
   // Create exception for specific date
   createException(memberId: number, availability: AvailabilityModel): Observable<AvailabilityModel> {
     return this.http.post<AvailabilityModel>(

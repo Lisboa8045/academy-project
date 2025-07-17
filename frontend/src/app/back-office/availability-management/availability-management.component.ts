@@ -3,13 +3,11 @@
   import { AvailabilityService } from './availability-management.service';
   import { AvailabilityModel } from '../../models/availability.model';
   import { AuthStore } from '../../auth/auth.store';
-  import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+  import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
   import { WeekNavigationComponent } from '../../shared/week-navigation/week-navigation.component';
   import { WeekNavigationService } from '../../shared/week-navigation.service';
-  import { addDays, startOfWeek, endOfWeek, isSameDay, format, parseISO, getDay, setHours, setMinutes } from 'date-fns';
-  import { ptBR } from 'date-fns/locale';
-  import {filter, take} from 'rxjs';
-  import {toObservable} from '@angular/core/rxjs-interop';
+  import { addDays, startOfWeek, endOfWeek, isSameDay, format, parseISO, setHours, setMinutes } from 'date-fns';
+  import {forkJoin} from 'rxjs';
 
   @Component({
     selector: 'app-availability-management',
@@ -95,27 +93,26 @@
     }
 
     getAvailabilityForDay(day: Date): AvailabilityModel[] {
-      const dayOfWeek = day.getDay();
-
-      // Get all availabilities for this specific day (both exceptions and local changes)
-      const dayAvailabilities = [
+      // 1. Get all exceptions (DB + local changes)
+      const exceptions = [
         ...this.availabilities.filter(a =>
-          isSameDay(parseISO(a.startDateTime as string), day) &&
+          isSameDay(parseISO(a.startDateTime), day) &&
+          a.isException &&
           !this.deletedIds.includes(a.id as number)
         ),
         ...this.localChanges.filter(a =>
-          isSameDay(parseISO(a.startDateTime as string), day)
+          isSameDay(parseISO(a.startDateTime), day)
         )
       ];
 
-      // If there are any exceptions (or local changes), return only those
-      if (dayAvailabilities.length > 0) {
-        return dayAvailabilities.sort((a, b) =>
-          parseISO(a.startDateTime as string).getTime() - parseISO(b.startDateTime as string).getTime()
+      // 2. If exceptions exist, return ONLY those
+      if (exceptions.length > 0) {
+        return exceptions.sort((a, b) =>
+          parseISO(a.startDateTime).getTime() - parseISO(b.startDateTime).getTime()
         );
       }
 
-      // If no exceptions and we have defaults, return default intervals
+      // 3. Fall back to defaults if no exceptions
       if (this.hasDefaults && !this.isSettingDefaults) {
         return this.getDefaultIntervalsForDay(day);
       }
@@ -152,15 +149,11 @@
     }
 
     trackByAvailability(index: number, avail: AvailabilityModel): number {
-      return avail.id || index;
+      return avail.id ?? index;
     }
 
     isToday(day: Date): boolean {
       return isSameDay(day, this.today);
-    }
-
-    isSlotBooked(avail: AvailabilityModel): boolean {
-      return false;
     }
 
     // Form operations
@@ -177,7 +170,7 @@
     }
 
     openEditForm(avail: AvailabilityModel): void {
-      const day = parseISO(avail.startDateTime as string);
+      const day = parseISO(avail.startDateTime);
       const dayAvailabilities = this.getAvailabilityForDay(day);
 
       this.selectedDay = day;
@@ -185,15 +178,15 @@
       if (dayAvailabilities.length > 0) {
         const firstInterval = dayAvailabilities[0];
         this.availabilityForm.patchValue({
-          startTime1: format(parseISO(firstInterval.startDateTime as string), 'HH:mm'),
-          endTime1: format(parseISO(firstInterval.endDateTime as string), 'HH:mm')
+          startTime1: format(parseISO(firstInterval.startDateTime), 'HH:mm'),
+          endTime1: format(parseISO(firstInterval.endDateTime), 'HH:mm')
         });
 
         if (dayAvailabilities.length > 1) {
           const secondInterval = dayAvailabilities[1];
           this.availabilityForm.patchValue({
-            startTime2: format(parseISO(secondInterval.startDateTime as string), 'HH:mm'),
-            endTime2: format(parseISO(secondInterval.endDateTime as string), 'HH:mm')
+            startTime2: format(parseISO(secondInterval.startDateTime), 'HH:mm'),
+            endTime2: format(parseISO(secondInterval.endDateTime), 'HH:mm')
           });
         }
       }
@@ -202,20 +195,11 @@
       this.showFormModal = true;
     }
 
-    openBulkAddForm(): void {
-      this.availabilityForm.reset({
-        startTime: '09:00',
-        endTime: '17:00',
-        applyType: 'weekly',
-        selectedMonths: [],
-        selectedDays: [1, 2, 3, 4, 5]
-      });
-      this.formMode = 'bulk';
-      this.showFormModal = true;
-    }
-
     saveLocalChanges(): void {
-      if (this.availabilityForm.invalid) return;
+      if (this.availabilityForm.invalid) {
+        console.error('Form is invalid');
+        return;
+      }
 
       const formValue = this.availabilityForm.value;
       const newAvailabilities = this.generateAvailabilitiesFromForm(formValue);
@@ -223,24 +207,27 @@
       if (this.selectedDay) {
         const selectedDay = this.selectedDay;
 
+        // Remove any existing changes for this day
         this.localChanges = this.localChanges.filter(a => {
-          const availDate = parseISO(a.startDateTime as string);
+          const availDate = parseISO(a.startDateTime);
           return !isSameDay(availDate, selectedDay);
         });
 
+        // Remove any existing availabilities for this day
         this.availabilities = this.availabilities.filter(a => {
-          const availDate = parseISO(a.startDateTime as string);
+          const availDate = parseISO(a.startDateTime);
           return !isSameDay(availDate, selectedDay) || this.deletedIds.includes(a.id as number);
         });
       }
 
+      // Add new availabilities with proper flags
       this.localChanges = [
         ...this.localChanges,
         ...newAvailabilities.map(avail => ({
           ...avail,
-          id: avail.id || this.generateTemporaryId(),
+          id: avail.id ?? this.generateTemporaryId(),
           memberId: this.authStore.id(),
-          isException: !this.isSettingDefaults // Mark as exception if not setting defaults
+          isException: !this.isSettingDefaults
         }))
       ];
 
@@ -295,15 +282,19 @@
 
     saveAllChanges(): void {
       const memberId = this.authStore.id();
-      if (!memberId) return;
+      if (!memberId || memberId <= 0) {
+        console.error('Invalid member ID');
+        return;
+      }
 
       if (this.isSettingDefaults) {
+        // Save default template (unchanged)
         const days = [...new Set(this.localChanges.map(avail => avail.dayOfWeek))];
         const firstMorning = this.localChanges.find(a =>
-          format(parseISO(a.startDateTime), 'HH:mm') === '09:00' // Adjust based on your morning start
+          format(parseISO(a.startDateTime), 'HH:mm') === '09:00'
         );
         const firstAfternoon = this.localChanges.find(a =>
-          format(parseISO(a.startDateTime), 'HH:mm') === '13:00' // Adjust based on your afternoon start
+          format(parseISO(a.startDateTime), 'HH:mm') === '13:00'
         );
 
         this.availabilityService.saveDefaultAvailability(
@@ -313,34 +304,53 @@
           firstMorning ? format(parseISO(firstMorning.endDateTime), 'HH:mm') : '12:00',
           firstAfternoon ? format(parseISO(firstAfternoon.startDateTime), 'HH:mm') : '13:00',
           firstAfternoon ? format(parseISO(firstAfternoon.endDateTime), 'HH:mm') : '17:00'
-        ).subscribe(() => {
-          this.isSettingDefaults = false;
-          this.hasDefaults = true;
-          this.resetLocalState();
-          this.loadAvailabilities();
-        });
-      } else {
-        // Original save logic for exceptions
-        const deleteObservables = this.deletedIds
-          .filter(id => id !== undefined)
-          .map(id => this.availabilityService.deleteAvailability(id));
-
-        const createObservables = this.localChanges.map(change => {
-          if (change.id && change.id > 0) {
-            return this.availabilityService.updateAvailability(change);
-          } else {
-            return this.availabilityService.createAvailability(memberId, {
-              ...change,
-              isException: true
-            });
-          }
-        });
-
-        Promise.all([...deleteObservables, ...createObservables])
-          .then(() => {
+        ).subscribe({
+          next: () => {
+            this.isSettingDefaults = false;
+            this.hasDefaults = true;
             this.resetLocalState();
             this.loadAvailabilities();
-          });
+          },
+          error: (err) => {
+            console.error('Error saving default availability:', err);
+            // Show error to user
+          }
+        });
+      } else {
+        // Filter to get only new exceptions (items with temporary IDs or no IDs)
+        const newExceptions = this.localChanges.filter(change =>
+          change.id === undefined || change.id < 0
+        );
+
+        if (newExceptions.length === 0) {
+          this.resetLocalState();
+          return;
+        }
+
+        // Prepare the data for the backend
+        const createObservables = newExceptions.map(change => {
+          const cleanException = {
+            dayOfWeek: change.dayOfWeek,
+            startDateTime: change.startDateTime,
+            endDateTime: change.endDateTime,
+            isException: true,
+            memberId: memberId
+          };
+          return this.availabilityService.createException(memberId, cleanException);
+        });
+
+        // Execute all creations
+        forkJoin(createObservables).subscribe({
+          next: () => {
+            this.resetLocalState();
+            this.loadAvailabilities();
+            // Show success message to user
+          },
+          error: (err) => {
+            console.error('Error creating exceptions:', err);
+            // Show error to user
+          }
+        });
       }
     }
 
@@ -394,44 +404,44 @@
       }
     }
 
-    private dayHasExceptions(day: Date): boolean {
-      return [
-        ...this.availabilities,
-        ...this.localChanges
-      ].some(a =>
-        isSameDay(parseISO(a.startDateTime as string), day) &&
-        (a.isException || !a.hasOwnProperty('isException'))
-      );
-    }
-
     private generateAvailabilitiesFromForm(formValue: any): AvailabilityModel[] {
       const newAvailabilities: AvailabilityModel[] = [];
 
-      if (!this.selectedDay) return newAvailabilities;
+      if (!this.selectedDay) {
+        console.error('No day selected');
+        return newAvailabilities;
+      }
+
+      const dayOfWeek = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'][this.selectedDay.getDay()];
+      const memberId = this.authStore.id();
 
       // First interval
       if (formValue.startTime1 && formValue.endTime1) {
-        const startDateTime1 = this.combineDateAndTime(this.selectedDay, formValue.startTime1);
-        const endDateTime1 = this.combineDateAndTime(this.selectedDay, formValue.endTime1);
+        const startDateTime = this.combineDateAndTime(this.selectedDay, formValue.startTime1);
+        const endDateTime = this.combineDateAndTime(this.selectedDay, formValue.endTime1);
 
         newAvailabilities.push({
-          startDateTime: startDateTime1,
-          endDateTime: endDateTime1,
-          dayOfWeek: ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'][this.selectedDay.getDay()],
-          isException: false
+          startDateTime: startDateTime,
+          endDateTime: endDateTime,
+          dayOfWeek: dayOfWeek,
+          isException: !this.isSettingDefaults,
+          memberId: memberId,
+          id: undefined // Explicitly set to undefined
         });
       }
 
       // Second interval if provided
       if (formValue.startTime2 && formValue.endTime2) {
-        const startDateTime2 = this.combineDateAndTime(this.selectedDay, formValue.startTime2);
-        const endDateTime2 = this.combineDateAndTime(this.selectedDay, formValue.endTime2);
+        const startDateTime = this.combineDateAndTime(this.selectedDay, formValue.startTime2);
+        const endDateTime = this.combineDateAndTime(this.selectedDay, formValue.endTime2);
 
         newAvailabilities.push({
-          startDateTime: startDateTime2,
-          endDateTime: endDateTime2,
-          dayOfWeek: ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'][this.selectedDay.getDay()],
-          isException: false
+          startDateTime: startDateTime,
+          endDateTime: endDateTime,
+          dayOfWeek: dayOfWeek,
+          isException: !this.isSettingDefaults,
+          memberId: memberId,
+          id: undefined // Explicitly set to undefined
         });
       }
 

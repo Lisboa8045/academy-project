@@ -8,7 +8,6 @@ import org.mapstruct.Mapping;
 public interface AvailabilityMapper {
 
     @Mapping(target = "memberId", source = "member.id")
-    @Mapping(target = "isDefault", source = "default")
     @Mapping(target = "isException", source = "exception")
     AvailabilityResponseDTO toResponseDTOWithMember(Availability availability);
 
@@ -16,7 +15,6 @@ public interface AvailabilityMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "member", ignore = true)
-    @Mapping(target = "default", constant = "false")
     @Mapping(target = "exception", constant = "false")
     Availability toEntity(AvailabilityRequestDTO requestDTO);
 }

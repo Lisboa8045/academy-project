@@ -9,6 +9,5 @@ public record AvailabilityResponseDTO(
         DayOfWeek dayOfWeek,
         LocalDateTime startDateTime,
         LocalDateTime endDateTime,
-        boolean isDefault,
         boolean isException
 ) {}
