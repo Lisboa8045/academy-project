@@ -35,6 +35,7 @@ public class AppointmentService {
     private final AppointmentMapper appointmentMapper;
     private final MemberService memberService;
     private final AuthenticationFacade authenticationFacade;
+    private final EmailService emailService;
 
     @Value("${slot.window.days:30}")
     private int slotWindowDays;
@@ -45,12 +46,14 @@ public class AppointmentService {
             , ServiceProviderService serviceProviderService,
                               AppointmentMapper appointmentMapper,
                               MemberService memberService,
-                              AuthenticationFacade authenticationFacade) {
+                              AuthenticationFacade authenticationFacade,
+                              EmailService emailService) {
         this.appointmentRepository = appointmentRepository;
         this.serviceProviderService = serviceProviderService;
         this.appointmentMapper = appointmentMapper;
         this.memberService = memberService;
         this.authenticationFacade = authenticationFacade;
+        this.emailService = emailService;
     }
 
     public List<AppointmentResponseDTO> getAllAppointments() {
@@ -110,7 +113,11 @@ public class AppointmentService {
         appointment.setStatus(AppointmentStatus.PENDING);
         appointment.setPrice(price - ( price * service.getDiscount()/100));
 
-        return appointmentMapper.toResponseDTO(appointmentRepository.save(appointment));
+        appointment = appointmentRepository.save(appointment);
+
+        emailService.sendAppointmentConfirmationEmail(appointment);
+
+        return appointmentMapper.toResponseDTO(appointment);
     }
 
 

@@ -48,7 +48,7 @@ export class ConfirmAppointmentComponent implements OnInit {
     });
   }
 
-  goToLogin(): void {
-    this.router.navigate(['/auth']);
+  goToHomePage(): void {
+    this.router.navigate(['/']);
   }
 }
