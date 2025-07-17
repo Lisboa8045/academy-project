@@ -14,10 +14,12 @@
 
 <div class="modal-backdrop" *ngIf="showModal">
   <div class="modal">
-    <h3>All Tags</h3>
-    <span *ngFor="let tag of tags" class="tag" (click)="onTagClick(tag)">
+    <h3 class="modal-title">All Tags</h3>
+    <div class="tag-container">
+      <div *ngFor="let tag of tags" class="tag-more" (click)="onTagClick(tag)">
         {{ tag }}
-      </span>
+      </div>
+    </div>
     <div class="modal-actions">
       <button (click)="closeModal()">Close</button>
     </div>

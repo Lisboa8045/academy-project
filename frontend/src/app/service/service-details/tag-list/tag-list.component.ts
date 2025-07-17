@@ -24,9 +24,11 @@ export class TagListComponent {
 
   openTagModal(): void {
     this.showModal = true;
+    document.body.classList.add('no-scroll');
   }
 
   closeModal(): void {
     this.showModal = false;
+    document.body.classList.remove('no-scroll');
   }
 }

@@ -17,23 +17,40 @@
   background-color: #f0f0f0;
   padding: 6px 12px;
   margin-right: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   display: inline-block;
   border-radius: 16px;
   font-size: 14px;
   cursor: pointer;
 }
 
+.tag-more {
+  background-color: #f0f0f0;
+  padding: 6px 12px;
+  margin-bottom: 8px;
+  display: block;
+  border-radius: 16px;
+  font-size: 14px;
+  cursor: pointer;
+  width: fit-content;
+}
+
+
+.tag-container {
+  text-align: center;
+}
 .see-more-button {
   background: none;
   border: none;
   color: blue;
   cursor: pointer;
   font-weight: bold;
+  margin-left: -1rem;
 }
 
 .modal-backdrop {
   position: fixed;
+  z-index: 1000;
   top: 0;
   left: 0;
   width: 100%;
@@ -48,6 +65,11 @@
   background: white;
   padding: 1rem;
   border-radius: 8px;
-  width: 300px;
+  width: 250px;
 }
+
+.modal-title {
+  text-align: center;
+}
+
 
