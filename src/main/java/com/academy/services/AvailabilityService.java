@@ -100,6 +100,16 @@ public class AvailabilityService {
         availability.setMember(member);
         availability.setException(true);
 
+        // Check for overlap before saving
+        boolean exists = availabilityRepository.existsByMember_IdAndDayOfWeekAndTimeOverlap(
+            member.getId(),
+            availability.getDayOfWeek(),
+            availability.getStartDateTime(),
+            availability.getEndDateTime()
+        );
+        if (exists) {
+            throw new InvalidArgumentException("Duplicate or overlapping availability detected.");
+        }
         Availability saved = availabilityRepository.save(availability);
         return availabilityMapper.toResponseDTOWithMember(saved);
     }
@@ -112,6 +122,16 @@ public class AvailabilityService {
         availability.setMember(member);
         availability.setException(false);
 
+        // Check for overlap before saving
+        boolean exists = availabilityRepository.existsByMember_IdAndDayOfWeekAndTimeOverlap(
+            member.getId(),
+            availability.getDayOfWeek(),
+            availability.getStartDateTime(),
+            availability.getEndDateTime()
+        );
+        if (exists) {
+            throw new InvalidArgumentException("Duplicate or overlapping availability detected.");
+        }
         Availability saved = availabilityRepository.save(availability);
         return availabilityMapper.toResponseDTOWithMember(saved);
     }

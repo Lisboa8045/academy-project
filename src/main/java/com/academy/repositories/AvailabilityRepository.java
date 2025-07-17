@@ -1,5 +1,6 @@
 package com.academy.repositories;
 
+import com.academy.dtos.availability.AvailabilityResponseDTO;
 import com.academy.models.Availability;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -36,4 +38,6 @@ public interface AvailabilityRepository extends JpaRepository<Availability, Long
             @Param("endDateTime") LocalDateTime endDateTime);
 
     List<Availability> findByMember_IdAndStartDateTimeBetween(Long memberId, LocalDateTime start, LocalDateTime end);
+
+    Collection<AvailabilityResponseDTO> findByMember_IdAndIsExceptionTrue(Long memberId);
 }

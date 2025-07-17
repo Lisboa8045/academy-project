@@ -1,0 +1,28 @@
+.management-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.management-title {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.bulk-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.save-all-button {
+  background: #2ecc71;
+  color: white;
+}
+
+.save-all-button:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+}
