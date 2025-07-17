@@ -27,6 +27,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.academy.utils.Utils.formatHours;
+
 @Service
 public class AppointmentService {
 
@@ -36,6 +38,8 @@ public class AppointmentService {
     private final MemberService memberService;
     private final AuthenticationFacade authenticationFacade;
     private final EmailService emailService;
+    private final AppointmentSchedulerService appointmentSchedulerService;
+    private final GlobalConfigurationService globalConfigurationService;
 
     @Value("${slot.window.days:30}")
     private int slotWindowDays;
@@ -47,13 +51,17 @@ public class AppointmentService {
                               AppointmentMapper appointmentMapper,
                               MemberService memberService,
                               AuthenticationFacade authenticationFacade,
-                              EmailService emailService) {
+                              EmailService emailService,
+                              AppointmentSchedulerService appointmentSchedulerService,
+                              GlobalConfigurationService globalConfigurationService) {
         this.appointmentRepository = appointmentRepository;
         this.serviceProviderService = serviceProviderService;
         this.appointmentMapper = appointmentMapper;
         this.memberService = memberService;
         this.authenticationFacade = authenticationFacade;
         this.emailService = emailService;
+        this.appointmentSchedulerService = appointmentSchedulerService;
+        this.globalConfigurationService = globalConfigurationService;
     }
 
     public List<AppointmentResponseDTO> getAllAppointments() {
@@ -117,11 +125,10 @@ public class AppointmentService {
 
         emailService.sendAppointmentConfirmationEmail(appointment);
 
+        appointmentSchedulerService.scheduleAutoCancel(appointment, Integer.parseInt(globalConfigurationService.getConfigValue("confirm_appointment_expiry_minutes")));
+
         return appointmentMapper.toResponseDTO(appointment);
     }
-
-
-
 
     public AppointmentResponseDTO updateAppointment(Long id, AppointmentRequestDTO appointmentDetails) {
 
