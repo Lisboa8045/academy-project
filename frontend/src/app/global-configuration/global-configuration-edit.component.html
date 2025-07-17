@@ -1,0 +1,64 @@
+<div class="tailwind-scope">
+  <div class="bg-white rounded-2xl shadow-lg p-6 w-full max-w-4xl mx-auto">
+    <h2 class="text-xl font-semibold mb-6">Edit Global Configurations</h2>
+
+    <form [formGroup]="configForm" (ngSubmit)="submit()">
+      <div formArrayName="configurations" class="space-y-6">
+        <div
+          *ngFor="let config of configurations.controls; let i = index"
+          [formGroupName]="i"
+          class="bg-gray-50 p-4 rounded-xl border border-gray-200 shadow-sm"
+        >
+
+          <div class="mb-2">
+            <label for="name-{{ i }}" class="block text-sm text-gray-600 font-medium">Name</label>
+            <input
+              id="name-{{ i }}"
+              type="text"
+              [value]="config.get('configName')?.value"
+              readonly
+              class="w-full mt-1 p-2 bg-gray-100 border border-gray-300 rounded-md text-gray-500 cursor-not-allowed"
+            />
+          </div>
+
+          <!-- Config Value -->
+          <div class="mb-2">
+            <label for="value-{{ i }}" class="block text-sm text-gray-600 font-medium">Value</label>
+            <input
+              id="value-{{ i }}"
+              [type]="configTypeDescription(config.get('configType')?.value) === 'Password' ? 'password' : 'text'"
+              formControlName="configValue"
+              class="w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+            />
+            <div *ngIf="config.get('configValue')?.invalid && config.get('configValue')?.touched" class="text-red-500 text-sm mt-1">
+              Value is required.
+            </div>
+          </div>
+
+          <!-- Config Type -->
+          <div>
+            <label for="type-{{ i }}" class="block text-sm text-gray-600 font-medium">Type</label>
+            <input
+              id="type-{{ i }}"
+              type="text"
+            [value]="configTypeDescription(config.get('configType')?.value)"
+            class="w-full mt-1 p-2 bg-gray-100 border border-gray-300 rounded-md text-gray-500 cursor-not-allowed"
+            readonly
+            />
+          </div>
+
+        </div>
+      </div>
+
+      <div class="mt-6 flex justify-end">
+        <button
+          type="submit"
+          [disabled]="configForm.invalid"
+          class="px-6 py-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Save Changes
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
