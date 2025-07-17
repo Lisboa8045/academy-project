@@ -5,6 +5,7 @@ import com.academy.dtos.appointment.AppointmentCardDTO;
 import com.academy.dtos.SlotDTO;
 import com.academy.dtos.appointment.AppointmentRequestDTO;
 import com.academy.dtos.appointment.AppointmentResponseDTO;
+import com.academy.dtos.appointment.ConfirmAppointmentResponseDTO;
 import com.academy.dtos.appointment.review.ReviewRequestDTO;
 import com.academy.dtos.appointment.review.ReviewResponseDTO;
 import com.academy.services.AppointmentService;
@@ -50,6 +51,11 @@ public class AppointmentController {
     public ResponseEntity<AppointmentResponseDTO> updateAppointment(@PathVariable Long id, @RequestBody AppointmentRequestDTO appointmentDetails) {
         AppointmentResponseDTO updated = appointmentService.updateAppointment(id, appointmentDetails);
         return ResponseEntity.ok(updated);
+    }
+
+    @PostMapping("/confirm-appointment/{id}")
+        public ResponseEntity<ConfirmAppointmentResponseDTO> confirmAppointment(@PathVariable Long id){
+        return appointmentService.confirmAppointment(id);
     }
 
     @DeleteMapping("/{id}")
