@@ -1,7 +1,8 @@
-<!-- provider-selection-modal.component.html -->
 <div class="modal-backdrop">
   <div class="modal provider-modal">
-    <h3>Choose a provider for {{ providerOptions[0]?.start | date:'shortTime' }}</h3>
+    <h3 *ngIf="providerOptions.length">
+      Choose a provider for {{ providerOptions[0].start | date:'shortTime' }}
+    </h3>
     <ul class="provider-list">
       <li *ngFor="let slot of providerOptions"
           (click)="providerSelected.emit(slot)"
