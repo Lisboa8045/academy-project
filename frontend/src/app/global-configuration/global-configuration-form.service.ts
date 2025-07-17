@@ -18,6 +18,7 @@ export class GlobalConfigurationFormService {
       array.push(
         this.fb.group({
           configName: [{ value: config.configName, disabled: true }],
+          configKey: [config.configKey],  // <-- Add this line
           configValue: [config.configValue, Validators.required],
           configType: [{ value: config.configType, disabled: true }],
         })
