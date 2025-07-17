@@ -1,13 +1,14 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { SlotModel } from '../../models/slot.model';
 import {CommonModule, DatePipe} from '@angular/common';
+import { WeekNavigationComponent } from '../../shared/week-navigation/week-navigation.component';
 
 @Component({
   selector: 'app-slot-selection',
   templateUrl: 'slot-selection.component.html',
   styleUrls: ['../schedule.component.css'],
   imports: [
-    DatePipe, CommonModule,
+    DatePipe, CommonModule, WeekNavigationComponent,
   ],
 })
 export class SlotSelectionComponent {
@@ -43,14 +44,6 @@ export class SlotSelectionComponent {
 
   filterByProvider(provider: string | null) {
     this.providerFilter.emit(provider);
-  }
-
-  goToPreviousWeek() {
-    this.previousWeek.emit();
-  }
-
-  goToNextWeek() {
-    this.nextWeek.emit();
   }
 
   selectSlot(slot: SlotModel) {
