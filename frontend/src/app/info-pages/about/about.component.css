@@ -63,7 +63,6 @@
 .avatar-link:hover {
   filter: grayscale(0%);
   transform: scale(1.12);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
 .avatar-link img {
