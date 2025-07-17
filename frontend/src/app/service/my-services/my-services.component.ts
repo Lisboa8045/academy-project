@@ -94,18 +94,4 @@ export class MyServicesComponent{
     }
   }
 
-  buildDummyData(): void {
-    this.loading.set(true)
-    this.serviceApiService.createService().subscribe({
-      next: (res) => {
-        console.log(res);
-        this.loading.set(false);
-      },
-      error: (err) => {
-        console.error('Failed to create service', err);
-        this.loading.set(false);
-      },
-    })
-  }
-
 }

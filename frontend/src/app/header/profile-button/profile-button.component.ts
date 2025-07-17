@@ -26,7 +26,7 @@ export class ProfileButtonComponent implements OnInit {
   menuItems: MenuItem[] = [];
 
   constructor(private authStore: AuthStore) {
-    effect(() =>{ console.log(authStore.role()), this.insertByRole()});
+    effect(() =>{this.insertByRole()});
   }
 
   ngOnInit() {
@@ -73,7 +73,6 @@ export class ProfileButtonComponent implements OnInit {
   }
 
   insertByRole(){
-    console.log("Entered role");
     this.menuItems = this.menuItems.filter(item => item.label !== 'My Services');
     if (this.role() === 'WORKER') {
       this.menuItems.splice(3, 0, {

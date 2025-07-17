@@ -47,9 +47,7 @@ export class ServiceCardComponent implements OnInit {
   }
 
   loadServiceImage() {
-    console.log(this.service.images[0])
     this.userProfileService.getImage(this.service.images[0]).then((url) => {
-      console.log(url);
       if(url !== null) this.serviceImage.set(url);
     });
   }

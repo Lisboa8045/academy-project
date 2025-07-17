@@ -31,13 +31,11 @@ export class AuthStore {
   }
 
   setProfilePicture(profilePicture: string) {
-    console.log(this.profilePicture());
     this.profilePicture.set(profilePicture);
     console.log(profilePicture);
   }
 
   setRole(role: string){
-    console.log('Old Role' + this.role() + ' New Role ' + role)
     this.role.set(role)
   }
 

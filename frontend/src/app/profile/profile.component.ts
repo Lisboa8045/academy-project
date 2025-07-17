@@ -187,7 +187,6 @@ export class ProfileComponent implements OnInit {
       formData.append('file', this.selectedFile!);
       this.profileService.uploadProfilePicture(formData, this.authStore.id()).subscribe({
         next: () => {
-          console.log('Uploaded');
           this.authStore.setProfilePicture(this.tempImageUrl());
         },
         error: (err) => {

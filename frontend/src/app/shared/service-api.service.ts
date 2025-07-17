@@ -53,17 +53,4 @@ export class ServiceApiService {
       .set('sort', query.sortOrder);
     return this.http.get<PagedResponse>(this.BASE_URL + '/my-services/'+id, {params});
   }
-
-  createService(){
-    return this.http.post<ServiceModel>(this.BASE_URL, {
-      "name": "a",
-      "description": "asdasdasd",
-      "price": 100,
-      "discount": 1,
-      "negotiable": false,
-      "duration": 1,
-      "serviceTypeName": "Beauty",
-      "tagNames": ["omg", "jesus", "piccolo"]
-    });
-  }
 }

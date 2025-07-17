@@ -152,7 +152,6 @@ public class ServiceService {
         if (previousType != null) {
             removeServiceTypeLink(service);
         }
-        System.out.println("AA" + serviceTypeName);
         ServiceType type = serviceTypeService.getServiceTypeEntityByName(serviceTypeName);
         service.setServiceType(type);
         type.getServices().add(service);
