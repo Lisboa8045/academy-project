@@ -267,17 +267,18 @@
     }
 
     removeAvailability(avail: AvailabilityModel): void {
+      // Remove from local changes if present
       this.localChanges = this.localChanges.filter(a => a.id !== avail.id);
 
       if (avail.id && avail.id > 0) {
-        this.deletedIds.push(avail.id);
-        this.availabilities = this.availabilities.filter(a => a.id !== avail.id);
-      } else {
-        this.availabilities = this.availabilities.filter(a =>
-          a.startDateTime !== avail.startDateTime ||
-          a.endDateTime !== avail.endDateTime
-        );
+        // Track for backend deletion
+        if (!this.deletedIds.includes(avail.id)) {
+          this.deletedIds.push(avail.id);
+        }
       }
+
+      // Update view immediately
+      this.updateView();
     }
 
     saveAllChanges(): void {
@@ -313,21 +314,19 @@
           },
           error: (err) => {
             console.error('Error saving default availability:', err);
-            // Show error to user
           }
         });
       } else {
-        // Filter to get only new exceptions (items with temporary IDs or no IDs)
+        // 1. First handle deletions
+        const deleteObservables = this.deletedIds.map(id =>
+          this.availabilityService.deleteAvailability(id)
+        );
+
+        // 2. Then handle new exceptions (items with temporary IDs or no IDs)
         const newExceptions = this.localChanges.filter(change =>
           change.id === undefined || change.id < 0
         );
 
-        if (newExceptions.length === 0) {
-          this.resetLocalState();
-          return;
-        }
-
-        // Prepare the data for the backend
         const createObservables = newExceptions.map(change => {
           const cleanException = {
             dayOfWeek: change.dayOfWeek,
@@ -339,15 +338,22 @@
           return this.availabilityService.createException(memberId, cleanException);
         });
 
-        // Execute all creations
-        forkJoin(createObservables).subscribe({
+        // 3. Combine both operations
+        const allOperations = [...deleteObservables, ...createObservables];
+
+        if (allOperations.length === 0) {
+          this.resetLocalState();
+          return;
+        }
+
+        forkJoin(allOperations).subscribe({
           next: () => {
             this.resetLocalState();
             this.loadAvailabilities();
             // Show success message to user
           },
           error: (err) => {
-            console.error('Error creating exceptions:', err);
+            console.error('Error saving changes:', err);
             // Show error to user
           }
         });
@@ -361,14 +367,11 @@
       );
     }
 
-    // Private helper methods
     private updateView(): void {
-      const combined = [
+      this.availabilities = [
         ...this.availabilities.filter(a => !this.deletedIds.includes(a.id as number)),
         ...this.localChanges
-      ];
-
-      this.availabilities = combined.filter((avail, index, self) =>
+      ].filter((avail, index, self) =>
           index === self.findIndex(a =>
             a.id === avail.id ||
             (a.startDateTime === avail.startDateTime && a.endDateTime === avail.endDateTime)

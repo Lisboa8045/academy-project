@@ -64,6 +64,12 @@ export class AvailabilityService {
     );
   }
 
+  deleteAvailability(availabilityId: number): Observable<void> {
+    return this.http.delete<void>(
+      `${this.BASE_URL}/availabilities/${availabilityId}`
+    );
+  }
+
   private mapDayStringToDayOfWeek(day: string): string {
     // Map your frontend day strings to backend DayOfWeek enum format
     // Example: "MONDAY" -> "MONDAY" (no change if already matching)
