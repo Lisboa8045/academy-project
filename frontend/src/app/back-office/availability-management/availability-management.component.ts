@@ -109,39 +109,19 @@ export class AvailabilityManagementComponent implements OnInit {
     // Get default intervals for the day
     const defaults = this.hasDefaults ? this.getDefaultIntervalsForDay(day) : [];
 
-    // Build intervals: for each default, if an exception exists for that interval, show only the exception, otherwise show the default
-    const intervals: AvailabilityModel[] = [];
-    for (const def of defaults) {
-      // Prefer local exception, then backend exception, then default
-      const localExc = localExceptions.find(exc =>
-        exc.startDateTime === def.startDateTime && exc.endDateTime === def.endDateTime
+    // If there are any exceptions for the day, show only exceptions (local + backend, excluding deleted)
+    const allExceptions = [
+      ...localExceptions,
+      ...backendExceptions
+    ];
+    if (allExceptions.length > 0) {
+      return allExceptions.sort((a, b) =>
+        parseISO(a.startDateTime).getTime() - parseISO(b.startDateTime).getTime()
       );
-      if (localExc) {
-        intervals.push(localExc);
-        continue;
-      }
-      const backendExc = backendExceptions.find(exc =>
-        exc.startDateTime === def.startDateTime && exc.endDateTime === def.endDateTime
-      );
-      if (backendExc) {
-        intervals.push(backendExc);
-        continue;
-      }
-      intervals.push(def);
     }
 
-    // Add any exceptions that do not match a default interval (e.g., custom exceptions)
-    for (const exc of [...localExceptions, ...backendExceptions]) {
-      const matchesDefault = defaults.some(def =>
-        def.startDateTime === exc.startDateTime && def.endDateTime === exc.endDateTime
-      );
-      if (!matchesDefault) {
-        intervals.push(exc);
-      }
-    }
-
-    // Sort by start time
-    return intervals.sort((a, b) =>
+    // Otherwise, show defaults
+    return defaults.sort((a, b) =>
       parseISO(a.startDateTime).getTime() - parseISO(b.startDateTime).getTime()
     );
     }
