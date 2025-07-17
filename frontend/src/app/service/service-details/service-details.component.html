@@ -6,7 +6,7 @@
 
     <div class ="service-page">
 
-      <div class="image-section card">
+      <div class="image-section">
         <div class="image-hover-container">
           <div class="image-wrapper">
             <button class="nav left" (click)="prevImage(thumbContainer)" [disabled]="currentImageIndex === 0">&#10094;
@@ -40,7 +40,11 @@
       <div class="info-section card">
             <h2>{{ service?.name  }}</h2>
           <div class ="type-and-duration">
-            <h3> {{ service?.serviceTypeName }}</h3>
+            <h3 (click)="searchServiceType(service?.serviceTypeName ?? '' )"
+                class="clickable"
+            >
+              {{ service?.serviceTypeName }}
+            </h3>
             <div *ngIf="formatedTimeMinutes != null && formatedTimeMinutes > 0; else onlyHours">
               <span class="duration-info">🕒 {{ formatedTimeHours }}h:{{ formatedTimeMinutes }} min</span>
             </div>
@@ -50,14 +54,16 @@
         <span class="duration-info">🕒 {{ formatedTimeHours }} H</span>
       </ng-template>
 
+        <!--        <div *ngIf="service?.tagNames?.length" class="tag-list">
+                <span *ngFor="let tag of service?.tagNames"
+                      class="tag"
+                      (click)="search(tag)">
+            {{ tag }}
+                </span>
+                </div>-->
+        <tag-list [tags]="service?.tagNames ?? []" (tagClicked)="search($event)"></tag-list>
 
-      <div *ngIf="service?.tagNames?.length" class="tag-list">
-            <span *ngFor="let tag of service?.tagNames" class="tag">
-              {{ tag }}
-            </span>
-          </div>
-
-          <ng-container *ngIf="discountedPrice !== null; else normalPrice">
+        <ng-container *ngIf="discountedPrice !== null; else normalPrice">
                 <div class="price-container">
                     <div class="price-details">
                         <div class="original-price" style="text-decoration: line-through; color: grey;">

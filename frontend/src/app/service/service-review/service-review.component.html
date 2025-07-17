@@ -6,15 +6,21 @@
       <div class="reviewer-info">
         <div class="profile-and-name">
           <img
+            *ngIf="imageUrls[i]; else placeholder"
             [src]="imageUrls[i]"
-            alt="Profile Picture"
+            alt="🧑"
             class="profile-picture"
           />
+
+          <ng-template #placeholder>
+            <span class="profile-picture placeholder-emoji">🧑</span>
+          </ng-template>
+
           <span class="reviewer-name">{{ review.memberUsername }}</span>
         </div>
         <div class="star-rating">
           <ng-container *ngFor="let star of [1,2,3,4,5]">
-            <span [ngClass]="{'filled': star <= review.rating, 'empty': star > review.rating}">
+            <span [ngClass]="{'filled': star ===1 || star <= review.rating, 'empty': star > review.rating && star!==1}">
               &#9733;
             </span>
           </ng-container>

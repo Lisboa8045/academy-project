@@ -80,8 +80,17 @@
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #ccc;
-  vertical-align: middle;
-  margin-right: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  background-color: #eee;
+  text-align: center;
+}
+
+.placeholder-emoji {
+  font-size: 42px;
+  line-height: 1;
 }
 
 .review-date {

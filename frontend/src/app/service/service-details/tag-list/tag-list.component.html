@@ -1,0 +1,26 @@
+<div *ngIf="tags?.length" class="tag-list">
+  <span *ngFor="let tag of tags | slice:0:3"
+        class="tag"
+        (click)="onTagClick(tag)">
+    {{ tag }}
+  </span>
+
+  <button *ngIf="tags.length > 3"
+          class="see-more-button"
+          (click)="openTagModal()">
+    +{{ tags.length - 3 }} more
+  </button>
+</div>
+
+<div class="modal-backdrop" *ngIf="showModal">
+  <div class="modal">
+    <h3>All Tags</h3>
+    <span *ngFor="let tag of tags" class="tag" (click)="onTagClick(tag)">
+        {{ tag }}
+      </span>
+    <div class="modal-actions">
+      <button (click)="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
+

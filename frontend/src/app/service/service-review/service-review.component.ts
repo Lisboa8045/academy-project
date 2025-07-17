@@ -1,6 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {ServiceDetailsService} from '../service-details.service';
-import {UserProfileService} from '../../profile/user-profile.service';
 import {ServiceAppointmentReviewModel} from '../service-details/service-appointment-review-model';
 import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
 
@@ -25,7 +24,6 @@ export class ServiceReviewComponent implements OnInit {
 
   constructor(
     private serviceDetailsService: ServiceDetailsService,
-    protected userProfileService: UserProfileService
   ) {
 
   }

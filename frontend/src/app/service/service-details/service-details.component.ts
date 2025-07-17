@@ -1,11 +1,13 @@
 import {Component, OnInit, signal} from '@angular/core';
 import {ServiceModel} from '../service.model';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {ServiceDetailsService} from '../service-details.service';
 import {LoadingComponent} from '../../loading/loading.component';
 import {NgForOf, NgIf} from "@angular/common";
 import {UserProfileService} from '../../profile/user-profile.service';
 import {ServiceReviewComponent} from '../service-review/service-review.component';
+import {TagListComponent} from './tag-list/tag-list.component';
+
 
 @Component({
   selector: 'app-service-details',
@@ -13,14 +15,14 @@ import {ServiceReviewComponent} from '../service-review/service-review.component
     LoadingComponent,
     NgIf,
     NgForOf,
-    ServiceReviewComponent
+    ServiceReviewComponent,
+    TagListComponent
   ],
   templateUrl: './service-details.component.html',
   styleUrl: './service-details.component.css'
 })
 export class ServiceDetailsComponent implements OnInit {
   private apiUrl = 'http://localhost:8080/auth/uploads';
-  fetched = false;
   currentImageIndex = 0;
   discountedPrice: number | null = null;
   formatedTimeHours: number | null = null;
@@ -32,7 +34,8 @@ export class ServiceDetailsComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private serviceDetailsService: ServiceDetailsService,
-    protected userProfileService: UserProfileService
+    protected userProfileService: UserProfileService,
+    private router: Router
   ) {
   }
 
@@ -49,7 +52,6 @@ export class ServiceDetailsComponent implements OnInit {
         } else{
           this.discountedPrice = null;
         }
-
         if(this.service?.duration >= 60){
           this.formatedTimeHours = Math.floor((this.service?.duration || 0) / 60);
           this.formatedTimeMinutes = this.service?.duration % 60;
@@ -67,8 +69,24 @@ export class ServiceDetailsComponent implements OnInit {
         this.loading.set(false);
       }
     });
+  }
 
 
+  search(string: string) {
+    this.router.navigate(['/services'], {queryParams: {q: string}});
+  }
+
+  searchServiceType(string: string) {
+    this.router.navigate(['/services'], {
+      queryParams: {
+        name: '',
+        page: 0,
+        size: 10,
+        sort: 'price,asc',
+        negotiable: false,
+        serviceTypeName: this.service?.serviceTypeName
+      }
+    });
   }
 
   prevImage(container: HTMLElement) {

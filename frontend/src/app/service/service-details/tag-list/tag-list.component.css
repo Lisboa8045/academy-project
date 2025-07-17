@@ -1,0 +1,53 @@
+.clickable {
+  cursor: pointer;
+  color: #007bff; /* a nice blue */
+  transition: color 0.3s ease;
+}
+
+.clickable:hover {
+  text-decoration: underline;
+  color: #0056b3; /* darker blue on hover */
+}
+
+.tag-list {
+  margin-top: -29px;
+}
+
+.tag {
+  background-color: #f0f0f0;
+  padding: 6px 12px;
+  margin-right: 8px;
+  margin-bottom: 8px;
+  display: inline-block;
+  border-radius: 16px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.see-more-button {
+  background: none;
+  border: none;
+  color: blue;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  width: 300px;
+}
+
