@@ -22,6 +22,21 @@ export class UserProfileService {
     this.fetched = true;
   }
 
+  async getImage(fileName: string): Promise<string | null> {
+    if (!fileName) return Promise.resolve(null);
+
+    return fetch(`${this.apiUrl}/${fileName}`)
+      .then(res => {
+        if (!res.ok) return null;
+        return res.blob();
+      })
+      .then(blob => {
+        if (!blob) return null;
+        return URL.createObjectURL(blob);
+      })
+      .catch(() => null);
+  }
+
   revoke() {
     const current = this._imageUrl();
     if (current) URL.revokeObjectURL(current);
