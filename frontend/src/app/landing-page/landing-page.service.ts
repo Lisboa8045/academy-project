@@ -28,54 +28,12 @@ export class LandingPageService {
   }
 
   getTopRatedServices(): Observable<ServiceModel[]> {
-    return forkJoin({
-      appointments: this.getAppointments(),
-      services: this.getServices(),
-      serviceProviders: this.http.get<ServiceProviderModel[]>(`${this.BASE_URL}/service-providers`),
-    }).pipe(
-      map(({ appointments, services, serviceProviders }) => {
-        // Mapa para relacionar providerId -> serviceId
-        const providerToService = new Map(serviceProviders.map(sp => [sp.id, sp.serviceId]));
-
-        // Mapa para serviços por id para lookup rápido
-        const servicesMap = new Map(services.map(s => [s.id, s]));
-
-        // Acumula total de ratings e contagem por serviceId
-        const ratings = appointments.reduce((acc, appointment) => {
-          const serviceId = providerToService.get(appointment.serviceProviderId);
-          if (serviceId != null && appointment.rating != null && servicesMap.has(serviceId)) {
-            const current = acc.get(serviceId) ?? { total: 0, count: 0 };
-            current.total += appointment.rating;
-            current.count += 1;
-            acc.set(serviceId, current);
-          }
-          return acc;
-        }, new Map<number, { total: number; count: number }>());
-
-        // Serviços avaliados
-        const ratedServices: ServiceModel[] = Array.from(
-          ratings.entries() as Iterable<[number, { total: number; count: number }]>
-        ).map(([id, { total, count }]) => ({
-          ...servicesMap.get(id)!,
-          averageRating: parseFloat((total / count).toFixed(1)),
-        }));
-
-        // Serviços sem avaliação (nota 0)
-        const ratedIds = new Set(ratedServices.map(s => s.id));
-        const unratedServices = services
-          .filter(s => !ratedIds.has(s.id))
-          .map(s => ({
-            ...s,
-            averageRating: 0,
-          }));
-
-        // Junta ambos e ordena
-        const allServices = [...ratedServices, ...unratedServices];
-        return allServices
-          .sort((a, b) => b.averageRating - a.averageRating)
-          .slice(0, 10);
-      })
+    return this.getServices().pipe(
+      map((services) =>
+        services
+          .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+          .slice(0, 10)
+      )
     );
   }
-
 }

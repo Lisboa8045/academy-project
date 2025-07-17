@@ -55,6 +55,9 @@ public class Service extends BaseEntity {
     @Column(name="duration")
     private int duration;
 
+    @Column(name = "rating")
+    private Integer rating = 0;
+
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "service_type_id", nullable = false)
     private ServiceType serviceType;

@@ -3,9 +3,6 @@
     <img [src]="service.images[0] || defaultImage"
          (error)="onImgError($event)"
          alt="Service Image" />
-    <div class="rating-badge" *ngIf="service.averageRating !== undefined && service.averageRating !== null">
-      ★ {{ service.averageRating }}
-    </div>
   </div>
   <div class="service-info">
     <h3>{{ service.name }}</h3>

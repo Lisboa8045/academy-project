@@ -38,6 +38,7 @@ public class AppointmentService {
     private final AppointmentMapper appointmentMapper;
     private final MemberService memberService;
     private final AuthenticationFacade authenticationFacade;
+    private final ServiceService serviceService;
 
     @Value("${slot.window.days:30}")
     private int slotWindowDays;
@@ -48,12 +49,13 @@ public class AppointmentService {
             , ServiceProviderService serviceProviderService,
                               AppointmentMapper appointmentMapper,
                               MemberService memberService,
-                              AuthenticationFacade authenticationFacade) {
+                              AuthenticationFacade authenticationFacade, ServiceService serviceService) {
         this.appointmentRepository = appointmentRepository;
         this.serviceProviderService = serviceProviderService;
         this.appointmentMapper = appointmentMapper;
         this.memberService = memberService;
         this.authenticationFacade = authenticationFacade;
+        this.serviceService = serviceService;
     }
 
     public List<AppointmentResponseDTO> getAllAppointments() {
@@ -200,7 +202,11 @@ public class AppointmentService {
 
         appointment.setRating(request.rating());
         appointment.setComment(request.comment());
-        appointmentRepository.save(appointment);
+
+        System.out.println("ServiceProv id:" + appointment.getServiceProvider().getId());
+        System.out.println("Service id:" + appointment.getServiceProvider().getService().getId());
+        serviceProviderService.updateRating(appointment.getServiceProvider().getId());
+        serviceService.updateRating(appointment.getServiceProvider().getService().getId());
 
         return ResponseEntity.ok(new ReviewResponseDTO("Review added successfully"));
     }

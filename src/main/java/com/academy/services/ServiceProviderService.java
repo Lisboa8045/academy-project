@@ -7,10 +7,12 @@ import com.academy.dtos.service_provider.ServiceProviderResponseDTO;
 import com.academy.exceptions.AuthenticationException;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.exceptions.MemberNotFoundException;
+import com.academy.models.appointment.Appointment;
 import com.academy.models.member.Member;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
+import com.academy.repositories.AppointmentRepository;
 import com.academy.repositories.ServiceProviderRepository;
 import com.academy.utils.Utils;
 import jakarta.transaction.Transactional;
@@ -30,6 +32,7 @@ public class ServiceProviderService {
     private final ServiceService serviceService;
     private final AuthenticationFacade authenticationFacade;
     private final ProviderPermissionService providerPermissionService;
+    private final AppointmentRepository appointmentRepository;
 
     @Autowired
     public ServiceProviderService(ServiceProviderRepository serviceProviderRepository,
@@ -37,13 +40,14 @@ public class ServiceProviderService {
                                   ProviderPermissionService providerPermissionService,
                                   MemberService memberService,
                                   @Lazy ServiceService serviceService,
-                                  AuthenticationFacade authenticationFacade) {
+                                  AuthenticationFacade authenticationFacade, AppointmentRepository appointmentRepository) {
         this.serviceProviderRepository = serviceProviderRepository;
         this.serviceProviderMapper = serviceProviderMapper;
         this.memberService = memberService;
         this.serviceService = serviceService;
         this.providerPermissionService = providerPermissionService;
         this.authenticationFacade = authenticationFacade;
+        this.appointmentRepository = appointmentRepository;
     }
 
     public static void checkIfValidPermissions(List<ProviderPermissionEnum> newPermissions) throws BadRequestException {
@@ -223,4 +227,16 @@ public class ServiceProviderService {
         return serviceProviderRepository.findProvidersByServiceIdAndPermission(serviceId, permission);
     }
 
+    public void updateRating(Long id){
+        Double rating = appointmentRepository.findAverageRatingByServiceProvider_Id(id);
+        System.out.println("Updating rating for service provider with id " + id + " to " + rating);
+        if (rating != null) {
+            int roundedRating = Math.toIntExact(Math.round(rating));
+            ServiceProvider provider = serviceProviderRepository.findById(id)
+                    .orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
+            provider.setRating(roundedRating);
+            serviceProviderRepository.save(provider);
+        }
+
+    }
 }
