@@ -1,0 +1,7 @@
+<div class="card-grid">
+  <app-service-card
+    *ngFor="let service of services()"
+    [service]="service"
+    (cardClick)="onCardClick($event)">
+  </app-service-card>
+</div>

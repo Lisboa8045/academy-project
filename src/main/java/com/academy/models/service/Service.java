@@ -5,7 +5,7 @@ import com.academy.models.ServiceType;
 import com.academy.models.Tag;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.models.shared.BaseEntity;
-import com.academy.util.FieldLengths;
+import com.academy.utils.FieldLengths;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -72,5 +72,9 @@ public class Service extends BaseEntity {
 
     @OneToMany(mappedBy = "service")
     private List<ServiceProvider> serviceProviders = new ArrayList<>();
+
+    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ServiceImages> images = new ArrayList<>();
+
 }
 

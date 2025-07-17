@@ -6,15 +6,14 @@ import { ScheduleApiService } from './schedule.service';
 import { SlotModel } from '../models/slot.model';
 import { ServiceModel } from '../service/service.model';
 import { AppointmentModel } from '../models/appointment.model';
-import { ServiceTypeModel } from '../models/service-type.model';
-import {CommonModule, DatePipe} from '@angular/common';
-import {ServiceSearchComponent} from './serviceSearchComponent/service-search.component';
-import {ServiceListComponent} from './serviceListComponent/service-list.component';
+import {CommonModule} from '@angular/common';
 import {ProviderSelectionModalComponent} from './providerSelectionModalComponent/provider-selection-modal.component';
 import {ConfirmationModalComponent} from './confirmationModalComponent/confirmation-modal.component';
 import {SlotSelectionComponent} from './slotSelectionComponent/slot-selection.component';
 import { ServiceProviderModel } from '../models/service-provider.model';
 import {AuthStore} from '../auth/auth.store';
+import { ActivatedRoute, Router } from '@angular/router';
+import {ServiceDetailsService} from "../service/service-details.service";
 
 @Component({
   selector: 'app-schedule',
@@ -23,8 +22,6 @@ import {AuthStore} from '../auth/auth.store';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    ServiceSearchComponent,
-    ServiceListComponent,
     SlotSelectionComponent,
     ConfirmationModalComponent,
     ProviderSelectionModalComponent,
@@ -40,10 +37,6 @@ export class ScheduleComponent implements OnInit {
   selectedServiceId?: number;
   showConfirmationModal = false;
   currentStep: 'service' | 'slots' | 'provider' | 'confirmation' = 'service';
-  serviceTypes: ServiceTypeModel[] = [];
-  filteredServices: ServiceModel[] = [];
-  selectedServiceTypeId: number | null = null;
-  searchTerm = '';
   filteredSlots: SlotModel[] = [];
   providers: string[] = [];
   selectedProvider: string | null = null;
@@ -56,10 +49,13 @@ export class ScheduleComponent implements OnInit {
   readonly username = inject(AuthStore).username;
 
   constructor(
-    private fb: FormBuilder,
-    private serviceApi: ServiceApiService,
-    private scheduleApi: ScheduleApiService
-  ) {
+      private fb: FormBuilder,
+      private serviceApi: ServiceApiService,
+      private scheduleApi: ScheduleApiService,
+      private serviceDetailsService: ServiceDetailsService,
+      private route: ActivatedRoute,
+      private router: Router
+) {
     this.form = this.fb.group({
       serviceId: [null]
     });
@@ -89,7 +85,6 @@ export class ScheduleComponent implements OnInit {
     this.updateWeekDays();
   }
 
-
   organizeSlotsByDay() {
     this.weeklySlots = {};
 
@@ -118,20 +113,40 @@ export class ScheduleComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadServices();
-    console.log(this.services);
-    this.loadServiceTypes();
+    this.route.paramMap.subscribe(params => {
+      const serviceId = params.get('id');
+      if (serviceId) {
+        this.selectedServiceId = +serviceId;
+        this.loadServiceAndSlots(this.selectedServiceId);
+      }
+    });
   }
 
-  loadServices() {
-  }
+  loadServiceAndSlots(serviceId: number) {
+    // Fetch the service details
+    this.serviceDetailsService.getServiceById(serviceId).subscribe({
+      next: (service) => {
+        this.selectedServiceId = service.id;
+        this.form.get('serviceId')?.setValue(service.id); // Keeps form state updated
 
-  loadServiceTypes() {
-    this.scheduleApi.getServiceTypes().subscribe({
-      next: (res: ServiceTypeModel[]) => {
-        this.serviceTypes = res;
+        this.selectedSlot = undefined;
+        this.slots = [];
+        this.scheduleApi.getFreeSlots(service.id).subscribe({
+          next: data => {
+            this.slots = data;
+            this.providers = [...new Set(data.map(slot => slot.providerName))];
+            this.filteredSlots = data;
+            this.currentStep = 'slots';
+            this.currentWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+            this.currentWeekEnd = endOfWeek(new Date(), { weekStartsOn: 1 });
+            this.updateWeekDays();
+          },
+          error: err => console.error('Failed to load slots', err)
+        });
       },
-      error: err => console.error('Erro ao carregar tipos de serviço:', err)
+      error: () => {
+        console.error('Failed to load service');
+      }
     });
   }
 
@@ -143,141 +158,92 @@ export class ScheduleComponent implements OnInit {
     this.organizeSlotsByDay();
   }
 
-  onSearchChange(searchTerm: string) {
-    this.searchTerm = searchTerm.toLowerCase();
-    this.applyFilters();
-  }
+  selectSlot(slot: SlotModel) {
+    const slotTime = new Date(slot.start).toISOString();
+    const sameTimeSlots = this.slots.filter(s =>
+      new Date(s.start).toISOString() === slotTime
+    );
 
-    filterByType(typeId: number | null) {
-      this.selectedServiceTypeId = typeId;
-      this.applyFilters();
-    }
-
-    applyFilters() {
-      this.filteredServices = this.services.filter(service => {
-        const matchesType =
-          this.selectedServiceTypeId == null || service.serviceType.id === this.selectedServiceTypeId;
-        const matchesSearch =
-          !this.searchTerm || service.name.toLowerCase().includes(this.searchTerm);
-        return matchesType && matchesSearch;
-      });
-
-      this.form.get('serviceId')?.setValue(null);
-      this.selectedServiceId = undefined;
-      this.slots = [];
-    }
-
-
-    selectService(service: ServiceModel) {
-      this.form.get('serviceId')?.setValue(service.id);
-      this.selectedServiceId = this.form.value.serviceId;
-      this.selectedSlot = undefined;
-      this.slots = [];
-
-      if (this.selectedServiceId) {
-        this.scheduleApi.getFreeSlots(this.selectedServiceId).subscribe({
-          next: data => {
-            this.slots = data;
-            this.providers = [...new Set(data.map(slot => slot.providerName))];
-            this.filteredSlots = data;
-            this.currentStep = 'slots';
-            this.currentWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
-            this.currentWeekEnd = endOfWeek(new Date(), { weekStartsOn: 1 });
-            this.updateWeekDays();
-          },
-          error: err => console.error('Erro ao carregar slots:', err)
-        });
+    const uniqueProviderMap = new Map<string, SlotModel>();
+    for (const s of sameTimeSlots) {
+      if (!uniqueProviderMap.has(s.providerName)) {
+        uniqueProviderMap.set(s.providerName, s);
       }
     }
 
-    selectSlot(slot: SlotModel) {
-      const slotTime = new Date(slot.start).toISOString();
-      const sameTimeSlots = this.slots.filter(s =>
-        new Date(s.start).toISOString() === slotTime
-      );
+    this.providerOptions = Array.from(uniqueProviderMap.values());
 
-      const uniqueProviderMap = new Map<string, SlotModel>();
-      for (const s of sameTimeSlots) {
-        if (!uniqueProviderMap.has(s.providerName)) {
-          uniqueProviderMap.set(s.providerName, s);
-        }
-      }
-
-      this.providerOptions = Array.from(uniqueProviderMap.values());
-
-      if (this.selectedProvider && slot.providerName === this.selectedProvider) {
-        this.selectedSlot = slot;
-        this.currentStep = 'confirmation';
-        this.showProviderModal = false;
-        this.showConfirmationModal = true;
-        return;
-      }
-
-      if (this.providerOptions.length > 1) {
-        // Se clicou no mesmo provider, "desmarca" e abre modal para escolha
-        if (this.selectedSlot && this.selectedSlot.providerName === slot.providerName) {
-          this.selectedSlot = undefined;
-          this.showProviderModal = true;
-        } else {
-          this.selectedSlot = this.providerOptions.find(p => p.providerName === slot.providerName) ?? undefined;
-          this.showProviderModal = true;
-        }
-        this.currentStep = 'provider';
-      } else {
-        // Só um provider -> vai direto à confirmação
-        this.selectedSlot = this.providerOptions[0];
-        this.currentStep = 'confirmation';
-        this.showProviderModal = false;
-        this.showConfirmationModal = true;
-      }
-    }
-
-    cancelModal() {
-      this.showConfirmationModal = false;
-      this.currentStep = 'slots';
-    }
-
-    confirmInModal() {
-      this.showConfirmationModal = false;
-      this.confirmAppointment();
-      this.currentStep = 'service';
-    }
-
-    confirmAppointment() {
-      if (!this.selectedSlot || !this.form.value.serviceId) return;
-
-      const serviceId = this.form.value.serviceId;
-      const providerId = this.selectedSlot.providerId;
-
-      this.scheduleApi.getServiceProvider(serviceId, providerId).subscribe({
-        next: (serviceProvider: ServiceProviderModel) => {
-          const appointment: AppointmentModel = {
-            serviceProviderId: serviceProvider.id,
-            startDateTime: this.selectedSlot!.start,
-            endDateTime: this.selectedSlot!.end,
-            status: 'CONFIRMED'
-          };
-
-          console.log('[LOG] Creating appointment with the following details:');
-          console.log('Service Provider ID:', appointment.serviceProviderId);
-          console.log('Start DateTime:', appointment.startDateTime);
-          console.log('End DateTime:', appointment.endDateTime);
-          console.log('Status:', appointment.status);
-
-          this.scheduleApi.confirmAppointment(appointment).subscribe({
-            next: () => alert('Marcação efetuada com sucesso!'),
-            error: err => alert('Erro ao marcar: ' + err.message)
-          });
-        },
-        error: err => alert('Erro ao obter prestador de serviço: ' + err.message)
-      });
-    }
-
-    selectProviderSlot(slot: SlotModel) {
+    if (this.selectedProvider && slot.providerName === this.selectedProvider) {
       this.selectedSlot = slot;
+      this.currentStep = 'confirmation';
       this.showProviderModal = false;
       this.showConfirmationModal = true;
-      this.currentStep = 'confirmation';
+      return;
     }
+
+    if (this.providerOptions.length > 1) {
+      // Se clicou no mesmo provider, "desmarca" e abre modal para escolha
+      if (this.selectedSlot && this.selectedSlot.providerName === slot.providerName) {
+        this.selectedSlot = undefined;
+        this.showProviderModal = true;
+      } else {
+        this.selectedSlot = this.providerOptions.find(p => p.providerName === slot.providerName) ?? undefined;
+        this.showProviderModal = true;
+      }
+      this.currentStep = 'provider';
+    } else {
+      // Só um provider -> vai direto à confirmação
+      this.selectedSlot = this.providerOptions[0];
+      this.currentStep = 'confirmation';
+      this.showProviderModal = false;
+      this.showConfirmationModal = true;
+    }
+  }
+
+  cancelModal() {
+    this.showConfirmationModal = false;
+    this.currentStep = 'slots';
+  }
+
+  confirmInModal() {
+    this.showConfirmationModal = false;
+    this.confirmAppointment();
+    this.currentStep = 'service';
+  }
+
+  confirmAppointment() {
+    if (!this.selectedSlot || !this.form.value.serviceId) return;
+
+    const serviceId = this.form.value.serviceId;
+    const providerId = this.selectedSlot.providerId;
+
+    this.scheduleApi.getServiceProvider(serviceId, providerId).subscribe({
+      next: (serviceProvider: ServiceProviderModel) => {
+        const appointment: AppointmentModel = {
+          serviceProviderId: serviceProvider.id,
+          startDateTime: this.selectedSlot!.start,
+          endDateTime: this.selectedSlot!.end,
+          status: 'CONFIRMED'
+        };
+
+        this.scheduleApi.confirmAppointment(appointment).subscribe({
+          next: () => alert('Appointment scheduled successfully!'),
+          error: err => alert('Error scheduling appointment: ' + err.message)
+        });
+      },
+      error: err => alert('Error obtaining service provider: ' + err.message)
+    });
+  }
+
+  selectProviderSlot(slot: SlotModel) {
+    this.selectedSlot = slot;
+    this.showProviderModal = false;
+    this.showConfirmationModal = true;
+    this.currentStep = 'confirmation';
+  }
+
+  backToServices() {
+    this.router.navigate(['/services']);
+  }
 
 }

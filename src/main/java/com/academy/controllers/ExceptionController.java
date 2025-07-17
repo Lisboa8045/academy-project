@@ -4,9 +4,12 @@ import com.academy.exceptions.AuthenticationException;
 import com.academy.exceptions.EmailTemplateLoadingException;
 import com.academy.exceptions.EntityAlreadyExists;
 import com.academy.exceptions.EntityNotFoundException;
+import com.academy.exceptions.MemberNotFoundByEmailException;
+import com.academy.exceptions.MemberNotFoundException;
 import com.academy.exceptions.NotFoundException;
 import com.academy.exceptions.RegistrationConflictException;
 import com.academy.exceptions.SendEmailException;
+import com.academy.exceptions.TokenExpiredException;
 import com.academy.exceptions.UnavailableUserException;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
@@ -60,7 +63,7 @@ public class ExceptionController {
     public ResponseEntity<Object> handleInvalidValue(BadRequestException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
-
+        
     @ExceptionHandler(com.academy.exceptions.BadRequestException.class)
     public ResponseEntity<Object> handleInvalidValue(com.academy.exceptions.BadRequestException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -69,6 +72,11 @@ public class ExceptionController {
     @ExceptionHandler(SendEmailException.class)
     public ResponseEntity<Object> handleInvalidValue(SendEmailException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(TokenExpiredException.class)
+    public ResponseEntity<Object> handleInvalidValue(TokenExpiredException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.GONE);
     }
 
     @ExceptionHandler(EmailTemplateLoadingException.class)
@@ -83,6 +91,16 @@ public class ExceptionController {
     
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Object> handleInvalidValue(NotFoundException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(MemberNotFoundByEmailException.class)
+    public ResponseEntity<Object> handleInvalidValue(MemberNotFoundByEmailException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(MemberNotFoundException.class)
+    public ResponseEntity<Object> handleInvalidValue(MemberNotFoundException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 

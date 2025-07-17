@@ -2,7 +2,7 @@ package com.academy.models.notification;
 
 import com.academy.models.member.Member;
 import com.academy.models.shared.BaseEntity;
-import com.academy.util.FieldLengths;
+import com.academy.utils.FieldLengths;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -27,6 +27,12 @@ public class Notification extends BaseEntity {
 
     @Column(name="title", length = FieldLengths.NOTIFICATION_TITLE_MAX)
     private String title;
+
+    @Column(name="body", length = FieldLengths.NOTIFICATION_BODY_MAX)
+    private String body;
+
+    @Column(name="url", length = FieldLengths.URL_MAX)
+    private String url;
 
     @Column(name="seen")
     private boolean seen;

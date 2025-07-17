@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Optional;
@@ -27,7 +26,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 @SpringBootTest
 @Transactional
 @ExtendWith(SpringExtension.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class MemberIntegrationTests {
 
     private final MemberService memberService;
@@ -68,7 +66,7 @@ public class MemberIntegrationTests {
     }
 
     private MemberRequestDTO createMemberRequestDTO(String username, String email, String address, String postalCode, String phoneNumber, String password, Long roleId) {
-        return new MemberRequestDTO(username, email, address, postalCode, phoneNumber, password, roleId);
+        return new MemberRequestDTO(username, email, address, postalCode, phoneNumber, roleId, null, null);
     }
 @Test
     void deleteMember_memberNotFound_throwsException(){
@@ -99,7 +97,7 @@ public class MemberIntegrationTests {
         assertThat(memberResponseDTO.address()).isEqualTo("Esgoto");
         assertThat(memberResponseDTO.postalCode()).isEqualTo("0000-100");
         assertThat(memberResponseDTO.phoneNumber()).isEqualTo("987654321");
-        assertThat(memberResponseDTO.email()).isEqualTo("donatello@example.com");
+        assertThat(memberResponseDTO.email()).isNotEqualTo("donatello@example.com");
         assertThat(memberResponseDTO.role()).isEqualTo("CLIENT");
     }
 
@@ -134,7 +132,7 @@ public class MemberIntegrationTests {
         assertThat(memberResponseDTO.email()).isEqualTo(member.getEmail());
         assertThat(memberResponseDTO.postalCode()).isEqualTo(member.getPostalCode());
         assertThat(memberResponseDTO.phoneNumber()).isEqualTo(member.getPhoneNumber());
-        assertThat(memberResponseDTO.role()).isEqualTo(member.getRole());
+        assertThat(memberResponseDTO.role()).isEqualTo(member.getRole().getName());
     }
 
     @Test

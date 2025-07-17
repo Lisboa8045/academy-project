@@ -1,10 +1,19 @@
 <header class="header">
   <nav class="nav">
-    <a class="nav-item" routerLink="/">🏠 Home</a>
+    <div class="home-link">
+      <a class="nav-item" routerLink="/">🏠 Home</a>
+    </div>
+
+    @if (isLandingPage()) {
+      <div class="search-form" style="visibility: hidden; width: 500px;"></div>
+    } @else {
+      <app-search-bar [isHeader]="true" (search)="onSearchFromChild($event)" />
+    }
 
     <div class="right-links">
       <div class="user-profile">
       @if (username()) {
+        <app-notification-button/>
         <app-profile-button/>
       } @else {
         <a class="nav-item" routerLink="/auth">🔐 Login</a>

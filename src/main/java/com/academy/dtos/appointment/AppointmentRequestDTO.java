@@ -1,7 +1,7 @@
 package com.academy.dtos.appointment;
 
 import com.academy.models.appointment.AppointmentStatus;
-import com.academy.util.FieldLengths;
+import com.academy.utils.FieldLengths;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;

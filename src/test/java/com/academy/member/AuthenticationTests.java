@@ -1,47 +1,36 @@
 package com.academy.member;
 
-import com.academy.config.AppProperties;
 import com.academy.config.TestConfig;
 import com.academy.config.TestTokenStorage;
 import com.academy.config.authentication.AuthenticationFacade;
 import com.academy.dtos.register.LoginRequestDto;
 import com.academy.dtos.register.RegisterRequestDto;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-
-import com.academy.exceptions.AuthenticationException;
 import com.academy.exceptions.UnavailableUserException;
+import com.academy.models.Role;
+import com.academy.models.member.Member;
+import com.academy.repositories.RoleRepository;
+import com.academy.services.MemberService;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
+import org.apache.coyote.BadRequestException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithAnonymousUser;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
-import com.academy.models.Role;
-import com.academy.models.ServiceType;
-import com.academy.models.member.Member;
-import com.academy.repositories.MemberRepository;
-import com.academy.repositories.RoleRepository;
-import com.academy.services.MemberService;
-import com.academy.services.ServiceProviderService;
-import com.academy.services.ServiceService;
-import com.academy.services.ServiceTypeService;
-import jakarta.transaction.Transactional;
-import org.apache.coyote.BadRequestException;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import java.net.URI;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -52,9 +41,12 @@ import java.net.URI;
 public class AuthenticationTests {
 
     private final String username = "user123453167891212";
+    private final String email = "user123453167891212@gmail.com";
 
     @Autowired private RoleRepository roleRepository;
     @Autowired MemberService memberService;
+    @Autowired
+    PasswordEncoder passwordEncoder;
     @Autowired TestTokenStorage testTokenStorage;
 
     @Autowired
@@ -76,7 +68,7 @@ public class AuthenticationTests {
         RegisterRequestDto registerRequest = new RegisterRequestDto(
                 username,
                 "Password123@",
-                username + "@gmail.com",
+                email,
                 1L,
                 null,
                 null,
@@ -126,7 +118,7 @@ public class AuthenticationTests {
     @Test
     public void testLoginAndRecreateConfirmationToken(){
         register();
-        memberService.recreateConfirmationToken(username, "Password123@");
+        memberService.recreateConfirmationToken(username);
         confirmEmail();
         HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
         memberService.login(new LoginRequestDto(
@@ -134,6 +126,35 @@ public class AuthenticationTests {
                 "Password123@"
         ), response);
     }
+
+    @Test
+    public void testResetPassword(){
+        long memberId = register();
+        confirmEmail();
+        memberService.createPasswordResetToken(email);
+
+        Member member = memberService.getMemberEntityById(memberId);
+        assertTrue(passwordEncoder.matches("Password123@", member.getPassword()));
+
+        String rawPasswordResetToken = testTokenStorage.getLastToken();
+        memberService.verifyPasswordResetToken(rawPasswordResetToken);
+        memberService.resetPassword(rawPasswordResetToken, "newPassword123@");
+
+        Member updatedMember = memberService.getMemberEntityById(memberId);
+
+        assertTrue(passwordEncoder.matches("newPassword123@", updatedMember.getPassword()));
+    }
+
+    @Test
+    public void testUsingInvalidResetPasswordToken(){
+        register();
+        confirmEmail();
+        memberService.createPasswordResetToken(email);
+
+        assertThatThrownBy(() -> memberService.verifyPasswordResetToken("adbadgbdfadgfafdagrw4"))
+                .isInstanceOf(com.academy.exceptions.BadRequestException.class);
+    }
+
 
 }
 

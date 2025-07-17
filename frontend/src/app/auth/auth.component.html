@@ -43,10 +43,10 @@
 
     <div class="password-wrapper">
       <label class="password-label">
-        <input [type]="passwordVisible ? 'text' : 'password'" formControlName="password" placeholder="Password" required />
+        <input [type]="passwordVisible() ? 'text' : 'password'" formControlName="password" placeholder="Password" required />
         <span class="toggle-password" (click)="togglePasswordVisibility($event)" style="cursor:pointer;">
-            <span class="material-symbols-outlined" *ngIf="passwordVisible">visibility_off</span>
-            <span class="material-symbols-outlined" *ngIf="!passwordVisible">visibility</span>
+            <span class="material-symbols-outlined" *ngIf="passwordVisible()">visibility_off</span>
+            <span class="material-symbols-outlined" *ngIf="!passwordVisible()">visibility</span>
         </span>
       </label>
     </div>
@@ -71,10 +71,10 @@
     @if (!isLoginMode()){
       <div class="password-wrapper">
         <label class="password-label">
-          <input [type]="confirmPasswordVisible ? 'text' : 'password'" formControlName="confirmPassword" placeholder="Confirm Password" [class.ng-invalid]="authForm.hasError('passwordsMismatch') && authForm.get('confirmPassword')?.touched" required />
+          <input [type]="confirmPasswordVisible() ? 'text' : 'password'" formControlName="confirmPassword" placeholder="Confirm Password" [class.ng-invalid]="authForm.hasError('passwordsMismatch') && authForm.get('confirmPassword')?.touched" required />
           <span class="toggle-password" (click)="toggleConfirmPasswordVisibility($event)" style="cursor:pointer;">
-            <span class="material-symbols-outlined" *ngIf="confirmPasswordVisible">visibility_off</span>
-            <span class="material-symbols-outlined" *ngIf="!confirmPasswordVisible">visibility</span>
+            <span class="material-symbols-outlined" *ngIf="confirmPasswordVisible()">visibility_off</span>
+            <span class="material-symbols-outlined" *ngIf="!confirmPasswordVisible()">visibility</span>
           </span>
 
         </label>
@@ -83,17 +83,27 @@
         Passwords do not match.
       </div>
     }
-    <div class="validation-error" *ngIf="errorMessage">
-      {{ errorMessage }}
+    <div class="validation-error" *ngIf="errorMessage()">
+      {{ errorMessage() }}
     </div>
-    <button type="submit" [disabled]="authForm.invalid">
-      {{ isLoginMode() ? 'Login' : 'Create Account' }}
-    </button>
+    <div class="button-container">
+      <button type="submit" [disabled]="authForm.invalid || loading()">
+        {{ isLoginMode() ? 'Login' : 'Create Account' }}
+      </button>
+      <span *ngIf="loading()" class="spinner"></span>
+    </div>
+
   </form>
+
+  @if (isLoginMode()) {
+    <div class="forgot-password">
+      <a [routerLink]="['/forgot-password']">Forgot password?</a>
+    </div>
+  }
 
   <p>
     {{ isLoginMode() ? "Don't have an account?" : 'Already have an account?' }}
-    <button type="button" (click)="toggleMode() ">
+    <button type="button" [disabled]="loading()" (click)="toggleMode() ">
       {{ isLoginMode() ? 'Sign up' : 'Login' }}
     </button>
   </p>
