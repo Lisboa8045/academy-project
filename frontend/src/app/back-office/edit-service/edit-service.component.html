@@ -1,11 +1,133 @@
-
 @if(loading()) {
   <app-loading/>
-} @else {
-  <p>{{ service | json }}</p>
-  @for (serviceProvider of serviceProviders; track serviceProvider.id) {
-    <p>{{ serviceProvider.memberName }}</p>
-    <p>{{ serviceProvider.permissions }}</p>
-  }
+  } @else {
+  <div class="card">
+    <h2>Manage Service</h2>
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <fieldset>
+        <legend>Service Info</legend>
+        <div class="input-wrapper">
+          <label>Name:</label>
+          <input type="text" placeholder="Enter Service Name" formControlName="name"/>
+          <div class="validation-error" *ngIf="form.get('name')?.invalid && form.get('name')?.touched">
+            Name is required
+          </div>
+        </div>
 
+        <div class="input-wrapper">
+          <label>Description:</label>
+          <textarea formControlName="description"></textarea>
+        </div>
+        <div class="input-wrapper">
+          <label for="serviceTypeName">Service Type:</label>
+          <select id="serviceTypeName" formControlName="serviceTypeName">
+            <option value="" disabled selected>Select a service type</option>
+            <option *ngFor="let option of serviceTypeOptions" [value]="option.name">
+              {{ option.name }}
+            </option>
+          </select>
+          <div class="validation-error"
+               *ngIf="form.get('serviceTypeName')?.invalid && form.get('serviceTypeName')?.touched">
+            Required field.
+          </div>
+        </div>
+
+        <div class="input-wrapper">
+          <label>Duration (minutes):</label>
+          <input type="number" formControlName="duration"/>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Images and tags</legend>
+        <div class="image-tags-section">
+          <div class="image-hover-container">
+            <div class="image-wrapper">
+              <button class="nav left" (click)="prevImage(thumbContainer)" type="button" [disabled]="currentImageIndex === 0">&#10094;
+              </button>
+              @if (imageUrls.length === 0) {
+                <div class="thumbnail-placeholder">
+                  No Image Provided
+                </div>
+              } @else {
+                <img
+                  [src]="imageUrls[currentImageIndex]"
+                  alt="Service Image"
+                  class="main-image"
+                />
+              }
+              <button class="nav right" (click)="nextImage(thumbContainer)" type="button"
+                      [disabled]="currentImageIndex === imageUrls.length - 1">&#10095;
+              </button>
+
+              <div class="thumbnails-overlay">
+                <div class="thumbnails-scroll-wrapper" #thumbContainer>
+                  <ng-container *ngFor="let imageUrl of imageUrls; let i = index">
+                    <div class="thumbnail-container">
+                      <img
+                        [src]="imageUrl"
+                        class="thumbnail-image"
+                        [class.selected]="i === currentImageIndex"
+                        (click)="selectThumbnail(i, thumbContainer)"
+                      />
+                      <div class="delete-image" (click)="deleteImage(i)">🗑️</div>
+                    </div>
+                  </ng-container>
+                  <div class="thumbnail-image">
+                    <fa-icon [icon]="faPlus" class="fa-3x add-image-btn" (click)="fileInput.click()">
+                    </fa-icon>
+                    <input
+                      #fileInput
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      (change)="onImagesSelected($event)"
+                      style="display: none"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="tag-section">
+            <!-- Input to add a new tag -->
+            <input
+              type="text"
+              [(ngModel)]="newTag"
+              [ngModelOptions]="{ standalone: true }"
+              (keyup.enter)="addTag()"
+              placeholder="Add a tag"
+            />
+            <button type="button" (click)="addTag()">Add Tag</button>
+
+            <!-- Display tags -->
+            <div class="tags-container">
+              @for (tag of tagNames.controls; track tag.value; let i = $index) {
+                <span class="tag" [title]="tag.value">
+                  <span class="tag-text">{{ tag.value }}</span>
+                  <fa-icon
+                    [icon]="faTimes"
+                    (click)="removeTag(i)"
+                    class="remove-icon"
+                  ></fa-icon>
+                </span>
+              }
+            </div>
+          </div>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Pricing</legend>
+        <div class="input-wrapper">
+          <label>Price:</label>
+          <input type="number" formControlName="price"/>
+        </div>
+        <div class="input-wrapper">
+          <label>Discount (%):</label>
+          <input type="number" formControlName="discount"/>
+        </div>
+      </fieldset>
+
+      <button type="submit" [disabled]="form.invalid">Submit</button>
+    </form>
+  </div>
 }

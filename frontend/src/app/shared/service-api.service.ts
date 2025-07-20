@@ -53,6 +53,10 @@ export class ServiceApiService {
     return this.http.post<any>(this.BASE_URL, payload);
   }
 
+  editService(payload: any, id: number): Observable<any> {
+    return this.http.put<any>(`${this.BASE_URL}/${id}`, payload);
+  }
+
   uploadServiceImages(formData: FormData, id : number) {
     return this.http.post<{imageUrl: string}>(
       `${this.UPLOADS_URL}?id=${id}`,

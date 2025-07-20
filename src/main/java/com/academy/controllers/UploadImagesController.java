@@ -3,20 +3,33 @@ package com.academy.controllers;
 import com.academy.models.service.ServiceImage;
 import com.academy.services.MemberService;
 import com.academy.services.ServiceService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
-import java.nio.file.*;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/auth/uploads")
@@ -36,12 +49,14 @@ public class UploadImagesController {
     }
 
     @PostMapping("/service-image")
-    public ResponseEntity<Map<String, Object>> uploadServiceImages(@RequestParam("id") Long id, @RequestParam("files") MultipartFile[] files) {
-
+    @Transactional
+    public ResponseEntity<Map<String, Object>> uploadServiceImages(@RequestParam("id") Long id, @RequestParam(name = "files", required = false) MultipartFile[] files) {
+        deleteImagesFromService(id);
         List<String> savedFiles = new ArrayList<>();
-        List<String> skippedFiles = new ArrayList<>();
-        List<ServiceImage> serviceImages = new ArrayList<>();
 
+        if (Objects.isNull(files)) {
+            return ResponseEntity.ok().body(Map.of("savedImages", savedFiles));
+        }
         try {
             Path uploadPath = Paths.get(uploadDir);
 
@@ -53,14 +68,8 @@ public class UploadImagesController {
 
             for (MultipartFile file : files) {
                 String extension = StringUtils.getFilenameExtension(file.getOriginalFilename());
-                String baseFilename = "service_" + id + "_" + counter + "." + extension;
+                String baseFilename = "service_" + id + "_" + counter++ + "." + extension;
                 Path filePath = uploadPath.resolve(baseFilename);
-
-                if (Files.exists(filePath)) {
-                    skippedFiles.add(baseFilename);
-                    counter++;
-                    continue;
-                }
 
                 file.transferTo(filePath.toFile());
                 savedFiles.add(baseFilename);
@@ -68,13 +77,10 @@ public class UploadImagesController {
                 image.setImage(baseFilename);
                 image.setService(serviceService.getServiceEntityById(id));
 
-                serviceImages.add(serviceImageRepository.save(image));
-                counter++;
+                serviceImageRepository.save(image);
             }
-            serviceService.saveImages(id, serviceImages);
             Map<String, Object> response = new HashMap<>();
             response.put("savedImages", savedFiles);
-            response.put("skippedImages", skippedFiles);
 
             return ResponseEntity.ok().body(response);
 
@@ -83,6 +89,19 @@ public class UploadImagesController {
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", e.getMessage()));
         }
+    }
+
+    void deleteImagesFromService(Long serviceId) {
+        serviceImageRepository.deleteServiceImageByServiceId(serviceId);
+        File directory = new File(uploadDir);
+        File[] files = directory.listFiles((dir, name) -> name.startsWith("service_" + serviceId + "_"));
+
+        if (files != null) {
+            for (File file : files) {
+                file.delete();
+            }
+        }
+
     }
 
     @PostMapping("/profile-picture")
