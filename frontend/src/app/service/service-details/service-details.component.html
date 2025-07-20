@@ -1,105 +1,105 @@
-
-@if(loading()) {
+@if (loading()) {
   <app-loading/>
 } @else {
 
 
-    <div class ="service-page">
+  <div class="service-page">
 
-      <div class="image-section">
-        <div class="image-hover-container">
-          <div class="image-wrapper">
-            <button class="nav left" (click)="prevImage(thumbContainer)" [disabled]="currentImageIndex === 0">&#10094;
-            </button>
+    <div class="image-section">
+      <div class="image-hover-container">
+        <div class="image-wrapper">
+          <button class="nav left" (click)="prevImage(thumbContainer)" [disabled]="currentImageIndex === 0">&#10094;
+          </button>
 
-            <img
-              [src]="userProfileService.serviceImageUrls[currentImageIndex]"
-              alt="Service Image"
-              class="main-image"
-            />
+          <img
+            [src]="userProfileService.serviceImageUrls[currentImageIndex]"
+            alt="Service Image"
+            class="main-image"
+          />
 
-            <button class="nav right" (click)="nextImage(thumbContainer)"
-                    [disabled]="currentImageIndex === userProfileService.serviceImageUrls.length - 1">&#10095;
-            </button>
+          <button class="nav right" (click)="nextImage(thumbContainer)"
+                  [disabled]="currentImageIndex === userProfileService.serviceImageUrls.length - 1">&#10095;
+          </button>
 
-            <div class="thumbnails-overlay">
-              <div class="thumbnails-scroll-wrapper" #thumbContainer>
-                <img
-                  *ngFor="let imageUrl of userProfileService.serviceImageUrls; let i = index"
-                  [src]="imageUrl"
-                  class="thumbnail-image"
-                  [class.selected]="i === currentImageIndex"
-                  (click)="selectThumbnail(i, thumbContainer)"
-                />
-              </div>
+          <div class="thumbnails-overlay">
+            <div class="thumbnails-scroll-wrapper" #thumbContainer>
+              <img
+                *ngFor="let imageUrl of userProfileService.serviceImageUrls; let i = index"
+                [src]="imageUrl"
+                class="thumbnail-image"
+                [class.selected]="i === currentImageIndex"
+                (click)="selectThumbnail(i, thumbContainer)"
+              />
             </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="info-section card">
-            <h2>{{ service?.name  }}</h2>
-          <div class ="type-and-duration">
-            <h3 (click)="searchServiceType(service?.serviceTypeName ?? '' )"
-                class="clickable"
-            >
-              {{ service?.serviceTypeName }}
-            </h3>
-            <div *ngIf="formatedTimeMinutes != null && formatedTimeMinutes > 0; else onlyHours">
-              <span class="duration-info">🕒 {{ formatedTimeHours }}h:{{ formatedTimeMinutes }} min</span>
-            </div>
-          </div>
+    <div class="info-section card">
+      <h2>{{ service?.name }}</h2>
+      <div class="type-and-duration">
+        <h3 (click)="searchServiceType(service?.serviceTypeName ?? '' )"
+            class="clickable"
+        >
+          {{ service?.serviceTypeName }}
+        </h3>
+        <div *ngIf="formatedTimeMinutes != null && formatedTimeMinutes > 0; else onlyHours">
+          <span class="duration-info">🕒 {{ formatedTimeHours }}h:{{ formatedTimeMinutes }} min</span>
+        </div>
+      </div>
 
       <ng-template #onlyHours>
         <span class="duration-info">🕒 {{ formatedTimeHours }} H</span>
       </ng-template>
 
-        <!--        <div *ngIf="service?.tagNames?.length" class="tag-list">
-                <span *ngFor="let tag of service?.tagNames"
-                      class="tag"
-                      (click)="search(tag)">
-            {{ tag }}
-                </span>
-                </div>-->
-        <tag-list [tags]="service?.tagNames ?? []" (tagClicked)="search($event)"></tag-list>
+      <!--        <div *ngIf="service?.tagNames?.length" class="tag-list">
+              <span *ngFor="let tag of service?.tagNames"
+                    class="tag"
+                    (click)="search(tag)">
+          {{ tag }}
+              </span>
+              </div>-->
+      <tag-list [tags]="service?.tagNames ?? []" (tagClicked)="search($event)"></tag-list>
 
-        <ng-container *ngIf="discountedPrice !== null; else normalPrice">
-                <div class="price-container">
-                    <div class="price-details">
-                        <div class="original-price" style="text-decoration: line-through; color: grey;">
-                            {{ service?.price }}€
-                        </div>
-                        <div class="discounted-price" style="font-weight: bold;">
-                            {{ discountedPrice }}€
-                        </div>
-                    </div>
-                    <div class="discount-badge" style="background-color: red; color: white; padding: 4px 8px; border-radius: 5px;">
-                        -{{ service?.discount }}%
+      <ng-container *ngIf="discountedPrice !== null; else normalPrice">
+        <div class="price-container">
+          <div class="price-details">
+            <div class="original-price" style="text-decoration: line-through; color: grey;">
+              {{ service?.price }}€
+            </div>
+            <div class="discounted-price" style="font-weight: bold;">
+              {{ discountedPrice }}€
+            </div>
+          </div>
+          <div class="discount-badge"
+               style="background-color: red; color: white; padding: 4px 8px; border-radius: 5px;">
+            -{{ service?.discount }}%
 
-                    </div>
-
-                </div>
-<!--                COMENTADO PORQUE NAO SABEMOS SE VAMOS IMPLEMENTAR ALGUMA MANEIRA DE CONTACTAR O SERVICE-->
-<!--                <span *ngIf="service!.negotiable" class="negotiable-label">-->
-<!--                                NEGOTIABLE-->
-<!--                            </span>-->
-            </ng-container>
-
-            <ng-template #normalPrice>
-                <div class="normal-price" style="font-weight: bold;">{{ service?.price }}€</div>
-            </ng-template>
-
-            <button class="schedule-btn">Schedule Appointment</button>
+          </div>
 
         </div>
+        <!--                COMENTADO PORQUE NAO SABEMOS SE VAMOS IMPLEMENTAR ALGUMA MANEIRA DE CONTACTAR O SERVICE-->
+        <!--                <span *ngIf="service!.negotiable" class="negotiable-label">-->
+        <!--                                NEGOTIABLE-->
+        <!--                            </span>-->
+      </ng-container>
+
+      <ng-template #normalPrice>
+        <div class="normal-price" style="font-weight: bold;">{{ service?.price }}€</div>
+      </ng-template>
+
+      <button class="schedule-btn">Schedule Appointment</button>
+
     </div>
 
-  <div class="service-description">
-    <h3> Description</h3>
-    <p>{{ service?.description }}</p>
+    <div class="service-description">
+      <h3> Description</h3>
+      <p>{{ service?.description }}</p>
+    </div>
+
+    <app-service-review [serviceId]="serviceId">
+
+    </app-service-review>
   </div>
-
-  <app-service-review [serviceId]="serviceId">
-
-  </app-service-review>
 }
