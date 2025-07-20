@@ -1,12 +1,12 @@
 import {AfterViewInit, Component, ViewChild} from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {CommonModule} from '@angular/common';
 import {FullCalendarComponent, FullCalendarModule} from '@fullcalendar/angular';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { CalendarOptions, DateSelectArg, EventClickArg } from '@fullcalendar/core';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { NgSelectComponent } from '@ng-select/ng-select';
+import {CalendarOptions, DateSelectArg, EventClickArg} from '@fullcalendar/core';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {NgSelectComponent} from '@ng-select/ng-select';
 
 @Component({
   selector: 'app-calendar',
@@ -15,7 +15,7 @@ import { NgSelectComponent } from '@ng-select/ng-select';
   templateUrl: './availability-calendar.component.html',
   styleUrls: ['./availability-calendar.component.css']
 })
-export class CalendarComponent implements AfterViewInit{
+export class CalendarComponent implements AfterViewInit {
   @ViewChild('calendar') calendarComponent!: FullCalendarComponent;
   calendarOptions: CalendarOptions = {
     initialView: 'timeGridWeek',
@@ -34,6 +34,7 @@ export class CalendarComponent implements AfterViewInit{
     select: this.handleDateSelect.bind(this),
     eventClick: this.handleEventClick.bind(this),
     dayHeaderContent: this.renderDayHeader.bind(this),
+    eventContent: this.renderEventContent.bind(this),
   };
 
   replicateForm: FormGroup;
@@ -50,13 +51,13 @@ export class CalendarComponent implements AfterViewInit{
   selectedRepeatDate: string | null = null;
   showRepeatModal = false;
   weekDays = [
-    { label: 'Sunday', value: 0 },
-    { label: 'Monday', value: 1 },
-    { label: 'Tuesday', value: 2 },
-    { label: 'Wednesday', value: 3 },
-    { label: 'Thursday', value: 4 },
-    { label: 'Friday', value: 5 },
-    { label: 'Saturday', value: 6 },
+    {label: 'Monday', value: 1},
+    {label: 'Tuesday', value: 2},
+    {label: 'Wednesday', value: 3},
+    {label: 'Thursday', value: 4},
+    {label: 'Friday', value: 5},
+    {label: 'Saturday', value: 6},
+    {label: 'Sunday', value: 0},
   ];
 
 
@@ -78,22 +79,35 @@ export class CalendarComponent implements AfterViewInit{
   renderDayHeader(arg: any) {
     const date = arg.date;
     const dayNum = date.getDate();
-    const weekday = date.toLocaleDateString('en-US', { weekday: 'short' });
-    const dateStr = date.toISOString().split('T')[0];
+    const weekday = date.toLocaleDateString('en-US', {weekday: 'short'});
+    const dateStr = date.toLocaleDateString('en-CA'); // ✅ 'YYYY-MM-DD' in local time
+
+    const calendarApi = this.calendarComponent?.getApi?.();
+    let hasEvents = false;
+
+    if (calendarApi) {
+      const events = calendarApi.getEvents();
+      hasEvents = events.some(event => {
+        const eventDate = new Date(event.start!);
+        return eventDate.toDateString() === date.toDateString();
+      });
+    }
 
     return {
       html: `
-      <div class="fc-day-header-inner">
-        <div class="day-header-text">
-          <div class="day-num">${dayNum}</div>
-          <div class="weekday">${weekday}</div>
-        </div>
-        <button
-          type="button"
-          class="repeat-icon"
-          title="Repeat this day’s availability"
-          onclick="handleRepeatIconClick(event, '${dateStr}')"
-        >🔁</button>
+  <div class="day-header-text">
+        <div style="font-size: 24px; font-weight: bold;">${dayNum}</div>
+        <div style="font-size: 12px; color: #555; margin-top: 2px;">${weekday}</div>
+        ${
+        hasEvents
+          ? `<button
+                type="button"
+                title="Repeat this day’s availability"
+                onclick="handleRepeatIconClick(event, '${dateStr}')"
+                style="position: absolute; top: 0; right: 0; background: none; border: none; cursor: pointer; font-size: 16px; line-height: 1;"
+              >🔁</button>`
+          : ''
+      }
       </div>
     `
     };
@@ -108,6 +122,66 @@ export class CalendarComponent implements AfterViewInit{
     this.showRepeatModal = true;
   }
 
+  renderEventContent(arg: any) {
+    const event = arg.event;
+
+    // Format the time manually (HH:mm)
+    const formatTime = (date: Date) =>
+      `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+
+    const startTime = formatTime(event.start!);
+    const endTime = formatTime(event.end!);
+
+    const container = document.createElement('div');
+    container.style.position = 'relative';
+
+    // Time range
+    const timeEl = document.createElement('div');
+    timeEl.textContent = `${startTime} - ${endTime}`;
+    timeEl.style.fontSize = '12px';
+    container.appendChild(timeEl);
+
+    // Title (e.g. "Available")
+    const titleEl = document.createElement('div');
+    titleEl.textContent = event.title;
+    titleEl.style.fontWeight = 'bold';
+    container.appendChild(titleEl);
+
+    // Delete button
+    const deleteBtn = document.createElement('span');
+    deleteBtn.innerHTML = '❌';
+    deleteBtn.title = 'Delete availability';
+    deleteBtn.style.cssText = `
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    display: none;
+    z-index: 1000;
+    pointer-events: auto;
+  `;
+
+    container.addEventListener('mouseenter', () => {
+      deleteBtn.style.display = 'block';
+    });
+    container.addEventListener('mouseleave', () => {
+      deleteBtn.style.display = 'none';
+    });
+
+    deleteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (confirm('Delete this availability?')) {
+        event.remove();
+        this.forceHeaderRerender();
+      }
+    });
+
+    container.appendChild(deleteBtn);
+
+    return { domNodes: [container] };
+  }
+
   // Automatically add a new "Available" event
   handleDateSelect(selectInfo: DateSelectArg) {
     console.log('handleDateSelect', selectInfo);
@@ -120,6 +194,15 @@ export class CalendarComponent implements AfterViewInit{
       end: selectInfo.end,
       allDay: false,
     });
+    this.forceHeaderRerender();
+  }
+
+  forceHeaderRerender() {
+    // Clone the existing options to trigger Angular change detection
+    this.calendarOptions = {
+      ...this.calendarOptions,
+      dayHeaderContent: this.renderDayHeader.bind(this)
+    };
   }
 
   // Allow user to edit time of an existing event
@@ -149,55 +232,6 @@ export class CalendarComponent implements AfterViewInit{
     return `${hours}:${minutes}`;
   }
 
-  // Replicate selected day's events across a range
-  replicateAvailability() {
-    if (this.replicateForm.invalid) return;
-
-    const { sourceDate, startDate, endDate } = this.replicateForm.value;
-    const calendarApi = (document.querySelector('full-calendar') as any)?.getApi();
-    if (!calendarApi) return;
-
-    const events = calendarApi.getEvents();
-    const source = new Date(sourceDate);
-    const startRange = new Date(startDate);
-    const endRange = new Date(endDate);
-    endRange.setHours(23, 59, 59);
-
-    const sourceEvents = events.filter((event: { start: string | number | Date; }) => {
-      const eventDate = new Date(event.start!);
-      return eventDate.toDateString() === source.toDateString();
-    });
-
-    if (sourceEvents.length === 0) {
-      alert('No availability found on the selected source date.');
-      return;
-    }
-
-    for (let day = new Date(startRange); day <= endRange; day.setDate(day.getDate() + 1)) {
-      if (day.toDateString() === source.toDateString()) continue;
-
-      sourceEvents.forEach((event: { start: Date; end: Date; }) => {
-        const { hours: sh, minutes: sm } = this.extractTime(event.start!);
-        const { hours: eh, minutes: em } = this.extractTime(event.end!);
-
-        const start = new Date(day);
-        const end = new Date(day);
-
-        start.setHours(sh, sm, 0);
-        end.setHours(eh, em, 0);
-
-        calendarApi.addEvent({
-          title: 'Available',
-          start,
-          end,
-          allDay: false,
-        });
-      });
-    }
-
-    this.replicateForm.reset();
-  }
-
   private extractTime(date: Date): { hours: number; minutes: number } {
     return {
       hours: date.getHours(),
@@ -213,7 +247,7 @@ export class CalendarComponent implements AfterViewInit{
     const events = calendarApi.getEvents();
 
     const source = new Date(this.selectedRepeatDate);
-    const { startDate, endDate } = this.replicateForm.value;
+    const {startDate, endDate} = this.replicateForm.value;
     const startRange = new Date(startDate);
     const endRange = new Date(endDate);
     endRange.setHours(23, 59, 59);
@@ -233,8 +267,8 @@ export class CalendarComponent implements AfterViewInit{
       sourceEvents.forEach((event) => {
         const start = new Date(day);
         const end = new Date(day);
-        const { hours: sh, minutes: sm } = this.extractTime(event.start!);
-        const { hours: eh, minutes: em } = this.extractTime(event.end!);
+        const {hours: sh, minutes: sm} = this.extractTime(event.start!);
+        const {hours: eh, minutes: em} = this.extractTime(event.end!);
 
         start.setHours(sh, sm, 0);
         end.setHours(eh, em, 0);

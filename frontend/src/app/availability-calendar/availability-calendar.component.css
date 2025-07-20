@@ -16,12 +16,6 @@
   color: #333;
 }
 
-/* Calendar wrapper */
-.calendar-container {
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  overflow: hidden;
-}
 
 /* FullCalendar specific adjustments */
 .fc {
@@ -185,6 +179,11 @@ button[type="submit"] {
   font-size: 12px;
   color: #555;
   margin-top: 2px;
+}
+
+.fc .fc-col-header-cell-cushion {
+  width: 100% !important;
+  display: block; /* often helps to force block-level behavior */
 }
 
 /* 🔁 icon positioned top-right */
