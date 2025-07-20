@@ -2,7 +2,7 @@
   <nav class="nav">
     <div class="nav-left">
       <a class="nav-item" routerLink="/">🏠 Home</a>
-      <a class="nav-item" routerLink="config">Admin Office</a>
+      <a class="nav-item" routerLink="config" *ngIf="isAdmin()">Admin Office</a>
     </div>
 
 

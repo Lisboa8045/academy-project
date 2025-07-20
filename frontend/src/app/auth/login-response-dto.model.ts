@@ -3,4 +3,5 @@ export interface LoginResponseDto {
   memberId: number;
   username: string;
   profilePicture: string;
+  role: string;
 }
