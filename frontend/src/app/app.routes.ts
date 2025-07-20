@@ -33,5 +33,6 @@ export const routes: Routes = [
   { path: 'terms', component: TermsComponent },
   { path: 'privacy', component: PrivacyComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
-  { path: 'reset-password/:token', component: ResetPasswordComponent }
+  { path: 'reset-password/:token', component: ResetPasswordComponent },
+  { path: '**', redirectTo: '', pathMatch: 'full' },
 ];
