@@ -1,0 +1,36 @@
+<div class="content card">
+  <h2>
+    My calendar
+  </h2>
+  <div class="calendar-container">
+    <full-calendar #calendar [options]="calendarOptions"></full-calendar>
+  </div>
+
+  <div *ngIf="showRepeatModal" class="modal-overlay">
+    <div class="modal-content">
+      <h3>Repeat availability from {{ selectedRepeatDate }}</h3>
+      <form [formGroup]="replicateForm" (ngSubmit)="submitModalRepeat()">
+        <label>
+          Repeat from:
+          <input type="date" formControlName="startDate" required />
+        </label>
+        <label>
+          To:
+          <input type="date" formControlName="endDate" required />
+        </label>
+        <ng-select
+          [items]="weekDays"
+          bindLabel="label"
+          bindValue="value"
+          [multiple]="true"
+          formControlName="repeatDays"
+          placeholder="Repeat on...">
+        </ng-select>
+        <div class="modal-actions">
+          <button type="submit" [disabled]="replicateForm.invalid">Confirm</button>
+          <button type="button" (click)="closeRepeatModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
