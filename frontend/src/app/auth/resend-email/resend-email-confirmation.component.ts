@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import {Router} from '@angular/router';
 import {AuthService} from "../auth.service";
 import {CommonModule} from "@angular/common";
 
@@ -18,16 +18,19 @@ export class ResendEmailConfirmationComponent implements OnInit {
   loading: boolean = false;
 
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private authService: AuthService
+    private readonly router: Router,
+    private readonly authService: AuthService
   ) {
   }
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
-      this.email = params['email'] || '';
-    });
+    const email = sessionStorage.getItem('pendingResendEmail');
+    if (!email) {
+      this.router.navigate(['/auth']);
+      return;
+    }
+
+    this.email = email;
   }
 
   resend(): void {
@@ -41,6 +44,7 @@ export class ResendEmailConfirmationComponent implements OnInit {
         this.message = 'Verification email sent!';
         this.error = '';
         this.showBackToLogin = true;
+        sessionStorage.removeItem('pendingResendEmail');
       },
       error: () => {
         this.loading = false;

@@ -105,9 +105,8 @@ export class AuthComponent{
         error: (err) => {
           this.loading.set(false);
           if (err?.type === 'EMAIL_NOT_CONFIRMED') {
-            this.router.navigate(['/resend-email'], {
-              queryParams: {email: err.email || login}
-            });
+            sessionStorage.setItem('pendingResendEmail', err.email ?? login);
+            this.router.navigate(['/resend-email']);
             return;
           }
           console.error('Login failed:', err);
