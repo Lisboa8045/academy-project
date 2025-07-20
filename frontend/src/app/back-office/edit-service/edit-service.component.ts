@@ -1,11 +1,11 @@
-import {Component, inject, OnInit, signal} from '@angular/core';
+import {Component, OnInit, signal} from '@angular/core';
 import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {buildServiceForm} from '../service-form/service-form.builder';
 import {ServiceApiService} from '../../shared/service-api.service';
 import {NgForOf, NgIf} from '@angular/common';
 import {ServiceTypeResponseDTO} from '../../shared/models/service-type.model';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import {faPlus, faTimes, faTrash} from '@fortawesome/free-solid-svg-icons';
+import {faPlus, faTimes} from '@fortawesome/free-solid-svg-icons';
 import {ActivatedRoute} from '@angular/router';
 import {EditServiceService} from './edit-service.service';
 import {ServiceDetailsService} from '../../service/service-details.service';
@@ -71,7 +71,7 @@ export class EditServiceComponent implements OnInit {
         this.form = buildServiceForm(this.fb, this.service);
         this.loading.set(false);
       },
-      error: (err) => {
+      error: () => {
         console.error("Error loading service");
       }
     });
@@ -105,7 +105,7 @@ export class EditServiceComponent implements OnInit {
       next: (data) => {
         this.serviceProviders = data;
       },
-      error: (err) => {
+      error: () => {
         console.error("Error loading service providers");
       }
     });
