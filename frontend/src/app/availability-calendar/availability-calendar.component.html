@@ -2,6 +2,11 @@
   <h2>
     My calendar
   </h2>
+  <div style="margin-top: 16px;">
+    <button (click)="saveAvailability()" class="save-button">
+      💾 Save Availability
+    </button>
+  </div>
   <div class="calendar-container">
     <full-calendar #calendar [options]="calendarOptions"></full-calendar>
   </div>

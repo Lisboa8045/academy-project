@@ -7,6 +7,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import {CalendarOptions, DateSelectArg, EventClickArg} from '@fullcalendar/core';
 import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {NgSelectComponent} from '@ng-select/ng-select';
+import {AvailabilityRequestNewDTO, DateTimeRange} from './availability.models';
 
 @Component({
   selector: 'app-calendar',
@@ -289,5 +290,43 @@ export class CalendarComponent implements AfterViewInit {
     this.showRepeatModal = false;
     this.selectedRepeatDate = null;
     this.replicateForm.reset();
+  }
+
+  saveAvailability(): void {
+    const calendarApi = this.calendarComponent.getApi();
+    const allEvents = calendarApi.getEvents();
+
+    const availableEvents = allEvents.filter(event => event.title === 'Available');
+
+    const grouped: Record<string, DateTimeRange[]> = {};
+
+    availableEvents.forEach(event => {
+      const date = event.start!;
+      const dateStr = date.toLocaleDateString('en-CA'); // "YYYY-MM-DD"
+
+      if (!grouped[dateStr]) {
+        grouped[dateStr] = [];
+      }
+
+      const start = new Date(event.start!);
+      const end = new Date(event.end!);
+
+      grouped[dateStr].push({
+        start: start.toTimeString().slice(0, 5), // "HH:mm"
+        end: end.toTimeString().slice(0, 5)
+      });
+    });
+
+    const dto: AvailabilityRequestNewDTO = {
+      daySchedules: Object.entries(grouped).map(([date, timeRanges]) => ({
+        date,
+        timeRanges
+      }))
+    };
+
+    console.log('DTO ready to send:', dto);
+
+    // TODO: Send to backend
+    // this.http.post('/api/availability', dto).subscribe(...);
   }
 }
