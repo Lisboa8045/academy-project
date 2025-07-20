@@ -16,7 +16,7 @@ import {GlobalConfigurationEditComponent} from './global-configuration/global-co
 export const routes: Routes = [
   { path: 'auth', component: AuthComponent },
   { path: 'profile', component: ProfileComponent },
-  {path: 'appointments', component: AppointmentHistoryComponent },
+  { path: 'appointments', component: AppointmentHistoryComponent },
   { path: 'unauthorized', component: UnauthorizedComponent },
   { path: 'services/:id', component: ServiceDetailsComponent},
   { path: 'services', component: SearchServicesComponent},
@@ -26,5 +26,5 @@ export const routes: Routes = [
   { path: 'confirm-email/:token', component: ConfirmEmailComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password/:token', component: ResetPasswordComponent },
-  {path: 'config', component: GlobalConfigurationEditComponent}
+  { path: 'config', component: GlobalConfigurationEditComponent }
 ];

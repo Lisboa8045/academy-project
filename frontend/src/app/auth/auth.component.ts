@@ -13,6 +13,7 @@ import {Router, RouterLink} from '@angular/router';
 import {strongPasswordValidator} from '../shared/validators/password.validator';
 import {noSpecialCharsValidator} from '../shared/validators/no-special-chars.validator';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {snackBarSuccess} from '../shared/snackbar/snackbar-success';
 
 @Component({
   selector: 'app-auth',
@@ -32,7 +33,7 @@ export class AuthComponent{
   confirmPasswordVisible = signal(false);
   loading = signal(false);
 
-  constructor(private readonly authService: AuthService, private readonly router: Router, private snackBar: MatSnackBar) {
+  constructor(private readonly authService: AuthService, private readonly router: Router, private readonly snackBar: MatSnackBar) {
     this.buildForm()
   }
 
@@ -116,7 +117,7 @@ export class AuthComponent{
       this.authService.signup(email!, username!, "2", password!).subscribe({
         next: () => {
           this.loading.set(false);
-          this.snackBar.open('Signup successful! Please log in.', 'Close', { duration: 5000 });
+          snackBarSuccess(this.snackBar, 'Signup successful! Please log in.');
           this.toggleMode()
         },
         error: (err) => {

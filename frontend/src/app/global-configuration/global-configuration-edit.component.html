@@ -1,5 +1,5 @@
 <div class="tailwind-scope">
-  <div class="bg-white rounded-2xl shadow-lg p-6 w-full max-w-4xl mx-auto">
+  <div class="bg-white rounded-2xl shadow-lg p-6 w-full max-w-4xl mx-auto mt-8">
     <h2 class="text-xl font-semibold mb-6">Edit Global Configurations</h2>
 
     <form [formGroup]="configForm" (ngSubmit)="submit()">
@@ -24,15 +24,41 @@
           <!-- Config Value -->
           <div class="mb-2">
             <label for="value-{{ i }}" class="block text-sm text-gray-600 font-medium">Value</label>
-            <input
-              id="value-{{ i }}"
-              [type]="configTypeDescription(config.get('configType')?.value) === 'Password' ? 'password' : 'text'"
-              formControlName="configValue"
-              class="w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            />
-            <div *ngIf="config.get('configValue')?.invalid && config.get('configValue')?.touched" class="text-red-500 text-sm mt-1">
-              Value is required.
+
+            <div class="relative mt-1">
+              <input
+                id="value-{{ i }}"
+                [type]="configTypeDescription(config.get('configType')?.value) === 'Password' && !showPasswords[i] ? 'password' : 'text'"
+                formControlName="configValue"
+                placeholder="Enter value"
+                class="w-full p-2 pr-10 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              />
+
+              <span
+                *ngIf="configTypeDescription(config.get('configType')?.value) === 'Password'"
+                class="toggle-password material-symbols-outlined"
+                (click)="togglePasswordVisibility(i)">
+                {{ showPasswords[i] ? 'visibility_off' : 'visibility' }}
+              </span>
             </div>
+
+            <div *ngIf="config.get('configValue')?.touched && config.get('configValue')?.invalid" class="text-red-500 text-sm mt-1">
+              <ng-container *ngIf="config.get('configValue')?.errors?.['required']">
+                Value is required.
+              </ng-container>
+              <ng-container *ngIf="config.get('configValue')?.errors?.['notAnInteger']">
+                Must be a valid integer.
+              </ng-container>
+              <ng-container *ngIf="config.get('configValue')?.errors?.['intOutOfRange']">
+                Integer is out of range (-2,147,483,648 to 2,147,483,647).
+              </ng-container>
+              <ng-container *ngIf="config.get('configValue')?.errors?.['pattern']">
+                <span *ngIf="configTypeDescription(config.get('configType')?.value) === 'True/False'">
+                  Must be 'true' or 'false'.
+                </span>
+              </ng-container>
+            </div>
+
           </div>
 
           <!-- Config Type -->

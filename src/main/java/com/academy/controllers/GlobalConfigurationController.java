@@ -39,8 +39,8 @@ public class GlobalConfigurationController {
     }
 
     @PostMapping("/edit")
-    public ResponseEntity<String> editConfigs(@Valid @RequestBody List<GlobalConfigurationRequestDTO> request) {
+    public ResponseEntity<Void> editConfigs(@Valid @RequestBody List<GlobalConfigurationRequestDTO> request) {
         globalConfigurationService.editConfigs(request);
-        return ResponseEntity.ok("TOOD");
+        return ResponseEntity.ok().build();
     }
 }

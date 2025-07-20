@@ -1,6 +1,6 @@
-export enum ConfigType{
-  STRING = 'Text',
-  BOOLEAN = 'True/False',
-  INT = 'Integer number',
-  PASSWORD = 'Password'
+export enum ConfigType {
+  STRING = 'STRING',
+  BOOLEAN = 'BOOLEAN',
+  INT = 'INT',
+  PASSWORD = 'PASSWORD',
 }
