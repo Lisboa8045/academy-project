@@ -8,7 +8,7 @@ export class AuthStore {
   readonly profilePicture = signal<string>("");
   readonly role = signal<string>("");
 
-  constructor(private userProfileService: UserProfileService) {
+  constructor(private readonly userProfileService: UserProfileService) {
     effect(() => {
 
       const fileName = this.profilePicture();
