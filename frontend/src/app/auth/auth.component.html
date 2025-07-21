@@ -82,6 +82,25 @@
       <div class="validation-error" *ngIf="authForm.hasError('passwordsMismatch') && authForm.get('confirmPassword')?.touched">
         Passwords do not match.
       </div>
+        <div class="checkbox-group">
+            <label>
+                <input type="checkbox" formControlName="agreedToTerms" />
+                I have read and agreed to the<a href="/terms" target="_blank" rel="noopener" class="link">Terms and Conditions</a>.
+            </label>
+            <div class="validation-error" *ngIf="authForm.get('agreedToTerms')?.touched && authForm.get('agreedToTerms')?.invalid">
+                You must agree to the Terms and Conditions.
+            </div>
+
+            <label>
+                <input type="checkbox" formControlName="agreedToPrivacy" />
+                I have read and agreed to the<a href="/privacy" target="_blank" rel="noopener" class="link">Privacy Policy</a>.
+            </label>
+            <div class="validation-error" *ngIf="authForm.get('agreedToPrivacy')?.touched && authForm.get('agreedToPrivacy')?.invalid">
+                You must agree to the Privacy Policy.
+            </div>
+        </div>
+
+
     }
     <div class="validation-error" *ngIf="errorMessage()">
       {{ errorMessage() }}

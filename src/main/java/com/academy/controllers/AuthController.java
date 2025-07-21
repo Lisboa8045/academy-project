@@ -94,8 +94,9 @@ public class AuthController {
         Member member = memberService.getMemberByUsername(username);
         Long id = member.getId();
         String profilePicture = member.getProfilePicture();
+        String role =  member.getRole().getName();
 
-        return ResponseEntity.ok(Map.of("username", username, "id", id, "profilePicture", profilePicture != null ? profilePicture : ""));
+        return ResponseEntity.ok(Map.of("username", username, "id", id, "profilePicture", profilePicture != null ? profilePicture : "", "role", role));
     }
 
     @PostMapping("/recreate-confirmation-token")

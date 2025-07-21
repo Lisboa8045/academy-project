@@ -115,12 +115,20 @@
             </div>
 
           } @else {
-            <button type="button" class="edit-button" (click)="toggleEdit()">Edit</button>
-            <button type="button" class="logout-button" (click)="logout()">Logout</button>
+            @if (canEdit()){
+              <button type="button" class="edit-button" (click)="toggleEdit()">Edit</button>
+              <button type="button" class="logout-button" (click)="logout()">Logout</button>
+            }
           }
         </div>
       </form>
 
     </div>
 </div>
+  @if (user) {
+    <div class="card">
+      <h2 style="font-size: 30px; margin-top: 0; margin-bottom: 10px">{{user.username}}'s services</h2>
+      <app-my-services [memberIdInput]="user!.id"></app-my-services>
+    </div>
+  }
 }
