@@ -2,7 +2,7 @@ package com.academy.services;
 
 import com.academy.dtos.SlotDTO;
 import com.academy.models.appointment.Appointment;
-import com.academy.models.Availability;
+import com.academy.models.availability.Availability;
 import com.academy.models.appointment.AppointmentStatus;
 import com.academy.models.member.Member;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +62,12 @@ public class SchedulingService {
 
             Member member = memberOpt.get();
 
-            List<Availability> availabilities = availabilityService.getAvailabilitiesForProvider(providerId);
+            List<Availability> allAvailabilities = availabilityService.getAllAvailabilitiesEntity();
+            List<Availability> availabilities = allAvailabilities.stream()
+                    .filter(av -> av.getMemberAvailabilities().stream()
+                            .anyMatch(ma -> ma.getMember().getId().equals(providerId)))
+                    .toList();
+
             List<Appointment> appointments = appointmentService.getAppointmentsForServiceProvider(
                     serviceProvider.getId()
             );
@@ -87,25 +93,42 @@ public class SchedulingService {
         LocalDateTime now = LocalDateTime.now();
 
         for (Availability availability : availabilities) {
-            List<SlotDTO> slots;
-            try {
-                slots = SchedulingService.generateCompleteSlots(
-                        providerId,
-                        providerName,
-                        availability.getStartDateTime(),
-                        availability.getEndDateTime(),
-                        slotDurationMinutes
-                );
-            } catch (IllegalArgumentException e) {
-                continue;
-            }
-            for (SlotDTO slot : slots) {
-                if (slot.start().isBefore(now.minusSeconds(1))) continue;
-                if (isSlotFree(slot, appointments)) freeSlots.add(slot);
+            for (var memberAvailability : availability.getMemberAvailabilities()) {
+                if (!memberAvailability.getMember().getId().equals(providerId)) continue;
+
+                List<LocalDate> dates = memberAvailability.getDates();
+                if (dates == null || dates.isEmpty()) continue;
+
+                for (LocalDate date : dates) {
+                    // Usa startTime e endTime com a data
+                    LocalDateTime start = date.atTime(availability.getStartTime());
+                    LocalDateTime end = date.atTime(availability.getEndTime());
+
+                    List<SlotDTO> slots;
+                    try {
+                        slots = SchedulingService.generateCompleteSlots(
+                                providerId,
+                                providerName,
+                                start,
+                                end,
+                                slotDurationMinutes
+                        );
+                    } catch (IllegalArgumentException e) {
+                        continue;
+                    }
+
+                    for (SlotDTO slot : slots) {
+                        if (slot.start().isBefore(now.minusSeconds(1))) continue;
+                        if (isSlotFree(slot, appointments)) freeSlots.add(slot);
+                    }
+                }
             }
         }
+
         return freeSlots;
     }
+
+
 
     public static List<SlotDTO> generateCompleteSlots(Long providerId, String providerName,
                                                       LocalDateTime start, LocalDateTime end, int slotDurationMinutes) {

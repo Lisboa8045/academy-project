@@ -6,7 +6,7 @@ import com.academy.models.appointment.AppointmentStatus;
 import com.academy.models.member.Member;
 import com.academy.models.member.MemberStatusEnum;
 import com.academy.models.Role;
-import com.academy.models.Availability;
+import com.academy.models.availability.Availability;
 import com.academy.models.ServiceType;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermission;
@@ -120,7 +120,7 @@ public class SchedulingIntegrationTests {
 
         LocalDateTime start = LocalDateTime.now().plusHours(2);
         Availability av = new Availability();
-        av.setMember(provider);
+        //av.setMember(provider);
         av.setStartDateTime(start);
         av.setEndDateTime(start.plusMinutes(90)); // 1h30
         availabilityRepository.save(av);
@@ -145,7 +145,7 @@ public class SchedulingIntegrationTests {
 
         LocalDateTime start = LocalDateTime.now().plusHours(3);
         Availability av = new Availability();
-        av.setMember(provider);
+        //av.setMember(provider);
         av.setStartDateTime(start);
         av.setEndDateTime(start.plusMinutes(40)); // menos do que 1h
 
@@ -165,7 +165,7 @@ public class SchedulingIntegrationTests {
 
         LocalDateTime start = LocalDateTime.now().plusHours(1).truncatedTo(ChronoUnit.MINUTES);
         Availability av = new Availability();
-        av.setMember(provider);
+        //av.setMember(provider);
         av.setStartDateTime(start);
         av.setEndDateTime(start.plusHours(2));
         availabilityRepository.save(av);

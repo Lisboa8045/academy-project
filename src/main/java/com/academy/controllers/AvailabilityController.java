@@ -2,6 +2,7 @@ package com.academy.controllers;
 
 import java.util.List;
 
+import com.academy.dtos.availability.AvailabilityRequestNewDTO;
 import com.academy.exceptions.InvalidArgumentException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -71,11 +72,13 @@ public class AvailabilityController {
     }
 
     @PostMapping
-    public ResponseEntity<AvailabilityResponseDTO> createAvailability(
+    /*public ResponseEntity<AvailabilityResponseDTO> createAvailability(
             @Valid @RequestBody AvailabilityRequestDTO availabilityRequestDTO) {
         AvailabilityResponseDTO response = availabilityService.createAvailability(availabilityRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+     */
 
     @PutMapping("/{availabilityId}")
     public ResponseEntity<AvailabilityResponseDTO> updateAvailability(
@@ -90,4 +93,15 @@ public class AvailabilityController {
         availabilityService.deleteAvailabilityById(availabilityId);
         return ResponseEntity.noContent().build();
     }
-}
+
+    @PostMapping("/create-availabilities")
+    public ResponseEntity<String> createAvailabilities( @RequestBody AvailabilityRequestNewDTO request){
+        availabilityService.createAvailabilities(request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @GetMapping("/member")
+    public ResponseEntity<AvailabilityRequestNewDTO> getMemberAvailability() {
+        return ResponseEntity.ok(availabilityService.getMemberAvailability());
+    }
+    }

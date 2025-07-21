@@ -1,21 +1,13 @@
 package com.academy.models.member;
 
 import com.academy.models.appointment.Appointment;
-import com.academy.models.Availability;
+import com.academy.models.availability.Availability;
 import com.academy.models.Role;
+import com.academy.models.availability.MemberAvailability;
 import com.academy.models.service.Service;
 import com.academy.models.shared.BaseEntity;
 import com.academy.utils.FieldLengths;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -33,7 +25,7 @@ import java.util.ArrayList;
 public class Member extends BaseEntity {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Availability> availabilities = new ArrayList<>();
+    private List<MemberAvailability> memberAvailabilities = new ArrayList<>();
 
     @OneToMany(mappedBy = "member")
     private List<Appointment> appointments = new ArrayList<>();

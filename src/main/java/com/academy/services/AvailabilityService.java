@@ -1,24 +1,28 @@
 package com.academy.services;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.academy.dtos.availability.DefaultAvailabilityRequest;
-import com.academy.dtos.availability.AvailabilityMapper;
-import com.academy.dtos.availability.AvailabilityRequestDTO;
-import com.academy.dtos.availability.AvailabilityResponseDTO;
+import com.academy.config.authentication.AuthenticationFacade;
+import com.academy.dtos.availability.*;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.exceptions.InvalidArgumentException;
-import com.academy.models.Availability;
+import com.academy.models.availability.Availability;
+import com.academy.models.availability.MemberAvailability;
 import com.academy.models.member.Member;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.AvailabilityRepository;
+import com.academy.repositories.MemberAvailabilityRepository;
+import com.academy.repositories.MemberRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -28,33 +32,42 @@ public class AvailabilityService {
     private final MemberService memberService;
     private final AvailabilityMapper availabilityMapper;
     private final ServiceProviderService serviceProviderService;
+    private final AuthenticationFacade authenticationFacade;
+    private final MemberAvailabilityRepository memberAvailabilityRepository;
 
     @Autowired
     public AvailabilityService(
             AvailabilityRepository availabilityRepository,
             MemberService memberService,
-            AvailabilityMapper availabilityMapper, ServiceProviderService serviceProviderService) {
+            AvailabilityMapper availabilityMapper, ServiceProviderService serviceProviderService,
+            AuthenticationFacade authenticationFacade,
+            MemberAvailabilityRepository memberAvailabilityRepository) {
         this.availabilityRepository = availabilityRepository;
         this.memberService = memberService;
         this.availabilityMapper = availabilityMapper;
         this.serviceProviderService = serviceProviderService;
+        this.authenticationFacade = authenticationFacade;
+        this.memberAvailabilityRepository = memberAvailabilityRepository;
     }
 
     public List<AvailabilityResponseDTO> getAvailabilitiesByMemberId(Long memberId) {
         validateMemberExists(memberId);
-        List<Availability> availabilities = availabilityRepository.findByMember_Id(memberId);
-        return mapToResponseDTOs(availabilities);
+        //List<Availability> availabilities = availabilityRepository.findByMember_Id(memberId);
+        //return mapToResponseDTOs(availabilities);
+        return null;
     }
 
     public List<AvailabilityResponseDTO> getDefaultAvailabilitiesByMemberId(Long memberId) {
         validateMemberExists(memberId);
-        List<Availability> availabilities = availabilityRepository.findByMember_IdAndIsExceptionFalse(memberId);
-        return mapToResponseDTOs(availabilities);
+        //List<Availability> availabilities = availabilityRepository.findByMember_IdAndIsExceptionFalse(memberId);
+        //return mapToResponseDTOs(availabilities);
+        return null;
     }
 
     public boolean hasDefaultAvailability(Long memberId) {
         validateMemberExists(memberId);
-        return availabilityRepository.existsByMember_IdAndIsExceptionFalse(memberId);
+        //return availabilityRepository.existsByMember_IdAndIsExceptionFalse(memberId);
+    return false;
     }
 
     @Transactional
@@ -63,13 +76,13 @@ public class AvailabilityService {
                 .orElseThrow(() -> new EntityNotFoundException(Member.class, memberId));
 
         // Delete existing non-exceptions (default availabilities)
-        availabilityRepository.deleteByMember_IdAndIsExceptionFalse(memberId);
+        //availabilityRepository.deleteByMember_IdAndIsExceptionFalse(memberId);
 
         List<Availability> defaultAvailabilities = new ArrayList<>();
 
         for (DayOfWeek day : request.days()) {
             Availability morning = new Availability();
-            morning.setMember(member);
+            //morning.setMember(member); AQ
             morning.setDayOfWeek(day);
             morning.setStartDateTime(request.morningStartTime().atDate(LocalDateTime.now().toLocalDate()));
             morning.setEndDateTime(request.morningEndTime().atDate(LocalDateTime.now().toLocalDate()));
@@ -78,7 +91,7 @@ public class AvailabilityService {
 
             if (request.afternoonStartTime() != null && request.afternoonEndTime() != null) {
                 Availability afternoon = new Availability();
-                afternoon.setMember(member);
+                //afternoon.setMember(member); AQ
                 afternoon.setDayOfWeek(day);
                 afternoon.setStartDateTime(request.afternoonStartTime().atDate(LocalDateTime.now().toLocalDate()));
                 afternoon.setEndDateTime(request.afternoonEndTime().atDate(LocalDateTime.now().toLocalDate()));
@@ -97,11 +110,11 @@ public class AvailabilityService {
         Member member = validateMemberExists(memberId);
 
         Availability availability = availabilityMapper.toEntity(requestDTO);
-        availability.setMember(member);
+        //availability.setMember(member);AQ
         availability.setException(true);
 
         // Check for overlap before saving
-        boolean exists = availabilityRepository.existsByMember_IdAndDayOfWeekAndTimeOverlap(
+        /*boolean exists = availabilityRepository.existsByMember_IdAndDayOfWeekAndTimeOverlap(
             member.getId(),
             availability.getDayOfWeek(),
             availability.getStartDateTime(),
@@ -110,8 +123,11 @@ public class AvailabilityService {
         if (exists) {
             throw new InvalidArgumentException("Duplicate or overlapping availability detected.");
         }
+
+         */
         Availability saved = availabilityRepository.save(availability);
-        return availabilityMapper.toResponseDTOWithMember(saved);
+        //return availabilityMapper.toResponseDTOWithMember(saved);AQ
+        return null;
     }
 
     public AvailabilityResponseDTO createAvailability(AvailabilityRequestDTO requestDTO) {
@@ -119,21 +135,26 @@ public class AvailabilityService {
         Member member = validateMemberExists(requestDTO.memberId());
 
         Availability availability = availabilityMapper.toEntity(requestDTO);
-        availability.setMember(member);
+        //availability.setMember(member);AQ
         availability.setException(false);
 
         // Check for overlap before saving
-        boolean exists = availabilityRepository.existsByMember_IdAndDayOfWeekAndTimeOverlap(
+        /*boolean exists = availabilityRepository.existsByMember_IdAndDayOfWeekAndTimeOverlap(
             member.getId(),
             availability.getDayOfWeek(),
             availability.getStartDateTime(),
             availability.getEndDateTime()
         );
+        AQ
+
         if (exists) {
             throw new InvalidArgumentException("Duplicate or overlapping availability detected.");
         }
+        7
+         */
         Availability saved = availabilityRepository.save(availability);
-        return availabilityMapper.toResponseDTOWithMember(saved);
+        //return availabilityMapper.toResponseDTOWithMember(saved);AQ
+        return null;
     }
 
     public List<Availability> getAvailabilitiesForProvider(Long providerId) {
@@ -150,17 +171,19 @@ public class AvailabilityService {
         LocalDateTime endDate = now.plusDays(30);
 
         // Get availabilities for this provider within the date range
-        List<Availability> availabilities = availabilityRepository.findByMember_IdAndStartDateTimeBetween(
+        /*List<Availability> availabilities = availabilityRepository.findByMember_IdAndStartDateTimeBetween(
                 providerId,
                 now,
                 endDate
         );
 
-        return availabilities;
+         AQ*/
+
+        return null;
     }
 
     public AvailabilityResponseDTO updateAvailability(Long availabilityId, AvailabilityRequestDTO requestDTO) {
-        Availability availability = availabilityRepository.findById(availabilityId)
+        /*Availability availability = availabilityRepository.findById(availabilityId)
                 .orElseThrow(() -> new EntityNotFoundException(Availability.class, availabilityId));
 
         availability.setDayOfWeek(requestDTO.dayOfWeek());
@@ -175,6 +198,9 @@ public class AvailabilityService {
 
         Availability updated = availabilityRepository.save(availability);
         return availabilityMapper.toResponseDTOWithMember(updated);
+
+        AQ */
+        return null;
     }
 
     public void deleteAvailabilityById(Long availabilityId) {
@@ -189,6 +215,9 @@ public class AvailabilityService {
         return mapToResponseDTOs(availabilities);
     }
 
+    public List<Availability> getAllAvailabilitiesEntity() {
+        return availabilityRepository.findAll();
+    }
     private Member validateMemberExists(Long memberId) {
         return memberService.findbyId(memberId)
                 .orElseThrow(() -> new EntityNotFoundException(Member.class, memberId));
@@ -201,9 +230,10 @@ public class AvailabilityService {
     }
 
     private List<AvailabilityResponseDTO> mapToResponseDTOs(List<Availability> availabilities) {
-        return availabilities.stream()
-                .map(availabilityMapper::toResponseDTOWithMember)
-                .collect(Collectors.toList());
+        //return availabilities.stream()
+                //.map(availabilityMapper::toResponseDTOWithMember)
+                //.collect(Collectors.toList()); AQ
+        return null;
     }
 
     public List<AvailabilityResponseDTO> getAvailabilitiesByServiceId(Long serviceId) {
@@ -220,13 +250,81 @@ public class AvailabilityService {
         for (ServiceProvider provider : providers) {
             Long providerId = provider.getProvider().getId();
             // Get all availabilities for this provider
-            List<Availability> providerAvailabilities = availabilityRepository.findByMember_Id(providerId);
+            //List<Availability> providerAvailabilities = availabilityRepository.findByMember_Id(providerId);
             // Convert to DTOs and add to result
-            result.addAll(providerAvailabilities.stream()
-                    .map(availabilityMapper::toResponseDTOWithMember)
-                    .collect(Collectors.toList()));
+            //result.addAll(providerAvailabilities.stream()
+                    //.map(availabilityMapper::toResponseDTOWithMember)
+                    //.collect(Collectors.toList()));
         }
 
         return result;
+    }
+
+    public void createAvailabilities(AvailabilityRequestNewDTO request) {
+        Member member = memberService.getMemberByUsername(authenticationFacade.getUsername());
+        for (DaySchedule daySchedule: request.daySchedules()) {
+                removeMemberAvailabilities(member.getId(), daySchedule.date());
+
+            for (DateTimeRange timeRange : daySchedule.timeRanges()) {
+                List<Availability> list = availabilityRepository.findByStartTimeAndEndTime(timeRange.start(), timeRange.end());
+
+                Availability availability;
+
+                if (list.isEmpty()) {
+                    availability = new Availability();
+                    availability.setStartTime(timeRange.start());
+                    availability.setEndTime(timeRange.end());
+                    availability = availabilityRepository.save(availability); // salvar primeiro para garantir ID
+                } else {
+                    availability = list.get(0); // reutilizar
+                }
+
+                MemberAvailability memberAvailability = new MemberAvailability();
+                memberAvailability.setMember(member);
+                memberAvailability.setAvailability(availability);
+
+                List<LocalDate> dates = new ArrayList<>();
+                dates.add(daySchedule.date());
+                memberAvailability.setDates(dates);
+
+                member.getMemberAvailabilities().add(memberAvailability);
+            }
+
+            memberAvailabilityRepository.saveAll(member.getMemberAvailabilities());
+
+        }
+    }
+
+    private void removeMemberAvailabilities(Long memberId, LocalDate date) {
+        String dateStrWithCommas = "," + date.toString() + ",";
+
+        List<MemberAvailability> matchingAvailabilities =
+                memberAvailabilityRepository.findByMemberIdAndDate(memberId, dateStrWithCommas);
+
+        for (MemberAvailability ma : matchingAvailabilities) {
+            List<LocalDate> updatedDates = ma.getDates().stream()
+                    .filter(d -> !d.equals(date))
+                    .collect(Collectors.toList());
+
+            if (updatedDates.isEmpty()) {
+                memberAvailabilityRepository.delete(ma); // remove completamente
+            } else {
+                ma.setDates(updatedDates); // atualiza lista e datesString
+                memberAvailabilityRepository.save(ma);
+            }
+        }
+    }
+
+    private void removeAvailabilityFromList(Availability availability, LocalDate dateToRemove){
+        List<LocalDate> currentDates = new ArrayList<>(availability.getDates());
+        currentDates.removeIf(d -> d.equals(dateToRemove));
+        availability.setDates(currentDates);
+    }
+
+    public AvailabilityRequestNewDTO getMemberAvailability() {
+        Member member = memberService.getMemberByUsername(authenticationFacade.getUsername());
+        List<MemberAvailability> availabilities = memberAvailabilityRepository.findByMemberId(member.getId());
+
+        return new AvailabilityRequestNewDTO(availabilityMapper.toDaySchedules(availabilities));
     }
 }
