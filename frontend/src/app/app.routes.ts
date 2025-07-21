@@ -36,7 +36,7 @@ export const routes: Routes = [
   { path: 'privacy', component: PrivacyComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password/:token', component: ResetPasswordComponent },
-  { path: '**', redirectTo: '', pathMatch: 'full' },
   {path: 'confirm-appointment/:id', component: ConfirmAppointmentComponent },
   { path: 'config', component: GlobalConfigurationEditComponent },
+  { path: '**', redirectTo: '', pathMatch: 'full' },
 ];
