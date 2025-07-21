@@ -1,6 +1,7 @@
 // AppointmentController.java
 package com.academy.controllers;
 
+import com.academy.dtos.appointment.AppointmentCalendarDTO;
 import com.academy.dtos.appointment.AppointmentCardDTO;
 import com.academy.dtos.SlotDTO;
 import com.academy.dtos.appointment.AppointmentRequestDTO;
@@ -80,6 +81,11 @@ public class AppointmentController {
             @RequestParam(defaultValue = "asc") String dateOrder
     ) {
         return ResponseEntity.ok(appointmentService.getAppointmentsForAuthenticatedMember(dateOrder));
+    }
+
+    @GetMapping("/calendar")
+    public ResponseEntity<List<AppointmentCalendarDTO>> getAppointmentsCalendarForAuthenticatedServiceProvider(){
+        return ResponseEntity.ok(appointmentService.getAppointmentsForAuthenticatedServiceProviderCalendar());
     }
 /*
     @GetMapping("/provider")

@@ -286,3 +286,15 @@ ng-select ::ng-deep .ng-dropdown-panel .ng-option.ng-option-selected {
   background-color: #e3f2fd;
   font-weight: 500;
 }
+
+.content-header{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.content-header h2{
+  margin: 0;
+}

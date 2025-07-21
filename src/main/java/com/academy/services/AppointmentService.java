@@ -1,9 +1,8 @@
 package com.academy.services;
 
 import com.academy.config.authentication.AuthenticationFacade;
-import com.academy.dtos.appointment.AppointmentDetailedDTO;
+import com.academy.dtos.appointment.AppointmentCalendarDTO;
 import com.academy.dtos.appointment.AppointmentCardDTO;
-import com.academy.config.authentication.AuthenticationFacade;
 import com.academy.dtos.appointment.AppointmentMapper;
 import com.academy.dtos.appointment.AppointmentRequestDTO;
 import com.academy.dtos.appointment.AppointmentResponseDTO;
@@ -162,6 +161,13 @@ public class AppointmentService {
 
         return appointmentList.stream().map(appointmentMapper::toAppointmentCardDTO).toList();
 
+    }
+
+    public List<AppointmentCalendarDTO> getAppointmentsForAuthenticatedServiceProviderCalendar() {
+
+        List<Appointment> appointmentList = appointmentRepository
+                .findAllByServiceProviderProviderUsername(authenticationFacade.getUsername());
+        return appointmentList.stream().map(appointmentMapper::toAppointmentCalendarDTO).toList();
     }
 
 /*
