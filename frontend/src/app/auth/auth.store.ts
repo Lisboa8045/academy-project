@@ -39,10 +39,6 @@ export class AuthStore {
     this.role.set(role)
   }
 
-  setRole(role: string) {
-    this.role.set(role);
-  }
-
   clear() {
     this.username.set("");
     this.id.set(-1);
