@@ -68,7 +68,9 @@ export class AuthComponent{
         email: ['', [Validators.required, Validators.email, Validators.maxLength(254)]],
         username: ['', [Validators.required, noSpecialCharsValidator(), Validators.minLength(4), Validators.maxLength(20)]],
         password: ['', [Validators.required, strongPasswordValidator(), Validators.minLength(8), Validators.maxLength(64)]],
-        confirmPassword: ['', [Validators.required, Validators.maxLength(64)]]
+        confirmPassword: ['', [Validators.required, Validators.maxLength(64)]],
+        agreedToTerms: [false, Validators.requiredTrue],
+        agreedToPrivacy: [false, Validators.requiredTrue]
       }, { validators: this.passwordsMatchValidator });
     }
 
@@ -104,9 +106,8 @@ export class AuthComponent{
         error: (err) => {
           this.loading.set(false);
           if (err?.type === 'EMAIL_NOT_CONFIRMED') {
-            this.router.navigate(['/resend-email'], {
-              queryParams: {email: err.email || login}
-            });
+            sessionStorage.setItem('pendingResendEmail', err.email ?? login);
+            this.router.navigate(['/resend-email']);
             return;
           }
           console.error('Login failed:', err);

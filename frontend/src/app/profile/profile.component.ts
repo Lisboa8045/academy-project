@@ -1,4 +1,4 @@
-import { Component, effect, inject, signal } from '@angular/core';
+import {Component, effect, inject, OnInit, signal, WritableSignal} from '@angular/core';
 import { Router } from '@angular/router';
 import { ProfileService } from './profile.service';
 import { AuthStore } from '../auth/auth.store';
@@ -15,21 +15,24 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { snackBarSuccess } from '../shared/snackbar/snackbar-success';
 import { snackBarError } from '../shared/snackbar/snackbar-error';
 import {passwordsMatchValidator} from '../shared/validators/password-match-validator';
+import { ActivatedRoute } from '@angular/router';
+import {MyServicesComponent} from '../service/my-services/my-services.component';
 
 @Component({
   selector: 'app-profile',
   imports: [
     LoadingComponent,
     ReactiveFormsModule,
-    NgIf
+    NgIf,
+    MyServicesComponent
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
-export class ProfileComponent {
+export class ProfileComponent implements OnInit {
   user: MemberResponseDTO | undefined;
   loading = signal(false);
-  readonly imageUrl = inject(UserProfileService).imageUrl;
+  imageUrl:WritableSignal<string|null> = signal("");
   tempImageUrl = signal("");
   profileForm!: FormGroup;
   editMode = false;
@@ -44,12 +47,28 @@ export class ProfileComponent {
     private profileService: ProfileService,
     private userProfileService: UserProfileService,
     private appConfigService: AppConfigService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private route: ActivatedRoute,
   ) {
     effect(() => {
+      if(this.route.snapshot.paramMap.get('id')) return;
       this.loading.set(true);
       if (this.authStore.id() > -1) this.getMember(this.authStore.id());
     });
+  }
+
+  ngOnInit() {
+    this.loading.set(true);
+    const idParam = this.route.snapshot.paramMap.get('id');
+    if (idParam) {
+      const id = Number(idParam);
+      if (!isNaN(id)) {
+        this.getMember(id);
+      }
+    } else {
+      this.getMember(this.authStore.id());
+    }
+    this.loading.set(false);
   }
 
   getMember(id: number) {
@@ -57,6 +76,9 @@ export class ProfileComponent {
       next: (res: MemberResponseDTO) => {
         this.loading.set(false);
         this.user = res;
+        this.userProfileService.getImage(res.profilePicture).then((url) => {
+          this.imageUrl.set(url);
+        });
         this.loadForm(this.user);
       },
       error: (err: any) => {
@@ -164,7 +186,9 @@ export class ProfileComponent {
       const formData = new FormData();
       formData.append('file', this.selectedFile!);
       this.profileService.uploadProfilePicture(formData, this.authStore.id()).subscribe({
-        next: () => console.log('Uploaded'),
+        next: () => {
+          this.authStore.setProfilePicture(this.tempImageUrl());
+        },
         error: (err) => {
           alert('Upload failed.');
           console.error(err);
@@ -193,5 +217,9 @@ export class ProfileComponent {
       },
       error: (err) => console.error('Logout failed', err)
     });
+  }
+
+  canEdit(): Boolean{
+    return this.user ? this.authStore.id() === this.user.id : false;
   }
 }
