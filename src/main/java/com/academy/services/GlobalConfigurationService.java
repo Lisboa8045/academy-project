@@ -9,7 +9,6 @@ import com.academy.models.global_configuration.GlobalConfiguration;
 import com.academy.models.global_configuration.GlobalConfigurationTypeEnum;
 import com.academy.repositories.GlobalConfigurationRepository;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -58,7 +57,7 @@ public class GlobalConfigurationService {
     }
 
     @Transactional
-    public void editConfigs(@Valid List<GlobalConfigurationRequestDTO> request) {
+    public void editConfigs(List<GlobalConfigurationRequestDTO> request) {
         for (GlobalConfigurationRequestDTO config: request){
             updateConfigValue(config.configKey(),  config);
         }
