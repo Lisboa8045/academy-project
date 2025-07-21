@@ -223,7 +223,7 @@ export class ScheduleComponent implements OnInit {
           serviceProviderId: serviceProvider.id,
           startDateTime: this.selectedSlot!.start,
           endDateTime: this.selectedSlot!.end,
-          status: 'CONFIRMED'
+          status: 'PENDING'
         };
 
         this.scheduleApi.confirmAppointment(appointment).subscribe({

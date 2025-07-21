@@ -15,6 +15,7 @@ import { TermsComponent } from './info-pages/terms/terms.component';
 import { PrivacyComponent } from './info-pages/privacy/privacy.component';
 import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './auth/reset-password/reset-password.component';
+import {ConfirmAppointmentComponent} from './confirm-appointment/confirm-appointment.component';
 
 export const routes: Routes = [
   { path: 'auth', component: AuthComponent },
@@ -35,4 +36,5 @@ export const routes: Routes = [
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password/:token', component: ResetPasswordComponent },
   { path: '**', redirectTo: '', pathMatch: 'full' },
+  {path: 'confirm-appointment/:id', component: ConfirmAppointmentComponent },
 ];
