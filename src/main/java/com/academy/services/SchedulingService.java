@@ -172,7 +172,7 @@ public class SchedulingService {
         if (slot == null || slot.start() == null || slot.end() == null) return false;
 
         return appointments.stream()
-                .filter(app -> app.getStatus() == AppointmentStatus.CONFIRMED)
+                .filter(app -> app.getStatus() != AppointmentStatus.CANCELLED)
                 .noneMatch(app ->
                         app.getStartDateTime() != null &&
                                 app.getEndDateTime() != null &&
