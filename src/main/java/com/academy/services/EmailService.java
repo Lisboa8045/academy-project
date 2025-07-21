@@ -3,6 +3,7 @@ package com.academy.services;
 import com.academy.config.AppProperties;
 import com.academy.exceptions.EmailTemplateLoadingException;
 import com.academy.exceptions.SendEmailException;
+import com.academy.models.appointment.Appointment;
 import com.academy.models.member.Member;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Map;
 
 import static com.academy.utils.Utils.formatHours;
 
@@ -47,6 +49,38 @@ public class EmailService{
             mailSender.send(message);
         } catch (MessagingException | UnsupportedEncodingException e) {
             throw new SendEmailException("Erro ao enviar e-mail");
+        }
+    }
+
+    @Async
+    protected void sendAppointmentConfirmationEmail(Appointment appointment) {
+        String resetUrl = appProperties.getFrontendUrl() + "/confirm-appointment/" + appointment.getId();
+        com.academy.models.service.Service service = appointment.getServiceProvider().getService();
+        String html = loadAppointmentConfirmationEmail()
+                .replace("[SERVICE_NAME]", appointment.getMember().getUsername())
+                .replace("[User Name]", appointment.getMember().getUsername())
+                .replace("[ENTITY_NUMBER]", service.getEntity())
+                .replace("[App Name]", appProperties.getName())
+                .replace("[REFERENCE_NUMBER]", "123 456 789")
+                .replace("[PAYMENT_CONFIRMATION_LINK]", resetUrl)
+                .replace("[HOURS]", formatHours(globalConfigurationService.getConfigValue("confirm_appointment_expiry_minutes")))
+                .replace("[AMOUNT]", Double.toString(service.getPrice()));
+
+        send(
+                appointment.getMember().getEmail(),
+                "Confirm Appointment for Service: " + service.getName(),
+                "Click on the link to proceed: " + resetUrl,
+                html
+        );
+    }
+
+    private String loadAppointmentConfirmationEmail() {
+        try {
+            ClassPathResource resource = new ClassPathResource("templates/confirm-appointment.html");
+            byte[] bytes = Files.readAllBytes(resource.getFile().toPath());
+            return new String(bytes, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new EmailTemplateLoadingException("Error loading e-mail template");
         }
     }
 
