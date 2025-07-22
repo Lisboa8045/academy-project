@@ -1,7 +1,7 @@
 import {Component, OnInit, signal} from '@angular/core';
 import {ServiceModel} from '../service.model';
 import {ActivatedRoute, Router} from '@angular/router';
-import {ServiceDetailsService} from '../service-details.service';
+import {ServiceApiService} from '../../shared/service-api.service';
 import {LoadingComponent} from '../../loading/loading.component';
 import {NgForOf, NgIf} from "@angular/common";
 import {UserProfileService} from '../../profile/user-profile.service';
@@ -33,7 +33,7 @@ export class ServiceDetailsComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private serviceDetailsService: ServiceDetailsService,
+    private serviceApiService: ServiceApiService,
     protected userProfileService: UserProfileService,
     private router: Router
   ) {
@@ -43,7 +43,7 @@ export class ServiceDetailsComponent implements OnInit {
     this.serviceId = Number(this.route.snapshot.paramMap.get('id'));
 
     this.loading.set(true);
-    this.serviceDetailsService.getServiceById(this.serviceId).subscribe({
+    this.serviceApiService.getServiceById(this.serviceId).subscribe({
       next: (data) => {
         this.service = data;
         if (this.service?.price && this.service?.discount && this.service.discount > 0) {
@@ -96,7 +96,7 @@ export class ServiceDetailsComponent implements OnInit {
   }
 
   nextImage(container: HTMLElement) {
-    if (this.currentImageIndex < this.userProfileService.serviceImageUrls.length - 1) {
+    if (this.currentImageIndex < this.userProfileService.serviceImageUrl.length - 1) {
       this.currentImageIndex++;
       this.scrollToThumbnail(container);
     }

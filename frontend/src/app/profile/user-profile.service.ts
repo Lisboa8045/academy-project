@@ -6,7 +6,7 @@ export class UserProfileService {
   readonly imageUrl = this._imageUrl.asReadonly();
   private fetched = false;
   private apiUrl = 'http://localhost:8080/auth/uploads';
-  serviceImageUrls: string[] = [];
+  serviceImageUrl: string[] = [];
 
   async loadImage(fileName: string) {
     if (!fileName || this.fetched) return;
@@ -45,7 +45,7 @@ export class UserProfileService {
 
         const blob = await res.blob();
         const objectUrl = URL.createObjectURL(blob);
-        this.serviceImageUrls.push(objectUrl);
+        this.serviceImageUrl.push(objectUrl);
         this.fetched = true;
       } catch (error) {
         console.error("Error loading the image", fileName, error)

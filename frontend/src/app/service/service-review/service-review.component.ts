@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {ServiceDetailsService} from '../service-details.service';
+import {ServiceApiService} from '../../shared/service-api.service';
 import {ServiceAppointmentReviewModel} from '../service-details/service-appointment-review-model';
 import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
 
@@ -23,7 +23,7 @@ export class ServiceReviewComponent implements OnInit {
   reviews?: ServiceAppointmentReviewModel[] = [];
 
   constructor(
-    private serviceDetailsService: ServiceDetailsService,
+    private serviceApiService: ServiceApiService,
   ) {
 
   }
@@ -52,7 +52,7 @@ export class ServiceReviewComponent implements OnInit {
   ngOnInit(): void {
     if (!this.serviceId) return;
 
-    this.serviceDetailsService.getReviewsByServiceId(this.serviceId).subscribe({
+    this.serviceApiService.getReviewsByServiceId(this.serviceId).subscribe({
       next: (data) => {
         this.reviews = data;
         this.reviews.forEach((review, idx) => {

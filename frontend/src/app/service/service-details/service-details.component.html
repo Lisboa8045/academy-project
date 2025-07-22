@@ -13,19 +13,19 @@
             </button>
 
             <img
-              [src]="userProfileService.serviceImageUrls[currentImageIndex]"
+              [src]="userProfileService.serviceImageUrl[currentImageIndex]"
               alt="Service Image"
               class="main-image"
             />
 
             <button class="nav right" (click)="nextImage(thumbContainer)"
-                    [disabled]="currentImageIndex === userProfileService.serviceImageUrls.length - 1">&#10095;
+                    [disabled]="currentImageIndex === userProfileService.serviceImageUrl.length - 1">&#10095;
             </button>
 
             <div class="thumbnails-overlay">
               <div class="thumbnails-scroll-wrapper" #thumbContainer>
                 <img
-                  *ngFor="let imageUrl of userProfileService.serviceImageUrls; let i = index"
+                  *ngFor="let imageUrl of userProfileService.serviceImageUrl; let i = index"
                   [src]="imageUrl"
                   class="thumbnail-image"
                   [class.selected]="i === currentImageIndex"

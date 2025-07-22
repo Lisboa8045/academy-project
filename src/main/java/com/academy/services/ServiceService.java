@@ -304,9 +304,6 @@ public class ServiceService {
     public List<AppointmentReviewResponseDTO> getReviewsByServiceId(Long serviceId) {
         Service service = serviceRepository.findById(serviceId)
                 .orElseThrow(() -> new EntityNotFoundException(Service.class, serviceId));
-
-        System.out.println("Service ->> " + service);
-        System.out.println("ServiceProviders _________________ ->> " + service.getServiceProviders());
         return service.getServiceProviders().stream()
                 .flatMap(sp -> sp.getAppointmentList().stream())
                 .filter(app -> app.getComment() != null)
