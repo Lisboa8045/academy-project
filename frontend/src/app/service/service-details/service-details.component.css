@@ -165,6 +165,12 @@ app-service-review {
   padding: 2rem;
 }
 
+.info-content {
+  display: flex;
+  flex-direction: column;
+  gap: 30px; /* controla espaço entre h2 e .type-and-duration */
+}
+
 .image-wrapper {
   width: 100%;
   height: 100%;
@@ -204,7 +210,6 @@ app-service-review {
 .price-details {
   display: flex;
   flex-direction: column;
-  margin-top: 20px;
 }
 
 .original-price {
@@ -260,9 +265,6 @@ app-service-review {
   background-color: #0056b3;
 }
 
-.tag-list {
-  margin-top: -29px;
-}
 
 .tag {
   background-color: #f0f0f0;
@@ -280,7 +282,6 @@ app-service-review {
   align-items: center;
   gap: 2rem;
   margin-bottom: 3rem;
-  margin-top: 0.5rem;
 }
 
 .type-and-duration h3 {
