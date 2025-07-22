@@ -59,8 +59,8 @@ app-service-review {
   object-fit: contain;
   /*overflow: hidden;*/
   /*border-radius: 10px;*/
-  object-fit: cover; /* Corta a imagem para preencher, mantendo os cantos arredondados */
-  border-radius: 0; /* Remove do elemento img para evitar conflito */
+  object-fit: cover;
+  border-radius: 0;
 
 }
 
@@ -168,7 +168,7 @@ app-service-review {
 .info-content {
   display: flex;
   flex-direction: column;
-  gap: 30px; /* controla espaço entre h2 e .type-and-duration */
+  gap: 30px;
 }
 
 .image-wrapper {
