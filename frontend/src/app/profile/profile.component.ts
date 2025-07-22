@@ -1,19 +1,19 @@
-import { Component, effect, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
-import { ProfileService } from './profile.service';
-import { AuthStore } from '../auth/auth.store';
-import { AuthService } from '../auth/auth.service';
-import { LoadingComponent } from '../loading/loading.component';
-import { MemberResponseDTO } from '../auth/member-response-dto.model';
-import { UserProfileService } from './user-profile.service';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { NgIf } from '@angular/common';
-import { AppConfigService } from '../shared/app-config.service';
-import { strongPasswordValidator } from '../shared/validators/password.validator';
-import { noSpecialCharsValidator } from '../shared/validators/no-special-chars.validator';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { snackBarSuccess } from '../shared/snackbar/snackbar-success';
-import { snackBarError } from '../shared/snackbar/snackbar-error';
+import {Component, effect, inject, signal} from '@angular/core';
+import {Router} from '@angular/router';
+import {ProfileService} from './profile.service';
+import {AuthStore} from '../auth/auth.store';
+import {AuthService} from '../auth/auth.service';
+import {LoadingComponent} from '../loading/loading.component';
+import {MemberResponseDTO} from '../auth/member-response-dto.model';
+import {UserProfileService} from './user-profile.service';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {NgIf} from '@angular/common';
+import {AppConfigService} from '../shared/app-config.service';
+import {strongPasswordValidator} from '../shared/validators/password.validator';
+import {noSpecialCharsValidator} from '../shared/validators/no-special-chars.validator';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {snackBarSuccess} from '../shared/snackbar/snackbar-success';
+import {snackBarError} from '../shared/snackbar/snackbar-error';
 import {passwordsMatchValidator} from '../shared/validators/password-match-validator';
 
 @Component({
@@ -35,6 +35,7 @@ export class ProfileComponent {
   editMode = false;
   editPasswordMode = false;
   selectedFile: File | null = null;
+  upgradeWorkerRole = false;
 
   constructor(
     private fb: FormBuilder,
@@ -105,6 +106,7 @@ export class ProfileComponent {
     this.profileForm.get('confirmPassword')?.updateValueAndValidity();
   }
 
+
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (!input.files || input.files.length === 0) return;
@@ -145,6 +147,8 @@ export class ProfileComponent {
       this.profileForm.disable();
       this.tempImageUrl.set("");
       this.profileForm.patchValue(this.user!);
+      this.upgradeWorkerRole = false;
+
     }
   }
 
@@ -153,13 +157,42 @@ export class ProfileComponent {
     this.updatePasswordValidators();
   }
 
+  toggleUpgradeRoleEditMode() {
+    this.upgradeWorkerRole = !this.upgradeWorkerRole
+    this.toggleEdit();
+
+  }
+
+  updateUpgradeRoleValidators() {
+    if (this.upgradeWorkerRole) {
+      this.profileForm.get('address')?.setValidators(Validators.required);
+      this.profileForm.get('postalCode')?.setValidators(Validators.required);
+      this.profileForm.get('phoneNumber')?.setValidators(Validators.required);
+    } else {
+      this.profileForm.get('address')?.removeValidators(Validators.required);
+      this.profileForm.get('postalCode')?.removeValidators(Validators.required);
+      this.profileForm.get('phoneNumber')?.removeValidators(Validators.required);
+    }
+
+    // Atualiza estado de validade dos campos
+    this.profileForm.get('address')?.updateValueAndValidity();
+    this.profileForm.get('postalCode')?.updateValueAndValidity();
+    this.profileForm.get('phoneNumber')?.updateValueAndValidity();
+  }
+
   onSubmit(): void {
     if (this.profileForm.invalid) {
       this.profileForm.markAllAsTouched();
       return;
     }
+    if (this.upgradeWorkerRole) {
+      this.updateUpgradeRoleValidators();
+    }
 
     const updatedUser: Partial<MemberResponseDTO> = this.profileForm.value;
+    if (this.upgradeWorkerRole) {
+      updatedUser.role = 'WORKER';
+    }
     if (this.tempImageUrl()) {
       const formData = new FormData();
       formData.append('file', this.selectedFile!);
@@ -194,4 +227,6 @@ export class ProfileComponent {
       error: (err) => console.error('Logout failed', err)
     });
   }
+
+  protected readonly UserProfileService = UserProfileService;
 }
