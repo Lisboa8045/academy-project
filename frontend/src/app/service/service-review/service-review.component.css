@@ -1,12 +1,10 @@
 .reviews-section {
-  margin-top: 2rem;
   padding: 1.5rem;
   background-color: #fff;
   padding: 1rem;
   border-radius: 1rem;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
   transition: transform 0.3s ease;
-  margin: 0 3rem 2rem 3rem;
 }
 
 .review {
