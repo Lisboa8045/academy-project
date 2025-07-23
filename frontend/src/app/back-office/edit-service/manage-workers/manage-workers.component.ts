@@ -7,7 +7,6 @@ import {snackBarSuccess} from '../../../shared/snackbar/snackbar-success';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {snackBarError} from '../../../shared/snackbar/snackbar-error';
 import {ProfileService} from '../../../profile/profile.service';
-import {UpdatePermissionsRequest} from './manage-workers.model';
 import {MemberResponseDTO} from '../../../auth/member-response-dto.model';
 import {ActivatedRoute} from '@angular/router';
 
@@ -64,7 +63,7 @@ export class ManageWorkersComponent implements OnInit {
       next: () => {
         snackBarSuccess(this.snackBar, `Permissions for ${provider.memberName} updated successfully!`);
       },
-      error: (err) => {
+      error: () => {
         snackBarError(this.snackBar, `Unable to update permissions for ${provider.memberName}`);
       }
     })
