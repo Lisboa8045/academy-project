@@ -1,7 +1,7 @@
 <table>
   <tr>
     <td>Name\Permissions</td>
-    <th *ngFor="let perm of permissions;">{{ perm }}</th>
+    <th id="permissions-header" *ngFor="let perm of permissions;">{{ perm }}</th>
   </tr>
   @for (provider of serviceProviders(); track provider.id) {
     <tr>

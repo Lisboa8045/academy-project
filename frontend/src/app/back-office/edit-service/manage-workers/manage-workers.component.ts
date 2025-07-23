@@ -1,4 +1,4 @@
-import {Component, inject, input, OnInit, signal} from '@angular/core';
+import {Component, inject, OnInit, signal} from '@angular/core';
 import {ServiceProviderModel, ServiceProviderRequestDTO} from '../../../models/service-provider.model';
 import {ProviderPermissionEnumModel} from '../../../models/provider-permission.enum';
 import {NgForOf} from '@angular/common';

@@ -1,7 +1,6 @@
-import {Injectable, WritableSignal} from '@angular/core';
+import {Injectable} from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {MemberResponseDTO} from '../auth/member-response-dto.model';
-import {Observable} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
