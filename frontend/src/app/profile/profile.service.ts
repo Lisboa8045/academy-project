@@ -18,6 +18,12 @@ export class ProfileService {
     );
   }
 
+  getMemberByUsername(username: string){
+    return this.http.get<MemberResponseDTO>(
+      `${this.apiUrl}/byUsername/${username}`,
+    );
+  }
+
   uploadProfilePicture(formData: FormData, id : number) {
     return this.http.post<{imageUrl: string}>(
       `${this.uploadUrl}/profile-picture?id=${id}`,

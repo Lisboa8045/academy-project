@@ -15,6 +15,7 @@ import {LoadingComponent} from '../../loading/loading.component';
 import {snackBarSuccess} from '../../shared/snackbar/snackbar-success';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {snackBarError} from '../../shared/snackbar/snackbar-error';
+import {ManageWorkersComponent} from './manage-workers/manage-workers.component';
 
 
 @Component({
@@ -25,7 +26,8 @@ import {snackBarError} from '../../shared/snackbar/snackbar-error';
     NgForOf,
     FontAwesomeModule,
     FormsModule,
-    LoadingComponent
+    LoadingComponent,
+    ManageWorkersComponent
   ],
   templateUrl: './edit-service.component.html',
   standalone: true,
@@ -114,7 +116,6 @@ export class EditServiceComponent implements OnInit {
   fetchServiceTypes() {
     this.serviceApi.getServiceTypes().subscribe((response: ServiceTypeResponseDTO[]) => {
       this.serviceTypeOptions = response;
-      console.log(this.serviceTypeOptions);
     });
   }
 

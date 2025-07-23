@@ -1,0 +1,20 @@
+<table>
+  <tr>
+    <td>Name\Permissions</td>
+    <th *ngFor="let perm of permissions;">{{ perm }}</th>
+  </tr>
+  @for (provider of serviceProviders(); track provider.id) {
+    <tr>
+      <td>{{ provider.memberName }}</td>
+
+      @for (permission of permissions; track permission) {
+        <td>
+          <input type="checkbox" [checked]="provider.permissions.includes(permission)"
+          (change)="togglePermission(provider, permission)">
+        </td>
+      }
+      <button (click)="updatePermissions(provider)">Save</button>
+    </tr>
+  }
+</table>
+<button type="button">Add Worker</button>
