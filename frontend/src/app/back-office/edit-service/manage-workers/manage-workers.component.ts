@@ -1,5 +1,5 @@
-import {Component, inject, input, OnInit} from '@angular/core';
-import {ServiceProviderModel} from '../../../models/service-provider.model';
+import {Component, inject, input, OnInit, signal} from '@angular/core';
+import {ServiceProviderModel, ServiceProviderRequestDTO} from '../../../models/service-provider.model';
 import {ProviderPermissionEnumModel} from '../../../models/provider-permission.enum';
 import {NgForOf} from '@angular/common';
 import {EditServiceService} from '../edit-service.service';
@@ -9,11 +9,15 @@ import {snackBarError} from '../../../shared/snackbar/snackbar-error';
 import {ProfileService} from '../../../profile/profile.service';
 import {MemberResponseDTO} from '../../../auth/member-response-dto.model';
 import {ActivatedRoute} from '@angular/router';
+import {FormsModule} from '@angular/forms';
+import {LoadingComponent} from '../../../loading/loading.component';
 
 @Component({
   selector: 'app-manage-workers',
   imports: [
-    NgForOf
+    NgForOf,
+    FormsModule,
+    LoadingComponent
   ],
   templateUrl: './manage-workers.component.html',
   styleUrl: './manage-workers.component.css'
@@ -23,12 +27,26 @@ export class ManageWorkersComponent implements OnInit {
   private snackBar = inject(MatSnackBar);
   private profileService = inject(ProfileService);
   private route = inject(ActivatedRoute);
-  serviceProviders = input<ServiceProviderModel[]>();
+  private serviceId = Number(this.route.snapshot.paramMap.get('id'));
+  serviceProviders = signal<ServiceProviderModel[]>([]);
   members: MemberResponseDTO[] = [];
+  newWorkers?: MemberResponseDTO[];
   permissions = Object.keys(ProviderPermissionEnumModel) as ProviderPermissionEnumModel[];
+  selectedWorker = signal<MemberResponseDTO | undefined>(undefined);
 
   ngOnInit() {
-    this.getMembersForServiceProviders();
+    this.fetchServiceProviders(this.serviceId);
+  }
+  private fetchServiceProviders(id: number): void {
+    this.editServiceService.getServiceProvidersByServiceId(id).subscribe({
+      next: (data) => {
+        this.serviceProviders.set(data.filter(provider => provider.active));
+        this.getMembersForServiceProviders();
+      },
+      error: () => {
+        console.error("Error loading service providers");
+      }
+    });
   }
 
   private getMembersForServiceProviders(){
@@ -67,5 +85,57 @@ export class ManageWorkersComponent implements OnInit {
         snackBarError(this.snackBar, `Unable to update permissions for ${provider.memberName}`);
       }
     })
+  }
+
+  removeServiceProvider(providerToDelete: ServiceProviderModel) {
+    console.log('removing ' + providerToDelete.memberName);
+    this.editServiceService.deleteServiceProvider(providerToDelete.id).subscribe({
+      next: () => {
+        let newServiceProviders =
+          this.serviceProviders()?.filter(provider => provider.id != providerToDelete.id)
+        this.serviceProviders.set(newServiceProviders);
+        this.members = this.members.filter(member => member.username != providerToDelete.memberName);
+        this.searchForNewWorkers();
+        snackBarSuccess(this.snackBar, `Service Provider ${providerToDelete.memberName} removed successfully!`);
+      },
+      error:() => {
+        snackBarError(this.snackBar, `Unable to remove ${providerToDelete.memberName}`);
+      }
+    })
+  }
+
+  addWorker() {
+    if (!this.selectedWorker()) {
+      snackBarError(this.snackBar, 'Please select a worker to add');
+      return;
+    }
+    let selectedWorker = this.selectedWorker()!;
+    let request = {
+      serviceId: this.serviceId,
+      memberId: selectedWorker.id,
+      permissions: [],
+      isServiceCreation: false
+    } as ServiceProviderRequestDTO;
+    this.editServiceService.createServiceProvider(request).subscribe({
+      next: (serviceProvider) => {
+        this.newWorkers = this.newWorkers!.filter(worker => worker.username != selectedWorker.username);
+        this.serviceProviders.set([...this.serviceProviders(), serviceProvider]);
+        this.members.push(selectedWorker);
+        snackBarSuccess(this.snackBar, `Worker ${selectedWorker.username} added successfully!`);
+      },
+      error: () => {
+        snackBarError(this.snackBar, `Unable to add worker ${selectedWorker.username}`);
+      }
+    })
+    this.selectedWorker.set(undefined);
+  }
+
+  searchForNewWorkers() {
+    console.log('Searching for workers')
+    this.profileService.getAllMembers().subscribe({
+      next: (members) => {
+        this.newWorkers = members.filter(member => member.role == 'WORKER' && !this.members.find(m => m.username == member.username));
+      },
+    });
   }
 }

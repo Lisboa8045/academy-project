@@ -102,6 +102,13 @@ public class ServiceProviderService {
         if(!checkIfHasPermissionToAddServiceProvider(loggedMember, service, dto.isServiceCreation()))
             throw new AuthenticationException("You do not have permission to create a Service Provider");
 
+        Optional<ServiceProvider> existingProvider = serviceProviderRepository.findByServiceIdAndProviderId(service.getId(), member.getId());
+        if(existingProvider.isPresent()) {
+            ServiceProvider serviceProvider = existingProvider.get();
+            existingProvider.get().setActive(true);
+            return serviceProviderRepository.save(serviceProvider);
+        }
+
         ServiceProvider serviceProvider = serviceProviderMapper.toEntity(dto);
         serviceProvider.setProvider(member);
         serviceProvider.setService(service);

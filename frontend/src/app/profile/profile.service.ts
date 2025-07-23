@@ -34,6 +34,12 @@ export class ProfileService {
   updateMember(updatedUser: Partial<MemberResponseDTO>, id:number) {
     return this.http.put(`${this.apiUrl}/${id}`, updatedUser);
   }
+
+  getAllMembers() {
+    return this.http.get<MemberResponseDTO[]>(
+      this.apiUrl
+    );
+  }
 }
 
 

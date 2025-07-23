@@ -14,7 +14,18 @@
         </td>
       }
       <button (click)="updatePermissions(provider)">Save</button>
+      <button (click)="removeServiceProvider(provider)">Remove Worker</button>
     </tr>
   }
 </table>
-<button type="button">Add Worker</button>
+<select [(ngModel)]="selectedWorker" (click)="searchForNewWorkers()">
+  <option [ngValue]="undefined" disabled selected>Select Worker To Add:</option>
+  @if (!newWorkers) {
+    <option [ngValue]="undefined"><app-loading/></option>
+  } @else {
+    @for (worker of newWorkers; track worker.id) {
+      <option [ngValue]="worker">{{ worker.username }}</option>
+    }
+  }
+</select>
+<button type="button" (click)="addWorker()">Add Worker</button>

@@ -7,10 +7,8 @@ import {ServiceTypeResponseDTO} from '../../shared/models/service-type.model';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {faPlus, faTimes} from '@fortawesome/free-solid-svg-icons';
 import {ActivatedRoute} from '@angular/router';
-import {EditServiceService} from './edit-service.service';
 import {ServiceDetailsService} from '../../service/service-details.service';
 import {ServiceModel} from '../../service/service.model';
-import {ServiceProviderModel} from '../../models/service-provider.model';
 import {LoadingComponent} from '../../loading/loading.component';
 import {snackBarSuccess} from '../../shared/snackbar/snackbar-success';
 import {MatSnackBar} from '@angular/material/snack-bar';
@@ -36,7 +34,6 @@ import {ManageWorkersComponent} from './manage-workers/manage-workers.component'
 export class EditServiceComponent implements OnInit {
   loading = signal(false);
   service?: ServiceModel;
-  serviceProviders?: ServiceProviderModel[];
   selectedFiles: File[] = [];
   readonly imageUrl = 'https://placehold.co/300x200?text=No+Image';
   faPlus=faPlus
@@ -49,7 +46,6 @@ export class EditServiceComponent implements OnInit {
 
   constructor(private fb: FormBuilder,
               private serviceApi: ServiceApiService,
-              private editServiceService: EditServiceService,
               private serviceDetailsService: ServiceDetailsService,
               private route: ActivatedRoute,
               private snackBar: MatSnackBar) {}
@@ -59,7 +55,6 @@ export class EditServiceComponent implements OnInit {
 
     this.loading.set(true);
     this.fetchService(id);
-    this.fetchServiceProviders(id);
     this.fetchServiceTypes();
   }
 
@@ -100,17 +95,6 @@ export class EditServiceComponent implements OnInit {
         console.error("Error loading the image", fileName, error)
       }
     }
-  }
-
-  private fetchServiceProviders(id: number): void {
-    this.editServiceService.getServiceProvidersByServiceId(id).subscribe({
-      next: (data) => {
-        this.serviceProviders = data;
-      },
-      error: () => {
-        console.error("Error loading service providers");
-      }
-    });
   }
 
   fetchServiceTypes() {
