@@ -4,11 +4,17 @@
   padding: 0.625rem 1.25rem;
   font-family: 'Poppins', sans-serif;
   color: white;
+  margin-bottom: 1rem;
 }
 
 .home-link {
   margin-left: -1rem;
-  margin-right: 1rem;
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* espaço entre os dois links */
 }
 
 .nav-item {
