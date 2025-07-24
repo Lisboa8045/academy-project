@@ -325,6 +325,7 @@ public class MemberService {
                 .map(memberMapper::toResponseDTO)
                 .orElseThrow(() -> new EntityNotFoundException(Member.class, id));
     }
+
     public Member getMemberEntityById(long id){
         return memberRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(Member.class, id));
     }
@@ -390,5 +391,11 @@ public class MemberService {
         member.setPasswordResetToken(null);
         member.setPasswordResetTokenExpiry(null);
         memberRepository.save(member);
+    }
+
+    public boolean isMemberSelf(Long memberId, String username) {
+        return memberRepository.findById(memberId)
+                .map(member -> username.equals(member.getUsername()))
+                .orElse(false);
     }
 }

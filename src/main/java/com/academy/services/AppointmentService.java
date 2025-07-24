@@ -1,8 +1,11 @@
 package com.academy.services;
 
 import com.academy.config.authentication.AuthenticationFacade;
-import com.academy.dtos.appointment.*;
-import com.academy.config.authentication.AuthenticationFacade;
+import com.academy.dtos.appointment.AppointmentCardDTO;
+import com.academy.dtos.appointment.AppointmentMapper;
+import com.academy.dtos.appointment.AppointmentRequestDTO;
+import com.academy.dtos.appointment.AppointmentResponseDTO;
+import com.academy.dtos.appointment.ConfirmAppointmentResponseDTO;
 import com.academy.dtos.appointment.review.ReviewRequestDTO;
 import com.academy.dtos.appointment.review.ReviewResponseDTO;
 import com.academy.exceptions.BadRequestException;
@@ -16,9 +19,6 @@ import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.AppointmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -26,8 +26,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
-import static com.academy.utils.Utils.formatHours;
 
 @Service
 public class AppointmentService {
@@ -69,10 +67,12 @@ public class AppointmentService {
                 .map(appointmentMapper::toResponseDTO)
                 .toList();
     }
+
     public Appointment getAppointmentEntityById(long id) {
         return appointmentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
     }
+
     public AppointmentResponseDTO getAppointmentById(Long id) {
         return appointmentMapper.toResponseDTO(getAppointmentEntityById(id));
     }
@@ -133,13 +133,10 @@ public class AppointmentService {
     public AppointmentResponseDTO updateAppointment(Long id, AppointmentRequestDTO appointmentDetails) {
 
         Appointment appointment = appointmentRepository.findById(id)
-
                 .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
-
 
         ServiceProvider serviceProvider = serviceProviderService.getServiceProviderEntityById(appointmentDetails.serviceProviderId());
         appointment.setServiceProvider(serviceProvider);
-
 
         if(appointmentDetails.rating().equals(appointment.getRating()))
             appointment.setRating(appointmentDetails.rating());
@@ -154,11 +151,9 @@ public class AppointmentService {
     public void deleteReview(Long id){
 
         Appointment appointment = appointmentRepository.findById(id)
-
                 .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
 
         appointment.setRating(null);
-
         appointment.setComment(null);
 
         appointmentRepository.save(appointment);
@@ -175,18 +170,9 @@ public class AppointmentService {
 
     }
 
-/*
-    public List<AppointmentResponseDTO> getAppointmentsForAuthenticatedProvider() {
-        return appointmentRepository.findByProvider_Username(authenticationFacade.getUsername()).stream()
-                .map(appointmentMapper::toResponseDTO)
-                .collect(Collectors.toList());
-    }
-
- */
-
     public List<Appointment> getAppointmentsForProvider(Long providerId) {
     if (providerId == null) {
-        throw new EntityNotFoundException(Appointment.class, providerId);
+        throw new EntityNotFoundException(Appointment.class, null);
     }
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime end = now.plusDays(slotWindowDays);
@@ -228,5 +214,21 @@ public class AppointmentService {
         appointment.setStatus(AppointmentStatus.CONFIRMED);
         appointmentRepository.save(appointment);
         return ResponseEntity.ok(new ConfirmAppointmentResponseDTO("Appointment confirmed successfully"));
+    }
+
+    public boolean isAppointmentOwnedByClientOrProvider(Long appointmentId, String username) {
+        return appointmentRepository.findById(appointmentId)
+                .map(appointment -> {
+                    String clientUsername = appointment.getMember().getUsername();
+                    String providerUsername = appointment.getServiceProvider().getProvider().getUsername();
+                    return username.equals(clientUsername) || username.equals(providerUsername);
+                })
+                .orElse(false);
+    }
+
+    public boolean isAppointmentOwnedByClient(Long appointmentId, String username) {
+        return appointmentRepository.findById(appointmentId)
+                .map(appointment -> username.equals(appointment.getMember().getUsername()))
+                .orElse(false);
     }
 }

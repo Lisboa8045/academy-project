@@ -20,7 +20,6 @@ import jakarta.transaction.Transactional;
 
 import com.academy.utils.DateRange;
 
-
 @org.springframework.stereotype.Service
 public class AvailabilityService {
 
@@ -182,5 +181,11 @@ public class AvailabilityService {
         }
         DateRange slotWindow = calculateCurrentSlotWindow();
         return availabilityRepository.findByMember_IdAndStartDateTimeBetween(providerId, slotWindow.start(), slotWindow.end());
+    }
+
+    public boolean isAvailabilityOwnedByUser(Long availabilityId, String username) {
+        return availabilityRepository.findById(availabilityId)
+                .map(availability -> username.equals(availability.getMember().getUsername()))
+                .orElse(false);
     }
 }

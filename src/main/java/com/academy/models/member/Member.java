@@ -47,10 +47,10 @@ public class Member extends BaseEntity {
     @Column(name = "email", nullable = false, length = FieldLengths.EMAIL_MAX)
     private String email;
 
-    @Column(name = "enabled") //TODO should be nullable quando alterarem os testes para usar service
+    @Column(name = "enabled", nullable = false)
     private boolean enabled;
 
-    @Column(name = "status") //TODO should be nullable quando alterarem os testes para usar service
+    @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private MemberStatusEnum status;
 
