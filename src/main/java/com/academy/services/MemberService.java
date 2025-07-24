@@ -269,6 +269,10 @@ public class MemberService {
         return optionalMember.get();
     }
 
+    public List<Member> searchByUsernameAndRole(String username, String roleName) {
+        return memberRepository.searchMemberByUsernameContainsIgnoreCaseAndRoleName(username, roleName);
+    }
+
     public boolean existsById(Long memberId) {
         return memberRepository.existsById(memberId);
     }

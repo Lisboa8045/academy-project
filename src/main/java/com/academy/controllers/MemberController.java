@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -69,6 +70,12 @@ public class MemberController {
     public ResponseEntity<MemberResponseDTO> getMemberByUserName(@PathVariable String username) {
         MemberResponseDTO responseDTO = memberMapper.toResponseDTO(memberService.getMemberByUsername(username));
         return ResponseEntity.ok(responseDTO);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<MemberResponseDTO>> searchMembersByContainsUsernameAndRoleName(@RequestParam String username,
+                                                                                              @RequestParam String roleName) {
+        return ResponseEntity.ok(memberService.searchByUsernameAndRole(username, roleName).stream().map(memberMapper::toResponseDTO).toList());
     }
 
 }

@@ -23,6 +23,12 @@ export class ProfileService {
     );
   }
 
+  getWorkersContainsUsername(username: string){
+    return this.http.get<MemberResponseDTO[]>(
+      `${this.apiUrl}/search?username=${username}&roleName=WORKER`,
+    );
+  }
+
   uploadProfilePicture(formData: FormData, id : number) {
     return this.http.post<{imageUrl: string}>(
       `${this.uploadUrl}/profile-picture?id=${id}`,

@@ -1,7 +1,7 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
 import {ServiceProviderModel, ServiceProviderRequestDTO} from '../../../models/service-provider.model';
-import {ProviderPermissionEnumModel} from '../../../models/provider-permission.enum';
-import {NgForOf} from '@angular/common';
+import {getProviderPermissionEnumLabel, ProviderPermissionEnumModel} from '../../../models/provider-permission.enum';
+import {AsyncPipe, NgClass, NgForOf, NgIf} from '@angular/common';
 import {EditServiceService} from '../edit-service.service';
 import {snackBarSuccess} from '../../../shared/snackbar/snackbar-success';
 import {MatSnackBar} from '@angular/material/snack-bar';
@@ -10,14 +10,19 @@ import {ProfileService} from '../../../profile/profile.service';
 import {MemberResponseDTO} from '../../../auth/member-response-dto.model';
 import {ActivatedRoute} from '@angular/router';
 import {FormsModule} from '@angular/forms';
-import {LoadingComponent} from '../../../loading/loading.component';
+import {FaIconComponent} from '@fortawesome/angular-fontawesome';
+import { faFloppyDisk, faTrash} from '@fortawesome/free-solid-svg-icons';
+import {debounceTime, Subject} from 'rxjs';
 
 @Component({
   selector: 'app-manage-workers',
   imports: [
     NgForOf,
     FormsModule,
-    LoadingComponent
+    FaIconComponent,
+    NgIf,
+    AsyncPipe,
+    NgClass
   ],
   templateUrl: './manage-workers.component.html',
   styleUrl: './manage-workers.component.css'
@@ -28,15 +33,32 @@ export class ManageWorkersComponent implements OnInit {
   private profileService = inject(ProfileService);
   private route = inject(ActivatedRoute);
   private serviceId = Number(this.route.snapshot.paramMap.get('id'));
-  serviceProviders = signal<ServiceProviderModel[]>([]);
-  members: MemberResponseDTO[] = [];
-  newWorkers?: MemberResponseDTO[];
+  private readonly debounceTimeMs = 300;
+  protected readonly faFloppyDisk = faFloppyDisk;
+  protected readonly faTrash = faTrash;
+  protected readonly getProviderPermissionEnumLabel = getProviderPermissionEnumLabel;
   permissions = Object.keys(ProviderPermissionEnumModel) as ProviderPermissionEnumModel[];
+  serviceProviders = signal<ServiceProviderModel[]>([]);
+  membersForServiceProviders: MemberResponseDTO[] = [];
+
+  searchTerm = new Subject<string>();
+  newWorkers?: MemberResponseDTO[];
   selectedWorker = signal<MemberResponseDTO | undefined>(undefined);
 
   ngOnInit() {
     this.fetchServiceProviders(this.serviceId);
+    this.searchTerm.pipe(debounceTime(this.debounceTimeMs)).subscribe((username) => {
+      if (this.selectedWorker() && username != this.selectedWorker()!.username) {
+        this.selectedWorker.set(undefined);
+      }
+      if (username == '') {
+        this.newWorkers = undefined;
+        return;
+      }
+      this.searchForNewWorkers(username);
+    });
   }
+
   private fetchServiceProviders(id: number): void {
     this.editServiceService.getServiceProvidersByServiceId(id).subscribe({
       next: (data) => {
@@ -53,7 +75,7 @@ export class ManageWorkersComponent implements OnInit {
     for (let provider of this.serviceProviders()!) {
       this.profileService.getMemberByUsername(provider.memberName).subscribe({
         next: (member) => {
-          this.members.push(member);
+          this.membersForServiceProviders.push(member);
         }
       });
     }
@@ -71,7 +93,7 @@ export class ManageWorkersComponent implements OnInit {
   }
 
   updatePermissions(provider: ServiceProviderModel) {
-    let member = this.members.find((member) => member.username == provider.memberName);
+    let member = this.membersForServiceProviders.find((member) => member.username == provider.memberName);
     let updatePermissionRequest = {
       permissions: provider.permissions,
       memberId: member!.id
@@ -94,8 +116,7 @@ export class ManageWorkersComponent implements OnInit {
         let newServiceProviders =
           this.serviceProviders()?.filter(provider => provider.id != providerToDelete.id)
         this.serviceProviders.set(newServiceProviders);
-        this.members = this.members.filter(member => member.username != providerToDelete.memberName);
-        this.searchForNewWorkers();
+        this.membersForServiceProviders = this.membersForServiceProviders.filter(member => member.username != providerToDelete.memberName);
         snackBarSuccess(this.snackBar, `Service Provider ${providerToDelete.memberName} removed successfully!`);
       },
       error:() => {
@@ -118,9 +139,9 @@ export class ManageWorkersComponent implements OnInit {
     } as ServiceProviderRequestDTO;
     this.editServiceService.createServiceProvider(request).subscribe({
       next: (serviceProvider) => {
-        this.newWorkers = this.newWorkers!.filter(worker => worker.username != selectedWorker.username);
         this.serviceProviders.set([...this.serviceProviders(), serviceProvider]);
-        this.members.push(selectedWorker);
+        this.membersForServiceProviders.push(selectedWorker);
+        this.searchTerm.next('');
         snackBarSuccess(this.snackBar, `Worker ${selectedWorker.username} added successfully!`);
       },
       error: () => {
@@ -130,12 +151,17 @@ export class ManageWorkersComponent implements OnInit {
     this.selectedWorker.set(undefined);
   }
 
-  searchForNewWorkers() {
+  searchForNewWorkers(searchTerm: string) {
     console.log('Searching for workers')
-    this.profileService.getAllMembers().subscribe({
+    this.profileService.getWorkersContainsUsername(searchTerm).subscribe({
       next: (members) => {
-        this.newWorkers = members.filter(member => member.role == 'WORKER' && !this.members.find(m => m.username == member.username));
+        this.newWorkers = members.filter(member => !this.membersForServiceProviders.find(m => m.username == member.username));
       },
     });
+  }
+
+  selectWorker(worker: MemberResponseDTO) {
+    this.searchTerm.next(worker.username);
+    this.selectedWorker.set(worker);
   }
 }

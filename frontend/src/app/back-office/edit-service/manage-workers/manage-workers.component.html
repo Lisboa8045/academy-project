@@ -1,7 +1,7 @@
 <table>
   <tr>
     <td>Name\Permissions</td>
-    <th id="permissions-header" *ngFor="let perm of permissions;">{{ perm }}</th>
+    <th id="permissions-header" *ngFor="let perm of permissions;">{{ getProviderPermissionEnumLabel(perm) }}</th>
   </tr>
   @for (provider of serviceProviders(); track provider.id) {
     <tr>
@@ -13,19 +13,32 @@
           (change)="togglePermission(provider, permission)">
         </td>
       }
-      <button (click)="updatePermissions(provider)">Save</button>
-      <button (click)="removeServiceProvider(provider)">Remove Worker</button>
+      <div class="icons-container">
+        <fa-icon [icon]="faFloppyDisk" class="update-icon" (click)="updatePermissions(provider)">
+        </fa-icon>
+        <fa-icon [icon]="faTrash" class="remove-icon" (click)="removeServiceProvider(provider)">
+        </fa-icon>
+      </div>
     </tr>
   }
 </table>
-<select [(ngModel)]="selectedWorker" (click)="searchForNewWorkers()">
-  <option [ngValue]="undefined" disabled selected>Select Worker To Add:</option>
-  @if (!newWorkers) {
-    <option [ngValue]="undefined"><app-loading/></option>
-  } @else {
-    @for (worker of newWorkers; track worker.id) {
-      <option [ngValue]="worker">{{ worker.username }}</option>
-    }
-  }
-</select>
-<button type="button" (click)="addWorker()">Add Worker</button>
+<div>
+  <input type="text" id="name"
+         [ngModel]="searchTerm | async"
+         (ngModelChange)="searchTerm.next($event)"
+         class="search-input" [ngClass]="selectedWorker() ? 'is-selected' : ''"
+         placeholder="Search For New Worker"/>
+  <button type="button" (click)="addWorker()">Add Worker</button>
+
+  <ul class="new-workers-list" *ngIf="newWorkers && !selectedWorker()">
+      @if (newWorkers.length <= 0) {
+        <li class="worker-item">No workers match query</li>
+      } @else {
+      <li *ngFor="let worker of newWorkers" class="worker-item" (click)="selectWorker(worker)">
+        <strong>{{worker.username}}</strong>
+      </li>
+      }
+  </ul>
+</div>
+
+
