@@ -106,6 +106,27 @@ export class ProfileComponent {
     this.profileForm.get('confirmPassword')?.updateValueAndValidity();
   }
 
+  private validatorsForWorker() {
+    this.profileForm.get('address')?.setValidators([Validators.required]);
+    this.profileForm.get('postalCode')?.setValidators([Validators.required, Validators.pattern(/^[0-9]{4}-[0-9]{3}$/)]);
+    this.profileForm.get('phoneNumber')?.setValidators([Validators.required, Validators.pattern(/^\+[0-9]{12}$/)]);
+  }
+
+  private updateWorkerRoleValidators() {
+    if (this.upgradeWorkerRole) {
+      this.validatorsForWorker();
+    } else {
+      this.profileForm.get('address')?.clearValidators();
+      this.profileForm.get('postalCode')?.clearValidators();
+      this.profileForm.get('postalCode')?.setValidators([Validators.pattern(/^[0-9]{4}-[0-9]{3}$/)])
+      this.profileForm.get('phoneNumber')?.clearValidators();
+      this.profileForm.get('phoneNumber')?.setValidators([Validators.pattern(/^\+[0-9]{12}$/)])
+    }
+
+    this.profileForm.get('address')?.updateValueAndValidity();
+    this.profileForm.get('postalCode')?.updateValueAndValidity();
+    this.profileForm.get('phoneNumber')?.updateValueAndValidity();
+  }
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -143,12 +164,13 @@ export class ProfileComponent {
     this.updatePasswordValidators();
     if (this.editMode) {
       this.profileForm.enable();
+      if (this?.user?.role === "WORKER") {
+        this.validatorsForWorker();
+      }
     } else {
       this.profileForm.disable();
       this.tempImageUrl.set("");
       this.profileForm.patchValue(this.user!);
-      this.upgradeWorkerRole = false;
-
     }
   }
 
@@ -156,46 +178,24 @@ export class ProfileComponent {
     this.editPasswordMode = !this.editPasswordMode;
     this.updatePasswordValidators();
   }
-
   toggleUpgradeRoleEditMode() {
-    this.upgradeWorkerRole = !this.upgradeWorkerRole
-    this.toggleEdit();
-
-  }
-
-  updateUpgradeRoleValidators() {
+    this.upgradeWorkerRole = !this.upgradeWorkerRole;
+    this.updateWorkerRoleValidators();
     if (this.upgradeWorkerRole) {
-      this.profileForm.get('address')?.setValidators(Validators.required);
-      this.profileForm.get('postalCode')?.setValidators(Validators.required);
-      this.profileForm.get('phoneNumber')?.setValidators(Validators.required);
+      this.profileForm.enable();
     } else {
-      this.profileForm.get('address')?.removeValidators(Validators.required);
-      this.profileForm.get('postalCode')?.removeValidators(Validators.required);
-      this.profileForm.get('phoneNumber')?.removeValidators(Validators.required);
+      this.profileForm.disable();
     }
-
-    // Atualiza estado de validade dos campos
-    this.profileForm.get('address')?.updateValueAndValidity();
-    this.profileForm.get('postalCode')?.updateValueAndValidity();
-    this.profileForm.get('phoneNumber')?.updateValueAndValidity();
   }
 
   onSubmit(): void {
 
-    if (this.upgradeWorkerRole) {
-      this.updateUpgradeRoleValidators();
-    }
     if (this.profileForm.invalid) {
       this.profileForm.markAllAsTouched();
-      console.log("Deu merda");
       return;
-
     }
 
     const updatedUser: Partial<MemberResponseDTO> = this.profileForm.value;
-    if (this.upgradeWorkerRole) {
-      updatedUser.role = 'WORKER';
-    }
     if (this.tempImageUrl()) {
       const formData = new FormData();
       formData.append('file', this.selectedFile!);
@@ -207,18 +207,37 @@ export class ProfileComponent {
         }
       });
     }
+    if (!this.upgradeWorkerRole) {
 
-    this.profileService.updateMember(updatedUser, this.authStore.id()).subscribe({
-      next: (res) => {
-        snackBarSuccess(this.snackBar, 'Member Updated Successfully');
-        this.getMember(this.authStore.id());
-        this.toggleEdit();
-      },
-      error: (err) => {
-        snackBarError(this.snackBar, 'Member Update failed. ' + err.error);
-        console.error(err);
+      this.profileService.updateMember(updatedUser, this.authStore.id()).subscribe({
+        next: (res) => {
+          snackBarSuccess(this.snackBar, 'Member Updated Successfully');
+          this.getMember(this.authStore.id());
+          this.toggleEdit();
+        },
+        error: (err) => {
+          snackBarError(this.snackBar, 'Member Update failed. ' + err.error);
+          console.error(err);
+        }
+      });
+    } else {
+      const upgradeUser: Partial<MemberResponseDTO> = {
+        ...updatedUser,
+        roleId: 3
       }
-    });
+
+      this.profileService.updateMember(upgradeUser, this.authStore.id()).subscribe({
+        next: (res) => {
+          snackBarSuccess(this.snackBar, 'Member is now a Worker');
+          this.getMember(this.authStore.id());
+          this.toggleUpgradeRoleEditMode();
+        },
+        error: (err) => {
+          snackBarError(this.snackBar, 'Member Update failed. ' + err.error);
+          console.error(err);
+        }
+      });
+    }
   }
 
   logout() {
