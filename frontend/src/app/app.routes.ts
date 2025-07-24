@@ -63,16 +63,16 @@ export const routes: Routes = [
   },
   { path: 'admin-office',
     component: LandingPageComponent,
-    canActivate: [PermissionGuard],
+    canActivate: [PermissionGuard], //TODO
     data: { roles: ['ADMIN']}
   },
   { path: 'availability-management',
-    component: LandingPageComponent,
+    component: LandingPageComponent, //TODO
     canActivate: [PermissionGuard],
     data: { roles: ['WORKER', 'ADMIN']}
   },
   { path: 'service-management',
-    component: LandingPageComponent,
+    component: LandingPageComponent, //TODO
     canActivate: [PermissionGuard],
     data: { roles: ['WORKER', 'ADMIN']}
   },
