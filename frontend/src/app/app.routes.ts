@@ -17,18 +17,15 @@ import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.
 import { ResetPasswordComponent } from './auth/reset-password/reset-password.component';
 import {ConfirmAppointmentComponent} from './confirm-appointment/confirm-appointment.component';
 import {GlobalConfigurationEditComponent} from './global-configuration/global-configuration-edit.component';
+import { PermissionGuard } from './auth/permission.guard';
 
 export const routes: Routes = [
   { path: 'auth', component: AuthComponent },
-  { path: 'profile', component: ProfileComponent },
-  { path: 'appointments', component: AppointmentHistoryComponent },
   { path: 'profile/:id', component: ProfileComponent },
   { path: 'unauthorized', component: UnauthorizedComponent },
   { path: 'services/:id', component: ServiceDetailsComponent},
   { path: 'services', component: SearchServicesComponent},
-  { path: 'schedule/:id', component: ScheduleComponent },
   { path: '', component: LandingPageComponent},
-  { path: 'my-services', component: MyServicesComponent},
   { path: 'resend-email', component: ResendEmailConfirmationComponent },
   { path: 'confirm-email/:token', component: ConfirmEmailComponent },
   { path: 'about', component: AboutComponent },
@@ -36,7 +33,48 @@ export const routes: Routes = [
   { path: 'privacy', component: PrivacyComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password/:token', component: ResetPasswordComponent },
-  {path: 'confirm-appointment/:id', component: ConfirmAppointmentComponent },
-  { path: 'config', component: GlobalConfigurationEditComponent },
-  { path: '**', redirectTo: '', pathMatch: 'full' },
+  {
+    path: 'profile',
+    component: ProfileComponent,
+    canActivate: [PermissionGuard],
+  },
+  {
+    path: 'appointments',
+    component: AppointmentHistoryComponent,
+    canActivate: [PermissionGuard],
+  },
+  { path: 'schedule/:id',
+    component: ScheduleComponent,
+    canActivate: [PermissionGuard]
+  },
+  { path: 'my-services',
+    component: MyServicesComponent,
+    canActivate: [PermissionGuard],
+    data: { roles: ['ADMIN', 'WORKER']}
+  },
+  { path: 'confirm-appointment/:id',
+    component: ConfirmAppointmentComponent,
+    canActivate: [PermissionGuard],
+  },
+  { path: 'config',
+    component: GlobalConfigurationEditComponent,
+    canActivate: [PermissionGuard],
+    data: { roles: ['ADMIN']}
+  },
+  { path: 'admin-office',
+    component: LandingPageComponent,
+    canActivate: [PermissionGuard],
+    data: { roles: ['ADMIN']}
+  },
+  { path: 'availability-management',
+    component: LandingPageComponent,
+    canActivate: [PermissionGuard],
+    data: { roles: ['WORKER', 'ADMIN']}
+  },
+  { path: 'service-management',
+    component: LandingPageComponent,
+    canActivate: [PermissionGuard],
+    data: { roles: ['WORKER', 'ADMIN']}
+  },
+  { path: '**', redirectTo: '', pathMatch: 'full' }
 ];
