@@ -1,5 +1,4 @@
 export enum ProviderPermissionEnumModel {
-  READ = 'READ',
   UPDATE = 'UPDATE',
   DELETE = 'DELETE',
   SERVE = 'SERVE',

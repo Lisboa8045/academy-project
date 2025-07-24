@@ -215,7 +215,7 @@ public class ServicePermissionsIntegrationTests {
                 serviceService.updateMemberPermissions(
                         serviceId,
                         memberWithPermissionToUpdateService.getId(),
-                        List.of(ProviderPermissionEnum.DELETE, ProviderPermissionEnum.READ)
+                        List.of(ProviderPermissionEnum.DELETE)
                 )
         );
     }
@@ -232,7 +232,7 @@ public class ServicePermissionsIntegrationTests {
                 serviceService.updateMemberPermissions(
                         serviceId,
                         memberWithPermissionToUpdateService.getId(),
-                        List.of(ProviderPermissionEnum.OWNER, ProviderPermissionEnum.READ)
+                        List.of(ProviderPermissionEnum.OWNER)
                 )
         );
     }
@@ -249,7 +249,7 @@ public class ServicePermissionsIntegrationTests {
                 serviceService.updateMemberPermissions(
                         serviceId,
                         memberWithPermissionToUpdatePermissions.getId(),
-                        List.of(ProviderPermissionEnum.OWNER, ProviderPermissionEnum.READ)
+                        List.of(ProviderPermissionEnum.OWNER)
                 )
         );
     }
@@ -266,7 +266,7 @@ public class ServicePermissionsIntegrationTests {
                 serviceService.updateMemberPermissions(
                         serviceId,
                         memberOwnerOfService.getId(),
-                        List.of(ProviderPermissionEnum.OWNER, ProviderPermissionEnum.READ)
+                        List.of(ProviderPermissionEnum.OWNER)
                 )
         );
     }
@@ -281,9 +281,9 @@ public class ServicePermissionsIntegrationTests {
                 serviceService.updateMemberPermissions(
                         serviceId,
                         memberWithPermissionToUpdateService.getId(),
-                        List.of(ProviderPermissionEnum.DELETE, ProviderPermissionEnum.READ));
+                        List.of(ProviderPermissionEnum.DELETE));
                 List <ProviderPermissionEnum> permissions = serviceProviderService.getPermissionsByProviderIdAndServiceId(memberWithPermissionToUpdateService.getId(), serviceId);
-        assertIterableEquals(permissions, List.of(ProviderPermissionEnum.DELETE, ProviderPermissionEnum.READ), "Did not update permissions correctly");
+        assertIterableEquals(permissions, List.of(ProviderPermissionEnum.DELETE), "Did not update permissions correctly");
 
     }
 
