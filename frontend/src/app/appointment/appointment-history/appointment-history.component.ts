@@ -192,4 +192,5 @@ export class AppointmentHistoryComponent implements OnInit {
     });
   }
 
+  protected readonly AppointmentStatusEnumModel = AppointmentStatusEnumModel;
 }
