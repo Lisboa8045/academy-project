@@ -260,8 +260,10 @@ public class AvailabilityService {
         return result;
     }
 
+    @Transactional
     public void createAvailabilities(AvailabilityRequestNewDTO request) {
         Member member = memberService.getMemberByUsername(authenticationFacade.getUsername());
+        List<MemberAvailability> newEntries = new ArrayList<>();
         for (DaySchedule daySchedule: request.daySchedules()) {
                 removeMemberAvailabilities(member.getId(), daySchedule.date());
 
@@ -288,43 +290,21 @@ public class AvailabilityService {
                 memberAvailability.setDates(dates);
 
                 member.getMemberAvailabilities().add(memberAvailability);
+                newEntries.add(memberAvailability);
             }
 
-            memberAvailabilityRepository.saveAll(member.getMemberAvailabilities());
-
         }
+        memberAvailabilityRepository.saveAll(newEntries);
+
     }
 
     private void removeMemberAvailabilities(Long memberId, LocalDate date) {
-        String dateStrWithCommas = "," + date.toString() + ",";
-
-        List<MemberAvailability> matchingAvailabilities =
-                memberAvailabilityRepository.findByMemberIdAndDate(memberId, dateStrWithCommas);
-
-        for (MemberAvailability ma : matchingAvailabilities) {
-            List<LocalDate> updatedDates = ma.getDates().stream()
-                    .filter(d -> !d.equals(date))
-                    .collect(Collectors.toList());
-
-            if (updatedDates.isEmpty()) {
-                memberAvailabilityRepository.delete(ma); // remove completamente
-            } else {
-                ma.setDates(updatedDates); // atualiza lista e datesString
-                memberAvailabilityRepository.save(ma);
-            }
-        }
-    }
-
-    private void removeAvailabilityFromList(Availability availability, LocalDate dateToRemove){
-        List<LocalDate> currentDates = new ArrayList<>(availability.getDates());
-        currentDates.removeIf(d -> d.equals(dateToRemove));
-        availability.setDates(currentDates);
+        memberAvailabilityRepository.deleteByMemberIdAndDatesStringContaining(memberId, String.valueOf(date));
     }
 
     public AvailabilityRequestNewDTO getMemberAvailability() {
         Member member = memberService.getMemberByUsername(authenticationFacade.getUsername());
         List<MemberAvailability> availabilities = memberAvailabilityRepository.findByMemberId(member.getId());
-
         return new AvailabilityRequestNewDTO(availabilityMapper.toDaySchedules(availabilities));
     }
 }
