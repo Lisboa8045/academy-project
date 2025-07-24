@@ -37,6 +37,8 @@ import {Review} from '../review/review.model';
   ]
 })
 export class AppointmentHistoryComponent implements OnInit {
+
+  protected readonly AppointmentStatusEnumModel = AppointmentStatusEnumModel;
   appointments: AppointmentResponseDTO[] = [];
   filteredAppointments: AppointmentResponseDTO[] = [];
   selectedAppointment: AppointmentResponseDetailedDTO | null | undefined;
@@ -191,6 +193,4 @@ export class AppointmentHistoryComponent implements OnInit {
       }
     });
   }
-
-  protected readonly AppointmentStatusEnumModel = AppointmentStatusEnumModel;
 }
