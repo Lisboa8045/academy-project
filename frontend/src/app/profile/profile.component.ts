@@ -181,12 +181,15 @@ export class ProfileComponent {
   }
 
   onSubmit(): void {
-    if (this.profileForm.invalid) {
-      this.profileForm.markAllAsTouched();
-      return;
-    }
+
     if (this.upgradeWorkerRole) {
       this.updateUpgradeRoleValidators();
+    }
+    if (this.profileForm.invalid) {
+      this.profileForm.markAllAsTouched();
+      console.log("Deu merda");
+      return;
+
     }
 
     const updatedUser: Partial<MemberResponseDTO> = this.profileForm.value;
