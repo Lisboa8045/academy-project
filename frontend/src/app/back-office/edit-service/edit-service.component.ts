@@ -14,6 +14,7 @@ import {snackBarSuccess} from '../../shared/snackbar/snackbar-success';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {snackBarError} from '../../shared/snackbar/snackbar-error';
 import {ManageWorkersComponent} from './manage-workers/manage-workers.component';
+import {ProviderPermissionEnumModel} from '../../models/provider-permission.enum';
 
 
 @Component({
@@ -66,12 +67,19 @@ export class EditServiceComponent implements OnInit {
           this.loadImages(this.service.images);
         }
         this.form = buildServiceForm(this.fb, this.service);
+        if (!this.userCanEdit()) {
+          this.form.disable();
+        }
         this.loading.set(false);
       },
       error: () => {
         console.error("Error loading service");
       }
     });
+  }
+
+  protected userCanEdit(): boolean {
+    return this.service!.permissions.includes(ProviderPermissionEnumModel.UPDATE);
   }
 
   async loadImages(fileNames: string[]) {
