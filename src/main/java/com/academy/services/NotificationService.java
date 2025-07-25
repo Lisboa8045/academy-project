@@ -44,4 +44,11 @@ public class NotificationService {
         notification.setSeen(true);
         this.notificationRepository.save(notification);
     }
+
+    public boolean isNotificationOwnedByUser(Long notificationId, String username) {
+        return notificationRepository.findById(notificationId)
+                .map(notification -> notification.getMember().getUsername().equals(username))
+                .orElse(false);
+    }
+
 }

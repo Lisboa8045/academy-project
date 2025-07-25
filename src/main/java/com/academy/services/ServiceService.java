@@ -86,7 +86,7 @@ public class ServiceService {
         Service existing = getServiceEntityById(id);
 
         List<ProviderPermissionEnum> permissions = getPermissionsByProviderUsernameAndServiceId(username, existing.getId());
-        checkIfHasPermission(permissions,ProviderPermissionEnum.UPDATE, "update service");
+        checkIfHasPermission(permissions,ProviderPermissionEnum.UPDATE, "update service"); //TODO bypass this if it's an admin?
 
         linkServiceToType(existing, dto.serviceTypeName());
         linkServiceToTags(existing, dto.tagNames());
@@ -111,6 +111,17 @@ public class ServiceService {
     public ServiceResponseDTO getById(Long id) {
         Service service = getServiceEntityById(id);
         String username =  authenticationFacade.getUsername();
+/*
+        if (!service.isEnabled()) { //TODO descomentar quando o enabled tiver implementado
+            if (username == null) {
+                throw new AuthenticationException("This service is not currently available for the public.");
+            }
+            Member member = memberService.getMemberByUsername(username);
+            if (!"ADMIN".equals(member.getRole().getName())) {
+                throw new AuthenticationException("This service is not currently available for the public.");
+            }
+        }
+*/
         return serviceMapper.toDto(service, getPermissionsByProviderUsernameAndServiceId(username, service.getId()));
     }
 
@@ -187,7 +198,7 @@ public class ServiceService {
 
         Specification<Service> spec = Specification.where(null); // start with no specifications, add each specification after if not null/empty
 
-        spec = addIfPresent(spec, name != null && !name.isBlank(), () -> ServiceSpecifications.nameOrTagMatches(name));
+        spec = addIfPresent(spec, name != null && !name.isBlank(), () -> ServiceSpecifications.nameOrTagMatches(name)); //TODO quando enabled tiver implementado, verificar se é admin, e se não for, adicionar spec de só mostrar enabled == true
         spec = addIfPresent(spec, minPrice != null, () -> ServiceSpecifications.hasPriceGreaterThanOrEqual(minPrice));
         spec = addIfPresent(spec, maxPrice != null, () -> ServiceSpecifications.hasPriceLessThanOrEqual(maxPrice));
         spec = addIfPresent(spec, minDuration != null, () -> ServiceSpecifications.hasDurationGreaterThanOrEqual(minDuration));
@@ -306,4 +317,9 @@ public class ServiceService {
         return null;
     }
 
+    public boolean isServiceOwnedByUser(Long serviceId, String username) {
+        return serviceRepository.findById(serviceId)
+                .map(service -> service.getOwner().getUsername().equals(username))
+                .orElse(false);
+    }
 }

@@ -126,15 +126,12 @@ public class ServiceProviderService {
         ServiceProvider serviceProvider = serviceProviderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
 
-        if(details.serviceId() != null) {
-            Service service = serviceService.getServiceEntityById(details.serviceId());
-            serviceProvider.setService(service);
-        }
+        Service service = serviceService.getServiceEntityById(details.serviceId());
+        serviceProvider.setService(service);
 
         serviceProvider = serviceProviderRepository.save(serviceProvider);
-        if (details.permissions() != null) {
-            providerPermissionService.createPermissionsViaList(details.permissions(), serviceProvider);
-        }
+        providerPermissionService.createPermissionsViaList(details.permissions(), serviceProvider);
+
         return serviceProviderMapper.toResponseDTO(serviceProvider);
     }
 
