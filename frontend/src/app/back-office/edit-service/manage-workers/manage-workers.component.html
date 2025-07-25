@@ -1,28 +1,30 @@
 <table>
   <tr>
     <td>Name\Permissions</td>
-    <th id="permissions-header" *ngFor="let perm of permissions;">{{ getProviderPermissionEnumLabel(perm) }}</th>
+    <th id="permissions-header" *ngFor="let perm of allPermissions;">{{ getProviderPermissionEnumLabel(perm) }}</th>
   </tr>
   @for (provider of serviceProviders(); track provider.id) {
     <tr>
       <td>{{ provider.memberName }}</td>
 
-      @for (permission of permissions; track permission) {
+      @for (permission of allPermissions; track permission) {
         <td>
-          <input type="checkbox" [checked]="provider.permissions.includes(permission)"
-          (change)="togglePermission(provider, permission)">
+          <input type="checkbox"
+                 [checked]="provider.permissions.includes(permission)"
+                 (change)="togglePermission(provider, permission)"
+                 [attr.disabled]="isCheckboxDisabled(provider, permission) ? 'true' : null">
         </td>
       }
       <div class="icons-container">
-        <fa-icon [icon]="faFloppyDisk" class="update-icon" (click)="updatePermissions(provider)">
+        <fa-icon *ngIf="userHasPermission(ProviderPermissionEnumModel.UPDATE_PERMISSIONS)" [icon]="faFloppyDisk" class="update-icon" (click)="updatePermissions(provider)">
         </fa-icon>
-        <fa-icon [icon]="faTrash" class="remove-icon" (click)="removeServiceProvider(provider)">
+        <fa-icon *ngIf="userHasPermission(ProviderPermissionEnumModel.ADD_SERVICE_PROVIDER)" [icon]="faTrash" class="remove-icon" (click)="removeServiceProvider(provider)">
         </fa-icon>
       </div>
     </tr>
   }
 </table>
-<div>
+<div *ngIf="userHasPermission(ProviderPermissionEnumModel.ADD_SERVICE_PROVIDER)">
   <input type="text" id="name"
          [ngModel]="searchTerm | async"
          (ngModelChange)="searchTerm.next($event)"

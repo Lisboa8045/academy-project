@@ -1,4 +1,4 @@
-import {Component, inject, OnInit, signal} from '@angular/core';
+import {Component, inject, input, OnInit, signal} from '@angular/core';
 import {ServiceProviderModel, ServiceProviderRequestDTO} from '../../../models/service-provider.model';
 import {getProviderPermissionEnumLabel, ProviderPermissionEnumModel} from '../../../models/provider-permission.enum';
 import {AsyncPipe, NgClass, NgForOf, NgIf} from '@angular/common';
@@ -11,7 +11,7 @@ import {MemberResponseDTO} from '../../../auth/member-response-dto.model';
 import {ActivatedRoute} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {FaIconComponent} from '@fortawesome/angular-fontawesome';
-import { faFloppyDisk, faTrash} from '@fortawesome/free-solid-svg-icons';
+import {faFloppyDisk, faTrash} from '@fortawesome/free-solid-svg-icons';
 import {debounceTime, Subject} from 'rxjs';
 
 @Component({
@@ -37,7 +37,8 @@ export class ManageWorkersComponent implements OnInit {
   protected readonly faFloppyDisk = faFloppyDisk;
   protected readonly faTrash = faTrash;
   protected readonly getProviderPermissionEnumLabel = getProviderPermissionEnumLabel;
-  permissions = Object.keys(ProviderPermissionEnumModel) as ProviderPermissionEnumModel[];
+  loggedUserPermissions = input.required<string[]>();
+  allPermissions = Object.keys(ProviderPermissionEnumModel) as ProviderPermissionEnumModel[];
   serviceProviders = signal<ServiceProviderModel[]>([]);
   membersForServiceProviders: MemberResponseDTO[] = [];
 
@@ -164,4 +165,16 @@ export class ManageWorkersComponent implements OnInit {
     this.searchTerm.next(worker.username);
     this.selectedWorker.set(worker);
   }
+
+  isCheckboxDisabled(provider: ServiceProviderModel, permission: ProviderPermissionEnumModel) {
+    let userLacksPermission = !this.userHasPermission(ProviderPermissionEnumModel.UPDATE_PERMISSIONS);
+    let providerIsOwner = provider.permissions.includes(ProviderPermissionEnumModel.OWNER);
+    return userLacksPermission || providerIsOwner || permission == ProviderPermissionEnumModel.OWNER;
+  }
+
+  userHasPermission(permission: ProviderPermissionEnumModel) {
+    return this.loggedUserPermissions().includes(permission);
+  }
+
+  protected readonly ProviderPermissionEnumModel = ProviderPermissionEnumModel;
 }
