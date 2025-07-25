@@ -62,7 +62,7 @@
         }
 
         @DeleteMapping("/{id}")
-        public ResponseEntity<Void> deleteServiceProvider(@PathVariable long id) {
+        public ResponseEntity<Void> deleteServiceProvider(@PathVariable long id) throws BadRequestException {
             serviceProviderService.deleteServiceProvider(id);
             return ResponseEntity.noContent().build();
         }

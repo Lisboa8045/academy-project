@@ -156,9 +156,20 @@ public class ServiceProviderService {
     }
 
     @Transactional
-    public void deleteServiceProvider(long id) {
+    public void deleteServiceProvider(long id) throws BadRequestException {
         ServiceProvider serviceProvider = serviceProviderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
+
+        String loggedUsername = authenticationFacade.getUsername();
+        Member loggedMember = memberService.getMemberByUsername(loggedUsername);
+        Service service = serviceProvider.getService();
+
+        if(!checkIfHasPermissionToAddServiceProvider(loggedMember, service, false))
+            throw new AuthenticationException("You do not have permission to delete a Service Provider");
+
+        if (serviceProvider.getPermissions().stream().anyMatch(permission -> permission.getPermission().equals(ProviderPermissionEnum.OWNER) ) ) {
+            throw new BadRequestException("Cannot remove owner from service.");
+        }
 
         providerPermissionService.deletePermissionsFromServiceProvider(serviceProvider);
         serviceProvider.setActive(false);
