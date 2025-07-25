@@ -4,6 +4,7 @@ import com.academy.models.global_configuration.GlobalConfigurationTypeEnum;
 
 public record GlobalConfigurationResponseDTO(
         Long id,
+        String configName,
         String configKey,
         String configValue,
         GlobalConfigurationTypeEnum configType) {

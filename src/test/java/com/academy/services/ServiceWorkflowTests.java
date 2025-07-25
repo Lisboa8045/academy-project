@@ -4,7 +4,6 @@ import com.academy.dtos.appointment.AppointmentRequestDTO;
 import com.academy.dtos.appointment.AppointmentResponseDTO;
 import com.academy.dtos.register.RegisterRequestDto;
 import com.academy.dtos.service.ServiceRequestDTO;
-import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.dtos.service_type.ServiceTypeRequestDTO;
 import com.academy.dtos.service_type.ServiceTypeResponseDTO;
 import com.academy.dtos.tag.TagRequestDTO;
@@ -17,7 +16,6 @@ import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.RoleRepository;
 import jakarta.transaction.Transactional;
 import org.apache.coyote.BadRequestException;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -27,11 +25,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @SpringBootTest
@@ -39,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(SpringExtension.class)
 @WithMockUser(username = "owner")
-public class ServiceWorkflowTests {
+class ServiceWorkflowTests {
 
     private final MemberService memberService;
     private final ServiceService serviceService;
@@ -109,8 +107,8 @@ public class ServiceWorkflowTests {
         return tagService.getTagEntityById(responseDTO.id());
     }
 
-    private AppointmentRequestDTO createAppointmentDTO(Long serviceProviderId, Long memberId) {
-        return new AppointmentRequestDTO(serviceProviderId, null, null, 0, "", null);
+    private AppointmentRequestDTO createAppointmentDTO(Long serviceProviderId) {
+        return new AppointmentRequestDTO(serviceProviderId, LocalDateTime.now().plusMinutes(3600), null, 0, "", null);
     }
 
     private void createDummyClient(String username) {
@@ -128,12 +126,12 @@ public class ServiceWorkflowTests {
     @Test
     void deleteServiceProvider_cascadesProperly() throws BadRequestException {
         ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag2"));
-        ServiceResponseDTO responseDTO = serviceService.create(serviceRequestDTO);
+        serviceService.create(serviceRequestDTO);
 
         Long serviceProviderId = serviceProviderService.getServiceProviderByUsername("owner").getId();
 
         AppointmentResponseDTO appointment = appointmentService.createAppointment(
-                createAppointmentDTO(serviceProviderId, clientId)
+                createAppointmentDTO(serviceProviderId)
         );
 
         assertThat(appointment).isNotNull();
@@ -153,12 +151,12 @@ public class ServiceWorkflowTests {
     @Test
     void deleteMember_cascadesProperly() throws BadRequestException {
         ServiceRequestDTO serviceRequestDTO = createDTO("Test Service", "Test Description", "Test Service Type", List.of("tag2"));
-        ServiceResponseDTO responseDTO = serviceService.create(serviceRequestDTO);
+        serviceService.create(serviceRequestDTO);
 
         Long serviceProviderId = serviceProviderService.getServiceProviderByUsername("owner").getId();
 
         AppointmentResponseDTO appointment = appointmentService.createAppointment(
-                createAppointmentDTO(serviceProviderId, clientId)
+                createAppointmentDTO(serviceProviderId)
         );
 
         assertThat(appointment).isNotNull();

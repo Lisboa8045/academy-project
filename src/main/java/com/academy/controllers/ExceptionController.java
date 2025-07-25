@@ -4,6 +4,8 @@ import com.academy.exceptions.AuthenticationException;
 import com.academy.exceptions.EmailTemplateLoadingException;
 import com.academy.exceptions.EntityAlreadyExists;
 import com.academy.exceptions.EntityNotFoundException;
+import com.academy.exceptions.MemberNotFoundByEmailException;
+import com.academy.exceptions.MemberNotFoundException;
 import com.academy.exceptions.NotFoundException;
 import com.academy.exceptions.RegistrationConflictException;
 import com.academy.exceptions.SendEmailException;
@@ -89,6 +91,16 @@ public class ExceptionController {
     
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Object> handleInvalidValue(NotFoundException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(MemberNotFoundByEmailException.class)
+    public ResponseEntity<Object> handleInvalidValue(MemberNotFoundByEmailException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(MemberNotFoundException.class)
+    public ResponseEntity<Object> handleInvalidValue(MemberNotFoundException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 

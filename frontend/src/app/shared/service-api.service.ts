@@ -56,4 +56,12 @@ export class ServiceApiService {
   getReviewsByServiceId(id: number): Observable<ServiceAppointmentReviewModel[]> {
     return this.http.get<ServiceAppointmentReviewModel[]>(`${this.REVIEWS_URL}/${id}`);
   }
+
+  getServicesOfMember(query: ServiceQuery, id: number): Observable<PagedResponse>{
+    let params = new HttpParams()
+      .set('page', query.page.toString())
+      .set('size', query.pageSize.toString())
+      .set('sort', query.sortOrder);
+    return this.http.get<PagedResponse>(this.BASE_URL + '/my-services/'+id, {params});
+  }
 }

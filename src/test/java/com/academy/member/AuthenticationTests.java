@@ -22,10 +22,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -39,9 +41,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class AuthenticationTests {
 
     private final String username = "user123453167891212";
+    private final String email = "user123453167891212@gmail.com";
 
     @Autowired private RoleRepository roleRepository;
     @Autowired MemberService memberService;
+    @Autowired
+    PasswordEncoder passwordEncoder;
     @Autowired TestTokenStorage testTokenStorage;
 
     @Autowired
@@ -63,7 +68,7 @@ public class AuthenticationTests {
         RegisterRequestDto registerRequest = new RegisterRequestDto(
                 username,
                 "Password123@",
-                username + "@gmail.com",
+                email,
                 1L,
                 null,
                 null,
@@ -121,6 +126,35 @@ public class AuthenticationTests {
                 "Password123@"
         ), response);
     }
+
+    @Test
+    public void testResetPassword(){
+        long memberId = register();
+        confirmEmail();
+        memberService.createPasswordResetToken(email);
+
+        Member member = memberService.getMemberEntityById(memberId);
+        assertTrue(passwordEncoder.matches("Password123@", member.getPassword()));
+
+        String rawPasswordResetToken = testTokenStorage.getLastToken();
+        memberService.verifyPasswordResetToken(rawPasswordResetToken);
+        memberService.resetPassword(rawPasswordResetToken, "newPassword123@");
+
+        Member updatedMember = memberService.getMemberEntityById(memberId);
+
+        assertTrue(passwordEncoder.matches("newPassword123@", updatedMember.getPassword()));
+    }
+
+    @Test
+    public void testUsingInvalidResetPasswordToken(){
+        register();
+        confirmEmail();
+        memberService.createPasswordResetToken(email);
+
+        assertThatThrownBy(() -> memberService.verifyPasswordResetToken("adbadgbdfadgfafdagrw4"))
+                .isInstanceOf(com.academy.exceptions.BadRequestException.class);
+    }
+
 
 }
 

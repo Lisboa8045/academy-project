@@ -8,6 +8,7 @@ import {UserProfileService} from '../../profile/user-profile.service';
 import {ServiceReviewComponent} from '../service-review/service-review.component';
 import {TagListComponent} from './tag-list/tag-list.component';
 
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-service-details',
@@ -136,4 +137,9 @@ export class ServiceDetailsComponent implements OnInit {
     });
   }
 
+  onClick(id: number | undefined) {
+    if (id) {
+      this.router.navigate(['/schedule', id]);
+    }
+  }
 }

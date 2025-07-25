@@ -123,7 +123,7 @@ class AppointmentIntegrationTests {
                 () -> appointmentService.createAppointment(dto));
 
         // Update to match actual error message
-        assertEquals("Service provider não possui permissão SERVE", exception.getMessage());
+        assertEquals("Service provider doesn't have SERVE permission", exception.getMessage());
     }
 
     @Test

@@ -21,6 +21,7 @@ export class AuthService {
           this.authStore.setUsername(res.username);
           this.authStore.setId(res.memberId);
           this.authStore.setProfilePicture(res.profilePicture);
+          this.authStore.setRole(res.role);
         }),
         catchError((error: HttpErrorResponse) => {
           if (error.status === 403 && error.error?.startsWith('Member is Inactive with status WAITING_FOR_EMAIL_APPROVAL')) {
@@ -55,6 +56,22 @@ export class AuthService {
 
   confirmEmail(token: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/confirm-email/${token}`);
+  }
+
+  requestPasswordReset(email: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/password-reset-token`, {
+      email: email
+    });
+  }
+
+  verifyResetToken(token: string) {
+    return this.http.get(`${this.apiUrl}/password-reset/${token}`);
+  }
+
+  resetPassword(token: string, password: string) {
+    return this.http.patch(`${this.apiUrl}/password-reset/${token}`, {
+      newPassword: password
+    });
   }
 }
 
