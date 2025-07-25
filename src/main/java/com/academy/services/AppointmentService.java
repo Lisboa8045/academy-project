@@ -23,6 +23,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import com.academy.services.EmailService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -206,6 +207,7 @@ public class AppointmentService {
 
         appointment.setStatus(AppointmentStatus.CANCELLED);
         appointmentRepository.save(appointment);
+        emailService.sendCancelAppointmentEmail(appointment);
     }
 
     public ResponseEntity<ReviewResponseDTO> addReview(Long appointmentId, ReviewRequestDTO request) {
