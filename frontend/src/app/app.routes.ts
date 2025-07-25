@@ -17,6 +17,7 @@ import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.
 import { ResetPasswordComponent } from './auth/reset-password/reset-password.component';
 import {ConfirmAppointmentComponent} from './confirm-appointment/confirm-appointment.component';
 import {GlobalConfigurationEditComponent} from './global-configuration/global-configuration-edit.component';
+import {ConfirmEmailPromptComponent} from "./auth/confirm-email-prompt/confirm-email-prompt.component";
 
 export const routes: Routes = [
   { path: 'auth', component: AuthComponent },
@@ -38,5 +39,6 @@ export const routes: Routes = [
   { path: 'reset-password/:token', component: ResetPasswordComponent },
   {path: 'confirm-appointment/:id', component: ConfirmAppointmentComponent },
   { path: 'config', component: GlobalConfigurationEditComponent },
+  { path: 'auth/confirm-prompt', component: ConfirmEmailPromptComponent },
   { path: '**', redirectTo: '', pathMatch: 'full' },
 ];
