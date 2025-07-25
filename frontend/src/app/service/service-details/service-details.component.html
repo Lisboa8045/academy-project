@@ -47,7 +47,7 @@
         </div>
       </div>
 
-    <div class="info-section card">
+      <div class="info-section">
       <div class="info-content">
       <h2>{{ service?.name }}</h2>
       <div class="type-and-duration">
@@ -100,13 +100,13 @@
             <ng-template #normalPrice>
                 <div class="normal-price" style="font-weight: bold;">{{ service?.price }}€</div>
             </ng-template>
-
+      </div>
             <button class="schedule-btn" (click)="onClick(service?.id)">Schedule Appointment</button>
 
         </div>
-    </div>
 
-    <div class="service-description">
+
+      <div class="service-description">
       <h3> Description</h3>
       <p>{{ service?.description }}</p>
     </div>

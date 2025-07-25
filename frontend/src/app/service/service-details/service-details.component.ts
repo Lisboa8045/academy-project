@@ -8,8 +8,6 @@ import {UserProfileService} from '../../profile/user-profile.service';
 import {ServiceReviewComponent} from '../service-review/service-review.component';
 import {TagListComponent} from './tag-list/tag-list.component';
 
-import { Router } from '@angular/router';
-
 @Component({
   selector: 'app-service-details',
   imports: [
