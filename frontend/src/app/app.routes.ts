@@ -30,6 +30,7 @@ export const routes: Routes = [
   { path: 'schedule/:id', component: ScheduleComponent },
   { path: '', component: LandingPageComponent},
   { path: 'my-services', component: MyServicesComponent},
+  { path: 'backoffice/availability', component: AvailabilityManagementComponent },
   { path: 'resend-email', component: ResendEmailConfirmationComponent },
   { path: 'confirm-email/:token', component: ConfirmEmailComponent },
   { path: 'about', component: AboutComponent },

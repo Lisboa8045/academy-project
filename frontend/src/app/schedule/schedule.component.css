@@ -245,13 +245,6 @@ button:hover {
   gap: 8px; /* space between slots */
 }
 
-.week-navigation {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 1rem 0;
-}
-
 .day-column li {
   cursor: pointer;
   padding: 6px 4px;

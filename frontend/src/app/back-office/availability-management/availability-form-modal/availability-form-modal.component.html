@@ -1,0 +1,36 @@
+<div class="modal-overlay" (click)="close.emit()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="close.emit()">×</button>
+    <h3 class="modal-title">{{ getModalTitle() }}</h3>
+
+    <form [formGroup]="availabilityForm" (ngSubmit)="onSave()">
+      <div class="time-inputs">
+        <div class="time-group">
+          <label class="time-label">Morning</label>
+          <div class="interval-row">
+            <input type="time" formControlName="startTime1" class="time-input" required />
+            <span>to</span>
+            <input type="time" formControlName="endTime1" class="time-input" required />
+          </div>
+        </div>
+        <div class="time-group">
+          <label class="time-label">Afternoon</label>
+          <div class="interval-row">
+            <input type="time" formControlName="startTime2" class="time-input" />
+            <span>to</span>
+            <input type="time" formControlName="endTime2" class="time-input" />
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="submit" class="nav-button save-button" [disabled]="!availabilityForm.valid">
+          {{ mode === 'edit' ? 'Update' : 'Save' }}
+        </button>
+        <button type="button" (click)="close.emit()" class="nav-button cancel-button">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
