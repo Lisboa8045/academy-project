@@ -70,7 +70,11 @@
                         [class.selected]="i === currentImageIndex"
                         (click)="selectThumbnail(i, thumbContainer)"
                       />
-                      <div *ngIf="userCanEdit()" class="delete-image" (click)="deleteImage(i)">🗑️</div>
+                      <ng-container class="image-icon-container" *ngIf="userCanEdit()">
+                        <span class="image-icon" (click)="moveImageLeft(i)">⬅️</span>
+                        <span class="image-icon" (click)="moveImageRight(i)">➡️</span>
+                        <span class="image-icon" (click)="deleteImage(i)">🗑️</span>
+                      </ng-container>
                     </div>
                   </ng-container>
                   <div *ngIf="userCanEdit()" class="thumbnail-image">

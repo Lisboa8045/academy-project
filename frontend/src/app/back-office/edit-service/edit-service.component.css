@@ -302,16 +302,14 @@ button {
   display: inline-block;
 }
 
-.delete-image {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  cursor: pointer;
-  padding: 2px 2px;
-  border-radius: 50%;
+.image-icon-container {
   z-index: 10; /* Ensure it appears on top */
 }
 
-.delete-image:hover {
+.image-icon {
+  cursor: pointer;
+}
+
+.image-icon:hover {
   scale: 150%;
 }
