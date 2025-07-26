@@ -20,6 +20,7 @@ type Tag = {
 })
 export class ServiceCardComponent implements OnInit {
   @Input() service: any;
+  @Input() shouldShowTags = true;
   serviceImage = signal('https://placehold.co/300x200?text=No+Image');
   @Output() cardClick = new EventEmitter<number>();
   discountedPrice: number | null = null;

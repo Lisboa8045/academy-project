@@ -28,14 +28,17 @@ export class ServiceApiService {
       .set('name', name)
       .set('page', options.page.toString())
       .set('size', options.pageSize.toString())
-      .set('sort', options.sortOrder);
+      .set('sort', options.sortOrder)
 
     if (options.minPrice != null) params = params.set('minPrice', options.minPrice.toString());
     if (options.maxPrice != null) params = params.set('maxPrice', options.maxPrice.toString());
     if (options.minDuration != null) params = params.set('minDuration', options.minDuration.toString());
     if (options.maxDuration != null) params = params.set('maxDuration', options.maxDuration.toString());
     if (options.negotiable != null) params = params.set('negotiable', options.negotiable.toString());
-    if (options.serviceTypeName != null) params = params.set('serviceTypeName', options.serviceTypeName.toString());
+    if (options.serviceTypeName != null) params = params.set('serviceTypeName', options.serviceTypeName.toString())
+    if (options.enabled != null) params = params.set('enabled', options.enabled);
+     else params = params.set('enabled', true);
+
 
     console.log('Search params:', params.toString());
 
@@ -53,4 +56,5 @@ export class ServiceApiService {
       .set('sort', query.sortOrder);
     return this.http.get<PagedResponse>(this.BASE_URL + '/my-services/'+id, {params});
   }
+
 }

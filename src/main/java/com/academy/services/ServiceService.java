@@ -12,6 +12,7 @@ import com.academy.models.Tag;
 import com.academy.models.member.Member;
 import com.academy.models.service.Service;
 import com.academy.models.service.ServiceImages;
+import com.academy.models.service.ServiceStatusEnum;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.ServiceRepository;
@@ -66,6 +67,8 @@ public class ServiceService {
         linkServiceToType(service, dto.serviceTypeName());
         linkServiceToTags(service, dto.tagNames());
 
+        service.setStatus(ServiceStatusEnum.PENDING_APPROVAL);
+
         Service savedService = serviceRepository.save(service);
         createAndLinkServiceOwner(savedService, member.getId());
         return savedService;
@@ -101,6 +104,7 @@ public class ServiceService {
         String username =  authenticationFacade.getUsername();
         return serviceRepository.findAll()
                 .stream()
+                .filter(Service::isEnabled)
                 .map(service ->  serviceMapper.toDto(service,
                         getPermissionsByProviderUsernameAndServiceId(username, service.getId())
                 ))
@@ -182,7 +186,7 @@ public class ServiceService {
     }
 
     public Page<ServiceResponseDTO> searchServices(String name, Double minPrice, Double maxPrice,
-                                                   Integer minDuration, Integer maxDuration, Boolean negotiable, String serviceTypeName, Pageable pageable) {
+                                                   Integer minDuration, Integer maxDuration, Boolean negotiable, String serviceTypeName, Pageable pageable, Boolean enabled) {
         String username = authenticationFacade.getUsername();
 
         Specification<Service> spec = Specification.where(null); // start with no specifications, add each specification after if not null/empty
@@ -194,6 +198,7 @@ public class ServiceService {
         spec = addIfPresent(spec, maxDuration != null, () -> ServiceSpecifications.hasDurationLessThanOrEqual(maxDuration));
         spec = addIfPresent(spec, negotiable != null, () -> ServiceSpecifications.canNegotiate(negotiable));
         spec = addIfPresent(spec, serviceTypeName != null, () -> ServiceSpecifications.hasServiceType(serviceTypeName));
+        spec = addIfPresent(spec, enabled != null, () -> ServiceSpecifications.isEnabled(enabled));
 
         return serviceRepository.findAll(spec, pageable)
                 .map(service ->  serviceMapper.toDto(service,
@@ -258,7 +263,7 @@ public class ServiceService {
     }
 
     public List<Service> getServiceEntitiesByIds(List<Long> ids) {
-        return serviceRepository.findAllById(ids);
+        return serviceRepository.findAllById(ids).stream().filter(Service::isEnabled).toList();
     }
 
     public boolean existsById(Long serviceId) {
@@ -291,7 +296,8 @@ public class ServiceService {
     }
 
     public Page<ServiceResponseDTO> getServicesByMemberId(Long memberId, Pageable pageable) {
-       return serviceRepository.queryServicesByMemberId(memberId, pageable).map(service ->  serviceMapper.toDto(service,
+       return serviceRepository.queryEnabledServicesByMemberId(memberId, pageable)
+               .map(service ->  serviceMapper.toDto(service,
                getPermissionsByProviderIdAndServiceId(memberId, service.getId())));
     }
 
@@ -306,4 +312,17 @@ public class ServiceService {
         return null;
     }
 
+    public void approveService(Long id) {
+        Service service = getServiceEntityById(id);
+        service.setEnabled(true);
+        service.setStatus(ServiceStatusEnum.APPROVED);
+        serviceRepository.save(service);
+    }
+
+    public void rejectService(Long id){
+        Service service = getServiceEntityById(id);
+        service.setEnabled(false);
+        service.setStatus(ServiceStatusEnum.REJECTED);
+        serviceRepository.save(service);
+    }
 }

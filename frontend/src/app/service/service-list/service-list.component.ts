@@ -17,6 +17,7 @@ export class ServiceListComponent {
   constructor(private router: Router) {}
 
   @Input() services!: Signal<ServiceModel[]>;
+  @Input() shouldShowTags = true;
 
   onCardClick(id: number) {
     this.router.navigate(['/services', id]);

@@ -33,14 +33,10 @@ import java.util.List;
 public class ServiceController {
 
     private final ServiceService serviceService;
-    private final AuthenticationFacade authenticationFacade;
-    private final MemberService memberService;
 
     @Autowired
     public ServiceController(ServiceService serviceService, AuthenticationFacade authenticationFacade, MemberService memberService) {
         this.serviceService = serviceService;
-        this.authenticationFacade = authenticationFacade;
-        this.memberService = memberService;
     }
 
     @PostMapping
@@ -79,10 +75,11 @@ public class ServiceController {
             @RequestParam(required = false) Integer maxDuration,
             @RequestParam(required = false) Boolean negotiable,
             @RequestParam(required = false) String serviceTypeName,
+            @RequestParam(required = false) Boolean enabled,
             @PageableDefault(sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Page<ServiceResponseDTO> responses = serviceService.searchServices(name, minPrice,
-                maxPrice, minDuration, maxDuration, negotiable, serviceTypeName, pageable);
+                maxPrice, minDuration, maxDuration, negotiable, serviceTypeName, pageable, enabled);
         return ResponseEntity.ok(responses);
     }
 
@@ -102,5 +99,17 @@ public class ServiceController {
     @GetMapping("/my-services/{id}")
     public ResponseEntity<Page<ServiceResponseDTO>> getMyServices(@PathVariable Long id, Pageable pageable){
         return ResponseEntity.ok(serviceService.getServicesByMemberId(id, pageable));
+    }
+
+    @PatchMapping("/approve-service/{id}")
+    public ResponseEntity<Void> approveService(@PathVariable Long id){
+        serviceService.approveService(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/reject-service/{id}")
+    public ResponseEntity<Void> rejectService(@PathVariable Long id){
+        serviceService.rejectService(id);
+        return ResponseEntity.noContent().build();
     }
 }

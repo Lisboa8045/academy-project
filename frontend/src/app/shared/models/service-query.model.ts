@@ -8,4 +8,5 @@ export interface ServiceQuery {
   maxDuration?: number;
   negotiable?: boolean;
   serviceTypeName?: string;
+  enabled?: boolean;
 }

@@ -1,14 +1,16 @@
 package com.academy.models.service;
 
-import com.academy.models.member.Member;
 import com.academy.models.ServiceType;
 import com.academy.models.Tag;
+import com.academy.models.member.Member;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.models.shared.BaseEntity;
 import com.academy.utils.FieldLengths;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
@@ -43,6 +45,9 @@ public class Service extends BaseEntity {
     @JoinColumn(name = "owner_id", nullable = false)
     private Member owner;
 
+    @Column(name="enabled")
+    private boolean enabled;
+
     @Column(name="price")
     private double price;
 
@@ -57,6 +62,10 @@ public class Service extends BaseEntity {
 
     @Column(name="entity", unique = true)
     private String entity;
+
+    @Column(name="status")
+    @Enumerated(EnumType.STRING)
+    private ServiceStatusEnum status;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "service_type_id", nullable = false)

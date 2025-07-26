@@ -83,4 +83,12 @@ public class ServiceSpecifications {
                         ? null
                         : cb.equal(cb.lower(root.get("serviceType").get("name")), typeName.toLowerCase());
     }
+
+    public static Specification<Service> isEnabled(Boolean enabled) {
+        return (root, query, cb) -> {
+            if (enabled == null) return null;
+            return cb.equal(root.get("enabled"), enabled);
+        };
+    }
+
 }

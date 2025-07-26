@@ -18,6 +18,7 @@ import { ResetPasswordComponent } from './auth/reset-password/reset-password.com
 import {ConfirmAppointmentComponent} from './confirm-appointment/confirm-appointment.component';
 import {GlobalConfigurationEditComponent} from './global-configuration/global-configuration-edit.component';
 import {ConfirmEmailPromptComponent} from "./auth/confirm-email-prompt/confirm-email-prompt.component";
+import {ServiceAdminApprovalComponent} from './service/admin-approval/service-admin-approval-component.component';
 
 export const routes: Routes = [
   { path: 'auth', component: AuthComponent },
@@ -40,5 +41,6 @@ export const routes: Routes = [
   {path: 'confirm-appointment/:id', component: ConfirmAppointmentComponent },
   { path: 'config', component: GlobalConfigurationEditComponent },
   { path: 'auth/confirm-prompt', component: ConfirmEmailPromptComponent },
+  { path: 'testando', component: ServiceAdminApprovalComponent },
   { path: '**', redirectTo: '', pathMatch: 'full' },
 ];

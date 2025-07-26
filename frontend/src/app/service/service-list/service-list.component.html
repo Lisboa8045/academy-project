@@ -2,6 +2,8 @@
   <app-service-card
     *ngFor="let service of services()"
     [service]="service"
+    [shouldShowTags]="shouldShowTags"
     (cardClick)="onCardClick($event)">
+    <ng-content></ng-content>
   </app-service-card>
 </div>
