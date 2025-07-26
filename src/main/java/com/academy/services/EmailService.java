@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Map;
 
 import static com.academy.utils.Utils.formatHours;
 
@@ -139,4 +138,5 @@ public class EmailService{
             throw new EmailTemplateLoadingException("Error loading e-mail template");
         }
     }
+
 }
