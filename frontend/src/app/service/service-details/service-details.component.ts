@@ -7,6 +7,7 @@ import {NgForOf, NgIf} from "@angular/common";
 import {UserProfileService} from '../../profile/user-profile.service';
 import {ServiceReviewComponent} from '../service-review/service-review.component';
 import {TagListComponent} from './tag-list/tag-list.component';
+import {of, switchMap, tap} from 'rxjs';
 
 @Component({
   selector: 'app-service-details',
@@ -39,33 +40,48 @@ export class ServiceDetailsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.serviceId = Number(this.route.snapshot.paramMap.get('id'));
-
-    this.loading.set(true);
-    this.serviceApiService.getServiceById(this.serviceId).subscribe({
-      next: (data) => {
-        this.service = data;
-        if (this.service?.price && this.service?.discount && this.service.discount > 0) {
-          const aux = this.service.price - (this.service.price * this.service.discount) / 100;
-          this.discountedPrice = parseFloat(aux.toFixed(2));
-        } else{
+    this.route.paramMap
+      .pipe(
+        tap(() => {
+          this.service = undefined;
+          this.userProfileService.serviceImageUrl = [];
+          this.userProfileService.fetched = false;
           this.discountedPrice = null;
-        }
+          this.currentImageIndex = 0;
+          this.loading.set(true);
+        }),
+        switchMap(params => {
+          const id = Number(params.get('id'));
+          this.serviceId = id;
+          if (isNaN(id)) return of(null); // AQUI PODE-SE DEFINIR O QUE QUEREMOS CARREGAR QUANDO ESTA POR EXEMPLO .../service/a. "a" ná é válido
+          return this.serviceApiService.getServiceById(id);
+        })
+      )
+      .subscribe({
+        next: (data) => {
+          if (!data) return;
+
+          this.service = data;
+
+          if (this.service?.price && this.service?.discount && this.service.discount > 0) {
+            const aux = this.service.price - (this.service.price * this.service.discount) / 100;
+            this.discountedPrice = parseFloat(aux.toFixed(2));
+          }
+
           this.formatedTimeHours = Math.floor((this.service?.duration || 0) / 60);
           this.formatedTimeMinutes = this.service?.duration % 60;
 
+          if (this.service?.images?.length > 0) {
+            this.userProfileService.loadImages(this.service.images);
+          }
 
-        if (this.service?.images && this.service.images.length > 0) {
-          this.userProfileService.loadImages(this.service.images);
+          this.loading.set(false);
+        },
+        error: (err) => {
+          console.error('Erro ao carregar o serviço:', err);
+          this.loading.set(false);
         }
-
-        this.loading.set(false);
-      },
-      error: (err) => {
-        console.error("Error loading service");
-        this.loading.set(false);
-      }
-    });
+      });
   }
 
 

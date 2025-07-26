@@ -4,7 +4,7 @@ import {Injectable, signal} from '@angular/core';
 export class UserProfileService {
   private readonly _imageUrl = signal<string | null>(null);
   readonly imageUrl = this._imageUrl.asReadonly();
-  private fetched = false;
+  fetched = false;
   private apiUrl = 'http://localhost:8080/auth/uploads';
   serviceImageUrl: string[] = [];
 
