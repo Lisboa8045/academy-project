@@ -4,6 +4,8 @@
     [service]="service"
     [shouldShowTags]="shouldShowTags"
     (cardClick)="onCardClick($event)">
-    <ng-content></ng-content>
+    <ng-container
+      *ngTemplateOutlet="contentTemplate; context: {$implicit: service}">
+    </ng-container>
   </app-service-card>
 </div>

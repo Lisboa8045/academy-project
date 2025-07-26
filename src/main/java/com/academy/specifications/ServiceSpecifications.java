@@ -2,6 +2,7 @@ package com.academy.specifications;
 
 import com.academy.models.Tag;
 import com.academy.models.service.Service;
+import com.academy.models.service.ServiceStatusEnum;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -91,4 +92,15 @@ public class ServiceSpecifications {
         };
     }
 
+    public static Specification<Service> statusMatches(String status) {
+        return (root, query, cb) -> {
+            if (status == null || status.isBlank()) return null;
+            try {
+                ServiceStatusEnum statusEnum = ServiceStatusEnum.valueOf(status.toUpperCase());
+                return cb.equal(root.get("status"), statusEnum);
+            } catch (IllegalArgumentException e) {
+                return null;
+            }
+        };
+    }
 }

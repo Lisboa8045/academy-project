@@ -9,6 +9,9 @@ import {ServiceQuery} from '../../shared/models/service-query.model';
 import {AuthStore} from '../../auth/auth.store';
 import {NgTemplateOutlet} from '@angular/common';
 import {RouterLink} from '@angular/router';
+import {MatSnackBar} from "@angular/material/snack-bar";
+import {snackBarSuccess} from "../../shared/snackbar/snackbar-success";
+import {snackBarError} from "../../shared/snackbar/snackbar-error";
 
 @Component({
   selector: 'app-service-admin-approval-component',
@@ -19,7 +22,6 @@ import {RouterLink} from '@angular/router';
     LoadingComponent,
     PaginationBarComponent,
     ServiceListComponent,
-    RouterLink,
     NgTemplateOutlet
   ]
 })
@@ -34,12 +36,14 @@ export class ServiceAdminApprovalComponent{
   sortOrder = signal("price,asc");
   enabled = false;
 
-  constructor(private serviceApiService: ServiceApiService, private authStore: AuthStore) {
+  constructor(private serviceApiService: ServiceApiService,
+              private authStore: AuthStore,
+              private snackBar: MatSnackBar) {
     this.loading.set(true);
     effect(() => {
       const id = this.memberId();
       if (id !== undefined && id !== null && id > 0) {
-        this.fetchServices(this.buildQuery({ page: 0, enabled:false }));
+        this.fetchServices(this.buildQuery({ page: 0, enabled:false, status:'PENDING_APPROVAL' }));
       }
     });
   }
@@ -65,7 +69,8 @@ export class ServiceAdminApprovalComponent{
       page: overrides.page ?? this.currentPage(),
       pageSize: overrides.pageSize ?? this.pageSize(),
       sortOrder: overrides.sortOrder ?? this.sortOrder(),
-      enabled: this.enabled
+      enabled: this.enabled,
+      status: overrides.status ?? '',
     };
   }
 
@@ -73,7 +78,7 @@ export class ServiceAdminApprovalComponent{
     if (this.currentPage() > 0) {
       const newPage = this.currentPage() - 1;
       this.currentPage.set(newPage);
-      this.fetchServices(this.buildQuery({ page: newPage }));
+      this.fetchServices(this.buildQuery({ page: newPage, enabled:false, status:'PENDING_APPROVAL' }));
     }
   }
 
@@ -81,7 +86,7 @@ export class ServiceAdminApprovalComponent{
     if (this.currentPage() + 1 < this.totalPages()) {
       const newPage = this.currentPage() + 1;
       this.currentPage.set(newPage);
-      this.fetchServices(this.buildQuery({ page: newPage }));
+      this.fetchServices(this.buildQuery({ page: newPage, enabled:false, status:'PENDING_APPROVAL' }));
     }
   }
 
@@ -89,8 +94,20 @@ export class ServiceAdminApprovalComponent{
     const pageNumber = Number(page);
     if (pageNumber >= 0 && pageNumber < this.totalPages()) {
       this.currentPage.set(pageNumber);
-      this.fetchServices(this.buildQuery({ page: pageNumber }));
+      this.fetchServices(this.buildQuery({ page: pageNumber, enabled:false, status:'PENDING_APPROVAL' }));
     }
   }
 
+  rejectService(service: ServiceModel) {
+    this.serviceApiService.rejectService(service.id).subscribe({
+      next: () => snackBarSuccess(this.snackBar, "Service rejected successfully"),
+      error: err => snackBarError(this.snackBar, err)
+    });  }
+
+  approveService(service: ServiceModel) {
+    this.serviceApiService.approveService(service.id).subscribe({
+      next: () => snackBarSuccess(this.snackBar, "Service approved successfully"),
+      error: err => console.log(err)
+    });
+  }
 }

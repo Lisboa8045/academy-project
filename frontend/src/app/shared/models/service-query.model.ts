@@ -9,4 +9,5 @@ export interface ServiceQuery {
   negotiable?: boolean;
   serviceTypeName?: string;
   enabled?: boolean;
+  status?: string;
 }

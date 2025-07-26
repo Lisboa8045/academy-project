@@ -36,8 +36,12 @@ export class ServiceApiService {
     if (options.maxDuration != null) params = params.set('maxDuration', options.maxDuration.toString());
     if (options.negotiable != null) params = params.set('negotiable', options.negotiable.toString());
     if (options.serviceTypeName != null) params = params.set('serviceTypeName', options.serviceTypeName.toString())
-    if (options.enabled != null) params = params.set('enabled', options.enabled);
-     else params = params.set('enabled', true);
+    if (options.enabled != null) {
+      params = params.set('enabled', options.enabled.toString());
+    } else {
+      params = params.set('enabled', 'true');
+    }
+    if (options.status != null) params = params.set('status', options.status.toString());
 
 
     console.log('Search params:', params.toString());
@@ -55,6 +59,14 @@ export class ServiceApiService {
       .set('size', query.pageSize.toString())
       .set('sort', query.sortOrder);
     return this.http.get<PagedResponse>(this.BASE_URL + '/my-services/'+id, {params});
+  }
+
+  approveService(id: number) {
+    return this.http.patch<void>(`${this.BASE_URL}/approve-service/${id}`, {});
+  }
+
+  rejectService(id: number) {
+    return this.http.patch<void>(`${this.BASE_URL}/reject-service/${id}`, {});
   }
 
 }

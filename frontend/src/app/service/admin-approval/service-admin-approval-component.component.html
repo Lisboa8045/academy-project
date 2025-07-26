@@ -24,20 +24,23 @@
           </div>
         } @else {
           <app-service-list [services]="services" [shouldShowTags]="false">
-            <div class="flex justify-between p-2">
-              <button
-                class="w-20 py-2 rounded-full bg-red-600 text-white hover:bg-red-700 transition"
-              >
-                Reject
-              </button>
+            <ng-template let-service>
+              <div class="flex justify-between p-2">
+                <button (click)="rejectService(service); $event.stopPropagation()"
+                        class="w-20 py-2 rounded-full bg-red-600 text-white hover:bg-red-700 transition"
+                >
+                  Reject
+                </button>
 
-              <button
-                class="w-20 py-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition"
-              >
-                Approve
-              </button>
-            </div>
+                <button (click)="approveService(service); $event.stopPropagation()"
+                        class="w-20 py-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition"
+                >
+                  Approve
+                </button>
+              </div>
+            </ng-template>
           </app-service-list>
+
         }
 
         <app-pagination-bar

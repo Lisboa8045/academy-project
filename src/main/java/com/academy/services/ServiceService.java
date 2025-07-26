@@ -186,7 +186,7 @@ public class ServiceService {
     }
 
     public Page<ServiceResponseDTO> searchServices(String name, Double minPrice, Double maxPrice,
-                                                   Integer minDuration, Integer maxDuration, Boolean negotiable, String serviceTypeName, Pageable pageable, Boolean enabled) {
+                                                   Integer minDuration, Integer maxDuration, Boolean negotiable, String serviceTypeName, Pageable pageable, Boolean enabled, String status) {
         String username = authenticationFacade.getUsername();
 
         Specification<Service> spec = Specification.where(null); // start with no specifications, add each specification after if not null/empty
@@ -199,6 +199,7 @@ public class ServiceService {
         spec = addIfPresent(spec, negotiable != null, () -> ServiceSpecifications.canNegotiate(negotiable));
         spec = addIfPresent(spec, serviceTypeName != null, () -> ServiceSpecifications.hasServiceType(serviceTypeName));
         spec = addIfPresent(spec, enabled != null, () -> ServiceSpecifications.isEnabled(enabled));
+        spec = addIfPresent(spec, enabled != null, () -> ServiceSpecifications.statusMatches(status));
 
         return serviceRepository.findAll(spec, pageable)
                 .map(service ->  serviceMapper.toDto(service,
