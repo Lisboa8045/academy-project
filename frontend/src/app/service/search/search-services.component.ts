@@ -61,7 +61,7 @@ export class SearchServicesComponent implements OnInit {
     });
     this.route.queryParams.subscribe(params => {
       const q = (params['q'] || '').trim();
-      const serviceType = params['serviceType'] || '';
+      const serviceType = (params['serviceType'] || params['serviceTypeName'] || '').trim();
       this.searchTerm.set(q);
       // aplica serviceType vindo da URL nos filtros
       if (serviceType) {

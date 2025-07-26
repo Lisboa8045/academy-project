@@ -1,0 +1,40 @@
+<div class="reviews-section" *ngIf="reviews && reviews.length > 0">
+  <h3>Reviews</h3>
+
+  <div *ngFor="let review of reviews; let i = index" class="review">
+    <div class="review-header">
+      <div class="reviewer-info">
+        <div class="profile-and-name">
+          <img
+            *ngIf="imageUrls[i]; else placeholder"
+            [src]="imageUrls[i]"
+            alt="🧑"
+            class="profile-picture"
+          />
+
+          <ng-template #placeholder>
+            <span class="profile-picture placeholder-emoji">🧑</span>
+          </ng-template>
+
+          <span class="reviewer-name">{{ review.memberUsername }}</span>
+        </div>
+        <div class="star-rating">
+          <ng-container *ngFor="let star of [1,2,3,4,5]">
+            <span [ngClass]="{'filled': star ===1 || star <= review.rating, 'empty': star > review.rating && star!==1}">
+              &#9733;
+            </span>
+          </ng-container>
+        </div>
+      </div>
+
+      <span class="review-date">{{ review.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+
+    </div>
+    <p class="review-comment">{{ review.comment }}</p>
+  </div>
+</div>
+
+<div class="reviews-section" *ngIf="reviews && reviews.length === 0">
+  <h3>Reviews</h3>
+  <p>This service doesn't have any reviews yet.</p>
+</div>
