@@ -56,14 +56,18 @@
         >
           {{ service?.serviceTypeName }}
         </h3>
-        <div *ngIf="formatedTimeMinutes != null && formatedTimeMinutes > 0; else onlyHours">
-          <span class="duration-info">🕒 {{ formatedTimeHours }}h:{{ formatedTimeMinutes }} min</span>
+        <div *ngIf="formatedTimeHours > 0">
+          <span class="duration-info">🕒 {{ formatedTimeHours }}H {{ formatedTimeMinutes }} m</span>
+        </div>
+
+        <div *ngIf="formatedTimeHours === 0 && formatedTimeMinutes > 0">
+          <span class="duration-info">🕒 {{ formatedTimeMinutes }} m</span>
+        </div>
+
+        <div *ngIf="formatedTimeHours === 0 && formatedTimeMinutes === 0">
+          <span class="duration-info">🕒 No Time</span>
         </div>
       </div>
-
-      <ng-template #onlyHours>
-        <span class="duration-info">🕒 {{ formatedTimeHours }} H</span>
-      </ng-template>
       <!--        <div *ngIf="service?.tagNames?.length" class="tag-list">
               <span *ngFor="let tag of service?.tagNames"
                     class="tag"

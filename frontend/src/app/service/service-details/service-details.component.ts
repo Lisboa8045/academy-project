@@ -24,8 +24,8 @@ export class ServiceDetailsComponent implements OnInit {
   private apiUrl = 'http://localhost:8080/auth/uploads';
   currentImageIndex = 0;
   discountedPrice: number | null = null;
-  formatedTimeHours: number | null = null;
-  formatedTimeMinutes: number | null = null;
+  formatedTimeHours: number = 0;
+  formatedTimeMinutes: number = 0;
   serviceId!: number;
   service?: ServiceModel;
   loading = signal(false);
@@ -51,10 +51,8 @@ export class ServiceDetailsComponent implements OnInit {
         } else{
           this.discountedPrice = null;
         }
-        if(this.service?.duration >= 60){
           this.formatedTimeHours = Math.floor((this.service?.duration || 0) / 60);
           this.formatedTimeMinutes = this.service?.duration % 60;
-        }
 
 
         if (this.service?.images && this.service.images.length > 0) {
