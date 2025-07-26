@@ -5,6 +5,7 @@ import com.academy.models.Availability;
 import com.academy.models.Role;
 import com.academy.models.service.Service;
 import com.academy.models.shared.BaseEntity;
+import com.academy.models.token.EmailConfirmationToken;
 import com.academy.utils.FieldLengths;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -37,6 +38,9 @@ public class Member extends BaseEntity {
 
     @OneToMany(mappedBy = "member")
     private List<Appointment> appointments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member")
+    private List<EmailConfirmationToken> emailConfirmationTokens = new ArrayList<>();
 
     @Column(name = "username", unique = true, nullable = false, length = FieldLengths.USERNAME_MAX)
     private String username;
