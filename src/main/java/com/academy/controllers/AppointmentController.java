@@ -1,13 +1,18 @@
 // AppointmentController.java
 package com.academy.controllers;
 
+import com.academy.dtos.appointment.AppointmentCardDTO;
 import com.academy.dtos.SlotDTO;
 import com.academy.dtos.appointment.AppointmentRequestDTO;
 import com.academy.dtos.appointment.AppointmentResponseDTO;
+import com.academy.dtos.appointment.ConfirmAppointmentResponseDTO;
+import com.academy.dtos.appointment.review.ReviewRequestDTO;
+import com.academy.dtos.appointment.review.ReviewResponseDTO;
 import com.academy.services.AppointmentService;
 import com.academy.services.SchedulingService;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -42,22 +47,32 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
 
-
     @PutMapping("/{id}")
     public ResponseEntity<AppointmentResponseDTO> updateAppointment(@PathVariable Long id, @RequestBody AppointmentRequestDTO appointmentDetails) {
         AppointmentResponseDTO updated = appointmentService.updateAppointment(id, appointmentDetails);
         return ResponseEntity.ok(updated);
     }
 
+    @PostMapping("/confirm-appointment/{id}")
+        public ResponseEntity<ConfirmAppointmentResponseDTO> confirmAppointment(@PathVariable Long id){
+        return appointmentService.confirmAppointment(id);
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAppointment(@PathVariable Long id) {
-        appointmentService.deleteAppointment(id);
+    public ResponseEntity<Void> cancelAppointment(@PathVariable Long id) {
+        appointmentService.cancelAppointment(id);
         return ResponseEntity.noContent().build();
     }
 
+    @Deprecated
     @PostMapping("/{id}/review")
     public ResponseEntity<AppointmentResponseDTO> createReview(@PathVariable Long id, @RequestBody AppointmentRequestDTO appointmentDetails) {
         return updateAppointment(id, appointmentDetails);
+    }
+
+    @PatchMapping("/{id}/review")
+    public ResponseEntity<ReviewResponseDTO> addReview(@PathVariable Long id, @RequestBody @Valid ReviewRequestDTO reviewRequestDTO) {
+        return appointmentService.addReview(id, reviewRequestDTO);
     }
 
     @DeleteMapping("/{id}/review")
@@ -65,6 +80,20 @@ public class AppointmentController {
         appointmentService.deleteReview(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/member")
+    public ResponseEntity<List<AppointmentCardDTO>> getAppointmentsForAuthenticatedMember(
+            @RequestParam(defaultValue = "asc") String dateOrder
+    ) {
+        return ResponseEntity.ok(appointmentService.getAppointmentsForAuthenticatedMember(dateOrder));
+    }
+/*
+    @GetMapping("/provider")
+    public ResponseEntity<List<AppointmentResponseDTO>> getAppointmentsForAuthenticatedProvider(){
+        return ResponseEntity.ok(appointmentService.getAppointmentsForAuthenticatedProvider());
+    }
+
+ */
 
     @GetMapping("/services/{serviceId}/free-slots")
     public ResponseEntity<List<SlotDTO>> getFreeSlots(@PathVariable Long serviceId) {

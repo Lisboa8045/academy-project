@@ -51,7 +51,19 @@ public class AuthController {
     @GetMapping("/confirm-email/{token}")
     public ResponseEntity<ConfirmEmailResponseDto> confirmEmail(@PathVariable String token) {
        memberService.confirmEmail(token);
-       return  ResponseEntity.ok(new ConfirmEmailResponseDto("Email confirmed successfully"));
+       return ResponseEntity.ok(new ConfirmEmailResponseDto("Email confirmed successfully"));
+    }
+
+    @GetMapping("/password-reset/{token}")
+    public ResponseEntity<PasswordResetResponseDto> verifyPasswordResetToken(@PathVariable String token) {
+        memberService.verifyPasswordResetToken(token);
+        return ResponseEntity.ok(new PasswordResetResponseDto("Password can be reset"));
+    }
+
+    @PatchMapping("/password-reset/{token}")
+    public ResponseEntity<PasswordResetResponseDto> resetPassword(@PathVariable String token, @RequestBody PasswordResetRequestDto requestDto) {
+        memberService.resetPassword(token, requestDto.newPassword());
+        return ResponseEntity.ok(new PasswordResetResponseDto("Password reset successful"));
     }
 
     @PostMapping("/login")
@@ -62,7 +74,6 @@ public class AuthController {
 
     @GetMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletResponse response) {
-        System.out.println("Backend Logout");
         memberService.logout(response);
         return ResponseEntity.ok().build();
     }
@@ -83,8 +94,9 @@ public class AuthController {
         Member member = memberService.getMemberByUsername(username);
         Long id = member.getId();
         String profilePicture = member.getProfilePicture();
+        String role =  member.getRole().getName();
 
-        return ResponseEntity.ok(Map.of("username", username, "id", id, "profilePicture", profilePicture != null ? profilePicture : ""));
+        return ResponseEntity.ok(Map.of("username", username, "id", id, "profilePicture", profilePicture != null ? profilePicture : "", "role", role));
     }
 
     @PostMapping("/recreate-confirmation-token")
@@ -92,5 +104,12 @@ public class AuthController {
             @RequestBody RecreateConfirmationTokenRequestDto request) {
         memberService.recreateConfirmationToken(request.login());
         return ResponseEntity.ok(new RecreateConfirmationTokenResponseDto("Confirmation token recreated"));
+    }
+
+    @PostMapping("/password-reset-token")
+    public ResponseEntity<CreatePasswordResetTokenResponseDto> createPasswordResetToken(
+            @RequestBody CreatePasswordResetTokenRequestDto request) {
+        memberService.createPasswordResetToken(request.email());
+        return ResponseEntity.ok(new CreatePasswordResetTokenResponseDto("Password reset token created"));
     }
 }

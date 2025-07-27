@@ -9,14 +9,16 @@ import {
   Validators
 } from '@angular/forms';
 import {AuthService} from './auth.service';
-import {Router} from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
 import {strongPasswordValidator} from '../shared/validators/password.validator';
 import {noSpecialCharsValidator} from '../shared/validators/no-special-chars.validator';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {snackBarSuccess} from '../shared/snackbar/snackbar-success';
 
 @Component({
   selector: 'app-auth',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.css']
 })
@@ -24,34 +26,34 @@ export class AuthComponent{
   readonly isLoginMode = signal(true);
 
   authForm!: FormGroup;
-  private fb = inject(FormBuilder);
+  private readonly fb = inject(FormBuilder);
 
-  errorMessage = '';
-  passwordVisible = false;
-  confirmPasswordVisible = false;
-  loading = false;
+  errorMessage = signal('');
+  passwordVisible = signal(false);
+  confirmPasswordVisible = signal(false);
+  loading = signal(false);
 
-  constructor(private authService: AuthService, private router: Router) {
+  constructor(private readonly authService: AuthService, private readonly router: Router, private readonly snackBar: MatSnackBar) {
     this.buildForm()
   }
 
   togglePasswordVisibility(event: MouseEvent) {
     event.preventDefault();
     event.stopPropagation();
-    this.passwordVisible = !this.passwordVisible;
+    this.passwordVisible.update(v => !v);
   }
 
   toggleConfirmPasswordVisibility(event: MouseEvent) {
     event.preventDefault();
     event.stopPropagation();
-    this.confirmPasswordVisible = !this.confirmPasswordVisible;
+    this.confirmPasswordVisible.update(v => !v);
   }
 
   toggleMode(): void {
     this.isLoginMode.update(mode => !mode);
-    this.errorMessage = '';
-    this.passwordVisible = false;
-    this.confirmPasswordVisible = false;
+    this.errorMessage.set('');
+    this.passwordVisible.set(false);
+    this.confirmPasswordVisible.set(false);
     this.buildForm();
   }
 
@@ -66,12 +68,14 @@ export class AuthComponent{
         email: ['', [Validators.required, Validators.email, Validators.maxLength(254)]],
         username: ['', [Validators.required, noSpecialCharsValidator(), Validators.minLength(4), Validators.maxLength(20)]],
         password: ['', [Validators.required, strongPasswordValidator(), Validators.minLength(8), Validators.maxLength(64)]],
-        confirmPassword: ['', [Validators.required, Validators.maxLength(64)]]
+        confirmPassword: ['', [Validators.required, Validators.maxLength(64)]],
+        agreedToTerms: [false, Validators.requiredTrue],
+        agreedToPrivacy: [false, Validators.requiredTrue]
       }, { validators: this.passwordsMatchValidator });
     }
 
     this.authForm.valueChanges.subscribe(() => {
-      this.errorMessage = '';
+      this.errorMessage.set('');
     });
   }
 
@@ -91,38 +95,37 @@ export class AuthComponent{
 
     if (!this.authForm.valid) return;
 
-    this.loading = true;
+    this.loading.set(true);
 
     if (this.isLoginMode()) {
-      this.authService.login(login!, password!).subscribe({
+      this.authService.login(login, password).subscribe({
         next: () => {
           this.router.navigate(['/']);
-          this.loading = false;
+          this.loading.set(false);
         },
         error: (err) => {
-          this.loading = false;
+          this.loading.set(false);
           if (err?.type === 'EMAIL_NOT_CONFIRMED') {
-            this.router.navigate(['/resend-email'], {
-              queryParams: {email: err.email || login}
-            });
+            sessionStorage.setItem('pendingResendEmail', err.email ?? login);
+            this.router.navigate(['/resend-email']);
             return;
           }
           console.error('Login failed:', err);
-          this.errorMessage = err?.error || 'Login failed. Please try again.';
+          this.errorMessage.set(err?.error ?? 'Login failed. Please try again.');
         }
       });
     } else {
-      this.authService.signup(email!, username!, "2", password!).subscribe({
+      this.authService.signup(email, username, "2", password).subscribe({
         next: () => {
-          alert('Signup successful! Please log in.');
-          this.toggleMode()
-          this.loading = false;
+          this.loading.set(false);
+          sessionStorage.setItem('signupConfirmEmail', email);
+          this.router.navigate(['/auth/confirm-prompt']);
         },
         error: (err) => {
           console.error('Signup failed:', err);
-          this.loading = false;
+          this.loading.set(false);
 
-          this.errorMessage = '';
+          this.errorMessage.set('');
           const errors = this.getHttpErrors(err);
 
           if (errors) {
@@ -132,7 +135,7 @@ export class AuthComponent{
               }
             }
           } else {
-            this.errorMessage = 'Signup failed. Please try again.'; // Fallback error message
+            this.errorMessage.set('Signup failed. Please try again.'); // Fallback error message
           }
         }
       });
