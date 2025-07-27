@@ -117,7 +117,6 @@ public class EmailService{
         String html = loadEmailTemplate("templates/cancelled-appointment-provider.html")
                 .replace("[CLIENT_NAME]", appointment.getMember().getUsername())
                 .replace("[SERVICE_PRICE]" , String.valueOf(appointment.getPrice()))
-                .replace("[APPOINTMENT_ID]", appointment.getId().toString())
                 .replace("[PROVIDER_NAME]", appointment.getServiceProvider().getProvider().getUsername())
                 .replace("[SERVICE_NAME]", appointment.getServiceProvider().getService().getName())
                 .replace("[START_TIME]", appointment.getStartDateTime().toString())
@@ -140,11 +139,11 @@ public class EmailService{
             compensationMessage="<p>Since the appointment was cancelled 3 or less before the time, you will receive the full amount</p>\n";
 
         String html = loadEmailTemplate("templates/cancelled-appointment-provider.html")
-                .replace("[CLIENT_NAME]", "client")
-                .replace("[SERVICE_PRICE]" , "price")
-                .replace("[PROVIDER_NAME]", "appointment.getServiceProvider().getProvider().getUsername()")
-                .replace("[SERVICE_NAME]"," appointment.getServiceProvider().getService().getName()")
-                .replace("[START_TIME]", "appointment.getStartDateTime().toString()")
+                .replace("[CLIENT_NAME]", appointment.getMember().getUsername())
+                .replace("[SERVICE_PRICE]" , String.valueOf(appointment.getPrice()))
+                .replace("[PROVIDER_NAME]", appointment.getServiceProvider().getProvider().getUsername())
+                .replace("[SERVICE_NAME]", appointment.getServiceProvider().getService().getName())
+                .replace("[START_TIME]", appointment.getStartDateTime().toString())
                 .replace("[App Name]", appProperties.getName())
                 .replace("[COMPENSATION_MESSAGE]", compensationMessage);
 
