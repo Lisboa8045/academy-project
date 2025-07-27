@@ -98,7 +98,7 @@ export class AuthComponent{
     this.loading.set(true);
 
     if (this.isLoginMode()) {
-      this.authService.login(login!, password!).subscribe({
+      this.authService.login(login, password).subscribe({
         next: () => {
           this.router.navigate(['/']);
           this.loading.set(false);
@@ -111,15 +111,15 @@ export class AuthComponent{
             return;
           }
           console.error('Login failed:', err);
-          this.errorMessage.set(err?.error || 'Login failed. Please try again.');
+          this.errorMessage.set(err?.error ?? 'Login failed. Please try again.');
         }
       });
     } else {
-      this.authService.signup(email!, username!, "2", password!).subscribe({
+      this.authService.signup(email, username, "2", password).subscribe({
         next: () => {
           this.loading.set(false);
-          snackBarSuccess(this.snackBar, 'Signup successful! Please log in.');
-          this.toggleMode()
+          sessionStorage.setItem('signupConfirmEmail', email);
+          this.router.navigate(['/auth/confirm-prompt']);
         },
         error: (err) => {
           console.error('Signup failed:', err);
