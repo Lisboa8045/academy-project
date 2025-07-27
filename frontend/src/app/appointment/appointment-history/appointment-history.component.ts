@@ -140,6 +140,10 @@ export class AppointmentHistoryComponent implements OnInit {
     return `cancel the appointment at ${formattedDate} for ${this.selectedAppointment.serviceName}`;
   }
 
+  isCancelledOrFinished(status: AppointmentStatusEnumModel): boolean {
+    return [AppointmentStatusEnumModel.CANCELLED, AppointmentStatusEnumModel.FINISHED].includes(status);
+  }
+
   confirmCancelAppointment() {
     this.appointmentHistoryService.cancelAppointment(this.selectedAppointment!.id).subscribe({
       next: data => {

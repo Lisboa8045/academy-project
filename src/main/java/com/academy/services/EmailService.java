@@ -113,6 +113,7 @@ public class EmailService{
 
         String html = loadEmailTemplate("templates/cancelled-appointment.html")
                 .replace("[CLIENT_NAME]", appointment.getMember().getUsername())
+                .replace("[SERVICE_PRICE]" , String.valueOf(appointment.getPrice()))
                 .replace("[APPOINTMENT_ID]", appointment.getId().toString())
                 .replace("[PROVIDER_NAME]", appointment.getServiceProvider().getProvider().getUsername())
                 .replace("[SERVICE_NAME]", appointment.getServiceProvider().getService().getName())
