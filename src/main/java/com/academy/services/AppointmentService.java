@@ -212,6 +212,13 @@ public class AppointmentService {
 
         appointment.setStatus(AppointmentStatus.CANCELLED);
         appointmentRepository.save(appointment);
+
+        String loggedMemberUsername = authenticationFacade.getUsername();
+        if(appointment.getServiceProvider().getProvider().getUsername().equals(loggedMemberUsername)){
+            sendNotificationToClientCancelledAppointment(appointment);
+        }
+        else
+            sendNotificationToProviderCancelledAppointment(appointment);
     }
 
     public ResponseEntity<ReviewResponseDTO> addReview(Long appointmentId, ReviewRequestDTO request) {
@@ -233,11 +240,11 @@ public class AppointmentService {
 
         appointment.setStatus(AppointmentStatus.CONFIRMED);
         appointmentRepository.save(appointment);
-        sendNotificationToProvider(appointment);
+        sendNotificationToProviderConfirmedAppointment(appointment);
         return ResponseEntity.ok(new ConfirmAppointmentResponseDTO("Appointment confirmed successfully"));
     }
 
-    private void sendNotificationToProvider(Appointment appointment) {
+    private void sendNotificationToProviderConfirmedAppointment(Appointment appointment) {
         Notification notification = new Notification();
         notification.setNotificationTypeEnum(NotificationTypeEnum.APPOINTMENT_CONFIRMED);
         notification.setTitle(appointment.getServiceProvider().getService().getName());
@@ -245,6 +252,27 @@ public class AppointmentService {
                 + appointment.getMember().getUsername()
                 + " at " + formatDate(appointment.getStartDateTime()) + " has been confirmed.");
         notification.setMember(appointment.getServiceProvider().getProvider());
+        notificationService.createNotification(notification);
+    }
+    private void sendNotificationToProviderCancelledAppointment(Appointment appointment) {
+        Notification notification = new Notification();
+        notification.setNotificationTypeEnum(NotificationTypeEnum.APPOINTMENT_CANCELLED);
+        notification.setTitle(appointment.getServiceProvider().getService().getName());
+        notification.setBody("Appointment with "
+                + appointment.getMember().getUsername()
+                + " at " + formatDate(appointment.getStartDateTime()) + " has been cancelled by the client.");
+        notification.setMember(appointment.getServiceProvider().getProvider());
+        notificationService.createNotification(notification);
+    }
+
+    private void sendNotificationToClientCancelledAppointment(Appointment appointment) {
+        Notification notification = new Notification();
+        notification.setNotificationTypeEnum(NotificationTypeEnum.APPOINTMENT_CANCELLED);
+        notification.setTitle(appointment.getServiceProvider().getService().getName());
+        notification.setBody("Appointment for "
+                + appointment.getServiceProvider().getService().getName()
+                + " at " + formatDate(appointment.getStartDateTime()) + " has been cancelled by the provider");
+        notification.setMember(appointment.getMember());
         notificationService.createNotification(notification);
     }
 
