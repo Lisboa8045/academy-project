@@ -41,6 +41,6 @@ export const routes: Routes = [
   {path: 'confirm-appointment/:id', component: ConfirmAppointmentComponent },
   { path: 'config', component: GlobalConfigurationEditComponent },
   { path: 'auth/confirm-prompt', component: ConfirmEmailPromptComponent },
-  { path: 'testando', component: ServiceAdminApprovalComponent },
+  { path: 'administrate-services', component: ServiceAdminApprovalComponent },
   { path: '**', redirectTo: '', pathMatch: 'full' },
 ];
