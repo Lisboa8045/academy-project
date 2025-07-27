@@ -6,6 +6,7 @@ import {NgForOf, NgIf} from '@angular/common';
 import {ServiceTypeResponseDTO} from '../../shared/models/service-type.model';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faPlus, faTimes} from '@fortawesome/free-solid-svg-icons';
+import {Router} from '@angular/router';
 
 
 @Component({
@@ -32,7 +33,7 @@ export class CreateServiceComponent implements OnInit {
   currentImageIndex = 0;
   newTag: string = '';
 
-  constructor(private fb: FormBuilder, private serviceApi: ServiceApiService) {}
+  constructor(private fb: FormBuilder, private serviceApi: ServiceApiService, private router: Router) {}
 
   ngOnInit() {
     this.form = buildServiceForm(this.fb);
@@ -76,6 +77,9 @@ export class CreateServiceComponent implements OnInit {
               error: (err) => {
                 alert('Upload failed.');
                 console.error(err);
+              },
+              complete: () => {
+                this.router.navigate([`/backoffice/services/${res.id}`]);
               }
             });
           }
