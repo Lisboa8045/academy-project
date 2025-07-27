@@ -28,8 +28,6 @@ export class ProfileService {
   updateMember(updatedUser: Partial<MemberResponseDTO>, id:number) {
     return this.http.put(`${this.apiUrl}/${id}`, updatedUser);
   }
-
-  deleteMember(id: number) {
-    return this.http.delete(`${this.apiUrl}/${id}`);
-  }
 }
+
+
