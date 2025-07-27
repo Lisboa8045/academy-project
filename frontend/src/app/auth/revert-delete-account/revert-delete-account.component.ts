@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import {ActivatedRoute, RouterLink} from '@angular/router';
 import { NgIf } from '@angular/common'; // <-- Import NgIf
 import { ProfileService } from '../../profile/profile.service';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-revert-delete-account',
   standalone: true,
-  imports: [NgIf, RouterLink],
+  imports: [NgIf],
   templateUrl: './revert-delete-account.component.html',
   styleUrls: ['./revert-delete-account.component.css']
 })
@@ -16,7 +17,8 @@ export class RevertDeleteAccountComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private profileService: ProfileService
+    private profileService: ProfileService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -36,5 +38,9 @@ export class RevertDeleteAccountComponent implements OnInit {
       this.message = 'Invalid link.';
       this.loading = false;
     }
+  }
+
+  goToLogin() {
+    this.router.navigate(['/auth']);
   }
 }

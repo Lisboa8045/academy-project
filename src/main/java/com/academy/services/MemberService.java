@@ -28,10 +28,13 @@ import com.academy.repositories.MemberRepository;
 import com.academy.repositories.RoleRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -434,5 +437,16 @@ public class MemberService {
         member.setConfirmationToken(null);
         member.setTokenExpiry(null);
         memberRepository.save(member);
+    }
+
+    @Scheduled(cron = "0 */2 * * * ?") // Every 2 minutes
+    public void permanentlyDeleteExpiredAccounts() {
+        List<Member> expiredMembers = memberRepository.findAll().stream()
+                .filter(m -> m.getStatus() == MemberStatusEnum.PENDING_DELETION
+                        && m.getTokenExpiry() != null
+                        && m.getTokenExpiry().isBefore(LocalDateTime.now()))
+                .toList();
+
+        memberRepository.deleteAll(expiredMembers);
     }
 }

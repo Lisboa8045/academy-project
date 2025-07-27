@@ -237,15 +237,54 @@ export class ProfileComponent implements OnInit {
   }
 
   onDeleteConfirmed() {
-    console.log('[AUTH ID]' + this.authStore.id());
     this.profileService.deleteMember(this.authStore.id()).subscribe({
       next: () => {
-        this.logout();
+        this.showDeleteCountdownAndLogout();
       },
       error: (err) => {
         snackBarError(this.snackBar, 'Delete failed: ' + (err.error?.message || err.statusText));
         console.error(err);
       }
     });
+  }
+
+  private showDeleteCountdownAndLogout() {
+    let seconds = 5;
+    const updateMessage = () =>
+      `Account deleted successfully. Logging out in ${seconds}...`;
+
+    const snackBarRef = this.snackBar.open(updateMessage(), undefined, {
+      duration: 1000,
+      panelClass: ['success-snackbar'],
+      horizontalPosition: 'right',
+      verticalPosition: 'top'
+    });
+
+    const interval = setInterval(() => {
+      seconds--;
+      snackBarRef.dismiss();
+      if (seconds > 0) {
+        this.snackBar.open(updateMessage(), undefined, {
+          duration: 1000,
+          panelClass: ['success-snackbar'],
+          horizontalPosition: 'right',
+          verticalPosition: 'top'
+        });
+      } else {
+        clearInterval(interval);
+        this.snackBar.dismiss();
+        // Wait for logout to complete before navigating and revoking state
+        this.authService.logout().subscribe({
+          next: () => {
+            this.userProfileService.revoke();
+            this.router.navigate(['/login']);
+          },
+          error: (err) => {
+            this.userProfileService.revoke();
+            this.router.navigate(['/login']);
+          }
+        });
+      }
+    }, 1000);
   }
 }

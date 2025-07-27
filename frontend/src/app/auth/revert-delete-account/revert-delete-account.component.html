@@ -4,8 +4,11 @@
   </ng-container>
   <ng-container *ngIf="!loading">
     <h2>{{ message }}</h2>
-    <a *ngIf="message === 'Your account has been restored!'" routerLink="/login">
-      Go to Login
-    </a>
+    <button
+      *ngIf="message === 'Your account has been restored!'"
+      (click)="goToLogin()"
+    >
+      Go to login
+    </button>
   </ng-container>
 </div>
