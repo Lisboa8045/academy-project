@@ -132,6 +132,7 @@ public class EmailService{
 
     @Async
     public void sendCancelAppointmentProviderEmail(Appointment appointment) {
+        //Teste
         String compensationMessage = "";
         long daysBeforeStart = ChronoUnit.DAYS.between(LocalDate.now(), appointment.getStartDateTime().toLocalDate());
         int daysBeforeCancellationGlobalConfig = Integer.parseInt(globalConfigurationService.getConfigValue("minimum_days_before_cancellation_to_not_pay"));
