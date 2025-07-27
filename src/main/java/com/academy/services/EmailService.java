@@ -114,7 +114,7 @@ public class EmailService{
     @Async
     protected void sendCancelAppointmentClientEmail(Appointment appointment) {
 
-        String html = loadEmailTemplate("templates/cancelled-appointment-provider.html")
+        String html = loadEmailTemplate("templates/cancelled-appointment-client.html")
                 .replace("[CLIENT_NAME]", appointment.getMember().getUsername())
                 .replace("[SERVICE_PRICE]" , String.valueOf(appointment.getPrice()))
                 .replace("[PROVIDER_NAME]", appointment.getServiceProvider().getProvider().getUsername())

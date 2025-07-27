@@ -202,16 +202,18 @@ public class AppointmentService {
         if(appointment.getStatus() != AppointmentStatus.PENDING && appointment.getStatus() != AppointmentStatus.CONFIRMED)
             throw new BadRequestException("Appointment can't be canceled with status " + appointment.getStatus());
         String loggedMemberUsername = authenticationFacade.getUsername();
-        appointment.setStatus(AppointmentStatus.CANCELLED);
-        appointmentRepository.save(appointment);
-
         if(appointment.getServiceProvider().getProvider().getUsername().equals(loggedMemberUsername)){
             if(AppointmentStatus.PENDING.equals(appointment.getStatus()))
                 throw new BadRequestException("Pending payment appointment can't be cancelled");
-            emailService.sendCancelAppointmentProviderEmail(appointment);
+            emailService.sendCancelAppointmentClientEmail(appointment);
         }
         else
-            emailService.sendCancelAppointmentClientEmail(appointment);
+            emailService.sendCancelAppointmentProviderEmail(appointment);
+
+        appointment.setStatus(AppointmentStatus.CANCELLED);
+        appointmentRepository.save(appointment);
+
+
     }
 
     public ResponseEntity<ReviewResponseDTO> addReview(Long appointmentId, ReviewRequestDTO request) {
