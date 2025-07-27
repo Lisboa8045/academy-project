@@ -3,7 +3,6 @@ package com.academy.controllers;
 import com.academy.dtos.notification.NotificationMapper;
 import com.academy.dtos.notification.NotificationResponseDTO;
 import com.academy.models.notification.Notification;
-import com.academy.models.notification.NotificationTypeEnum;
 import com.academy.services.MemberService;
 import com.academy.services.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,17 +38,6 @@ public class NotificationController {
     @PatchMapping("{notificationId}")
     public ResponseEntity<Void> markNotificationAsSeen(@PathVariable("notificationId") long notificationId) {
         notificationService.markNotificationAsSeen(notificationId);
-        return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/test")
-    public ResponseEntity<Void> testeCriarNoti(){
-        Notification notification = new Notification();
-        notification.setTitle("title");
-        notification.setBody("body");
-        notification.setMember(memberService.getMemberEntityById(1L));
-        notification.setNotificationTypeEnum(NotificationTypeEnum.APPOINTMENT_CONFIRMED);
-        notificationService.createNotification(notification);
         return ResponseEntity.noContent().build();
     }
 }
