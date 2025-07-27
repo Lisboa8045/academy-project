@@ -297,3 +297,15 @@ button {
   gap: 1rem;
 }
 
+.image-icon-container {
+  z-index: 10; /* Ensure it appears on top */
+}
+
+.image-icon {
+  cursor: pointer;
+}
+
+.image-icon:hover {
+  scale: 150%;
+}
+

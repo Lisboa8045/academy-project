@@ -39,7 +39,7 @@
       <div class="image-tags-section">
         <div class="image-hover-container">
           <div class="image-wrapper">
-            <button class="nav left" (click)="prevImage(thumbContainer)" [disabled]="currentImageIndex === 0">&#10094;
+            <button class="nav left" (click)="prevImage(thumbContainer)" type="button" [disabled]="currentImageIndex === 0">&#10094;
             </button>
             @if (imageUrls.length === 0) {
               <div class="thumbnail-placeholder">
@@ -52,19 +52,26 @@
                 class="main-image"
               />
             }
-            <button class="nav right" (click)="nextImage(thumbContainer)"
+            <button class="nav right" (click)="nextImage(thumbContainer)" type="button"
                     [disabled]="currentImageIndex === imageUrls.length - 1">&#10095;
             </button>
 
             <div class="thumbnails-overlay">
               <div class="thumbnails-scroll-wrapper" #thumbContainer>
                 <ng-container *ngFor="let imageUrl of imageUrls; let i = index">
-                  <img
-                    [src]="imageUrl"
-                    class="thumbnail-image"
-                    [class.selected]="i === currentImageIndex"
-                    (click)="selectThumbnail(i, thumbContainer)"
-                  />
+                  <div class="thumbnail-container">
+                    <img
+                      [src]="imageUrl"
+                      class="thumbnail-image"
+                      [class.selected]="i === currentImageIndex"
+                      (click)="selectThumbnail(i, thumbContainer)"
+                    />
+                    <ng-container class="image-icon-container">
+                      <span class="image-icon" (click)="moveImageLeft(i)">⬅️</span>
+                      <span class="image-icon" (click)="moveImageRight(i)">➡️</span>
+                      <span class="image-icon" (click)="deleteImage(i)">🗑️</span>
+                    </ng-container>
+                  </div>
                 </ng-container>
                 <div class="thumbnail-image">
                   <fa-icon [icon]="faPlus" class="fa-3x add-image-btn" (click)="fileInput.click()">

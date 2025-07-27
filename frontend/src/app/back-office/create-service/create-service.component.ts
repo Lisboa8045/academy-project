@@ -148,4 +148,30 @@ export class CreateServiceComponent implements OnInit {
       this.imageUrls.push(objectUrl);
     });
   }
+
+  deleteImage(index: number) {
+    console.log("DELETE IMAGE: " + this.selectedFiles[index].name);
+    this.selectedFiles.splice(index, 1);
+    this.imageUrls.splice(index, 1);
+  }
+
+  moveImageLeft(imageIndex: number) {
+    if (imageIndex === 0) return;
+    this.swapImages(imageIndex, imageIndex - 1);
+  }
+
+  moveImageRight(imageIndex: number) {
+    if (imageIndex === this.selectedFiles.length - 1) return;
+    this.swapImages(imageIndex, imageIndex + 1);
+  }
+
+  private swapImages(imageIndex1: number, imageIndex2: number) {
+    const tempFile = this.selectedFiles[imageIndex1];
+    this.selectedFiles[imageIndex1] = this.selectedFiles[imageIndex2];
+    this.selectedFiles[imageIndex2] = tempFile;
+
+    const tempUrl = this.imageUrls[imageIndex1];
+    this.imageUrls[imageIndex1] = this.imageUrls[imageIndex2];
+    this.imageUrls[imageIndex2] = tempUrl;
+  }
 }
