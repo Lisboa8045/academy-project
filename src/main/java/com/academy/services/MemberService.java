@@ -272,10 +272,33 @@ public class MemberService {
     }
 
     public void deleteMember(long id) {
-        if(!memberRepository.existsById(id)) throw new EntityNotFoundException(Member.class,id);
-        unlinkServiceProviders(id);
-        memberRepository.deleteById(id);
+        System.out.println("Tentando apagar membro com id: " + id);
+        Member member = getMemberEntityById(id);
+        member.setEnabled(false);
+        member.setStatus(MemberStatusEnum.PENDING_DELETION);
+        member.setTokenExpiry(LocalDateTime.now().plusDays(
+                Integer.parseInt(globalConfigurationService.getConfigValue("account_deletion_expiry_days"))));
+        memberRepository.save(member);
+        emailService.sendDeleteAccountConfirmationEmail(member, generateRevertToken(member));
     }
+
+    private String generateRevertToken(Member member) {
+        String rawToken;
+        Optional<Member> optionalMember;
+
+        do {
+            rawToken = generateEncodedToken();
+            String finalRawToken = rawToken;
+            optionalMember = memberRepository.findAll().stream()
+                .filter(m -> m.getConfirmationToken() != null && passwordEncoder.matches(finalRawToken, m.getConfirmationToken()))
+                .findFirst();
+        } while (optionalMember.isPresent());
+
+        member.setConfirmationToken(passwordEncoder.encode(rawToken));
+        memberRepository.save(member);
+        return rawToken;
+    }
+
 
     public MemberResponseDTO editMember(long id, MemberRequestDTO memberRequestDTO){
         Member member = memberRepository.findById(id)
@@ -389,6 +412,27 @@ public class MemberService {
         member.setPassword(passwordEncoder.encode(newPassword));
         member.setPasswordResetToken(null);
         member.setPasswordResetTokenExpiry(null);
+        memberRepository.save(member);
+    }
+
+
+    @Transactional
+    public void revertDelete(String token) {
+        Member member = memberRepository.findAll().stream()
+            .filter(m -> m.getConfirmationToken() != null &&
+                    passwordEncoder.matches(token, m.getConfirmationToken()) &&
+                    m.getStatus() == MemberStatusEnum.PENDING_DELETION)
+            .findFirst()
+            .orElseThrow(() -> new BadRequestException("Invalid or expired revert token."));
+
+        if (member.getTokenExpiry() == null || member.getTokenExpiry().isBefore(LocalDateTime.now())) {
+            throw new TokenExpiredException("Revert token has expired.");
+        }
+
+        member.setEnabled(true);
+        member.setStatus(MemberStatusEnum.ACTIVE);
+        member.setConfirmationToken(null);
+        member.setTokenExpiry(null);
         memberRepository.save(member);
     }
 }

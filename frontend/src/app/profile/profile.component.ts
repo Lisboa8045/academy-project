@@ -17,6 +17,8 @@ import { snackBarError } from '../shared/snackbar/snackbar-error';
 import {passwordsMatchValidator} from '../shared/validators/password-match-validator';
 import { ActivatedRoute } from '@angular/router';
 import {MyServicesComponent} from '../service/my-services/my-services.component';
+import {ConfirmationModalComponent} from '../shared/confirmation-component/confirmation-modal.component';
+import {MemberStatusEnum} from '../models/member-status-enum.model';
 
 @Component({
   selector: 'app-profile',
@@ -24,7 +26,8 @@ import {MyServicesComponent} from '../service/my-services/my-services.component'
     LoadingComponent,
     ReactiveFormsModule,
     NgIf,
-    MyServicesComponent
+    MyServicesComponent,
+    ConfirmationModalComponent
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
@@ -38,6 +41,9 @@ export class ProfileComponent implements OnInit {
   editMode = false;
   editPasswordMode = false;
   selectedFile: File | null = null;
+  showDeleteModal = false;
+
+  protected readonly MemberStatusEnum = MemberStatusEnum;
 
   constructor(
     private fb: FormBuilder,
@@ -51,9 +57,12 @@ export class ProfileComponent implements OnInit {
     private route: ActivatedRoute,
   ) {
     effect(() => {
-      if(this.route.snapshot.paramMap.get('id')) return;
-      this.loading.set(true);
-      if (this.authStore.id() > -1) this.getMember(this.authStore.id());
+      if (this.route.snapshot.paramMap.get('id')) return;
+      const id = this.authStore.id();
+      if (id > -1) {
+        this.loading.set(true);
+        this.getMember(id);
+      }
     });
   }
 
@@ -64,9 +73,9 @@ export class ProfileComponent implements OnInit {
       const id = Number(idParam);
       if (!isNaN(id)) {
         this.getMember(id);
+        this.loading.set(false);
+        return;
       }
-    } else {
-      this.getMember(this.authStore.id());
     }
     this.loading.set(false);
   }
@@ -221,5 +230,22 @@ export class ProfileComponent implements OnInit {
 
   canEdit(): Boolean{
     return this.user ? this.authStore.id() === this.user.id : false;
+  }
+
+  deleteMember() {
+    this.showDeleteModal = true;
+  }
+
+  onDeleteConfirmed() {
+    console.log('[AUTH ID]' + this.authStore.id());
+    this.profileService.deleteMember(this.authStore.id()).subscribe({
+      next: () => {
+        this.logout();
+      },
+      error: (err) => {
+        snackBarError(this.snackBar, 'Delete failed: ' + (err.error?.message || err.statusText));
+        console.error(err);
+      }
+    });
   }
 }

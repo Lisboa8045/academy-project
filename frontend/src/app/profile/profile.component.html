@@ -118,12 +118,25 @@
             @if (canEdit()){
               <button type="button" class="edit-button" (click)="toggleEdit()">Edit</button>
               <button type="button" class="logout-button" (click)="logout()">Logout</button>
+              <button
+                type="button"
+                class="logout-button"
+                (click)="deleteMember()"
+                [disabled]="user?.status === MemberStatusEnum.PENDING_DELETION">
+                Delete Account
+              </button>
             }
           }
         </div>
       </form>
-
     </div>
+    <app-confirmation-modal
+      *ngIf="showDeleteModal"
+      [title]="'Delete Account'"
+      [text]="'Are you sure you want to delete your account?'"
+      (confirm)="onDeleteConfirmed()"
+      (close)="showDeleteModal = false">
+    </app-confirmation-modal>
 </div>
   @if (user) {
     <div class="card">
