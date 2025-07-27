@@ -1,4 +1,4 @@
-import {Component, OnInit, signal} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {buildServiceForm} from '../service-form/service-form.builder';
 import {ServiceApiService} from '../../shared/service-api.service';
