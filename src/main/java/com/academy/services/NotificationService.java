@@ -1,5 +1,6 @@
 package com.academy.services;
 
+import com.academy.dtos.notification.NotificationMapper;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.member.Member;
 import com.academy.models.notification.Notification;
@@ -14,11 +15,18 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final MemberService memberService;
+    private final NotificationWebSocketService notificationWebSocketService;
+    private final NotificationMapper notificationMapper;
 
     @Autowired
-    public NotificationService(NotificationRepository notificationRepository, MemberService memberService) {
+    public NotificationService(NotificationRepository notificationRepository,
+                               MemberService memberService,
+                               NotificationWebSocketService notificationWebSocketService,
+                               NotificationMapper notificationMapper) {
         this.notificationRepository = notificationRepository;
         this.memberService = memberService;
+        this.notificationWebSocketService = notificationWebSocketService;
+        this.notificationMapper = notificationMapper;
     }
 
     public List<Notification> getAllNotifications() {
@@ -36,6 +44,7 @@ public class NotificationService {
     }
 
     public Notification createNotification(Notification notification) {
+        notificationWebSocketService.sendNotification(notification.getMember().getId(), notificationMapper.toDTO(notification));
         return this.notificationRepository.save(notification);
     }
 
