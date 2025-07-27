@@ -18,6 +18,7 @@ import { ResetPasswordComponent } from './auth/reset-password/reset-password.com
 import {ConfirmAppointmentComponent} from './confirm-appointment/confirm-appointment.component';
 import {GlobalConfigurationEditComponent} from './global-configuration/global-configuration-edit.component';
 import {ConfirmEmailPromptComponent} from "./auth/confirm-email-prompt/confirm-email-prompt.component";
+import {RevertDeleteAccountComponent} from './auth/revert-delete-account/revert-delete-account.component';
 
 export const routes: Routes = [
   { path: 'auth', component: AuthComponent },
@@ -37,7 +38,8 @@ export const routes: Routes = [
   { path: 'privacy', component: PrivacyComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password/:token', component: ResetPasswordComponent },
-  {path: 'confirm-appointment/:id', component: ConfirmAppointmentComponent },
+  { path: 'confirm-appointment/:id', component: ConfirmAppointmentComponent },
+  { path: 'revert-delete-account/:token', component: RevertDeleteAccountComponent },
   { path: 'config', component: GlobalConfigurationEditComponent },
   { path: 'auth/confirm-prompt', component: ConfirmEmailPromptComponent },
   { path: '**', redirectTo: '', pathMatch: 'full' },

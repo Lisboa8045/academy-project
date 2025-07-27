@@ -1,0 +1,11 @@
+<div class="revert-delete-container">
+  <ng-container *ngIf="loading">
+    <p>Restoring your account...</p>
+  </ng-container>
+  <ng-container *ngIf="!loading">
+    <h2>{{ message }}</h2>
+    <a *ngIf="message === 'Your account has been restored!'" routerLink="/login">
+      Go to Login
+    </a>
+  </ng-container>
+</div>

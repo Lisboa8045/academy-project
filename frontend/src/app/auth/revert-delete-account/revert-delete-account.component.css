@@ -1,0 +1,21 @@
+.revert-delete-container {
+  margin: 80px auto;
+  padding: 1.5rem;
+  max-width: 500px;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-family: sans-serif;
+  background-color: #fafafa;
+}
+
+.revert-delete-container a {
+  display: inline-block;
+  margin-top: 1rem;
+  color: #007bff;
+  text-decoration: none;
+}
+
+.revert-delete-container a:hover {
+  text-decoration: underline;
+}

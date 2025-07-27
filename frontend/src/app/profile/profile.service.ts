@@ -32,4 +32,8 @@ export class ProfileService {
   deleteMember(id: number) {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
+
+  revertDeleteAccount(token: string) {
+    return this.http.post(`${this.apiUrl}/revert-delete/${token}`, {});
+  }
 }
