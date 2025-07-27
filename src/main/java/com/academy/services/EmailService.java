@@ -5,6 +5,7 @@ import com.academy.exceptions.EmailTemplateLoadingException;
 import com.academy.exceptions.SendEmailException;
 import com.academy.models.appointment.Appointment;
 import com.academy.models.member.Member;
+import com.academy.models.service.ServiceStatusEnum;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.core.io.ClassPathResource;
@@ -17,7 +18,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Map;
 
 import static com.academy.utils.Utils.formatHours;
 
@@ -120,6 +120,25 @@ public class EmailService{
         );
     }
 
+    @Async
+    protected void sendAdminAnswerToServiceEmail(com.academy.models.service.Service service) {
+        String status = ServiceStatusEnum.APPROVED.equals(service.getStatus()) ? "Approved" : "Rejected";
+        String color = ServiceStatusEnum.APPROVED.equals(service.getStatus()) ? "#4CAF50" : "#F44336";
+        String html = loadAdminAnswerToServiceEmail()
+                .replace("[USER_NAME]", service.getOwner().getUsername())
+                .replace("[SERVICE_NAME]", service.getName())
+                .replace("[STATUS]", status)
+                .replace("[STATUS_COLOR]", color)
+                .replace("[APP_NAME]", appProperties.getName());
+
+        send(
+                service.getOwner().getEmail(),
+                service.getName() + " has been " + status.toLowerCase(),
+                "",
+                html
+        );
+    }
+
     private String loadVerificationEmailHtml(){
         try {
             ClassPathResource resource = new ClassPathResource("templates/verification-email.html");
@@ -133,6 +152,16 @@ public class EmailService{
     private String loadPasswordResetEmailHtml(){
         try {
             ClassPathResource resource = new ClassPathResource("templates/password-reset-email.html");
+            byte[] bytes = Files.readAllBytes(resource.getFile().toPath());
+            return new String(bytes, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new EmailTemplateLoadingException("Error loading e-mail template");
+        }
+    }
+
+    private String loadAdminAnswerToServiceEmail(){
+        try {
+            ClassPathResource resource = new ClassPathResource("templates/admin-answer-to-service-email.html");
             byte[] bytes = Files.readAllBytes(resource.getFile().toPath());
             return new String(bytes, StandardCharsets.UTF_8);
         } catch (IOException e) {

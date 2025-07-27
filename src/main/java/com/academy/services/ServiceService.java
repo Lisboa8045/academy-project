@@ -42,6 +42,7 @@ public class ServiceService {
     private final MemberService memberService;
     private final TagService tagService;
     private final ServiceTypeService serviceTypeService;
+    private final EmailService emailService;
 
     public ServiceService(ServiceRepository serviceRepository,
                           ServiceMapper serviceMapper,
@@ -49,7 +50,7 @@ public class ServiceService {
                           AuthenticationFacade authenticationFacade,
                           MemberService memberService,
                           TagService tagService,
-                          ServiceTypeService serviceTypeService) {
+                          ServiceTypeService serviceTypeService, EmailService emailService) {
         this.serviceRepository = serviceRepository;
         this.serviceMapper = serviceMapper;
         this.serviceProviderService = serviceProviderService;
@@ -57,6 +58,7 @@ public class ServiceService {
         this.memberService = memberService;
         this.tagService = tagService;
         this.serviceTypeService = serviceTypeService;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -318,6 +320,7 @@ public class ServiceService {
         service.setEnabled(true);
         service.setStatus(ServiceStatusEnum.APPROVED);
         serviceRepository.save(service);
+        emailService.sendAdminAnswerToServiceEmail(service);
     }
 
     public void rejectService(Long id){
@@ -325,5 +328,6 @@ public class ServiceService {
         service.setEnabled(false);
         service.setStatus(ServiceStatusEnum.REJECTED);
         serviceRepository.save(service);
+        emailService.sendAdminAnswerToServiceEmail(service);
     }
 }
