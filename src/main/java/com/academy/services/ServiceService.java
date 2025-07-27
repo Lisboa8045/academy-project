@@ -10,6 +10,8 @@ import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.ServiceType;
 import com.academy.models.Tag;
 import com.academy.models.member.Member;
+import com.academy.models.notification.Notification;
+import com.academy.models.notification.NotificationTypeEnum;
 import com.academy.models.service.Service;
 import com.academy.models.service.ServiceImages;
 import com.academy.models.service.ServiceStatusEnum;
@@ -43,6 +45,7 @@ public class ServiceService {
     private final TagService tagService;
     private final ServiceTypeService serviceTypeService;
     private final EmailService emailService;
+    private final NotificationService notificationService;
 
     public ServiceService(ServiceRepository serviceRepository,
                           ServiceMapper serviceMapper,
@@ -50,7 +53,9 @@ public class ServiceService {
                           AuthenticationFacade authenticationFacade,
                           MemberService memberService,
                           TagService tagService,
-                          ServiceTypeService serviceTypeService, EmailService emailService) {
+                          ServiceTypeService serviceTypeService,
+                          EmailService emailService,
+                          NotificationService notificationService) {
         this.serviceRepository = serviceRepository;
         this.serviceMapper = serviceMapper;
         this.serviceProviderService = serviceProviderService;
@@ -59,6 +64,7 @@ public class ServiceService {
         this.tagService = tagService;
         this.serviceTypeService = serviceTypeService;
         this.emailService = emailService;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -321,6 +327,7 @@ public class ServiceService {
         service.setStatus(ServiceStatusEnum.APPROVED);
         serviceRepository.save(service);
         emailService.sendAdminAnswerToServiceEmail(service);
+        sendNotification(service);
     }
 
     public void rejectService(Long id){
@@ -329,5 +336,18 @@ public class ServiceService {
         service.setStatus(ServiceStatusEnum.REJECTED);
         serviceRepository.save(service);
         emailService.sendAdminAnswerToServiceEmail(service);
+        sendNotification(service);
+    }
+
+    private void sendNotification(Service service) {
+        String status = service.getStatus().toString().toLowerCase();
+        Notification notification = new Notification();
+        notification.setMember(service.getOwner());
+        notification.setTitle(service.getName() + " has been " + status);
+        notification.setBody("The service " + service.getName() + " that you have created, has been " + status);
+        notification.setNotificationTypeEnum(
+                ServiceStatusEnum.APPROVED.equals(service.getStatus()) ? NotificationTypeEnum.APPROVED_SERVICE : NotificationTypeEnum.REJECTED_SERVICE
+        );
+        notificationService.createNotification(notification);
     }
 }

@@ -38,7 +38,7 @@ public class Notification extends BaseEntity {
     private boolean seen;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "notification_type", nullable = false)
+    @Column(name = "notification_type", nullable = false, length = 50)
     private NotificationTypeEnum notificationTypeEnum;
 
 }
