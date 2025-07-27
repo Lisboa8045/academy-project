@@ -146,11 +146,19 @@ export class EditServiceComponent implements OnInit {
           snackBarSuccess(this.snackBar, 'Service Updated Successfully');
         },
         error: (err) => {
-          snackBarError(this.snackBar, 'Service update failed.');
-          console.error(err);
+          console.error(err.error);
+          snackBarError(this.snackBar, 'Service update failed: \n' +  this.formErrorMessage(err.error));
         }
       });
     }
+  }
+
+  private formErrorMessage(error: any): string {
+    let errorMessage = '';
+    Object.keys(error).forEach(key => {
+      errorMessage += key + ' ' + error[key] + '.\n';
+    })
+    return errorMessage;
   }
 
   prevImage(container: HTMLElement) {

@@ -16,9 +16,9 @@
         </td>
       }
       <div class="icons-container">
-        <fa-icon *ngIf="userHasPermission(ProviderPermissionEnumModel.UPDATE_PERMISSIONS)" [icon]="faFloppyDisk" class="update-icon" (click)="updatePermissions(provider)">
+        <fa-icon *ngIf="userHasPermission(ProviderPermissionEnumModel.UPDATE_PERMISSIONS) && !provider.permissions.includes(ProviderPermissionEnumModel.OWNER)" [icon]="faFloppyDisk" class="update-icon" (click)="updatePermissions(provider)">
         </fa-icon>
-        <fa-icon *ngIf="userHasPermission(ProviderPermissionEnumModel.ADD_SERVICE_PROVIDER)" [icon]="faTrash" class="remove-icon" (click)="removeServiceProvider(provider)">
+        <fa-icon *ngIf="userHasPermission(ProviderPermissionEnumModel.ADD_SERVICE_PROVIDER) && !provider.permissions.includes(ProviderPermissionEnumModel.OWNER)" [icon]="faTrash" class="remove-icon" (click)="removeServiceProvider(provider)">
         </fa-icon>
       </div>
     </tr>
