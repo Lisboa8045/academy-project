@@ -100,13 +100,20 @@ export class ServiceAdminApprovalComponent{
 
   rejectService(service: ServiceModel) {
     this.serviceApiService.rejectService(service.id).subscribe({
-      next: () => snackBarSuccess(this.snackBar, "Service rejected successfully"),
+      next: () => {
+        snackBarSuccess(this.snackBar, "Service rejected successfully")
+        this.fetchServices(this.buildQuery({ page: this.currentPage(), enabled:false, status:'PENDING_APPROVAL' }));
+      },
       error: err => snackBarError(this.snackBar, err)
-    });  }
+    });
+  }
 
   approveService(service: ServiceModel) {
     this.serviceApiService.approveService(service.id).subscribe({
-      next: () => snackBarSuccess(this.snackBar, "Service approved successfully"),
+      next: () => {
+        snackBarSuccess(this.snackBar, "Service approved successfully")
+        this.fetchServices(this.buildQuery({ page: this.currentPage(), enabled:false, status:'PENDING_APPROVAL' }));
+      },
       error: err => console.log(err)
     });
   }
