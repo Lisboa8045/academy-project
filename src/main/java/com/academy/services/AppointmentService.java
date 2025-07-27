@@ -207,7 +207,7 @@ public class AppointmentService {
 
         if(appointment.getServiceProvider().getProvider().getUsername().equals(loggedMemberUsername)){
             if(AppointmentStatus.PENDING.equals(appointment.getStatus()))
-                throw new RuntimeException("Pending payment appointment can't be cancelled");
+                throw new BadRequestException("Pending payment appointment can't be cancelled");
             emailService.sendCancelAppointmentProviderEmail(appointment);
         }
         else
