@@ -148,8 +148,7 @@ public class EmailService{
                 .replace("[COMPENSATION_MESSAGE]", compensationMessage);
 
         send(
-                //appointment.getServiceProvider().getProvider().getEmail(),
-                "adriano.l.a.queiroz@gmail.com",
+                appointment.getServiceProvider().getProvider().getEmail(),
                 "Canceled appointment",
                 "",
                 html
