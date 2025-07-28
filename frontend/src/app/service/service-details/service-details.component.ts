@@ -7,7 +7,7 @@ import {NgForOf, NgIf} from "@angular/common";
 import {UserProfileService} from '../../profile/user-profile.service';
 import {ServiceReviewComponent} from '../service-review/service-review.component';
 import {TagListComponent} from './tag-list/tag-list.component';
-import {of, switchMap, tap} from 'rxjs';
+import {switchMap, tap} from 'rxjs';
 
 @Component({
   selector: 'app-service-details',
@@ -53,7 +53,10 @@ export class ServiceDetailsComponent implements OnInit {
         switchMap(params => {
           const id = Number(params.get('id'));
           this.serviceId = id;
-          if (isNaN(id)) return of(null); // AQUI PODE-SE DEFINIR O QUE QUEREMOS CARREGAR QUANDO ESTA POR EXEMPLO .../service/a. "a" ná é válido
+          if (isNaN(id)) {
+            this.router.navigate(['/not-found'])
+          }
+          ;// AQUI PODE-SE DEFINIR O QUE QUEREMOS CARREGAR QUANDO ESTA POR EXEMPLO .../service/a. "a" ná é válido
           return this.serviceApiService.getServiceById(id);
         })
       )
@@ -80,6 +83,7 @@ export class ServiceDetailsComponent implements OnInit {
         error: (err) => {
           console.error('Erro ao carregar o serviço:', err);
           this.loading.set(false);
+          this.router.navigate(['/not-found'])
         }
       });
   }
