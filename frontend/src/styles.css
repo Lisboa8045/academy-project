@@ -55,6 +55,19 @@ button[disabled] {
   color: white !important;
 }
 
+.no-scroll {
+  overflow: hidden;
+}
+.card {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  gap: 2rem;
+}
+
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

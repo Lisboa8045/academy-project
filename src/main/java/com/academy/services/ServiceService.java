@@ -1,6 +1,8 @@
 package com.academy.services;
 
 import com.academy.config.authentication.AuthenticationFacade;
+import com.academy.dtos.appointment.AppointmentMapper;
+import com.academy.dtos.appointment.AppointmentReviewResponseDTO;
 import com.academy.dtos.service.ServiceMapper;
 import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
@@ -43,6 +45,7 @@ public class ServiceService {
     private final MemberService memberService;
     private final TagService tagService;
     private final ServiceTypeService serviceTypeService;
+    private final AppointmentMapper appointmentMapper;
     private final ServiceProviderRepository serviceProviderRepository;
 
     public ServiceService(ServiceRepository serviceRepository,
@@ -51,7 +54,9 @@ public class ServiceService {
                           AuthenticationFacade authenticationFacade,
                           MemberService memberService,
                           TagService tagService,
-                          ServiceTypeService serviceTypeService, ServiceProviderRepository serviceProviderRepository) {
+                          ServiceTypeService serviceTypeService,
+                          ServiceProviderRepository serviceProviderRepository) {
+                          AppointmentMapper appointmentMapper) {
         this.serviceRepository = serviceRepository;
         this.serviceMapper = serviceMapper;
         this.serviceProviderService = serviceProviderService;
@@ -59,6 +64,7 @@ public class ServiceService {
         this.memberService = memberService;
         this.tagService = tagService;
         this.serviceTypeService = serviceTypeService;
+        this.appointmentMapper = appointmentMapper;
         this.serviceProviderRepository = serviceProviderRepository;
     }
 
@@ -156,7 +162,6 @@ public class ServiceService {
         if (previousType != null) {
             removeServiceTypeLink(service);
         }
-
         ServiceType type = serviceTypeService.getServiceTypeEntityByName(serviceTypeName);
         service.setServiceType(type);
         type.getServices().add(service);
@@ -295,8 +300,9 @@ public class ServiceService {
         unlinkAndDisableServiceProviders(service);
     }
 
-    public void recalculateServiceRating(){
-
+    public Page<ServiceResponseDTO> getServicesByMemberId(Long memberId, Pageable pageable) {
+       return serviceRepository.queryServicesByMemberId(memberId, pageable).map(service ->  serviceMapper.toDto(service,
+               getPermissionsByProviderIdAndServiceId(memberId, service.getId())));
     }
 
     // este saveImages será para usado depois para o endpoint de criação do serviço
@@ -310,6 +316,15 @@ public class ServiceService {
         return null;
     }
 
+    public List<AppointmentReviewResponseDTO> getReviewsByServiceId(Long serviceId) {
+        Service service = serviceRepository.findById(serviceId)
+                .orElseThrow(() -> new EntityNotFoundException(Service.class, serviceId));
+        return service.getServiceProviders().stream()
+                .flatMap(sp -> sp.getAppointmentList().stream())
+                .filter(app -> app.getComment() != null)
+                .map(appointmentMapper::toReviewResponseDTO)
+                .toList();
+    }
     public void updateRating(Long id){
         Double rating = serviceProviderRepository.findAverageRatingByService_Id(id);
         System.out.println("Updating rating for service id " + id + " to " + rating);

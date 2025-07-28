@@ -1,16 +1,13 @@
 package com.academy.services;
 
 import com.academy.config.authentication.AuthenticationFacade;
-import com.academy.dtos.appointment.AppointmentDetailedDTO;
-import com.academy.dtos.appointment.AppointmentCardDTO;
+import com.academy.dtos.appointment.*;
 import com.academy.config.authentication.AuthenticationFacade;
-import com.academy.dtos.appointment.AppointmentMapper;
-import com.academy.dtos.appointment.AppointmentRequestDTO;
-import com.academy.dtos.appointment.AppointmentResponseDTO;
 import com.academy.dtos.appointment.review.ReviewRequestDTO;
 import com.academy.dtos.appointment.review.ReviewResponseDTO;
 import com.academy.exceptions.BadRequestException;
 import com.academy.exceptions.EntityNotFoundException;
+import com.academy.exceptions.TokenExpiredException;
 import com.academy.models.appointment.Appointment;
 import com.academy.models.appointment.AppointmentStatus;
 import com.academy.models.member.Member;
@@ -30,6 +27,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.academy.utils.Utils.formatHours;
+
 @Service
 public class AppointmentService {
 
@@ -39,6 +38,9 @@ public class AppointmentService {
     private final MemberService memberService;
     private final AuthenticationFacade authenticationFacade;
     private final ServiceService serviceService;
+    private final EmailService emailService;
+    private final AppointmentSchedulerService appointmentSchedulerService;
+    private final GlobalConfigurationService globalConfigurationService;
 
     @Value("${slot.window.days:30}")
     private int slotWindowDays;
@@ -49,13 +51,20 @@ public class AppointmentService {
             , ServiceProviderService serviceProviderService,
                               AppointmentMapper appointmentMapper,
                               MemberService memberService,
-                              AuthenticationFacade authenticationFacade, ServiceService serviceService) {
+                              AuthenticationFacade authenticationFacade,
+                              EmailService emailService,
+                              AppointmentSchedulerService appointmentSchedulerService,
+                              GlobalConfigurationService globalConfigurationService,
+                              ServiceService serviceService) {
         this.appointmentRepository = appointmentRepository;
         this.serviceProviderService = serviceProviderService;
         this.appointmentMapper = appointmentMapper;
         this.memberService = memberService;
         this.authenticationFacade = authenticationFacade;
         this.serviceService = serviceService;
+        this.emailService = emailService;
+        this.appointmentSchedulerService = appointmentSchedulerService;
+        this.globalConfigurationService = globalConfigurationService;
     }
 
     public List<AppointmentResponseDTO> getAllAppointments() {
@@ -115,11 +124,14 @@ public class AppointmentService {
         appointment.setStatus(AppointmentStatus.PENDING);
         appointment.setPrice(price - ( price * service.getDiscount()/100));
 
-        return appointmentMapper.toResponseDTO(appointmentRepository.save(appointment));
+        appointment = appointmentRepository.save(appointment);
+
+        emailService.sendAppointmentConfirmationEmail(appointment);
+
+        appointmentSchedulerService.scheduleAutoCancel(appointment, Integer.parseInt(globalConfigurationService.getConfigValue("confirm_appointment_expiry_minutes")));
+
+        return appointmentMapper.toResponseDTO(appointment);
     }
-
-
-
 
     public AppointmentResponseDTO updateAppointment(Long id, AppointmentRequestDTO appointmentDetails) {
 
@@ -185,7 +197,9 @@ public class AppointmentService {
     }
 
     public List<Appointment> getAppointmentsForServiceProvider(Long serviceProviderId) {
-        return appointmentRepository.findByServiceProviderId(serviceProviderId);
+        return appointmentRepository.findByServiceProviderId(serviceProviderId).stream().filter(
+                appointment -> !appointment.getStatus().equals(AppointmentStatus.CANCELLED)
+        ).toList();
     }
 
     public void cancelAppointment(Long id) {
@@ -203,11 +217,21 @@ public class AppointmentService {
         appointment.setRating(request.rating());
         appointment.setComment(request.comment());
 
-        System.out.println("ServiceProv id:" + appointment.getServiceProvider().getId());
-        System.out.println("Service id:" + appointment.getServiceProvider().getService().getId());
         serviceProviderService.updateRating(appointment.getServiceProvider().getId());
         serviceService.updateRating(appointment.getServiceProvider().getService().getId());
 
         return ResponseEntity.ok(new ReviewResponseDTO("Review added successfully"));
+    }
+
+    public ResponseEntity<ConfirmAppointmentResponseDTO> confirmAppointment(Long id) {
+        Appointment appointment = getAppointmentEntityById(id);
+        if(AppointmentStatus.CANCELLED.equals(appointment.getStatus()))
+            throw new TokenExpiredException("Time to confirm appointment has passed" + appointment.getStatus());
+        if(!AppointmentStatus.PENDING.equals(appointment.getStatus()))
+            throw new BadRequestException("Appointment can't be confirmed with status " + appointment.getStatus());
+
+        appointment.setStatus(AppointmentStatus.CONFIRMED);
+        appointmentRepository.save(appointment);
+        return ResponseEntity.ok(new ConfirmAppointmentResponseDTO("Appointment confirmed successfully"));
     }
 }

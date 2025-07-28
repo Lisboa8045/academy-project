@@ -241,7 +241,8 @@ public class MemberService {
                     token,
                     member.getId(),
                     member.getUsername(),
-                    member.getProfilePicture()
+                    member.getProfilePicture(),
+                    member.getRole().getName()
             );
     }
 

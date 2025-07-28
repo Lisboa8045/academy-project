@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,5 +42,11 @@ public class GlobalConfigurationController {
     public ResponseEntity<GlobalConfigurationResponseDTO> updateConfig(@PathVariable String configKey, @Valid @RequestBody GlobalConfigurationRequestDTO request) {
         GlobalConfigurationResponseDTO response = globalConfigurationService.updateConfigValue(configKey, request);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/edit")
+    public ResponseEntity<Void> editConfigs(@Valid @RequestBody List<GlobalConfigurationRequestDTO> request) {
+        globalConfigurationService.editConfigs(request);
+        return ResponseEntity.ok().build();
     }
 }

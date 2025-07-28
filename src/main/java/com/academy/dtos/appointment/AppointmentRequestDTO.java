@@ -13,7 +13,7 @@ public record AppointmentRequestDTO(
         @NotNull Long serviceProviderId,
         @NotNull LocalDateTime startDateTime,
         @NotNull LocalDateTime endDateTime,
-        @Min(0) @Max(5) Integer rating,
+        @Min(1) @Max(5) Integer rating,
         @Size(max = FieldLengths.REVIEW_MAX) String comment,
-        @NotNull AppointmentStatus status // agora obrigatório e validado
+        AppointmentStatus status // Isto está a ser ignorado em bastantes sítios, apesar de ser passado é ignorado
 ) {}

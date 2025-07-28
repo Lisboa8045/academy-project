@@ -1,8 +1,10 @@
 <header class="header">
   <nav class="nav">
-    <div class="home-link">
+    <div class="nav-left">
       <a class="nav-item" routerLink="/">🏠 Home</a>
+      <a class="nav-item" routerLink="config" *ngIf="isAdmin()">Admin Office</a>
     </div>
+
 
     @if (isLandingPage()) {
       <div class="search-form" style="visibility: hidden; width: 500px;"></div>

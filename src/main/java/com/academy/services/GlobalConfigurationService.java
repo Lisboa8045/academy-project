@@ -56,6 +56,13 @@ public class GlobalConfigurationService {
         return globalConfigurationMapper.toDTO(configurationRepository.save(config));
     }
 
+    @Transactional
+    public void editConfigs(List<GlobalConfigurationRequestDTO> request) {
+        for (GlobalConfigurationRequestDTO config: request){
+            updateConfigValue(config.configKey(),  config);
+        }
+    }
+
     private boolean isNotAValidValue(String value, GlobalConfigurationTypeEnum type) {
         try {
             switch (type) {
@@ -67,7 +74,7 @@ public class GlobalConfigurationService {
                         return true;
                     }
                     break;
-                case STRING:
+                case STRING, PASSWORD:
                     // All values are valid strings
                     break;
                 default:
@@ -79,8 +86,4 @@ public class GlobalConfigurationService {
         }
 
     }
-
-
-
-
 }

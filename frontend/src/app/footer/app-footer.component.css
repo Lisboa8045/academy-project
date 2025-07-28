@@ -1,10 +1,22 @@
 .footer {
   background: linear-gradient(90deg, #3b2ff5 0%, #00d4ff 100%);
   color: white;
-  padding: 0.5rem 0 0.75rem; /* 🔽 less padding */
+  padding: 0.5rem 0 0.75rem;
   text-align: center;
   font-size: 0.8rem;
   font-family: 'Poppins', sans-serif;
+  margin-top: 2rem;
+}
+
+.footer a {
+  color: lightgrey;
+  margin: 0 0.5rem;
+  text-decoration: none;
+  transition: text-decoration 0.3s ease;
+}
+
+.footer a:hover {
+  text-decoration: underline;
 }
 
 .footer h2 {
@@ -12,43 +24,4 @@
   font-weight: 600;
   margin-bottom: 0.75rem;
   color: white;
-}
-
-.avatar-group {
-  display: flex;
-  justify-content: center;
-  gap: 1.25rem;
-  flex-wrap: wrap;
-  margin-bottom: 0.5rem;
-}
-
-.avatar-link {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-decoration: none;
-  color: inherit;
-  filter: grayscale(100%);
-  transition: transform 0.25s ease, filter 0.25s ease;
-}
-
-.avatar-link:hover {
-  filter: grayscale(0%);
-  transform: scale(1.06);
-}
-
-.avatar-link img {
-  width: 56px; /* 🔽 smaller */
-  height: 56px;
-  border-radius: 50%;
-  object-fit: cover;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* 🔆 soft glow */
-  transition: transform 0.25s ease, filter 0.25s ease;
-}
-
-.username {
-  font-size: 0.7rem;
-  margin-top: 0.25rem;
-  color: white;
-  opacity: 0.85;
 }
