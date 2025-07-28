@@ -19,11 +19,11 @@
             <form [formGroup]="replicateForm" (ngSubmit)="submitModalRepeat()">
                 <label>
                     Repeat from:
-                    <input type="date" formControlName="startDate" required/>
+                    <input type="date" formControlName="startDate" [min]="todayString" required/>
                 </label>
                 <label>
                     To:
-                    <input type="date" formControlName="endDate" required/>
+                    <input type="date" formControlName="endDate"  [min]="replicateForm.value.startDate || todayString" required/>
                 </label>
                 <ng-select
                         [items]="weekDays"
