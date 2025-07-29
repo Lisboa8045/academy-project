@@ -2,6 +2,7 @@ package com.academy.controllers;
 
 import com.academy.config.authentication.JwtCookieUtil;
 import com.academy.config.authentication.JwtUtil;
+import com.academy.dtos.appointment.AppointmentReviewResponseDTO;
 import com.academy.dtos.member.MemberRequestDTO;
 import com.academy.dtos.member.MemberResponseDTO;
 import com.academy.services.MemberService;
@@ -56,5 +57,9 @@ public class MemberController {
         return ResponseEntity.ok(memberService.getMemberById(id));
     }
 
-
+    @GetMapping("/{id}/reviews")
+    public ResponseEntity<List<AppointmentReviewResponseDTO>> getReviewsByMemberId(@PathVariable Long id) {
+        List<AppointmentReviewResponseDTO> reviews = memberService.getReviewsByMemberId(id);
+        return ResponseEntity.ok(reviews);
+    }
 }

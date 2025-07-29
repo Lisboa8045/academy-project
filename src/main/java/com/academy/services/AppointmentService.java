@@ -219,6 +219,7 @@ public class AppointmentService {
 
         serviceProviderService.updateRating(appointment.getServiceProvider().getId());
         serviceService.updateRating(appointment.getServiceProvider().getService().getId());
+        memberService.updateMemberRating(appointment.getServiceProvider().getProvider().getId());
 
         return ResponseEntity.ok(new ReviewResponseDTO("Review added successfully"));
     }

@@ -7,7 +7,7 @@ import { LoadingComponent } from '../loading/loading.component';
 import { MemberResponseDTO } from '../auth/member-response-dto.model';
 import { UserProfileService } from './user-profile.service';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { NgIf } from '@angular/common';
+import {CommonModule, DecimalPipe, NgIf} from '@angular/common';
 import { AppConfigService } from '../shared/app-config.service';
 import { strongPasswordValidator } from '../shared/validators/password.validator';
 import { noSpecialCharsValidator } from '../shared/validators/no-special-chars.validator';
@@ -25,7 +25,10 @@ import {ServiceReviewComponent} from '../service/service-review/service-review.c
     LoadingComponent,
     ReactiveFormsModule,
     NgIf,
-    MyServicesComponent
+    MyServicesComponent,
+    ServiceReviewComponent,
+    DecimalPipe,
+    CommonModule
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
@@ -223,4 +226,6 @@ export class ProfileComponent implements OnInit {
   canEdit(): Boolean{
     return this.user ? this.authStore.id() === this.user.id : false;
   }
+
+  protected readonly Math = Math;
 }

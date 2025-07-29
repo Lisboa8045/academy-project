@@ -7,6 +7,7 @@ import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service_type.ServiceTypeRequestDTO;
 import com.academy.dtos.tag.TagRequestDTO;
 import com.academy.models.Role;
+import com.academy.models.member.Member; // --- ADDED (import)
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.models.service.Service;
 import com.academy.repositories.RoleRepository;
@@ -79,7 +80,6 @@ public class AppointmentRatingTests {
     }
 
     private void createAndReviewAppointment(int rating, int offsetDays) {
-        System.out.println("A" + serviceProviderId);
         AppointmentRequestDTO dto = new AppointmentRequestDTO(serviceProviderId, LocalDateTime.now().plusDays(1+offsetDays), null, 0, "", null);
         Long appointmentId = appointmentService.createAppointment(dto).id();
         ReviewRequestDTO reviewDTO = new ReviewRequestDTO(rating, "Test review");
@@ -88,7 +88,6 @@ public class AppointmentRatingTests {
 
     @Test
     void ratingsAreUpdatedAndRoundedCorrectly() {
-        System.out.println("B" + serviceProviderId);
         createAndReviewAppointment(4,1);
         createAndReviewAppointment(5,2);
         createAndReviewAppointment(3, 3); // Avg = 4.0
@@ -96,8 +95,11 @@ public class AppointmentRatingTests {
         ServiceProvider provider = serviceProviderService.getServiceProviderEntityById(serviceProviderId);
         Service service = serviceService.getServiceEntityById(serviceId);
 
+        Member providerMember = memberService.getMemberByUsername("test-rating"); // --- ADDED
+
         assertThat(provider.getRating()).isEqualTo(4);
         assertThat(service.getRating()).isEqualTo(4);
+        assertThat(providerMember.getRating()).isEqualTo(4); // --- ADDED
     }
 
     @Test
@@ -108,8 +110,11 @@ public class AppointmentRatingTests {
         ServiceProvider provider = serviceProviderService.getServiceProviderEntityById(serviceProviderId);
         Service service = serviceService.getServiceEntityById(serviceId);
 
+        Member providerMember = memberService.getMemberByUsername("test-rating"); // --- ADDED
+
         assertThat(provider.getRating()).isEqualTo(5);
         assertThat(service.getRating()).isEqualTo(5);
+        assertThat(providerMember.getRating()).isEqualTo(5); // --- ADDED
     }
 
     @Test
@@ -120,7 +125,10 @@ public class AppointmentRatingTests {
         ServiceProvider provider = serviceProviderService.getServiceProviderEntityById(serviceProviderId);
         Service service = serviceService.getServiceEntityById(serviceId);
 
+        Member providerMember = memberService.getMemberByUsername("test-rating"); // --- ADDED
+
         assertThat(provider.getRating()).isEqualTo(4);
         assertThat(service.getRating()).isEqualTo(4);
+        assertThat(providerMember.getRating()).isEqualTo(4); // --- ADDED
     }
 }

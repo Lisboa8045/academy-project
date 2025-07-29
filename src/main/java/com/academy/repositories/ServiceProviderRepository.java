@@ -39,4 +39,7 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
 
     @Query("SELECT AVG(sp.rating) FROM ServiceProvider sp WHERE sp.service.id = :serviceId")
     Double findAverageRatingByService_Id(@Param("serviceId") Long serviceId);
+
+    @Query("SELECT AVG(sp.rating) FROM ServiceProvider sp WHERE sp.provider.id = :memberId")
+    Double findAverageRatingByMemberId(@Param("memberId") Long memberId);
 }

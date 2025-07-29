@@ -38,4 +38,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     @Query("SELECT AVG(ap.rating) FROM Appointment ap WHERE ap.serviceProvider.id = :serviceProviderId")
     Double findAverageRatingByServiceProvider_Id(@Param("serviceProviderId") Long serviceProviderId);
+
+    @Query("SELECT a FROM Appointment a WHERE a.serviceProvider.provider.id = :memberId")
+    List<Appointment> findAllReviewsByMemberId(@Param("memberId") Long memberId);
 }

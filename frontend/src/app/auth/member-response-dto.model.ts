@@ -10,4 +10,5 @@ export interface MemberResponseDTO {
   oldPassword: string;
   newPassword: string;
   confirmPassword: string;
+  rating: number;
 }
