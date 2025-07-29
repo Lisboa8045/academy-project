@@ -1,22 +1,22 @@
-import {Component, effect, inject, OnInit, signal, WritableSignal} from '@angular/core';
-import { Router } from '@angular/router';
-import { ProfileService } from './profile.service';
-import { AuthStore } from '../auth/auth.store';
-import { AuthService } from '../auth/auth.service';
-import { LoadingComponent } from '../loading/loading.component';
-import { MemberResponseDTO } from '../auth/member-response-dto.model';
-import { UserProfileService } from './user-profile.service';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { NgIf } from '@angular/common';
-import { AppConfigService } from '../shared/app-config.service';
-import { strongPasswordValidator } from '../shared/validators/password.validator';
-import { noSpecialCharsValidator } from '../shared/validators/no-special-chars.validator';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { snackBarSuccess } from '../shared/snackbar/snackbar-success';
-import { snackBarError } from '../shared/snackbar/snackbar-error';
+import {Component, effect, OnInit, signal, WritableSignal} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {ProfileService} from './profile.service';
+import {AuthStore} from '../auth/auth.store';
+import {AuthService} from '../auth/auth.service';
+import {LoadingComponent} from '../loading/loading.component';
+import {MemberResponseDTO} from '../auth/member-response-dto.model';
+import {UserProfileService} from './user-profile.service';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {NgIf} from '@angular/common';
+import {AppConfigService} from '../shared/app-config.service';
+import {strongPasswordValidator} from '../shared/validators/password.validator';
+import {noSpecialCharsValidator} from '../shared/validators/no-special-chars.validator';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {snackBarSuccess} from '../shared/snackbar/snackbar-success';
+import {snackBarError} from '../shared/snackbar/snackbar-error';
 import {passwordsMatchValidator} from '../shared/validators/password-match-validator';
-import { ActivatedRoute } from '@angular/router';
 import {MyServicesComponent} from '../service/my-services/my-services.component';
+import {snackBarInfo} from '../shared/snackbar/snackbar-info';
 
 @Component({
   selector: 'app-profile',
@@ -204,6 +204,7 @@ export class ProfileComponent implements OnInit {
     this.upgradeWorkerRole = !this.upgradeWorkerRole;
     this.updateWorkerRoleValidators();
     if (this.upgradeWorkerRole) {
+      snackBarInfo(this.snackBar, 'Please validate your personal information');
       this.profileForm.enable();
     } else {
       this.profileForm.disable();
