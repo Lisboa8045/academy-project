@@ -1,19 +1,18 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
-import { addDays, startOfWeek, endOfWeek, isSameDay } from 'date-fns';
-import { ServiceApiService } from '../shared/service-api.service';
-import { ScheduleApiService } from './schedule.service';
-import { SlotModel } from '../models/slot.model';
-import { ServiceModel } from '../service/service.model';
-import { AppointmentModel } from '../models/appointment.model';
+import {addDays, endOfWeek, isSameDay, startOfWeek} from 'date-fns';
+import {ServiceApiService} from '../shared/service-api.service';
+import {ScheduleApiService} from './schedule.service';
+import {SlotModel} from '../models/slot.model';
+import {ServiceModel} from '../service/service.model';
+import {AppointmentModel} from '../models/appointment.model';
 import {CommonModule} from '@angular/common';
 import {ProviderSelectionModalComponent} from './providerSelectionModalComponent/provider-selection-modal.component';
 import {ConfirmationModalComponent} from './confirmationModalComponent/confirmation-modal.component';
 import {SlotSelectionComponent} from './slotSelectionComponent/slot-selection.component';
-import { ServiceProviderModel } from '../models/service-provider.model';
+import {ServiceProviderModel} from '../models/service-provider.model';
 import {AuthStore} from '../auth/auth.store';
-import { ActivatedRoute, Router } from '@angular/router';
-import {ServiceDetailsService} from "../service/service-details.service";
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
   selector: 'app-schedule',
@@ -52,7 +51,6 @@ export class ScheduleComponent implements OnInit {
       private fb: FormBuilder,
       private serviceApi: ServiceApiService,
       private scheduleApi: ScheduleApiService,
-      private serviceDetailsService: ServiceDetailsService,
       private route: ActivatedRoute,
       private router: Router
 ) {
@@ -124,7 +122,7 @@ export class ScheduleComponent implements OnInit {
 
   loadServiceAndSlots(serviceId: number) {
     // Fetch the service details
-    this.serviceDetailsService.getServiceById(serviceId).subscribe({
+    this.serviceApi.getServiceById(serviceId).subscribe({
       next: (service) => {
         this.selectedServiceId = service.id;
         this.form.get('serviceId')?.setValue(service.id); // Keeps form state updated
@@ -223,7 +221,7 @@ export class ScheduleComponent implements OnInit {
           serviceProviderId: serviceProvider.id,
           startDateTime: this.selectedSlot!.start,
           endDateTime: this.selectedSlot!.end,
-          status: 'CONFIRMED'
+          status: 'PENDING'
         };
 
         this.scheduleApi.confirmAppointment(appointment).subscribe({

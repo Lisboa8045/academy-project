@@ -115,21 +115,23 @@
             </div>
 
           } @else {
-            @if (upgradeWorkerRole) {
-              <div class="form-buttons">
-                <button type="submit" class="submit-button" [disabled]="profileForm.invalid">Save</button>
-                <button type="button" class="cancel-button" (click)="toggleUpgradeRoleEditMode()">Cancel</button>
-              </div>
-            } @else {
+            @if(canEdit()){
+              @if (upgradeWorkerRole) {
+                <div class="form-buttons">
+                  <button type="submit" class="submit-button" [disabled]="profileForm.invalid">Save</button>
+                  <button type="button" class="cancel-button" (click)="toggleUpgradeRoleEditMode()">Cancel</button>
+                </div>
+              } @else {
 
-            <button type="button" class="edit-button" (click)="toggleEdit()">Edit</button>
-            @if (user.role === "CLIENT") {
-              <div class="form-buttons">
-                <button type="button" class="edit-button" (click)="toggleUpgradeRoleEditMode()">Upgrade to Worker
-                </button>
-              </div>
-            }
-            <button type="button" class="logout-button" (click)="logout()">Logout</button>
+              <button type="button" class="edit-button" (click)="toggleEdit()">Edit</button>
+              @if (user.role === "CLIENT") {
+                <div class="form-buttons">
+                  <button type="button" class="edit-button" (click)="toggleUpgradeRoleEditMode()">Upgrade to Worker
+                  </button>
+                </div>
+              }
+              <button type="button" class="logout-button" (click)="logout()">Logout</button>
+              }
             }
           }
         </div>
@@ -137,4 +139,10 @@
 
     </div>
 </div>
+  @if (user) {
+    <div class="card">
+      <h2 style="font-size: 30px; margin-top: 0; margin-bottom: 10px">{{user.username}}'s services</h2>
+      <app-my-services [memberIdInput]="user!.id"></app-my-services>
+    </div>
+  }
 }
