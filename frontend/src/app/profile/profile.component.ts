@@ -17,6 +17,7 @@ import { snackBarError } from '../shared/snackbar/snackbar-error';
 import {passwordsMatchValidator} from '../shared/validators/password-match-validator';
 import { ActivatedRoute } from '@angular/router';
 import {MyServicesComponent} from '../service/my-services/my-services.component';
+import {ServiceReviewComponent} from '../service/service-review/service-review.component';
 
 @Component({
   selector: 'app-profile',

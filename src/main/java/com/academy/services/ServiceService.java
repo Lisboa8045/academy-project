@@ -55,7 +55,7 @@ public class ServiceService {
                           MemberService memberService,
                           TagService tagService,
                           ServiceTypeService serviceTypeService,
-                          ServiceProviderRepository serviceProviderRepository) {
+                          ServiceProviderRepository serviceProviderRepository,
                           AppointmentMapper appointmentMapper) {
         this.serviceRepository = serviceRepository;
         this.serviceMapper = serviceMapper;
