@@ -273,15 +273,14 @@ export class ProfileComponent implements OnInit {
       } else {
         clearInterval(interval);
         this.snackBar.dismiss();
-        // Wait for logout to complete before navigating and revoking state
         this.authService.logout().subscribe({
           next: () => {
             this.userProfileService.revoke();
-            this.router.navigate(['/login']);
+            this.router.navigate(['/auth']);
           },
           error: (err) => {
             this.userProfileService.revoke();
-            this.router.navigate(['/login']);
+            this.router.navigate(['/auth']);
           }
         });
       }
