@@ -11,11 +11,13 @@ import com.academy.exceptions.AuthenticationException;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.ServiceType;
 import com.academy.models.Tag;
+import com.academy.models.appointment.Appointment;
 import com.academy.models.member.Member;
 import com.academy.models.service.Service;
 import com.academy.models.service.ServiceImages;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
+import com.academy.repositories.ServiceProviderRepository;
 import com.academy.repositories.ServiceRepository;
 import com.academy.specifications.ServiceSpecifications;
 import com.academy.utils.Utils;
@@ -44,6 +46,7 @@ public class ServiceService {
     private final TagService tagService;
     private final ServiceTypeService serviceTypeService;
     private final AppointmentMapper appointmentMapper;
+    private final ServiceProviderRepository serviceProviderRepository;
 
     public ServiceService(ServiceRepository serviceRepository,
                           ServiceMapper serviceMapper,
@@ -52,6 +55,7 @@ public class ServiceService {
                           MemberService memberService,
                           TagService tagService,
                           ServiceTypeService serviceTypeService,
+                          ServiceProviderRepository serviceProviderRepository,
                           AppointmentMapper appointmentMapper) {
         this.serviceRepository = serviceRepository;
         this.serviceMapper = serviceMapper;
@@ -61,6 +65,7 @@ public class ServiceService {
         this.tagService = tagService;
         this.serviceTypeService = serviceTypeService;
         this.appointmentMapper = appointmentMapper;
+        this.serviceProviderRepository = serviceProviderRepository;
     }
 
     @Transactional
@@ -319,5 +324,17 @@ public class ServiceService {
                 .filter(app -> app.getComment() != null)
                 .map(appointmentMapper::toReviewResponseDTO)
                 .toList();
+    }
+    public void updateRating(Long id){
+        Double rating = serviceProviderRepository.findAverageRatingByService_Id(id);
+        System.out.println("Updating rating for service id " + id + " to " + rating);
+
+        if (rating != null) {
+            int roundedRating = Math.toIntExact(Math.round(rating));
+            Service service = serviceRepository.findById(id)
+                    .orElseThrow(() -> new EntityNotFoundException(Service.class, id));
+            service.setRating(roundedRating);
+            serviceRepository.save(service);
+        }
     }
 }

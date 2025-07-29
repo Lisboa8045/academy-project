@@ -2,6 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 import {ServiceApiService} from '../../shared/service-api.service';
 import {ServiceAppointmentReviewModel} from '../service-details/service-appointment-review-model';
 import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
+import {ProfileService} from '../../profile/profile.service';
 
 @Component({
   selector: 'app-service-review',
@@ -19,11 +20,13 @@ export class ServiceReviewComponent implements OnInit {
   imageUrls: string[] = [];
   private fetched = false;
   private apiUrl = 'http://localhost:8080/auth/uploads';
-  @Input() serviceId!: number;
+  @Input() serviceId?: number;
+  @Input() memberId?: number;
   reviews?: ServiceAppointmentReviewModel[] = [];
 
   constructor(
     private serviceApiService: ServiceApiService,
+    private profileService: ProfileService
   ) {
 
   }
@@ -50,21 +53,34 @@ export class ServiceReviewComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (!this.serviceId) return;
+    if (this.serviceId) {
+      this.serviceApiService.getReviewsByServiceId(this.serviceId).subscribe({
+        next: (data) => {
+          this.handleReviews(data);
+        },
+        error: (err) => {
+          console.error("Error loading service reviews", err);
+        }
+      });
+    } else if (this.memberId) {
+      this.profileService.getReviewsByMemberId(this.memberId).subscribe({
+        next: (data) => {
+          this.handleReviews(data);
+        },
+        error: (err) => {
+          console.error("Error loading profile reviews", err);
+        }
+      });
+    }
+  }
 
-    this.serviceApiService.getReviewsByServiceId(this.serviceId).subscribe({
-      next: (data) => {
-        this.reviews = data;
-        this.reviews.forEach((review, idx) => {
-          this.loadReviewImage(review.memberProfilePicture).then(url => {
-            this.imageUrls[idx] = url || '';
-          });
-        });
-        console.log("Fetched reviews", this.reviews);
-      },
-      error: (err) => {
-        console.error("Error loading reviews", err);
-      }
-    })
+  private handleReviews(data: ServiceAppointmentReviewModel[]) {
+    this.reviews = data;
+    this.reviews.forEach((review, idx) => {
+      this.loadReviewImage(review.memberProfilePicture).then(url => {
+        this.imageUrls[idx] = url || '';
+      });
+    });
+    console.log("Fetched reviews", this.reviews);
   }
 }

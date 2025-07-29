@@ -1,21 +1,22 @@
-import {Component, effect, OnInit, signal, WritableSignal} from '@angular/core';
+import {Component, effect, inject, OnInit, signal, WritableSignal} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {ProfileService} from './profile.service';
-import {AuthStore} from '../auth/auth.store';
-import {AuthService} from '../auth/auth.service';
-import {LoadingComponent} from '../loading/loading.component';
-import {MemberResponseDTO} from '../auth/member-response-dto.model';
-import {UserProfileService} from './user-profile.service';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {NgIf} from '@angular/common';
-import {AppConfigService} from '../shared/app-config.service';
-import {strongPasswordValidator} from '../shared/validators/password.validator';
-import {noSpecialCharsValidator} from '../shared/validators/no-special-chars.validator';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {snackBarSuccess} from '../shared/snackbar/snackbar-success';
-import {snackBarError} from '../shared/snackbar/snackbar-error';
+import { ProfileService } from './profile.service';
+import { AuthStore } from '../auth/auth.store';
+import { AuthService } from '../auth/auth.service';
+import { LoadingComponent } from '../loading/loading.component';
+import { MemberResponseDTO } from '../auth/member-response-dto.model';
+import { UserProfileService } from './user-profile.service';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import {CommonModule, DecimalPipe, NgIf} from '@angular/common';
+import { AppConfigService } from '../shared/app-config.service';
+import { strongPasswordValidator } from '../shared/validators/password.validator';
+import { noSpecialCharsValidator } from '../shared/validators/no-special-chars.validator';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { snackBarSuccess } from '../shared/snackbar/snackbar-success';
+import { snackBarError } from '../shared/snackbar/snackbar-error';
 import {passwordsMatchValidator} from '../shared/validators/password-match-validator';
 import {MyServicesComponent} from '../service/my-services/my-services.component';
+import {ServiceReviewComponent} from '../service/service-review/service-review.component';
 import {snackBarInfo} from '../shared/snackbar/snackbar-info';
 
 @Component({
@@ -24,7 +25,10 @@ import {snackBarInfo} from '../shared/snackbar/snackbar-info';
     LoadingComponent,
     ReactiveFormsModule,
     NgIf,
-    MyServicesComponent
+    MyServicesComponent,
+    ServiceReviewComponent,
+    DecimalPipe,
+    CommonModule
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
@@ -280,4 +284,6 @@ export class ProfileComponent implements OnInit {
   canEdit(): Boolean{
     return this.user ? this.authStore.id() === this.user.id : false;
   }
+
+  protected readonly Math = Math;
 }

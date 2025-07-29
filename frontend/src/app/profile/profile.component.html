@@ -35,6 +35,12 @@
                    placeholder="Enter username">
             </div>
           }
+          <div class="member-rating" *ngIf="user.rating != null">
+            <span *ngFor="let star of [1,2,3,4,5]">
+              <span class="star" [class.filled]="star <= Math.round(user.rating)">&#9733;</span>
+            </span>
+            <span class="rating-number">({{ user.rating | number:'1.1-2' }})</span>
+          </div>
           <p>{{ user.email }}</p>
           <div class="validation-error" *ngIf="profileForm.get('username')?.errors?.['required'] && profileForm.get('username')?.touched">
             Username is required.
@@ -143,6 +149,11 @@
     <div class="card">
       <h2 style="font-size: 30px; margin-top: 0; margin-bottom: 10px">{{user.username}}'s services</h2>
       <app-my-services [memberIdInput]="user!.id"></app-my-services>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size: 30px; margin-top: 0; margin-bottom: 10px">{{user.username}}'s reviews</h2>
+      <app-service-review [memberId]="user!.id"></app-service-review>
     </div>
   }
 }
