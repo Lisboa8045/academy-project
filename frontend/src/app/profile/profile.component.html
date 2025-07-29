@@ -107,17 +107,31 @@
         <div class="bottom-right-container">
           @if (editMode) {
             <div class="form-buttons">
-              <button type="submit" class="submit-button">Save</button>
-              @if(!editPasswordMode){
+              <button type="submit" class="submit-button" [disabled]="profileForm.invalid">Save</button>
+              @if (!editPasswordMode && !upgradeWorkerRole) {
                 <button type="button" class="edit-button" (click)="togglePasswordEditMode()">Change Password</button>
               }
               <button type="button" class="cancel-button" (click)="toggleEdit()">Cancel</button>
             </div>
 
           } @else {
-            @if (canEdit()){
+            @if(canEdit()){
+              @if (upgradeWorkerRole) {
+                <div class="form-buttons">
+                  <button type="submit" class="submit-button" [disabled]="profileForm.invalid">Save</button>
+                  <button type="button" class="cancel-button" (click)="toggleUpgradeRoleEditMode()">Cancel</button>
+                </div>
+              } @else {
+
               <button type="button" class="edit-button" (click)="toggleEdit()">Edit</button>
+              @if (user.role === "CLIENT") {
+                <div class="form-buttons">
+                  <button type="button" class="edit-button" (click)="toggleUpgradeRoleEditMode()">Upgrade to Worker
+                  </button>
+                </div>
+              }
               <button type="button" class="logout-button" (click)="logout()">Logout</button>
+              }
             }
           }
         </div>
