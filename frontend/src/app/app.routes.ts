@@ -22,16 +22,13 @@ import {ConfirmEmailPromptComponent} from "./auth/confirm-email-prompt/confirm-e
 import {NotFoundComponent} from './not-found.component';
 
 export const routes: Routes = [
+  { path: '', component: LandingPageComponent},
   { path: 'auth', component: AuthComponent },
-  { path: 'profile', component: ProfileComponent },
   { path: 'appointments', component: AppointmentHistoryComponent },
   { path: 'profile/:id', component: ProfileComponent },
   { path: 'unauthorized', component: UnauthorizedComponent },
   { path: 'services/:id', component: ServiceDetailsComponent},
   { path: 'services', component: SearchServicesComponent},
-  { path: 'schedule/:id', component: ScheduleComponent },
-  { path: '', component: LandingPageComponent},
-  { path: 'my-services', component: MyServicesComponent},
   { path: 'resend-email', component: ResendEmailConfirmationComponent },
   { path: 'confirm-email/:token', component: ConfirmEmailComponent },
   { path: 'about', component: AboutComponent },
@@ -39,14 +36,16 @@ export const routes: Routes = [
   { path: 'privacy', component: PrivacyComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password/:token', component: ResetPasswordComponent },
-  {path: 'confirm-appointment/:id', component: ConfirmAppointmentComponent },
-  { path: 'config', component: GlobalConfigurationEditComponent },
+  { path: 'not-found', component: NotFoundComponent},
   { path: 'auth/confirm-prompt', component: ConfirmEmailPromptComponent },
-  {path: 'not-found', component: NotFoundComponent},
-  { path: '**', redirectTo: '', pathMatch: 'full' },
   {
     path: 'profile',
     component: ProfileComponent,
+    canActivate: [PermissionGuard],
+  },
+  {
+    path: 'confirm-appointment/:id',
+    component: ConfirmAppointmentComponent,
     canActivate: [PermissionGuard],
   },
   {
@@ -70,11 +69,6 @@ export const routes: Routes = [
   { path: 'config',
     component: GlobalConfigurationEditComponent,
     canActivate: [PermissionGuard],
-    data: { roles: ['ADMIN']}
-  },
-  { path: 'admin-office',
-    component: LandingPageComponent,
-    canActivate: [PermissionGuard], //TODO
     data: { roles: ['ADMIN']}
   },
   { path: 'availability-management',
