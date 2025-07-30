@@ -18,14 +18,20 @@ import { ResetPasswordComponent } from './auth/reset-password/reset-password.com
 import {ConfirmAppointmentComponent} from './confirm-appointment/confirm-appointment.component';
 import {GlobalConfigurationEditComponent} from './global-configuration/global-configuration-edit.component';
 import { PermissionGuard } from './auth/permission.guard';
+import {ConfirmEmailPromptComponent} from "./auth/confirm-email-prompt/confirm-email-prompt.component";
+import {NotFoundComponent} from './not-found.component';
 
 export const routes: Routes = [
   { path: 'auth', component: AuthComponent },
+  { path: 'profile', component: ProfileComponent },
+  { path: 'appointments', component: AppointmentHistoryComponent },
   { path: 'profile/:id', component: ProfileComponent },
   { path: 'unauthorized', component: UnauthorizedComponent },
   { path: 'services/:id', component: ServiceDetailsComponent},
   { path: 'services', component: SearchServicesComponent},
+  { path: 'schedule/:id', component: ScheduleComponent },
   { path: '', component: LandingPageComponent},
+  { path: 'my-services', component: MyServicesComponent},
   { path: 'resend-email', component: ResendEmailConfirmationComponent },
   { path: 'confirm-email/:token', component: ConfirmEmailComponent },
   { path: 'about', component: AboutComponent },
@@ -33,6 +39,11 @@ export const routes: Routes = [
   { path: 'privacy', component: PrivacyComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password/:token', component: ResetPasswordComponent },
+  {path: 'confirm-appointment/:id', component: ConfirmAppointmentComponent },
+  { path: 'config', component: GlobalConfigurationEditComponent },
+  { path: 'auth/confirm-prompt', component: ConfirmEmailPromptComponent },
+  {path: 'not-found', component: NotFoundComponent},
+  { path: '**', redirectTo: '', pathMatch: 'full' },
   {
     path: 'profile',
     component: ProfileComponent,

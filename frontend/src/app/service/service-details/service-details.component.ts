@@ -1,94 +1,107 @@
 import {Component, OnInit, signal} from '@angular/core';
 import {ServiceModel} from '../service.model';
-import {ActivatedRoute} from '@angular/router';
-import {ServiceDetailsService} from '../service-details.service';
+import {ActivatedRoute, Router} from '@angular/router';
+import {ServiceApiService} from '../../shared/service-api.service';
 import {LoadingComponent} from '../../loading/loading.component';
 import {NgForOf, NgIf} from "@angular/common";
-import { Router } from '@angular/router';
+import {UserProfileService} from '../../profile/user-profile.service';
+import {ServiceReviewComponent} from '../service-review/service-review.component';
+import {TagListComponent} from './tag-list/tag-list.component';
+import {switchMap, tap} from 'rxjs';
 
 @Component({
   selector: 'app-service-details',
   imports: [
     LoadingComponent,
     NgIf,
-    NgForOf
+    NgForOf,
+    ServiceReviewComponent,
+    TagListComponent
   ],
   templateUrl: './service-details.component.html',
   styleUrl: './service-details.component.css'
 })
 export class ServiceDetailsComponent implements OnInit {
   private apiUrl = 'http://localhost:8080/auth/uploads';
-  fetched = false;
-  imageUrls: string[] = [];
   currentImageIndex = 0;
   discountedPrice: number | null = null;
-  formatedTimeHours: number | null = null;
-  formatedTimeMinutes: number | null = null;
-
+  formatedTimeHours: number = 0;
+  formatedTimeMinutes: number = 0;
+  serviceId!: number;
   service?: ServiceModel;
   loading = signal(false);
 
-  async loadImages(fileNames: string[]) {
-    if (!fileNames || fileNames.length === 0 || this.fetched) {
-      return;
-    }
-
-    for (const fileName of fileNames) {
-      try {
-        console.log("Fetching image..." + fileName);
-        const res = await fetch(`${this.apiUrl}/${fileName}`);
-        if (!res.ok) return;
-
-        console.log("Fetched image..." + fileName);
-
-        const blob = await res.blob();
-        const objectUrl = URL.createObjectURL(blob);
-        this.imageUrls.push(objectUrl);
-        this.fetched = true;
-      } catch (error) {
-        console.error("Error loading the image", fileName, error)
-      }
-
-    }
-  }
-
   constructor(
     private route: ActivatedRoute,
-    private serviceDetailsService: ServiceDetailsService,
+    private serviceApiService: ServiceApiService,
+    protected userProfileService: UserProfileService,
     private router: Router
   ) {
   }
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-
-    this.loading.set(true);
-    this.serviceDetailsService.getServiceById(id).subscribe({
-      next: (data) => {
-        this.service = data;
-        if (this.service?.price && this.service?.discount && this.service.discount > 0) {
-          const aux = this.service.price - (this.service.price * this.service.discount) / 100;
-          this.discountedPrice = parseFloat(aux.toFixed(2));
-        } else{
+    this.route.paramMap
+      .pipe(
+        tap(() => {
+          this.service = undefined;
+          this.userProfileService.serviceImageUrl = [];
+          this.userProfileService.fetched = false;
           this.discountedPrice = null;
-        }
+          this.currentImageIndex = 0;
+          this.loading.set(true);
+        }),
+        switchMap(params => {
+          const id = Number(params.get('id'));
+          this.serviceId = id;
+          if (isNaN(id)) {
+            this.router.navigate(['/not-found'])
+          }
+          ;// AQUI PODE-SE DEFINIR O QUE QUEREMOS CARREGAR QUANDO ESTA POR EXEMPLO .../service/a. "a" ná é válido
+          return this.serviceApiService.getServiceById(id);
+        })
+      )
+      .subscribe({
+        next: (data) => {
+          if (!data) return;
 
-        if(this.service?.duration >= 60){
+          this.service = data;
+
+          if (this.service?.price && this.service?.discount && this.service.discount > 0) {
+            const aux = this.service.price - (this.service.price * this.service.discount) / 100;
+            this.discountedPrice = parseFloat(aux.toFixed(2));
+          }
+
           this.formatedTimeHours = Math.floor((this.service?.duration || 0) / 60);
           this.formatedTimeMinutes = this.service?.duration % 60;
+
+          if (this.service?.images?.length > 0) {
+            this.userProfileService.loadImages(this.service.images);
+          }
+
+          this.loading.set(false);
+        },
+        error: (err) => {
+          console.error('Erro ao carregar o serviço:', err);
+          this.loading.set(false);
+          this.router.navigate(['/not-found'])
         }
+      });
+  }
 
 
-        if (this.service?.images && this.service.images.length > 0) {
-          this.loadImages(this.service.images);
-        }
+  search(string: string) {
+    this.router.navigate(['/services'], {queryParams: {q: string}});
+  }
 
-
-        this.loading.set(false);
-      },
-      error: (err) => {
-        console.error("Error loading service");
-        this.loading.set(false);
+  searchServiceType(string: string) {
+    this.router.navigate(['/services'], {
+      queryParams: {
+        name: '',
+        page: 0,
+        size: 10,
+        sort: 'price,asc',
+        negotiable: false,
+        serviceTypeName: this.service?.serviceTypeName
       }
     });
   }
@@ -100,7 +113,7 @@ export class ServiceDetailsComponent implements OnInit {
   }
 
   nextImage(container: HTMLElement) {
-    if (this.currentImageIndex < this.imageUrls.length - 1) {
+    if (this.currentImageIndex < this.userProfileService.serviceImageUrl.length - 1) {
       this.currentImageIndex++;
       this.scrollToThumbnail(container);
     }
