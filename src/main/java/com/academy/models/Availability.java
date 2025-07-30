@@ -11,17 +11,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@ToString(callSuper = true, exclude="member")
 @Entity
 @Table(name = "availability")
-
 public class Availability extends BaseEntity {
 
     @ManyToOne
@@ -38,5 +35,6 @@ public class Availability extends BaseEntity {
     @Column(name = "end_date_time")
     private LocalDateTime endDateTime;
 
-
+    @Column(name = "is_exception")
+    private boolean isException;
 }
