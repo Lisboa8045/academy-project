@@ -48,13 +48,12 @@ export class ServiceApiService {
     return this.http.get<ServiceTypeResponseDTO[]>(this.SERVICE_TYPE_URL);
   }
 
-  //TODO
-  createService(payload: any): Observable<any> {
-    return this.http.post<any>(this.BASE_URL, payload);
+  createService(payload: ServiceModel): Observable<ServiceModel> {
+    return this.http.post<ServiceModel>(this.BASE_URL, payload);
   }
 
-  editService(payload: any, id: number): Observable<any> {
-    return this.http.put<any>(`${this.BASE_URL}/${id}`, payload);
+  editService(payload: ServiceModel, id: number): Observable<ServiceModel> {
+    return this.http.put<ServiceModel>(`${this.BASE_URL}/${id}`, payload);
   }
 
   uploadServiceImages(formData: FormData, id : number) {

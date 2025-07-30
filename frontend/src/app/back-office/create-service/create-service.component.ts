@@ -7,6 +7,8 @@ import {ServiceTypeResponseDTO} from '../../shared/models/service-type.model';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faPlus, faTimes} from '@fortawesome/free-solid-svg-icons';
 import {Router} from '@angular/router';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {snackBarError} from '../../shared/snackbar/snackbar-error';
 
 
 @Component({
@@ -33,7 +35,10 @@ export class CreateServiceComponent implements OnInit {
   currentImageIndex = 0;
   newTag: string = '';
 
-  constructor(private fb: FormBuilder, private serviceApi: ServiceApiService, private router: Router) {}
+  constructor(private fb: FormBuilder,
+              private serviceApi: ServiceApiService,
+              private router: Router,
+              private snackBar: MatSnackBar) {}
 
   ngOnInit() {
     this.form = buildServiceForm(this.fb);
@@ -43,7 +48,6 @@ export class CreateServiceComponent implements OnInit {
   fetchServiceTypes() {
     this.serviceApi.getServiceTypes().subscribe((response: ServiceTypeResponseDTO[]) => {
       this.serviceTypeOptions = response;
-      console.log(this.serviceTypeOptions);
     });
   }
 
@@ -73,10 +77,8 @@ export class CreateServiceComponent implements OnInit {
               formData.append('files', file);
             });
             this.serviceApi.uploadServiceImages(formData, res.id).subscribe({
-              next: () => console.log('Uploaded'),
               error: (err) => {
-                alert('Upload failed.');
-                console.error(err);
+                snackBarError(this.snackBar, 'Upload failed.')
               },
               complete: () => {
                 this.router.navigate([`/backoffice/services/${res.id}`]);
@@ -85,8 +87,7 @@ export class CreateServiceComponent implements OnInit {
           }
         },
         error: (err) => {
-          alert('Service creation failed.');
-          console.error(err);
+          snackBarError(this.snackBar, 'Service creation failed.');
         }
       });
 

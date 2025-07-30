@@ -67,7 +67,7 @@ export class ManageWorkersComponent implements OnInit {
         this.getMembersForServiceProviders();
       },
       error: () => {
-        console.error("Error loading service providers");
+        snackBarError(this.snackBar, "Error loading service providers");
       }
     });
   }

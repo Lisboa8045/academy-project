@@ -73,7 +73,7 @@ export class EditServiceComponent implements OnInit {
         this.loading.set(false);
       },
       error: () => {
-        console.error("Error loading service");
+        snackBarError(this.snackBar, "Error loading service");
       }
     });
   }
@@ -128,7 +128,6 @@ export class EditServiceComponent implements OnInit {
   }
 
   submit() {
-    console.log("SUBMITTED");
     if(this.form.valid) {
       this.serviceApi.editService(this.form.value, this.service!.id).subscribe({
         next: (res) => {
@@ -140,13 +139,11 @@ export class EditServiceComponent implements OnInit {
             next: () => console.log('Uploaded'),
             error: (err) => {
               snackBarError(this.snackBar, 'Image Upload failed.');
-              console.error(err);
             }
           });
           snackBarSuccess(this.snackBar, 'Service Updated Successfully');
         },
         error: (err) => {
-          console.error(err.error);
           snackBarError(this.snackBar, 'Service update failed: \n' +  this.formErrorMessage(err.error));
         }
       });
