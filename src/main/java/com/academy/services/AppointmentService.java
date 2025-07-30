@@ -37,6 +37,7 @@ public class AppointmentService {
     private final AppointmentMapper appointmentMapper;
     private final MemberService memberService;
     private final AuthenticationFacade authenticationFacade;
+    private final ServiceService serviceService;
     private final EmailService emailService;
     private final AppointmentSchedulerService appointmentSchedulerService;
     private final GlobalConfigurationService globalConfigurationService;
@@ -53,12 +54,14 @@ public class AppointmentService {
                               AuthenticationFacade authenticationFacade,
                               EmailService emailService,
                               AppointmentSchedulerService appointmentSchedulerService,
-                              GlobalConfigurationService globalConfigurationService) {
+                              GlobalConfigurationService globalConfigurationService,
+                              ServiceService serviceService) {
         this.appointmentRepository = appointmentRepository;
         this.serviceProviderService = serviceProviderService;
         this.appointmentMapper = appointmentMapper;
         this.memberService = memberService;
         this.authenticationFacade = authenticationFacade;
+        this.serviceService = serviceService;
         this.emailService = emailService;
         this.appointmentSchedulerService = appointmentSchedulerService;
         this.globalConfigurationService = globalConfigurationService;
@@ -213,7 +216,10 @@ public class AppointmentService {
 
         appointment.setRating(request.rating());
         appointment.setComment(request.comment());
-        appointmentRepository.save(appointment);
+
+        serviceProviderService.updateRating(appointment.getServiceProvider().getId());
+        serviceService.updateRating(appointment.getServiceProvider().getService().getId());
+        memberService.updateMemberRating(appointment.getServiceProvider().getProvider().getId());
 
         return ResponseEntity.ok(new ReviewResponseDTO("Review added successfully"));
     }

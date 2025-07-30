@@ -4,6 +4,8 @@ import com.academy.config.AppProperties;
 import com.academy.config.TestTokenStorage;
 import com.academy.config.authentication.JwtCookieUtil;
 import com.academy.config.authentication.JwtUtil;
+import com.academy.dtos.appointment.AppointmentMapper;
+import com.academy.dtos.appointment.AppointmentReviewResponseDTO;
 import com.academy.dtos.member.MemberRequestDTO;
 import com.academy.dtos.member.MemberResponseDTO;
 import com.academy.dtos.register.LoginRequestDto;
@@ -21,11 +23,14 @@ import com.academy.exceptions.RegistrationConflictException;
 import com.academy.exceptions.TokenExpiredException;
 import com.academy.exceptions.UnavailableUserException;
 import com.academy.models.Role;
+import com.academy.models.appointment.Appointment;
 import com.academy.models.member.Member;
 import com.academy.models.member.MemberStatusEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
+import com.academy.repositories.AppointmentRepository;
 import com.academy.repositories.MemberRepository;
 import com.academy.repositories.RoleRepository;
+import com.academy.repositories.ServiceProviderRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +46,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -61,6 +67,10 @@ public class MemberService {
 
     private final JwtCookieUtil jwtCookieUtil;
     private final ServiceProviderService serviceProviderService;
+    private final ServiceProviderRepository serviceProviderRepository;
+    @Autowired
+    private AppointmentRepository appointmentRepository;
+    private final AppointmentMapper appointmentMapper;
 
     @Autowired
     public MemberService(MemberRepository memberRepository,
@@ -73,7 +83,9 @@ public class MemberService {
                          EmailService emailService,
                          GlobalConfigurationService globalConfigurationService,
                          AppProperties appProperties,
-                         @Lazy ServiceProviderService serviceProviderService) {
+                         @Lazy ServiceProviderService serviceProviderService,
+                         ServiceProviderRepository serviceProviderRepository,
+                         AppointmentMapper appointmentMapper) {
         this.memberRepository = memberRepository;
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
@@ -85,6 +97,8 @@ public class MemberService {
         this.globalConfigurationService = globalConfigurationService;
         this.appProperties = appProperties;
         this.serviceProviderService = serviceProviderService;
+        this.serviceProviderRepository = serviceProviderRepository;
+        this.appointmentMapper = appointmentMapper;
     }
 
 
@@ -398,5 +412,24 @@ public class MemberService {
         member.setPasswordResetToken(null);
         member.setPasswordResetTokenExpiry(null);
         memberRepository.save(member);
+    }
+
+    public void updateMemberRating(Long memberId) {
+        Double rating = serviceProviderRepository.findAverageRatingByMemberId(memberId);
+        System.out.println("Updating Member rating with" + memberId + " to " +rating);
+        if (rating != null) {
+            int roundedRating = Math.toIntExact(Math.round(rating));
+            Member member = memberRepository.findById(memberId)
+                    .orElseThrow(() -> new EntityNotFoundException(Member.class, memberId));
+            member.setRating(roundedRating);
+            memberRepository.save(member);
+        }
+    }
+
+    public List<AppointmentReviewResponseDTO> getReviewsByMemberId(Long id) {
+        List<Appointment> appointments = appointmentRepository.findAllReviewsByMemberId(id);
+        return appointments.stream()
+                .map(appointmentMapper::toReviewResponseDTO)
+                .toList();
     }
 }

@@ -5,6 +5,7 @@ import {Observable} from 'rxjs';
 import {ServiceModel} from '../service/service.model';
 import {ServiceQuery} from './models/service-query.model';
 import {ServiceTypeResponseDTO} from "./models/service-type.model";
+import {ServiceAppointmentReviewModel} from '../service/service-details/service-appointment-review-model';
 
 export interface PagedResponse {
   content: ServiceModel[];
@@ -21,6 +22,7 @@ export class ServiceApiService {
   private BASE_URL = 'http://localhost:8080/services';
   private SERVICE_TYPE_URL = 'http://localhost:8080/service-types';
   private UPLOADS_URL = 'http://localhost:8080/auth/uploads/service-image';
+  private REVIEWS_URL = 'http://localhost:8080/services/service_with_review';
 
   constructor(private http: HttpClient) {
   }
@@ -61,6 +63,14 @@ export class ServiceApiService {
       `${this.UPLOADS_URL}?id=${id}`,
       formData,
     );
+  }
+
+  getServiceById(id: number): Observable<ServiceModel> {
+    return this.http.get<ServiceModel>(`${this.BASE_URL}/${id}`);
+  }
+
+  getReviewsByServiceId(id: number): Observable<ServiceAppointmentReviewModel[]> {
+    return this.http.get<ServiceAppointmentReviewModel[]>(`${this.REVIEWS_URL}/${id}`);
   }
 
   getServicesOfMember(query: ServiceQuery, id: number): Observable<PagedResponse>{

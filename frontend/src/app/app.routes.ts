@@ -1,25 +1,26 @@
-import { Routes } from '@angular/router';
+import {Routes} from '@angular/router';
 import {AppointmentHistoryComponent} from './appointment/appointment-history/appointment-history.component';
-import { AuthComponent } from './auth/auth.component';
-import { ProfileComponent } from './profile/profile.component';
-import { UnauthorizedComponent } from './unauthorized.component';
-import { SearchServicesComponent} from "./service/search/search-services.component";
-import { ScheduleComponent } from './schedule/schedule.component';
-import { LandingPageComponent } from './landing-page/landing-page.component';
+import {AuthComponent} from './auth/auth.component';
+import {ProfileComponent} from './profile/profile.component';
+import {UnauthorizedComponent} from './unauthorized.component';
+import {SearchServicesComponent} from "./service/search/search-services.component";
+import {ScheduleComponent} from './schedule/schedule.component';
+import {LandingPageComponent} from './landing-page/landing-page.component';
 import {MyServicesComponent} from './service/my-services/my-services.component';
-import { ResendEmailConfirmationComponent } from "./auth/resend-email/resend-email-confirmation.component";
-import { ConfirmEmailComponent } from './auth/confirm-email/confirm-email.component';
-import { ServiceDetailsComponent } from './service/service-details/service-details.component';
-import { EditServiceComponent } from './back-office/edit-service/edit-service.component';
+import {EditServiceComponent} from './back-office/edit-service/edit-service.component';
 import {CreateServiceComponent} from './back-office/create-service/create-service.component';
-import { AboutComponent } from './info-pages/about/about.component';
-import { TermsComponent } from './info-pages/terms/terms.component';
-import { PrivacyComponent } from './info-pages/privacy/privacy.component';
-import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.component';
-import { ResetPasswordComponent } from './auth/reset-password/reset-password.component';
+import {ResendEmailConfirmationComponent} from "./auth/resend-email/resend-email-confirmation.component";
+import {ConfirmEmailComponent} from './auth/confirm-email/confirm-email.component';
+import {ServiceDetailsComponent} from './service/service-details/service-details.component';
+import {AboutComponent} from './info-pages/about/about.component';
+import {TermsComponent} from './info-pages/terms/terms.component';
+import {PrivacyComponent} from './info-pages/privacy/privacy.component';
+import {ForgotPasswordComponent} from './auth/forgot-password/forgot-password.component';
+import {ResetPasswordComponent} from './auth/reset-password/reset-password.component';
 import {ConfirmAppointmentComponent} from './confirm-appointment/confirm-appointment.component';
 import {GlobalConfigurationEditComponent} from './global-configuration/global-configuration-edit.component';
 import {ConfirmEmailPromptComponent} from "./auth/confirm-email-prompt/confirm-email-prompt.component";
+import {NotFoundComponent} from './not-found.component';
 
 
 export const routes: Routes = [
@@ -45,5 +46,6 @@ export const routes: Routes = [
   {path: 'confirm-appointment/:id', component: ConfirmAppointmentComponent },
   { path: 'config', component: GlobalConfigurationEditComponent },
   { path: 'auth/confirm-prompt', component: ConfirmEmailPromptComponent },
+  {path: 'not-found', component: NotFoundComponent},
   { path: '**', redirectTo: '', pathMatch: 'full' },
 ];

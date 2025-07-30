@@ -33,7 +33,7 @@ public class Appointment extends BaseEntity {
     private ServiceProvider serviceProvider;
 
     @Column(name="rating")
-    private Integer rating;
+    private Integer rating = 0;
 
     @Column(name="comment", length = FieldLengths.REVIEW_MAX)
     private String comment;
