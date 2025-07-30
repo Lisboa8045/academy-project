@@ -107,7 +107,6 @@ button {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: stretch;
   align-items: center;
   padding-right: 2rem;
 }
@@ -127,7 +126,6 @@ button {
 .main-image {
   width: 100%;
   height: 100%;
-  object-fit: contain;
   object-fit: cover;
   border-radius: 0;
 
@@ -151,7 +149,7 @@ button {
   z-index: 10;
   border-radius: 50%;
   transition: background 0.3s ease;
-  min-width: 0px;
+  min-width: 0;
 }
 
 .thumbnail-placeholder {

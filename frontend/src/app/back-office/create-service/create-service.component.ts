@@ -77,7 +77,7 @@ export class CreateServiceComponent implements OnInit {
               formData.append('files', file);
             });
             this.serviceApi.uploadServiceImages(formData, res.id).subscribe({
-              error: (err) => {
+              error: () => {
                 snackBarError(this.snackBar, 'Upload failed.')
               },
               complete: () => {
@@ -86,7 +86,7 @@ export class CreateServiceComponent implements OnInit {
             });
           }
         },
-        error: (err) => {
+        error: () => {
           snackBarError(this.snackBar, 'Service creation failed.');
         }
       });

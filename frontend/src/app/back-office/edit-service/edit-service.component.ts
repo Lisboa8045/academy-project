@@ -137,7 +137,7 @@ export class EditServiceComponent implements OnInit {
           });
           this.serviceApi.uploadServiceImages(formData, res.id).subscribe({
             next: () => console.log('Uploaded'),
-            error: (err) => {
+            error: () => {
               snackBarError(this.snackBar, 'Image Upload failed.');
             }
           });
