@@ -7,7 +7,6 @@ import {ServiceTypeResponseDTO} from '../../shared/models/service-type.model';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {faPlus, faTimes} from '@fortawesome/free-solid-svg-icons';
 import {ActivatedRoute} from '@angular/router';
-import {ServiceDetailsService} from '../../service/service-details.service';
 import {ServiceModel} from '../../service/service.model';
 import {LoadingComponent} from '../../loading/loading.component';
 import {snackBarSuccess} from '../../shared/snackbar/snackbar-success';
@@ -47,7 +46,6 @@ export class EditServiceComponent implements OnInit {
 
   constructor(private fb: FormBuilder,
               private serviceApi: ServiceApiService,
-              private serviceDetailsService: ServiceDetailsService,
               private route: ActivatedRoute,
               private snackBar: MatSnackBar) {}
 
@@ -60,8 +58,8 @@ export class EditServiceComponent implements OnInit {
   }
 
   private fetchService(id: number): void {
-    this.serviceDetailsService.getServiceById(id).subscribe({
-      next: (data) => {
+    this.serviceApi.getServiceById(id).subscribe({
+      next: (data: ServiceModel) => {
         this.service = data;
         if (this.service?.images && this.service.images.length > 0) {
           this.loadImages(this.service.images);
