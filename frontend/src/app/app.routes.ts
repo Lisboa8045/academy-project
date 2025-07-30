@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import {AvailabilityManagementComponent} from './back-office/availability-management/availability-management.component';
 import {AppointmentHistoryComponent} from './appointment/appointment-history/appointment-history.component';
 import { AuthComponent } from './auth/auth.component';
 import { ProfileComponent } from './profile/profile.component';
@@ -23,7 +22,6 @@ export const routes: Routes = [
   { path: 'services', component: SearchServicesComponent},
   { path: 'schedule/:id', component: ScheduleComponent },
   { path: '', component: LandingPageComponent},
-  { path: 'backoffice/availability', component: AvailabilityManagementComponent },
   { path: 'resend-email', component: ResendEmailConfirmationComponent },
   { path: 'confirm-email/:token', component: ConfirmEmailComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
