@@ -100,7 +100,7 @@ export class EditServiceComponent implements OnInit {
         this.imageUrls.push(objectUrl);
         this.selectedFiles.push(this.blobToFile(blob, fileName));
       } catch (error) {
-        console.error("Error loading the image", fileName, error)
+        snackBarError(this.snackBar, "Error loading the image: " + fileName)
       }
     }
   }

@@ -253,6 +253,10 @@ public class MemberService {
         return optionalMember.get();
     }
 
+    public MemberResponseDTO getMemberDTOByUsername(String username) {
+        return memberMapper.toResponseDTO(getMemberByUsername(username));
+    }
+
     public Member getMemberByUsername(String username){
         Optional<Member> optionalMember = memberRepository.findByUsername(username);
         if(optionalMember.isEmpty())
