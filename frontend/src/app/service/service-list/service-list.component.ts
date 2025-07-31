@@ -1,4 +1,4 @@
-import type {Signal} from '@angular/core';
+import {input, Signal} from '@angular/core';
 import {Component, Input} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ServiceModel} from '../service.model';
@@ -16,9 +16,10 @@ export class ServiceListComponent {
 
   constructor(private router: Router) {}
 
-  @Input() services!: Signal<ServiceModel[]>;
+  services = input.required<ServiceModel[]>();
+  clickPath = input.required<string>();
 
   onCardClick(id: number) {
-    this.router.navigate(['/services', id]);
+    this.router.navigate([this.clickPath(), id]);
   }
 }

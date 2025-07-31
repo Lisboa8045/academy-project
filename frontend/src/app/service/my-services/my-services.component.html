@@ -33,7 +33,7 @@
             }
           </div>
         } @else {
-          <app-service-list [services]="services"></app-service-list>
+          <app-service-list [services]="services()" clickPath="/backoffice/services"></app-service-list>
         }
 
         <app-pagination-bar
