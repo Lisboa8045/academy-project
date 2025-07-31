@@ -1,71 +1,77 @@
-.highlighted {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
+.carousel-wrapper {
+  overflow-x: auto;
+  overflow-y: visible;
+  width: 100%;
+  padding-bottom: 1rem;
+  scrollbar-width: thin;
+  scrollbar-color: #5c6bc0 #f3f5fb;
+}
+
+.carousel-track {
+  display: flex;
   gap: 2rem;
+  /* Optional: scroll snapping for smoothness */
+  scroll-snap-type: x mandatory;
+  scroll-padding: 1rem;
 }
 
-.service-card {
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  transition: transform 0.2s;
+/* Optional: hide scrollbar (for webkit browsers) */
+.carousel-wrapper::-webkit-scrollbar {
+  display: none;
 }
 
-h2 {
-  margin-top: 0;
-  font-weight: normal;
+/* Responsive */
+@media (max-width: 700px) {
+  .service-card {
+    flex: 0 0 90vw; /* Make cards fit small screens */
+  }
+  .carousel-track {
+    gap: 1rem;
+  }
 }
 
-.service-card:hover {
-  transform: scale(1.02);
-}
-
-.rating-badge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: linear-gradient(
-    90deg,
-    #3b2ff5 0%,
-    #00d4ff 100%
-  );
-  color: #fff;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-weight: bold;
-  font-size: 14px;
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
-}
-
-.image-container {
+.carousel-nav {
   position: relative;
   width: 100%;
-  height: 200px;
-  overflow: hidden;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
+  display: flex;
+  align-items: center;
+}
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 10;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.95);
+  border: none;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  color: #3b2ff5;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: box-shadow 0.16s, background 0.16s, color 0.16s, transform 0.13s;
+  cursor: pointer;
+  opacity: 0.92;
+}
+.carousel-arrow.left {
+  left: 12px;
+}
+.carousel-arrow.right {
+  right: 12px;
+}
+.carousel-arrow:hover {
+  background: #3b2ff5;
+  color: #fff;
+  box-shadow: 0 6px 24px #3b2ff533;
+  transform: scale(1.08);
 }
 
-.service-info {
-  padding: 1rem;
+.carousel-wrapper {
+  flex: 1 1 auto;
+  overflow-x: auto;
+  /* ...your previous styles here... */
 }
 
-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-@media (max-width: 1300px) {
-  .highlighted {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
-  }
-}
-
-@media (max-width: 700px) {
-  .highlighted {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-}

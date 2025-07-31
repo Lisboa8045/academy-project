@@ -11,5 +11,6 @@ public record MemberResponseDTO(
         String phoneNumber,
         String role,
         String profilePicture,
-        MemberStatusEnum status
+        MemberStatusEnum status,
+        Integer rating
 ) {}

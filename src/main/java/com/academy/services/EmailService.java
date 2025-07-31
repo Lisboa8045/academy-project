@@ -17,6 +17,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+
 import static com.academy.utils.Utils.formatHours;
 
 @Service
@@ -109,29 +112,47 @@ public class EmailService{
     }
 
     @Async
-    protected void sendCancelAppointmentEmail(Appointment appointment) {
+    protected void sendCancelAppointmentClientEmail(Appointment appointment) {
 
-        String html = loadEmailTemplate("templates/cancelled-appointment.html")
+        String html = loadEmailTemplate("templates/cancelled-appointment-client.html")
                 .replace("[CLIENT_NAME]", appointment.getMember().getUsername())
                 .replace("[SERVICE_PRICE]" , String.valueOf(appointment.getPrice()))
-                .replace("[APPOINTMENT_ID]", appointment.getId().toString())
                 .replace("[PROVIDER_NAME]", appointment.getServiceProvider().getProvider().getUsername())
                 .replace("[SERVICE_NAME]", appointment.getServiceProvider().getService().getName())
                 .replace("[START_TIME]", appointment.getStartDateTime().toString())
                 .replace("[App Name]", appProperties.getName());
 
                 send(
-                        appointment.getServiceProvider().getProvider().getEmail(),
-                        "Canceled appointment",
-                        "",
-                        html
-                );
-                send(
                         appointment.getMember().getEmail(),
                         "Canceled appointment",
                         "",
                         html
                 );
+    }
+
+    @Async
+    public void sendCancelAppointmentProviderEmail(Appointment appointment) {
+        String compensationMessage = "";
+        long daysBeforeStart = ChronoUnit.DAYS.between(LocalDate.now(), appointment.getStartDateTime().toLocalDate());
+        int daysBeforeCancellationGlobalConfig = Integer.parseInt(globalConfigurationService.getConfigValue("minimum_days_before_cancellation_to_not_pay"));
+        if(daysBeforeStart < daysBeforeCancellationGlobalConfig)
+            compensationMessage = "<p>Since the appointment was cancelled " + daysBeforeCancellationGlobalConfig + " or fewer days before the scheduled time, you will receive the full amount.</p>\n";
+
+        String html = loadEmailTemplate("templates/cancelled-appointment-provider.html")
+                .replace("[CLIENT_NAME]", appointment.getMember().getUsername())
+                .replace("[SERVICE_PRICE]" , String.valueOf(appointment.getPrice()))
+                .replace("[PROVIDER_NAME]", appointment.getServiceProvider().getProvider().getUsername())
+                .replace("[SERVICE_NAME]", appointment.getServiceProvider().getService().getName())
+                .replace("[START_TIME]", appointment.getStartDateTime().toString())
+                .replace("[App Name]", appProperties.getName())
+                .replace("[COMPENSATION_MESSAGE]", compensationMessage);
+
+        send(
+                appointment.getServiceProvider().getProvider().getEmail(),
+                "Canceled appointment",
+                "",
+                html
+        );
     }
 
     @Async
@@ -155,5 +176,4 @@ public class EmailService{
             throw new EmailTemplateLoadingException("Error loading e-mail template: " + templatePath);
         }
     }
-
 }

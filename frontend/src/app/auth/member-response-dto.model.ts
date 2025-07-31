@@ -8,9 +8,11 @@ export interface MemberResponseDTO {
   postalCode: string;
   phoneNumber: string;
   role: string;
+  roleId: number;
   profilePicture: string;
   oldPassword: string;
   newPassword: string;
   confirmPassword: string;
+  rating: number;
   status: MemberStatusEnum;
 }

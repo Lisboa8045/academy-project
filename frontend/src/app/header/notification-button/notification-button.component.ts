@@ -4,6 +4,7 @@ import {NgIf} from '@angular/common';
 import {NotificationService} from '../../shared/notification.service';
 import {AuthStore} from '../../auth/auth.store';
 import {NotificationModel} from './notification-sidebar/notification.model';
+import {WebSocketService} from '../../shared/websocket.service';
 
 @Component({
   selector: 'app-notification-button',
@@ -18,18 +19,19 @@ export class NotificationButtonComponent implements OnInit {
   notificationService = inject(NotificationService);
   authStore = inject(AuthStore);
   destroyRef = inject(DestroyRef);
+  webSocketService = inject(WebSocketService);
   notifications = signal<NotificationModel[]>([]);
   showList = signal(false);
 
   ngOnInit(): void {
     this.fetchNotifications();
-    let interval = setInterval(() => {
-      this.fetchNotifications()
-    }, 5000);
+    this.webSocketService.connect(this.authStore.id(), (newNotification: NotificationModel) => {
+      this.notifications.update((prev) => [newNotification, ...prev]);
+    });
 
     this.destroyRef.onDestroy(() => {
-      clearInterval(interval);
-    })
+      this.webSocketService.disconnect();
+    });
   }
 
   toggleList() {

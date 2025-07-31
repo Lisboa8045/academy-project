@@ -1,5 +1,5 @@
 import {Component, effect, inject, OnInit, signal, WritableSignal} from '@angular/core';
-import { Router } from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import { ProfileService } from './profile.service';
 import { AuthStore } from '../auth/auth.store';
 import { AuthService } from '../auth/auth.service';
@@ -7,7 +7,7 @@ import { LoadingComponent } from '../loading/loading.component';
 import { MemberResponseDTO } from '../auth/member-response-dto.model';
 import { UserProfileService } from './user-profile.service';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { NgIf } from '@angular/common';
+import {CommonModule, DecimalPipe, NgIf} from '@angular/common';
 import { AppConfigService } from '../shared/app-config.service';
 import { strongPasswordValidator } from '../shared/validators/password.validator';
 import { noSpecialCharsValidator } from '../shared/validators/no-special-chars.validator';
@@ -15,10 +15,11 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { snackBarSuccess } from '../shared/snackbar/snackbar-success';
 import { snackBarError } from '../shared/snackbar/snackbar-error';
 import {passwordsMatchValidator} from '../shared/validators/password-match-validator';
-import { ActivatedRoute } from '@angular/router';
 import {MyServicesComponent} from '../service/my-services/my-services.component';
 import {ConfirmationModalComponent} from '../shared/confirmation-component/confirmation-modal.component';
 import {MemberStatusEnum} from '../models/member-status-enum.model';
+import {ServiceReviewComponent} from '../service/service-review/service-review.component';
+import {snackBarInfo} from '../shared/snackbar/snackbar-info';
 
 @Component({
   selector: 'app-profile',
@@ -27,7 +28,11 @@ import {MemberStatusEnum} from '../models/member-status-enum.model';
     ReactiveFormsModule,
     NgIf,
     MyServicesComponent,
-    ConfirmationModalComponent
+    ConfirmationModalComponent,
+    MyServicesComponent,
+    ServiceReviewComponent,
+    DecimalPipe,
+    CommonModule
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
@@ -44,6 +49,7 @@ export class ProfileComponent implements OnInit {
   showDeleteModal = false;
 
   protected readonly MemberStatusEnum = MemberStatusEnum;
+  upgradeWorkerRole = false;
 
   constructor(
     private fb: FormBuilder,
@@ -73,9 +79,9 @@ export class ProfileComponent implements OnInit {
       const id = Number(idParam);
       if (!isNaN(id)) {
         this.getMember(id);
-        this.loading.set(false);
-        return;
       }
+    } else {
+      this.getMember(this.authStore.id());
     }
     this.loading.set(false);
   }
@@ -136,6 +142,28 @@ export class ProfileComponent implements OnInit {
     this.profileForm.get('confirmPassword')?.updateValueAndValidity();
   }
 
+  private validatorsForWorker() {
+    this.profileForm.get('address')?.setValidators([Validators.required]);
+    this.profileForm.get('postalCode')?.setValidators([Validators.required, Validators.pattern(/^[0-9]{4}-[0-9]{3}$/)]);
+    this.profileForm.get('phoneNumber')?.setValidators([Validators.required, Validators.pattern(/^\+[0-9]{12}$/)]);
+  }
+
+  private updateWorkerRoleValidators() {
+    if (this.upgradeWorkerRole) {
+      this.validatorsForWorker();
+    } else {
+      this.profileForm.get('address')?.clearValidators();
+      this.profileForm.get('postalCode')?.clearValidators();
+      this.profileForm.get('postalCode')?.setValidators([Validators.pattern(/^[0-9]{4}-[0-9]{3}$/)])
+      this.profileForm.get('phoneNumber')?.clearValidators();
+      this.profileForm.get('phoneNumber')?.setValidators([Validators.pattern(/^\+[0-9]{12}$/)])
+    }
+
+    this.profileForm.get('address')?.updateValueAndValidity();
+    this.profileForm.get('postalCode')?.updateValueAndValidity();
+    this.profileForm.get('phoneNumber')?.updateValueAndValidity();
+  }
+
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (!input.files || input.files.length === 0) return;
@@ -172,6 +200,9 @@ export class ProfileComponent implements OnInit {
     this.updatePasswordValidators();
     if (this.editMode) {
       this.profileForm.enable();
+      if (this?.user?.role === "WORKER") {
+        this.validatorsForWorker();
+      }
     } else {
       this.profileForm.disable();
       this.tempImageUrl.set("");
@@ -183,8 +214,19 @@ export class ProfileComponent implements OnInit {
     this.editPasswordMode = !this.editPasswordMode;
     this.updatePasswordValidators();
   }
+  toggleUpgradeRoleEditMode() {
+    this.upgradeWorkerRole = !this.upgradeWorkerRole;
+    this.updateWorkerRoleValidators();
+    if (this.upgradeWorkerRole) {
+      snackBarInfo(this.snackBar, 'Please validate your personal information');
+      this.profileForm.enable();
+    } else {
+      this.profileForm.disable();
+    }
+  }
 
   onSubmit(): void {
+
     if (this.profileForm.invalid) {
       this.profileForm.markAllAsTouched();
       return;
@@ -204,18 +246,37 @@ export class ProfileComponent implements OnInit {
         }
       });
     }
+    if (!this.upgradeWorkerRole) {
 
-    this.profileService.updateMember(updatedUser, this.authStore.id()).subscribe({
-      next: (res) => {
-        snackBarSuccess(this.snackBar, 'Member Updated Successfully');
-        this.getMember(this.authStore.id());
-        this.toggleEdit();
-      },
-      error: (err) => {
-        snackBarError(this.snackBar, 'Member Update failed. ' + err.error);
-        console.error(err);
+      this.profileService.updateMember(updatedUser, this.authStore.id()).subscribe({
+        next: (res) => {
+          snackBarSuccess(this.snackBar, 'Member Updated Successfully');
+          this.getMember(this.authStore.id());
+          this.toggleEdit();
+        },
+        error: (err) => {
+          snackBarError(this.snackBar, 'Member Update failed. ' + err.error);
+          console.error(err);
+        }
+      });
+    } else {
+      const upgradeUser: Partial<MemberResponseDTO> = {
+        ...updatedUser,
+        roleId: 3
       }
-    });
+
+      this.profileService.updateMember(upgradeUser, this.authStore.id()).subscribe({
+        next: (res) => {
+          snackBarSuccess(this.snackBar, 'Member is now a Worker');
+          this.getMember(this.authStore.id());
+          this.toggleUpgradeRoleEditMode();
+        },
+        error: (err) => {
+          snackBarError(this.snackBar, 'Member Update failed. ' + err.error);
+          console.error(err);
+        }
+      });
+    }
   }
 
   logout() {
@@ -228,9 +289,13 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  protected readonly UserProfileService = UserProfileService;
+
   canEdit(): Boolean{
     return this.user ? this.authStore.id() === this.user.id : false;
   }
+
+  protected readonly Math = Math;
 
   deleteMember() {
     this.showDeleteModal = true;

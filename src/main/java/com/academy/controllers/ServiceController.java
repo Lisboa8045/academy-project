@@ -1,6 +1,7 @@
 package com.academy.controllers;
 
 import com.academy.config.authentication.AuthenticationFacade;
+import com.academy.dtos.appointment.AppointmentReviewResponseDTO;
 import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.dtos.service.UpdatePermissionsRequestDto;
@@ -103,4 +104,11 @@ public class ServiceController {
     public ResponseEntity<Page<ServiceResponseDTO>> getMyServices(@PathVariable Long id, Pageable pageable){
         return ResponseEntity.ok(serviceService.getServicesByMemberId(id, pageable));
     }
+
+    @GetMapping("/service_with_review/{id}")
+    public ResponseEntity<List<AppointmentReviewResponseDTO>> getServiceReviews(@PathVariable Long id) {
+        List<AppointmentReviewResponseDTO> reviews = serviceService.getReviewsByServiceId(id);
+        return ResponseEntity.ok(reviews);
+    }
+
 }
