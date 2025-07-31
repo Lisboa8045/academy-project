@@ -1,5 +1,5 @@
-import {input, Signal} from '@angular/core';
-import {Component, Input} from '@angular/core';
+import {input} from '@angular/core';
+import {Component} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ServiceModel} from '../service.model';
 import { Router } from '@angular/router';
