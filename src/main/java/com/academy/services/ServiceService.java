@@ -145,7 +145,7 @@ public class ServiceService {
     // Read one
     public ServiceResponseDTO getById(Long id) {
         Service service = getServiceEntityById(id);
-        String username =  authenticationFacade.getUsername();
+        String username = authenticationFacade.getUsername();
 
         if (!service.isEnabled()) {
             if (username == null) {
@@ -384,7 +384,8 @@ public class ServiceService {
                 .map(appointmentMapper::toReviewResponseDTO)
                 .toList();
     }
-    
+
+    @Transactional
     public void updateRating(Long id){
         Double rating = serviceProviderRepository.findAverageRatingByService_Id(id);
         System.out.println("Updating rating for service id " + id + " to " + rating);
@@ -398,6 +399,7 @@ public class ServiceService {
         }
     }
 
+    @Transactional
     public void approveService(Long id) {
         Service service = getServiceEntityById(id);
         service.setEnabled(true);
@@ -407,6 +409,7 @@ public class ServiceService {
         sendNotification(service);
     }
 
+    @Transactional
     public void rejectService(Long id){
         Service service = getServiceEntityById(id);
         service.setEnabled(false);

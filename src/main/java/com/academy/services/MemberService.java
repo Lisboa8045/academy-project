@@ -133,6 +133,8 @@ public class MemberService {
         return createMember(request, optionalRole.get()).getId();
 
     }
+
+    @Transactional
     private Member createMember(RegisterRequestDto request, Role role){
         Member member = memberMapper.toMember(request);
         member.setPassword(passwordEncoder.encode(request.password()));
@@ -187,6 +189,7 @@ public class MemberService {
     private String generateEncodedToken(){
         return UUID.randomUUID().toString();
     }
+
     @Transactional
     public void confirmEmail(String confirmationToken) {
         Member member = memberRepository.findAll().stream()
@@ -287,12 +290,14 @@ public class MemberService {
         return memberRepository.findById(memberId);
     }
 
+    @Transactional
     public void deleteMember(long id) {
         if(!memberRepository.existsById(id)) throw new EntityNotFoundException(Member.class,id);
         unlinkServiceProviders(id);
         memberRepository.deleteById(id);
     }
 
+    @Transactional
     public MemberResponseDTO editMember(long id, MemberRequestDTO memberRequestDTO){
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Member.class, id));
@@ -346,6 +351,7 @@ public class MemberService {
         return memberRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(Member.class, id));
     }
 
+    @Transactional
     public void recreateConfirmationToken(String login) {
         Optional<Member> optionalMember = getMemberByLogin(login);
         if(optionalMember.isEmpty())
@@ -365,6 +371,7 @@ public class MemberService {
         emailService.sendConfirmationEmail(member, rawConfirmationToken);
     }
 
+    @Transactional
     public void saveProfilePic(Long id, String filename) {
         memberRepository.findById(id)
                 .map(m -> {
@@ -383,6 +390,7 @@ public class MemberService {
         }
     }
 
+    @Transactional
     public void createPasswordResetToken(String email) {
         Member member = getMemberByEmail(email);
         String rawPasswordResetToken = generateUniquePasswordResetToken();
@@ -425,7 +433,8 @@ public class MemberService {
                 member.getRole().getName()
         );
     }
-    
+
+    @Transactional
     public void updateMemberRating(Long memberId) {
         Double rating = serviceProviderRepository.findAverageRatingByMemberId(memberId);
         System.out.println("Updating Member rating with" + memberId + " to " +rating);

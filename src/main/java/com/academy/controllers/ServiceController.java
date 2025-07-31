@@ -69,7 +69,7 @@ public class ServiceController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ServiceResponseDTO> getById(@PathVariable Long id) { // TODO, if service is disabled, should return an error
+    public ResponseEntity<ServiceResponseDTO> getById(@PathVariable Long id) {
         ServiceResponseDTO response = serviceService.getById(id);
         return ResponseEntity.ok(response);
     }

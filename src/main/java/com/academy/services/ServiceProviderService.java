@@ -7,7 +7,6 @@ import com.academy.dtos.service_provider.ServiceProviderResponseDTO;
 import com.academy.exceptions.AuthenticationException;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.exceptions.MemberNotFoundException;
-import com.academy.models.appointment.Appointment;
 import com.academy.models.member.Member;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
@@ -224,6 +223,7 @@ public class ServiceProviderService {
         return serviceProviderRepository.findProvidersByServiceIdAndPermission(serviceId, permission);
     }
 
+    @Transactional
     public void updateRating(Long id){
         Double rating = appointmentRepository.findAverageRatingByServiceProvider_Id(id);
         System.out.println("Updating rating for service provider with id " + id + " to " + rating);
@@ -234,8 +234,6 @@ public class ServiceProviderService {
             provider.setRating(roundedRating);
             serviceProviderRepository.save(provider);
         }
-
     }
-
-
+    
 }
