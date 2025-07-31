@@ -1,5 +1,8 @@
 package com.academy.controllers;
 
+import com.academy.config.authentication.AuthenticationFacade;
+import com.academy.dtos.appointment.AppointmentReviewResponseDTO;
+import com.academy.dtos.appointment.AppointmentReviewResponseDTO;
 import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.dtos.service.UpdatePermissionsRequestDto;
@@ -53,8 +56,16 @@ public class ServiceController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ServiceResponseDTO>> getAllServices() {
-        List<ServiceResponseDTO> responses = serviceService.getAll();
+    public ResponseEntity<List<ServiceResponseDTO>> getAllEnabled(){
+
+        List<ServiceResponseDTO> responses = serviceService.getAllEnabled();
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/disabled")
+    public ResponseEntity<List<ServiceResponseDTO>> getAllDisabled(){
+
+        List<ServiceResponseDTO> responses = serviceService.getAllDisabled();
         return ResponseEntity.ok(responses);
     }
 
@@ -73,10 +84,12 @@ public class ServiceController {
             @RequestParam(required = false) Integer maxDuration,
             @RequestParam(required = false) Boolean negotiable,
             @RequestParam(required = false) String serviceTypeName,
+            @RequestParam(required = false) Boolean enabled,
+            @RequestParam(required = false) String status,
             @PageableDefault(sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Page<ServiceResponseDTO> responses = serviceService.searchServices(name, minPrice,
-                maxPrice, minDuration, maxDuration, negotiable, serviceTypeName, pageable);
+                maxPrice, minDuration, maxDuration, negotiable, serviceTypeName, pageable, enabled, status);
         return ResponseEntity.ok(responses);
     }
 
@@ -105,5 +118,23 @@ public class ServiceController {
     @GetMapping("/my-services/{id}")
     public ResponseEntity<Page<ServiceResponseDTO>> getMyServices(@PathVariable Long id, Pageable pageable){
         return ResponseEntity.ok(serviceService.getServicesByMemberId(id, pageable));
+    }
+
+    @PatchMapping("/approve-service/{id}")
+    public ResponseEntity<Void> approveService(@PathVariable Long id){
+        serviceService.approveService(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/reject-service/{id}")
+    public ResponseEntity<Void> rejectService(@PathVariable Long id){
+        serviceService.rejectService(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/service_with_review/{id}")
+    public ResponseEntity<List<AppointmentReviewResponseDTO>> getServiceReviews(@PathVariable Long id) {
+        List<AppointmentReviewResponseDTO> reviews = serviceService.getReviewsByServiceId(id);
+        return ResponseEntity.ok(reviews);
     }
 }

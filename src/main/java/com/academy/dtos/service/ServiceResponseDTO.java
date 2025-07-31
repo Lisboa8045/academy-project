@@ -19,5 +19,6 @@ public record ServiceResponseDTO(
         List<String> tagNames,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
-        List<String> images
+        List<String> images,
+        int rating
 ) {}

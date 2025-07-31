@@ -3,6 +3,7 @@ import {NgIf, NgStyle} from '@angular/common';
 import {UserProfileService} from '../../profile/user-profile.service';
 import {AuthStore} from '../../auth/auth.store';
 import {Router} from '@angular/router';
+import {ServiceModel} from '../../service/service.model';
 
 type Tag = {
   label: string;
@@ -19,7 +20,8 @@ type Tag = {
   styleUrls: ['./service-card.component.css']
 })
 export class ServiceCardComponent implements OnInit {
-  @Input() service: any;
+  @Input() service!: ServiceModel;
+  @Input() shouldShowTags = true;
   serviceImage = signal('https://placehold.co/300x200?text=No+Image');
   @Output() cardClick = new EventEmitter<number>();
   discountedPrice: number | null = null;

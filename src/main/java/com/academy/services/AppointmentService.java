@@ -21,6 +21,7 @@ import com.academy.repositories.AppointmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +36,7 @@ public class AppointmentService {
     private final AppointmentMapper appointmentMapper;
     private final MemberService memberService;
     private final AuthenticationFacade authenticationFacade;
+    private final ServiceService serviceService;
     private final EmailService emailService;
     private final AppointmentSchedulerService appointmentSchedulerService;
     private final GlobalConfigurationService globalConfigurationService;
@@ -51,12 +53,14 @@ public class AppointmentService {
                               AuthenticationFacade authenticationFacade,
                               EmailService emailService,
                               AppointmentSchedulerService appointmentSchedulerService,
-                              GlobalConfigurationService globalConfigurationService) {
+                              GlobalConfigurationService globalConfigurationService,
+                              ServiceService serviceService) {
         this.appointmentRepository = appointmentRepository;
         this.serviceProviderService = serviceProviderService;
         this.appointmentMapper = appointmentMapper;
         this.memberService = memberService;
         this.authenticationFacade = authenticationFacade;
+        this.serviceService = serviceService;
         this.emailService = emailService;
         this.appointmentSchedulerService = appointmentSchedulerService;
         this.globalConfigurationService = globalConfigurationService;
@@ -187,11 +191,21 @@ public class AppointmentService {
 
     public void cancelAppointment(Long id) {
         Appointment appointment = getAppointmentEntityById(id);
-        if(appointment.getStatus() != AppointmentStatus.PENDING)
+        if(appointment.getStatus() != AppointmentStatus.PENDING && appointment.getStatus() != AppointmentStatus.CONFIRMED)
             throw new BadRequestException("Appointment can't be canceled with status " + appointment.getStatus());
+        String loggedMemberUsername = authenticationFacade.getUsername();
+        if(appointment.getServiceProvider().getProvider().getUsername().equals(loggedMemberUsername)){
+            if(AppointmentStatus.PENDING.equals(appointment.getStatus()))
+                throw new BadRequestException("Pending payment appointment can't be cancelled");
+            emailService.sendCancelAppointmentClientEmail(appointment);
+        }
+        else
+            emailService.sendCancelAppointmentProviderEmail(appointment);
 
         appointment.setStatus(AppointmentStatus.CANCELLED);
         appointmentRepository.save(appointment);
+
+
     }
 
     public ResponseEntity<ReviewResponseDTO> addReview(Long appointmentId, ReviewRequestDTO request) {
@@ -199,7 +213,10 @@ public class AppointmentService {
 
         appointment.setRating(request.rating());
         appointment.setComment(request.comment());
-        appointmentRepository.save(appointment);
+
+        serviceProviderService.updateRating(appointment.getServiceProvider().getId());
+        serviceService.updateRating(appointment.getServiceProvider().getService().getId());
+        memberService.updateMemberRating(appointment.getServiceProvider().getProvider().getId());
 
         return ResponseEntity.ok(new ReviewResponseDTO("Review added successfully"));
     }
@@ -215,4 +232,5 @@ public class AppointmentService {
         appointmentRepository.save(appointment);
         return ResponseEntity.ok(new ConfirmAppointmentResponseDTO("Appointment confirmed successfully"));
     }
+
 }

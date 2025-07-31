@@ -5,6 +5,7 @@ import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -37,4 +38,10 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
     boolean existsByServiceIdAndPermissions_Permission(Long id, ProviderPermissionEnum providerPermissionEnum);
 
     boolean existsByProvider_UsernameAndService_IdAndPermissions_Permission(String username, Long serviceId, ProviderPermissionEnum permission);
+    
+    @Query("SELECT AVG(sp.rating) FROM ServiceProvider sp WHERE sp.service.id = :serviceId")
+    Double findAverageRatingByService_Id(@Param("serviceId") Long serviceId);
+
+    @Query("SELECT AVG(sp.rating) FROM ServiceProvider sp WHERE sp.provider.id = :memberId")
+    Double findAverageRatingByMemberId(@Param("memberId") Long memberId);
 }

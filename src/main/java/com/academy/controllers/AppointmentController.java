@@ -1,7 +1,7 @@
 package com.academy.controllers;
 
-import com.academy.dtos.appointment.AppointmentCardDTO;
 import com.academy.dtos.SlotDTO;
+import com.academy.dtos.appointment.AppointmentCardDTO;
 import com.academy.dtos.appointment.AppointmentRequestDTO;
 import com.academy.dtos.appointment.AppointmentResponseDTO;
 import com.academy.dtos.appointment.ConfirmAppointmentResponseDTO;
@@ -9,7 +9,6 @@ import com.academy.dtos.appointment.review.ReviewRequestDTO;
 import com.academy.dtos.appointment.review.ReviewResponseDTO;
 import com.academy.services.AppointmentService;
 import com.academy.services.SchedulingService;
-
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;

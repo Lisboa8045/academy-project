@@ -42,6 +42,9 @@ public class ServiceProvider extends BaseEntity {
     @JoinColumn(name="service_id")
     private Service service;
 
+    @Column(name = "rating")
+    private Integer rating = 0;
+
     @OneToMany(mappedBy = "serviceProvider", fetch = FetchType.EAGER)
     private List<Appointment> appointmentList = new ArrayList<>();
 

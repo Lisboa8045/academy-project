@@ -3,6 +3,7 @@ package com.academy.controllers;
 import com.academy.dtos.notification.NotificationMapper;
 import com.academy.dtos.notification.NotificationResponseDTO;
 import com.academy.models.notification.Notification;
+import com.academy.services.MemberService;
 import com.academy.services.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,11 +21,13 @@ import java.util.List;
 public class NotificationController {
     private final NotificationService notificationService;
     private final NotificationMapper notificationMapper;
+    private final MemberService memberService;
 
     @Autowired
-    public NotificationController(NotificationService notificationService, NotificationMapper notificationMapper) {
+    public NotificationController(NotificationService notificationService, NotificationMapper notificationMapper, MemberService memberService) {
         this.notificationService = notificationService;
         this.notificationMapper = notificationMapper;
+        this.memberService = memberService;
     }
 
     @PreAuthorize("@memberSecurity.isSelf(#memberId, authentication.name)")

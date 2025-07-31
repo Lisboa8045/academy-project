@@ -1,10 +1,11 @@
 import {Component, OnInit} from '@angular/core';
-import {Router, RouterOutlet} from '@angular/router';
+import {NavigationEnd, Router, RouterOutlet} from '@angular/router';
 import {AppHeaderComponent} from './header/app-header.component';
 import {HttpClient} from '@angular/common/http';
 import {AuthStore} from './auth/auth.store';
 import {MemberResponseDTO} from "./auth/member-response-dto.model";
 import {AppFooterComponent} from './footer/app-footer.component';
+import {filter} from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -13,8 +14,11 @@ import {AppFooterComponent} from './footer/app-footer.component';
   styleUrl: './app.component.css'
 })
 export class AppComponent implements OnInit {
-  constructor(private http: HttpClient, private authStore: AuthStore, private router: Router) {}
+
+  constructor(private readonly http: HttpClient, private readonly authStore: AuthStore, private readonly router: Router) {}
+
   ngOnInit(): void {
+
     this.http.get<MemberResponseDTO>('http://localhost:8080/auth/me', {
       withCredentials: true
     }).subscribe({
@@ -30,5 +34,11 @@ export class AppComponent implements OnInit {
         //this.router.navigate(['/auth']);
       }
     });
+
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(() => {
+        setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
+      });
   }
 }
