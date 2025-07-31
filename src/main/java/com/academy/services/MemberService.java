@@ -37,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -286,10 +287,32 @@ public class MemberService {
     }
 
     public void deleteMember(long id) {
-        if(!memberRepository.existsById(id)) throw new EntityNotFoundException(Member.class,id);
-        unlinkServiceProviders(id);
-        memberRepository.deleteById(id);
+        Member member = getMemberEntityById(id);
+        member.setEnabled(false);
+        member.setStatus(MemberStatusEnum.PENDING_DELETION);
+        member.setTokenExpiry(LocalDateTime.now().plusDays(
+                Integer.parseInt(globalConfigurationService.getConfigValue("account_deletion_expiry_days"))));
+        memberRepository.save(member);
+        emailService.sendDeleteAccountConfirmationEmail(member, generateAccountDeletionRevertToken(member));
     }
+
+    private String generateAccountDeletionRevertToken(Member member) {
+        String rawToken;
+        Optional<Member> optionalMember;
+
+        do {
+            rawToken = generateEncodedToken();
+            String finalRawToken = rawToken;
+            optionalMember = memberRepository.findAll().stream()
+                .filter(m -> m.getConfirmationToken() != null && passwordEncoder.matches(finalRawToken, m.getConfirmationToken()))
+                .findFirst();
+        } while (optionalMember.isPresent());
+
+        member.setConfirmationToken(passwordEncoder.encode(rawToken));
+        memberRepository.save(member);
+        return rawToken;
+    }
+
 
     public MemberResponseDTO editMember(long id, MemberRequestDTO memberRequestDTO){
         Member member = memberRepository.findById(id)
@@ -362,6 +385,10 @@ public class MemberService {
         emailService.sendConfirmationEmail(member, rawConfirmationToken);
     }
 
+    public void recreateDeletionToken(String login) {
+       //TODO
+    }
+
     public void saveProfilePic(Long id, String filename) {
         memberRepository.findById(id)
                 .map(m -> {
@@ -404,6 +431,38 @@ public class MemberService {
         member.setPasswordResetToken(null);
         member.setPasswordResetTokenExpiry(null);
         memberRepository.save(member);
+    }
+
+
+    @Transactional
+    public void revertAccountDelete(String token) {
+        Member member = memberRepository.findAll().stream()
+            .filter(m -> m.getConfirmationToken() != null &&
+                    passwordEncoder.matches(token, m.getConfirmationToken()) &&
+                    m.getStatus() == MemberStatusEnum.PENDING_DELETION)
+            .findFirst()
+            .orElseThrow(() -> new BadRequestException("Invalid or expired revert token."));
+
+        if (member.getTokenExpiry() == null || member.getTokenExpiry().isBefore(LocalDateTime.now())) {
+            throw new TokenExpiredException("Revert token has expired.");
+        }
+
+        member.setEnabled(true);
+        member.setStatus(MemberStatusEnum.ACTIVE);
+        member.setConfirmationToken(null);
+        member.setTokenExpiry(null);
+        memberRepository.save(member);
+    }
+
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void permanentlyDeleteExpiredAccounts() {
+        List<Member> expiredMembers = memberRepository.findAll().stream()
+                .filter(m -> m.getStatus() == MemberStatusEnum.PENDING_DELETION
+                        && m.getTokenExpiry() != null
+                        && m.getTokenExpiry().isBefore(LocalDateTime.now()))
+                .toList();
+
+        memberRepository.deleteAll(expiredMembers);
     }
 
     public void updateMemberRating(Long memberId) {

@@ -16,6 +16,8 @@ import { snackBarSuccess } from '../shared/snackbar/snackbar-success';
 import { snackBarError } from '../shared/snackbar/snackbar-error';
 import {passwordsMatchValidator} from '../shared/validators/password-match-validator';
 import {MyServicesComponent} from '../service/my-services/my-services.component';
+import {ConfirmationModalComponent} from '../shared/confirmation-component/confirmation-modal.component';
+import {MemberStatusEnum} from '../models/member-status-enum.model';
 import {ServiceReviewComponent} from '../service/service-review/service-review.component';
 import {snackBarInfo} from '../shared/snackbar/snackbar-info';
 
@@ -25,6 +27,8 @@ import {snackBarInfo} from '../shared/snackbar/snackbar-info';
     LoadingComponent,
     ReactiveFormsModule,
     NgIf,
+    MyServicesComponent,
+    ConfirmationModalComponent,
     MyServicesComponent,
     ServiceReviewComponent,
     DecimalPipe,
@@ -42,6 +46,9 @@ export class ProfileComponent implements OnInit {
   editMode = false;
   editPasswordMode = false;
   selectedFile: File | null = null;
+  showDeleteModal = false;
+
+  protected readonly MemberStatusEnum = MemberStatusEnum;
   upgradeWorkerRole = false;
 
   constructor(
@@ -56,9 +63,12 @@ export class ProfileComponent implements OnInit {
     private route: ActivatedRoute,
   ) {
     effect(() => {
-      if(this.route.snapshot.paramMap.get('id')) return;
-      this.loading.set(true);
-      if (this.authStore.id() > -1) this.getMember(this.authStore.id());
+      if (this.route.snapshot.paramMap.get('id')) return;
+      const id = this.authStore.id();
+      if (id > -1) {
+        this.loading.set(true);
+        this.getMember(id);
+      }
     });
   }
 
@@ -286,4 +296,59 @@ export class ProfileComponent implements OnInit {
   }
 
   protected readonly Math = Math;
+
+  deleteMember() {
+    this.showDeleteModal = true;
+  }
+
+  onDeleteConfirmed() {
+    this.profileService.deleteMember(this.authStore.id()).subscribe({
+      next: () => {
+        this.showDeleteCountdownAndLogout();
+      },
+      error: (err) => {
+        snackBarError(this.snackBar, 'Delete failed: ' + (err.error?.message || err.statusText));
+        console.error(err);
+      }
+    });
+  }
+
+  private showDeleteCountdownAndLogout() {
+    let seconds = 5;
+    const updateMessage = () =>
+      `Account deleted successfully. Logging out in ${seconds}...`;
+
+    const snackBarRef = this.snackBar.open(updateMessage(), undefined, {
+      duration: 1000,
+      panelClass: ['success-snackbar'],
+      horizontalPosition: 'right',
+      verticalPosition: 'top'
+    });
+
+    const interval = setInterval(() => {
+      seconds--;
+      snackBarRef.dismiss();
+      if (seconds > 0) {
+        this.snackBar.open(updateMessage(), undefined, {
+          duration: 1000,
+          panelClass: ['success-snackbar'],
+          horizontalPosition: 'right',
+          verticalPosition: 'top'
+        });
+      } else {
+        clearInterval(interval);
+        this.snackBar.dismiss();
+        this.authService.logout().subscribe({
+          next: () => {
+            this.userProfileService.revoke();
+            this.router.navigate(['/auth']);
+          },
+          error: (err) => {
+            this.userProfileService.revoke();
+            this.router.navigate(['/auth']);
+          }
+        });
+      }
+    }, 1000);
+  }
 }

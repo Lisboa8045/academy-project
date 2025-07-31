@@ -57,6 +57,12 @@ public class MemberController {
         return ResponseEntity.ok(memberService.getMemberById(id));
     }
 
+    @PostMapping("/revert-delete/{token}")
+    public ResponseEntity<Void> revertDelete(@PathVariable String token) {
+        memberService.revertAccountDelete(token);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/{id}/reviews")
     public ResponseEntity<List<AppointmentReviewResponseDTO>> getReviewsByMemberId(@PathVariable Long id) {
         List<AppointmentReviewResponseDTO> reviews = memberService.getReviewsByMemberId(id);
