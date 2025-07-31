@@ -37,6 +37,8 @@ import {Review} from '../review/review.model';
   ]
 })
 export class AppointmentHistoryComponent implements OnInit {
+
+  protected readonly AppointmentStatusEnumModel = AppointmentStatusEnumModel;
   appointments: AppointmentResponseDTO[] = [];
   filteredAppointments: AppointmentResponseDTO[] = [];
   selectedAppointment: AppointmentResponseDetailedDTO | null | undefined;
@@ -138,6 +140,10 @@ export class AppointmentHistoryComponent implements OnInit {
     return `cancel the appointment at ${formattedDate} for ${this.selectedAppointment.serviceName}`;
   }
 
+  isCancelledOrFinished(status: AppointmentStatusEnumModel): boolean {
+    return [AppointmentStatusEnumModel.CANCELLED, AppointmentStatusEnumModel.FINISHED].includes(status);
+  }
+
   confirmCancelAppointment() {
     this.appointmentHistoryService.cancelAppointment(this.selectedAppointment!.id).subscribe({
       next: data => {
@@ -191,5 +197,4 @@ export class AppointmentHistoryComponent implements OnInit {
       }
     });
   }
-
 }
