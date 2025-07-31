@@ -5,7 +5,6 @@ import com.academy.config.authentication.JwtUtil;
 import com.academy.dtos.appointment.AppointmentReviewResponseDTO;
 import com.academy.dtos.member.MemberRequestDTO;
 import com.academy.dtos.member.MemberResponseDTO;
-import com.academy.dtos.register.MemberMapper;
 import com.academy.services.MemberService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +30,7 @@ public class MemberController {
     private final UserDetailsService userDetailsService;
     private final JwtCookieUtil jwtCookieUtil;
 
-    public MemberController(MemberService memberService, JwtUtil jwtUtil, UserDetailsService userDetailsService, JwtCookieUtil jwtCookieUtil, MemberMapper memberMapper) {
+    public MemberController(MemberService memberService, JwtUtil jwtUtil, UserDetailsService userDetailsService, JwtCookieUtil jwtCookieUtil) {
         this.memberService = memberService;
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
