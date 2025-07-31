@@ -15,7 +15,6 @@ import {snackBarError} from '../../shared/snackbar/snackbar-error';
 import {ManageWorkersComponent} from './manage-workers/manage-workers.component';
 import {ProviderPermissionEnumModel} from '../../models/provider-permission.enum';
 import {ConfirmationModalComponent} from '../../shared/confirmation-component/confirmation-modal.component';
-import {AppointmentHistoryComponent} from '../../appointment/appointment-history/appointment-history.component';
 import {ServiceAppointmentsComponent} from './service-appointments/service-appointments.component';
 
 
