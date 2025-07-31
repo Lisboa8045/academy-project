@@ -59,7 +59,7 @@ public class MemberController {
 
     @PostMapping("/revert-delete/{token}")
     public ResponseEntity<Void> revertDelete(@PathVariable String token) {
-        memberService.revertDelete(token);
+        memberService.revertAccountDelete(token);
         return ResponseEntity.ok().build();
     }
 

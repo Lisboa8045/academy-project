@@ -293,10 +293,10 @@ public class MemberService {
         member.setTokenExpiry(LocalDateTime.now().plusDays(
                 Integer.parseInt(globalConfigurationService.getConfigValue("account_deletion_expiry_days"))));
         memberRepository.save(member);
-        emailService.sendDeleteAccountConfirmationEmail(member, generateRevertToken(member));
+        emailService.sendDeleteAccountConfirmationEmail(member, generateAccountDeletionRevertToken(member));
     }
 
-    private String generateRevertToken(Member member) {
+    private String generateAccountDeletionRevertToken(Member member) {
         String rawToken;
         Optional<Member> optionalMember;
 
@@ -435,7 +435,7 @@ public class MemberService {
 
 
     @Transactional
-    public void revertDelete(String token) {
+    public void revertAccountDelete(String token) {
         Member member = memberRepository.findAll().stream()
             .filter(m -> m.getConfirmationToken() != null &&
                     passwordEncoder.matches(token, m.getConfirmationToken()) &&
