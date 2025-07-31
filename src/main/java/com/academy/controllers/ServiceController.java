@@ -1,6 +1,8 @@
 package com.academy.controllers;
 
 import com.academy.config.authentication.AuthenticationFacade;
+import com.academy.dtos.appointment.AppointmentReviewResponseDTO;
+import com.academy.dtos.appointment.AppointmentReviewResponseDTO;
 import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.dtos.service.UpdatePermissionsRequestDto;
@@ -33,10 +35,14 @@ import java.util.List;
 public class ServiceController {
 
     private final ServiceService serviceService;
+    private final AuthenticationFacade authenticationFacade;
+    private final MemberService memberService;
 
     @Autowired
     public ServiceController(ServiceService serviceService, AuthenticationFacade authenticationFacade, MemberService memberService) {
         this.serviceService = serviceService;
+        this.authenticationFacade = authenticationFacade;
+        this.memberService = memberService;
     }
 
     @PostMapping
@@ -63,6 +69,8 @@ public class ServiceController {
 
         List<ServiceResponseDTO> responses = serviceService.getAllDisabled();
         return ResponseEntity.ok(responses);
+
+
     }
 
     @GetMapping("/{id}")
@@ -117,5 +125,11 @@ public class ServiceController {
     public ResponseEntity<Void> rejectService(@PathVariable Long id){
         serviceService.rejectService(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/service_with_review/{id}")
+    public ResponseEntity<List<AppointmentReviewResponseDTO>> getServiceReviews(@PathVariable Long id) {
+        List<AppointmentReviewResponseDTO> reviews = serviceService.getReviewsByServiceId(id);
+        return ResponseEntity.ok(reviews);
     }
 }

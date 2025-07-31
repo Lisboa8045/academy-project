@@ -2,6 +2,7 @@ import {Injectable, WritableSignal} from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {MemberResponseDTO} from '../auth/member-response-dto.model';
 import {Observable} from 'rxjs';
+import {ServiceAppointmentReviewModel} from '../service/service-details/service-appointment-review-model';
 
 @Injectable({
   providedIn: 'root'
@@ -27,6 +28,10 @@ export class ProfileService {
 
   updateMember(updatedUser: Partial<MemberResponseDTO>, id:number) {
     return this.http.put(`${this.apiUrl}/${id}`, updatedUser);
+  }
+
+  getReviewsByMemberId(memberId: number): Observable<ServiceAppointmentReviewModel[]> {
+    return this.http.get<ServiceAppointmentReviewModel[]>(`${this.apiUrl}/${memberId}/reviews`);
   }
 }
 

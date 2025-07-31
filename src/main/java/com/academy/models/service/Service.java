@@ -60,6 +60,9 @@ public class Service extends BaseEntity {
     @Column(name="duration")
     private int duration;
 
+    @Column(name = "rating")
+    private Integer rating = 0;
+
     @Column(name="entity", unique = true)
     private String entity;
 

@@ -1,6 +1,8 @@
 package com.academy.services;
 
 import com.academy.config.authentication.AuthenticationFacade;
+import com.academy.dtos.appointment.AppointmentMapper;
+import com.academy.dtos.appointment.AppointmentReviewResponseDTO;
 import com.academy.dtos.service.ServiceMapper;
 import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
@@ -9,6 +11,7 @@ import com.academy.exceptions.AuthenticationException;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.ServiceType;
 import com.academy.models.Tag;
+import com.academy.models.appointment.Appointment;
 import com.academy.models.member.Member;
 import com.academy.models.notification.Notification;
 import com.academy.models.notification.NotificationTypeEnum;
@@ -17,6 +20,7 @@ import com.academy.models.service.ServiceImages;
 import com.academy.models.service.ServiceStatusEnum;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
+import com.academy.repositories.ServiceProviderRepository;
 import com.academy.repositories.ServiceRepository;
 import com.academy.specifications.ServiceSpecifications;
 import com.academy.utils.Utils;
@@ -46,6 +50,8 @@ public class ServiceService {
     private final ServiceTypeService serviceTypeService;
     private final EmailService emailService;
     private final NotificationService notificationService;
+    private final AppointmentMapper appointmentMapper;
+    private final ServiceProviderRepository serviceProviderRepository;
 
     public ServiceService(ServiceRepository serviceRepository,
                           ServiceMapper serviceMapper,
@@ -54,6 +60,8 @@ public class ServiceService {
                           MemberService memberService,
                           TagService tagService,
                           ServiceTypeService serviceTypeService,
+                          ServiceProviderRepository serviceProviderRepository,
+                          AppointmentMapper appointmentMapper,
                           EmailService emailService,
                           NotificationService notificationService) {
         this.serviceRepository = serviceRepository;
@@ -65,6 +73,9 @@ public class ServiceService {
         this.serviceTypeService = serviceTypeService;
         this.emailService = emailService;
         this.notificationService = notificationService;
+        this.appointmentMapper = appointmentMapper;
+        this.serviceProviderRepository = serviceProviderRepository;
+
     }
 
     @Transactional
@@ -333,6 +344,28 @@ public class ServiceService {
         return null;
     }
 
+    public List<AppointmentReviewResponseDTO> getReviewsByServiceId(Long serviceId) {
+        Service service = serviceRepository.findById(serviceId)
+                .orElseThrow(() -> new EntityNotFoundException(Service.class, serviceId));
+        return service.getServiceProviders().stream()
+                .flatMap(sp -> sp.getAppointmentList().stream())
+                .filter(app -> app.getComment() != null)
+                .map(appointmentMapper::toReviewResponseDTO)
+                .toList();
+    }
+    public void updateRating(Long id){
+        Double rating = serviceProviderRepository.findAverageRatingByService_Id(id);
+        System.out.println("Updating rating for service id " + id + " to " + rating);
+
+        if (rating != null) {
+            int roundedRating = Math.toIntExact(Math.round(rating));
+            Service service = serviceRepository.findById(id)
+                    .orElseThrow(() -> new EntityNotFoundException(Service.class, id));
+            service.setRating(roundedRating);
+            serviceRepository.save(service);
+        }
+    }
+
     public void approveService(Long id) {
         Service service = getServiceEntityById(id);
         service.setEnabled(true);
@@ -362,4 +395,5 @@ public class ServiceService {
         );
         notificationService.createNotification(notification);
     }
+
 }

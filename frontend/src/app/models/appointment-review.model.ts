@@ -3,4 +3,5 @@ export interface AppointmentReviewModel {
   rating: number;
   comment: string;
   memberUsername: string;
+  memberProfilePicture: string;
 }
