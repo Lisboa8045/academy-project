@@ -15,9 +15,12 @@ export interface AvailabilityDTO {
 }
 
 export interface AppointmentCalendarDTO{
+  id: number;
   memberUsername: string;
   serviceName: string;
   startDateTime: string;
   endDateTime: string;
+  price: number;
+  duration: number;
   status: AppointmentStatus;
 }

@@ -163,7 +163,7 @@ public class AppointmentService {
     public List<AppointmentCalendarDTO> getAppointmentsForAuthenticatedServiceProviderCalendar() {
 
         List<Appointment> appointmentList = appointmentRepository
-                .findAllByServiceProviderProviderUsername(authenticationFacade.getUsername());
+                .findAllByServiceProviderProviderUsernameAndStatusIsNot(authenticationFacade.getUsername(), AppointmentStatus.CANCELLED);
         return appointmentList.stream().map(appointmentMapper::toAppointmentCalendarDTO).toList();
     }
 

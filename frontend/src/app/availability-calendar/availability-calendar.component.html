@@ -54,3 +54,9 @@
         </div>
     </div>
 </div>
+<app-appointment-modal
+  *ngIf="showAppointmentModal && selectedAppointment"
+  [appointment]="selectedAppointment"
+  [isCalendarContext]="true"
+  (close)="refetchAppointments()"
+></app-appointment-modal>

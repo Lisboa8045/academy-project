@@ -26,10 +26,17 @@
           <span class="font-semibold">Service:</span>
           <span class="ml-2">{{ appointment.serviceName }}</span>
         </div>
-        <div>
-          <span class="font-semibold">Provider:</span>
-          <span class="ml-2">{{ appointment.serviceProviderUsername }}</span>
-        </div>
+        @if(!isCalendarContext){
+          <div>
+            <span class="font-semibold">Provider:</span>
+            <span class="ml-2">{{ appointment.serviceProviderUsername }}</span>
+          </div>
+        }@else{
+          <div>
+            <span class="font-semibold">Client:</span>
+            <span class="ml-2">{{ appointment.memberUsername }}</span>
+          </div>
+        }
         <div>
           <span class="font-semibold">Status:</span>
           <span class="ml-2">{{ appointment.status }}</span>
@@ -78,6 +85,22 @@
         Close
       </button>
     </div>
+    @if(isCalendarContext){
+      <div *ngIf="!cancelAppointmentModal" class="flex justify-end mt-auto pt-6">
+        <button
+          class="px-4 py-2 rounded-full bg-red-500 text-white hover:bg-red-800 transition"
+          (click)="cancelAppointmentModal = true"
+        >
+          Cancel Appointment
+        </button>
+      </div>
+      <app-confirmation-modal *ngIf="cancelAppointmentModal"
+                              [title]="'Cancel Appointment'"
+                              [text]="getCancelText()"
+                              (confirm)="confirmCancelAppointment()"
+                              (close)="cancelAppointmentModal = false"
+      ></app-confirmation-modal>
+    }
   </div>
 </div>
 </div>

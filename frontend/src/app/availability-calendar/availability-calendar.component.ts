@@ -12,11 +12,13 @@ import {AvailabilityService} from './availability.service';
 import {snackBarError} from '../shared/snackbar/snackbar-error';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {snackBarSuccess} from '../shared/snackbar/snackbar-success';
+import {AppointmentResponseDetailedDTO} from '../appointment/appointment-response-dto.model';
+import {AppointmentModalComponent} from '../appointment/appointment-modal/appointment-modal.component';
 
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [CommonModule, FullCalendarModule, ReactiveFormsModule, NgSelectComponent],
+  imports: [CommonModule, FullCalendarModule, ReactiveFormsModule, NgSelectComponent, AppointmentModalComponent],
   templateUrl: './availability-calendar.component.html',
   styleUrls: ['./availability-calendar.component.css']
 })
@@ -24,6 +26,8 @@ export class CalendarComponent implements OnInit, AfterViewInit {
   @ViewChild('calendar') calendarComponent!: FullCalendarComponent;
   todayString = new Date().toISOString().split('T')[0];
   private originalAvailabilitySnapshot: { date: string, start: string, end: string }[] = [];
+  selectedAppointment: AppointmentResponseDetailedDTO | null = null;
+  showAppointmentModal = false;
 
   calendarOptions: CalendarOptions = {
     initialView: 'timeGridWeek',
@@ -54,16 +58,19 @@ export class CalendarComponent implements OnInit, AfterViewInit {
         selectMirror: false,
       }
     },
-    datesSet: () => {
-      // Force re-render of day headers and stack events after navigation
-      this.forceHeaderRerender();
-      this.scheduleStackEvents();
-    },
     eventDidMount: (info) => {
-      this.collectEventForStacking(info);
-      // Only in month view (dayGridMonth)
+      if (info.event.title !== 'Available' && info.view.type.startsWith('timeGrid')) {
+        // Find all events that overlap this slot in this cell
+        const cell = info.el.parentElement?.parentElement;
+        if (!cell) return;
+        // Apply left and width offset to stack
+        info.el.style.left = `-80%`;
+        info.el.style.width = `calc(200%-12px)`;
+        console.log(info.el.style)
+      }
+
+      // Optionally: Month view disables pointer events
       if (info.view.type === 'dayGridMonth' && info.el) {
-        // info.el is the <a> element
         info.el.style.pointerEvents = 'none';
       }
     },
@@ -125,11 +132,13 @@ export class CalendarComponent implements OnInit, AfterViewInit {
           end: app.endDateTime,
           color: this.statusColors[app.status],
           editable: false,
-          durationEditable: false
+          durationEditable: false,
+          extendedProps: {
+            appointment: app
+          }
         }));
         calendarEvents.forEach(event => calendarApi.addEvent(event));
         this.forceHeaderRerender();
-        this.scheduleStackEvents();
       }
     });
     // Load availabilities
@@ -162,7 +171,6 @@ export class CalendarComponent implements OnInit, AfterViewInit {
           });
         });
         this.forceHeaderRerender();
-        this.scheduleStackEvents();
       }
     });
   }
@@ -231,7 +239,6 @@ export class CalendarComponent implements OnInit, AfterViewInit {
       color: this.availableColor,
     });
     this.forceHeaderRerender();
-    this.scheduleStackEvents();
   }
 
   allowEventEdit(dropInfo: any) {
@@ -248,8 +255,16 @@ export class CalendarComponent implements OnInit, AfterViewInit {
 
   handleEventClick(clickInfo: EventClickArg) {
     const event = clickInfo.event;
-    if (event.title !== 'Available') {
-      return;
+    if (event.title === 'Available') {
+      return; // Skip available events
+    }
+    const appointment = event.extendedProps?.['appointment'] as AppointmentResponseDetailedDTO;
+    if (appointment) {
+      const start = new Date(appointment.startDateTime);
+      const end = event.end;
+      appointment.duration = (end!.getTime() - start.getTime()) / 60000;
+      this.selectedAppointment = appointment;
+      this.showAppointmentModal = true;
     }
     // Add any additional click logic here if needed
   }
@@ -266,6 +281,41 @@ export class CalendarComponent implements OnInit, AfterViewInit {
     this.showRepeatModal = false;
     this.selectedRepeatDate = null;
     this.replicateForm.reset();
+  }
+
+  refetchAppointments(){
+    const calendarApi = this.calendarComponent.getApi();
+
+    calendarApi.getEvents().forEach(event => {
+      if (event.title !== 'Available') {
+        event.remove();
+      }
+    });
+
+    this.availabilityService.getAppointments().subscribe({
+      next: (appointments) => {
+        const calendarEvents = appointments.map(app => ({
+          title: `${app.serviceName} ${app.status}`,
+          start: app.startDateTime,
+          end: app.endDateTime,
+          color: this.statusColors[app.status],
+          editable: false,
+          durationEditable: false,
+          extendedProps: {
+            appointment: app
+          }
+        }));
+        calendarEvents.forEach(event => calendarApi.addEvent(event));
+        this.forceHeaderRerender();
+      },
+      error: () => {
+        snackBarError(this.snackBar, 'Could not reload appointments');
+      }
+    });
+
+    // 3. Optionally, close modal if open
+    this.showAppointmentModal = false;
+    this.selectedAppointment = null;
   }
 
   showConflictsModal(messages: string[]) {
@@ -342,7 +392,6 @@ export class CalendarComponent implements OnInit, AfterViewInit {
     }
 
     this.forceHeaderRerender();
-    this.scheduleStackEvents();
   }
 
   // ────────────── Save / DTO Logic ──────────────
@@ -534,7 +583,6 @@ export class CalendarComponent implements OnInit, AfterViewInit {
           if (confirm('Delete this availability?')) {
             event.remove();
             this.forceHeaderRerender();
-            this.scheduleStackEvents();
           }
         });
         container.appendChild(deleteBtn);
@@ -544,50 +592,6 @@ export class CalendarComponent implements OnInit, AfterViewInit {
     container.appendChild(titleEl);
 
     return {domNodes: [container]};
-  }
-
-  // ────────────── Event stacking logic (robust across view changes) ──────────────
-
-  private collectEventForStacking(info: any) {
-    if (info.view.type.startsWith('timeGrid')) {
-      this.eventsToStack.push(info);
-    }
-  }
-
-  private scheduleStackEvents() {
-    if (this.eventStackingTimer) clearTimeout(this.eventStackingTimer);
-    this.eventStackingTimer = setTimeout(() => {
-      this.stackEvents();
-    }, 20); // 20ms is usually enough, tweak if needed
-  }
-
-  private stackEvents() {
-    // Group events by cell
-    const cellToHarnesses = new Map<Element, Element[]>();
-    this.eventsToStack.forEach(info => {
-      const harness = info.el.parentElement;
-      if (!harness) return;
-      const cell = harness.parentElement;
-      if (!cell) return;
-      if (!cellToHarnesses.has(cell)) {
-        cellToHarnesses.set(cell, []);
-      }
-      cellToHarnesses.get(cell)!.push(harness);
-    });
-
-    // For each cell, stack its events
-    for (const harnesses of cellToHarnesses.values()) {
-      harnesses.forEach((el: any, idx: number) => {
-        el.style.left = `${(idx) * 12}px`;
-        el.style.marginTop = `${(idx) * 14}px`;
-        el.style.width = `calc(100% - ${(idx) * 12}px)`;
-        el.style.zIndex = `${100 + idx}`;
-        el.style.boxShadow = '0 2px 8px 0 rgba(30,41,59,0.10), 0 1.5px 3px 0 rgba(30,41,59,0.10)';
-        el.style.borderRadius = '10px';
-        el.style.transition = 'box-shadow 0.15s, left 0.15s, width 0.15s, margin-top 0.15s';
-      });
-    }
-    this.eventsToStack = [];
   }
 
   // ────────────── Utility Methods ──────────────

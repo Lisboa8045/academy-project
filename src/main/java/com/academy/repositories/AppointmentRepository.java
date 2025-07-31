@@ -5,6 +5,8 @@ import com.academy.models.appointment.Appointment;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.academy.models.appointment.AppointmentStatus;
+import com.academy.services.AppointmentService;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -32,5 +34,5 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     List<Appointment> findByServiceProviderId(Long serviceProviderId);
 
-    List<Appointment> findAllByServiceProviderProviderUsername(String username);
+    List<Appointment> findAllByServiceProviderProviderUsernameAndStatusIsNot(String username, AppointmentStatus status);
 }
