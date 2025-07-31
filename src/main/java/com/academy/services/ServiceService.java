@@ -108,11 +108,23 @@ public class ServiceService {
     }
 
     // Read all
-    public List<ServiceResponseDTO> getAll() {
+    public List<ServiceResponseDTO> getAllEnabled() {
         String username =  authenticationFacade.getUsername();
         return serviceRepository.findAll()
                 .stream()
                 .filter(Service::isEnabled)
+                .map(service ->  serviceMapper.toDto(service,
+                        getPermissionsByProviderUsernameAndServiceId(username, service.getId())
+                ))
+                .collect(Collectors.toList());
+    }
+
+    // Read all
+    public List<ServiceResponseDTO> getAllDisabled() {
+        String username =  authenticationFacade.getUsername();
+        return serviceRepository.findAll()
+                .stream()
+                .filter(service -> !service.isEnabled())
                 .map(service ->  serviceMapper.toDto(service,
                         getPermissionsByProviderUsernameAndServiceId(username, service.getId())
                 ))
@@ -272,7 +284,7 @@ public class ServiceService {
     }
 
     public List<Service> getServiceEntitiesByIds(List<Long> ids) {
-        return serviceRepository.findAllById(ids).stream().filter(Service::isEnabled).toList();
+        return serviceRepository.findAllById(ids);
     }
 
     public boolean existsById(Long serviceId) {

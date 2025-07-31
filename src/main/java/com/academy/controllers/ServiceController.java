@@ -52,12 +52,17 @@ public class ServiceController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ServiceResponseDTO>> getAll() throws BadRequestException {
+    public ResponseEntity<List<ServiceResponseDTO>> getAllEnabled(){
 
-        List<ServiceResponseDTO> responses = serviceService.getAll();
+        List<ServiceResponseDTO> responses = serviceService.getAllEnabled();
         return ResponseEntity.ok(responses);
+    }
 
+    @GetMapping("/disabled")
+    public ResponseEntity<List<ServiceResponseDTO>> getAllDisabled(){
 
+        List<ServiceResponseDTO> responses = serviceService.getAllDisabled();
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/{id}")

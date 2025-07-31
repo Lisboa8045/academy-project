@@ -57,7 +57,8 @@ export class ServiceAdminApprovalComponent{
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Failed to fetch services', err);
+        snackBarSuccess(this.snackBar, 'Failed to fetch services')
+        //console.error('Failed to fetch services', err);
         this.services.set([]);
         this.loading.set(false);
       },
@@ -114,7 +115,7 @@ export class ServiceAdminApprovalComponent{
         snackBarSuccess(this.snackBar, "Service approved successfully")
         this.fetchServices(this.buildQuery({ page: this.currentPage(), enabled:false, status:'PENDING_APPROVAL' }));
       },
-      error: err => console.log(err)
+      error: err => snackBarError(this.snackBar, err)
     });
   }
 }
