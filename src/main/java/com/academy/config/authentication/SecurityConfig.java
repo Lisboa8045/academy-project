@@ -40,6 +40,8 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/auth/logout").authenticated()
+                        .requestMatchers("/auth/me").authenticated()
                         .requestMatchers("/auth/uploads/profile-picture").authenticated()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/").permitAll()

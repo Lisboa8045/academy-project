@@ -35,4 +35,6 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
     List<ServiceProvider> findProvidersByServiceIdAndPermission(Long serviceId, ProviderPermissionEnum permission);
 
     boolean existsByServiceIdAndPermissions_Permission(Long id, ProviderPermissionEnum providerPermissionEnum);
+
+    boolean existsByProvider_UsernameAndService_IdAndPermissions_Permission(String username, Long serviceId, ProviderPermissionEnum permission);
 }

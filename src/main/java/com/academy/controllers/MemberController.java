@@ -57,14 +57,13 @@ public class MemberController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public List<MemberResponseDTO> getAllMembers() {
-        return memberService.getAllMembers();
+    public ResponseEntity<List<MemberResponseDTO>> getAllMembers() {
+        List<MemberResponseDTO> members = memberService.getAllMembers();
+        return ResponseEntity.ok(members);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<MemberResponseDTO> getMemberById(@PathVariable Long id) {
         return ResponseEntity.ok(memberService.getMemberById(id));
     }
-
-
 }

@@ -88,6 +88,13 @@ public class ServiceController {
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{id}/disable")
+    public ResponseEntity<Void> disableService(@PathVariable Long id) {
+        serviceService.disable(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @PreAuthorize("hasRole('ADMIN') or hasRole('WORKER')")
     @PatchMapping("/{id}")
     public ResponseEntity<ServiceResponseDTO> updatePermissions(

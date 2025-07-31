@@ -307,6 +307,7 @@ public class ServiceService {
     }
 
     // este saveImages será para usado depois para o endpoint de criação do serviço
+    @Transactional
     public Service saveImages(Long id, List<ServiceImages> images) {
         serviceRepository.findById(id).map(s -> {
                     s.setImages(images);
@@ -316,4 +317,13 @@ public class ServiceService {
                 .orElseThrow(() -> new EntityNotFoundException(Service.class, id));
         return null;
     }
+
+    @Transactional
+    public void disable(Long id) {
+        Service service = serviceRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(Service.class, id));
+       // service.setEnabled(false); //TODO Uncomment this quando enabled done
+        serviceRepository.save(service);
+    }
+
 }

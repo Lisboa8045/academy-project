@@ -1,9 +1,10 @@
 package com.academy.services;
 
-import com.academy.config.AppProperties;
 import com.academy.config.TestTokenStorage;
+import com.academy.config.authentication.AuthenticationFacade;
 import com.academy.config.authentication.JwtCookieUtil;
 import com.academy.config.authentication.JwtUtil;
+import com.academy.dtos.member.CurrentUserInfoDTO;
 import com.academy.dtos.member.MemberRequestDTO;
 import com.academy.dtos.member.MemberResponseDTO;
 import com.academy.dtos.register.LoginRequestDto;
@@ -32,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -55,12 +57,13 @@ public class MemberService {
     private final MessageSource messageSource;
     private final EmailService emailService;
     private final GlobalConfigurationService globalConfigurationService;
-    private final AppProperties appProperties;
+    private final AuthenticationFacade authenticationFacade;
+    private final JwtCookieUtil jwtCookieUtil;
+    private final ServiceProviderService serviceProviderService;
+
     @Autowired(required = false)
     private TestTokenStorage testTokenStorage;
 
-    private final JwtCookieUtil jwtCookieUtil;
-    private final ServiceProviderService serviceProviderService;
 
     @Autowired
     public MemberService(MemberRepository memberRepository,
@@ -72,7 +75,7 @@ public class MemberService {
                          JwtCookieUtil jwtCookieUtil,
                          EmailService emailService,
                          GlobalConfigurationService globalConfigurationService,
-                         AppProperties appProperties,
+                         AuthenticationFacade authenticationFacade,
                          @Lazy ServiceProviderService serviceProviderService) {
         this.memberRepository = memberRepository;
         this.passwordEncoder = passwordEncoder;
@@ -83,7 +86,7 @@ public class MemberService {
         this.jwtCookieUtil = jwtCookieUtil;
         this.emailService = emailService;
         this.globalConfigurationService = globalConfigurationService;
-        this.appProperties = appProperties;
+        this.authenticationFacade = authenticationFacade;
         this.serviceProviderService = serviceProviderService;
     }
 
@@ -391,5 +394,22 @@ public class MemberService {
         member.setPasswordResetToken(null);
         member.setPasswordResetTokenExpiry(null);
         memberRepository.save(member);
+    }
+
+    public CurrentUserInfoDTO getCurrentUserInfo() {
+        Authentication auth = authenticationFacade.getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
+            throw new AuthenticationException("User not authenticated");
+        }
+
+        String username = auth.getName();
+        Member member = getMemberByUsername(username);
+        return new CurrentUserInfoDTO(
+                username,
+                member.getId(),
+                member.getProfilePicture() != null ? member.getProfilePicture() : "",
+                member.getRole().getName()
+        );
     }
 }

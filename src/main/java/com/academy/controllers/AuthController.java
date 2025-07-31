@@ -1,16 +1,16 @@
 package com.academy.controllers;
 
 import com.academy.config.authentication.AuthenticationFacade;
+import com.academy.dtos.member.CurrentUserInfoDTO;
 import com.academy.dtos.register.ConfirmEmailResponseDto;
 import com.academy.dtos.register.CreatePasswordResetTokenRequestDto;
 import com.academy.dtos.register.CreatePasswordResetTokenResponseDto;
+import com.academy.dtos.register.LoginRequestDto;
+import com.academy.dtos.register.LoginResponseDto;
 import com.academy.dtos.register.PasswordResetRequestDto;
 import com.academy.dtos.register.PasswordResetResponseDto;
 import com.academy.dtos.register.RecreateConfirmationTokenRequestDto;
 import com.academy.dtos.register.RecreateConfirmationTokenResponseDto;
-import com.academy.models.member.Member;
-import com.academy.dtos.register.LoginRequestDto;
-import com.academy.dtos.register.LoginResponseDto;
 import com.academy.dtos.register.RegisterRequestDto;
 import com.academy.dtos.register.RegisterResponseDto;
 import com.academy.services.MemberService;
@@ -19,10 +19,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,8 +27,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
@@ -90,24 +85,9 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser() {
-        Authentication auth = authenticationFacade.getAuthentication();
-
-        if (auth == null || !auth.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        String username = auth.getName();
-
-        if ("anonymousUser".equals(username)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        Member member = memberService.getMemberByUsername(username);
-        Long id = member.getId();
-        String profilePicture = member.getProfilePicture();
-        String role =  member.getRole().getName();
-
-        return ResponseEntity.ok(Map.of("username", username, "id", id, "profilePicture", profilePicture != null ? profilePicture : "", "role", role));
+    public ResponseEntity<CurrentUserInfoDTO> getCurrentUser() {
+        CurrentUserInfoDTO response = memberService.getCurrentUserInfo();
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/recreate-confirmation-token")

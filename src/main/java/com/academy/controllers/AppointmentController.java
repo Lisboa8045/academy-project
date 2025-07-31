@@ -76,6 +76,7 @@ public class AppointmentController {
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("@appointmentSecurity.isClient(#id, authentication.name)")
     @Deprecated
     @PostMapping("/{id}/review")
     public ResponseEntity<AppointmentResponseDTO> createReview(@PathVariable Long id, @RequestBody AppointmentRequestDTO appointmentDetails) {

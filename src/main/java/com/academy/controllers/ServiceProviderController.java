@@ -52,7 +52,7 @@ public class ServiceProviderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdServiceProvider);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @serviceProviderSecurity.isSelf(#id, authentication.name)")
+    @PreAuthorize("hasRole('ADMIN') or @serviceProviderSecurity.canUpdateServiceProvider(#id, authentication.name)")
     @PutMapping("/{id}")
     public ResponseEntity<ServiceProviderResponseDTO> updateServiceProvider(@PathVariable long id, @Valid @RequestBody ServiceProviderRequestDTO serviceProvider) {
         try {
