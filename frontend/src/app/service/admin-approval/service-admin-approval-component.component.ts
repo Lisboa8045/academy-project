@@ -57,8 +57,7 @@ export class ServiceAdminApprovalComponent{
         this.loading.set(false);
       },
       error: (err) => {
-        snackBarSuccess(this.snackBar, 'Failed to fetch services')
-        //console.error('Failed to fetch services', err);
+        snackBarError(this.snackBar, 'Failed to fetch services')
         this.services.set([]);
         this.loading.set(false);
       },
