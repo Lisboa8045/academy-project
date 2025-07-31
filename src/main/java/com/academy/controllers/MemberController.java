@@ -30,14 +30,12 @@ public class MemberController {
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
     private final JwtCookieUtil jwtCookieUtil;
-    private final MemberMapper memberMapper;
 
     public MemberController(MemberService memberService, JwtUtil jwtUtil, UserDetailsService userDetailsService, JwtCookieUtil jwtCookieUtil, MemberMapper memberMapper) {
         this.memberService = memberService;
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
         this.jwtCookieUtil = jwtCookieUtil;
-        this.memberMapper = memberMapper;
     }
 
     @DeleteMapping("/{id}")
@@ -75,7 +73,7 @@ public class MemberController {
     @GetMapping("/search")
     public ResponseEntity<List<MemberResponseDTO>> searchMembersByContainsUsernameAndRoleName(@RequestParam String username,
                                                                                               @RequestParam String roleName) {
-        return ResponseEntity.ok(memberService.searchByUsernameAndRole(username, roleName).stream().map(memberMapper::toResponseDTO).toList());
+        return ResponseEntity.ok(memberService.getMemberDTOByUsernameAndRole(username, roleName));
     }
 
     @GetMapping("/{id}/reviews")

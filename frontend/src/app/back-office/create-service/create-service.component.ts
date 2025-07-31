@@ -155,7 +155,6 @@ export class CreateServiceComponent implements OnInit {
   }
 
   deleteImage(index: number) {
-    console.log("DELETE IMAGE: " + this.selectedFiles[index].name);
     this.selectedFiles.splice(index, 1);
     this.imageUrls.splice(index, 1);
   }

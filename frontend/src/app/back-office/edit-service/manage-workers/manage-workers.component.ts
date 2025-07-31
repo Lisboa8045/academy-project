@@ -111,7 +111,6 @@ export class ManageWorkersComponent implements OnInit {
   }
 
   removeServiceProvider(providerToDelete: ServiceProviderModel) {
-    console.log('removing ' + providerToDelete.memberName);
     this.editServiceService.deleteServiceProvider(providerToDelete.id).subscribe({
       next: () => {
         let newServiceProviders =
@@ -153,7 +152,6 @@ export class ManageWorkersComponent implements OnInit {
   }
 
   searchForNewWorkers(searchTerm: string) {
-    console.log('Searching for workers')
     this.profileService.getWorkersContainsUsername(searchTerm).subscribe({
       next: (members) => {
         this.newWorkers = members.filter(member => !this.membersForServiceProviders.find(m => m.username == member.username));

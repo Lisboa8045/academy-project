@@ -93,11 +93,8 @@ export class EditServiceComponent implements OnInit {
 
     for (const fileName of fileNames) {
       try {
-        console.log("Fetching image..." + fileName);
         const res = await fetch(`http://localhost:8080/auth/uploads/${fileName}`);
         if (!res.ok) return;
-
-        console.log("Fetched image..." + fileName);
 
         const blob = await res.blob();
         const objectUrl = URL.createObjectURL(blob);
@@ -140,7 +137,6 @@ export class EditServiceComponent implements OnInit {
             formData.append('files', file);
           });
           this.serviceApi.uploadServiceImages(formData, res.id).subscribe({
-            next: () => console.log('Uploaded'),
             error: () => {
               snackBarError(this.snackBar, 'Image Upload failed.');
             }
@@ -224,7 +220,6 @@ export class EditServiceComponent implements OnInit {
   }
 
   deleteImage(index: number) {
-    console.log("DELETE IMAGE: " + this.selectedFiles[index].name);
     this.selectedFiles.splice(index, 1);
     this.imageUrls.splice(index, 1);
   }
@@ -268,7 +263,6 @@ export class EditServiceComponent implements OnInit {
 
   deleteService() {
     this.deleteServiceModal.set(false);
-    console.log("DELETE SERVICE: " + this.service!.id);
     this.serviceApi.deleteService(this.service!.id).subscribe({
       next: () => {
         snackBarSuccess(this.snackBar, 'Service Deleted Successfully');
