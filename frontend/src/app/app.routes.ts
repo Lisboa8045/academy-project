@@ -19,6 +19,7 @@ import {ConfirmAppointmentComponent} from './confirm-appointment/confirm-appoint
 import {GlobalConfigurationEditComponent} from './global-configuration/global-configuration-edit.component';
 import {ConfirmEmailPromptComponent} from "./auth/confirm-email-prompt/confirm-email-prompt.component";
 import {RevertDeleteAccountComponent} from './auth/revert-delete-account/revert-delete-account.component';
+import {ResendAccountDeletionEmailComponent} from './auth/resend-account-deletion-email/resend-account-deletion-email.component';
 
 export const routes: Routes = [
   { path: 'auth', component: AuthComponent },
@@ -40,7 +41,10 @@ export const routes: Routes = [
   { path: 'reset-password/:token', component: ResetPasswordComponent },
   { path: 'confirm-appointment/:id', component: ConfirmAppointmentComponent },
   { path: 'revert-delete-account/:token', component: RevertDeleteAccountComponent },
+  { path: 'resend-acc-deletion-email', component: ResendAccountDeletionEmailComponent },
   { path: 'config', component: GlobalConfigurationEditComponent },
   { path: 'auth/confirm-prompt', component: ConfirmEmailPromptComponent },
   { path: '**', redirectTo: '', pathMatch: 'full' },
+
+
 ];

@@ -110,6 +110,11 @@ export class AuthComponent{
             this.router.navigate(['/resend-email']);
             return;
           }
+          if (err?.type === 'PENDING_DELETION_ACCOUNT'){
+            sessionStorage.setItem('pendingDeletionEmail', err.email ?? login);
+            this.router.navigate(['/resend-acc-deletion-email']);
+            return;
+          }
           console.error('Login failed:', err);
           this.errorMessage.set(err?.error ?? 'Login failed. Please try again.');
         }

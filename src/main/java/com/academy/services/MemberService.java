@@ -28,8 +28,6 @@ import com.academy.repositories.MemberRepository;
 import com.academy.repositories.RoleRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
@@ -275,7 +273,6 @@ public class MemberService {
     }
 
     public void deleteMember(long id) {
-        System.out.println("Tentando apagar membro com id: " + id);
         Member member = getMemberEntityById(id);
         member.setEnabled(false);
         member.setStatus(MemberStatusEnum.PENDING_DELETION);
@@ -374,6 +371,12 @@ public class MemberService {
         emailService.sendConfirmationEmail(member, rawConfirmationToken);
     }
 
+    public void recreateDeletionToken(String login) {
+       //TODO
+    }
+
+
+
     public void saveProfilePic(Long id, String filename) {
         memberRepository.findById(id)
                 .map(m -> {
@@ -439,7 +442,7 @@ public class MemberService {
         memberRepository.save(member);
     }
 
-    @Scheduled(cron = "0 */2 * * * ?") // Every 2 minutes
+    @Scheduled(cron = "0 0 0 * * ?")
     public void permanentlyDeleteExpiredAccounts() {
         List<Member> expiredMembers = memberRepository.findAll().stream()
                 .filter(m -> m.getStatus() == MemberStatusEnum.PENDING_DELETION
