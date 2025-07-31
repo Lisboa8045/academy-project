@@ -234,7 +234,7 @@ public class ServiceService {
 
         boolean isAdmin = false;
 
-        if (username != null) {
+        if (username != null && !"anonymousUser".equals(username)) {
             Member member = memberService.getMemberByUsername(username);
             isAdmin = "ADMIN".equals(member.getRole().getName());
         }
