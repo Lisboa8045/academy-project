@@ -119,7 +119,6 @@ export class SearchServicesComponent implements OnInit {
     }
   }
 
-
   goToNextPage() {
     if (this.currentPage() + 1 < this.totalPages()) {
       const newPage = this.currentPage() + 1;

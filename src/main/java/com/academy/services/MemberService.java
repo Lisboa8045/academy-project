@@ -1,11 +1,12 @@
 package com.academy.services;
 
-import com.academy.config.AppProperties;
 import com.academy.config.TestTokenStorage;
+import com.academy.config.authentication.AuthenticationFacade;
 import com.academy.config.authentication.JwtCookieUtil;
 import com.academy.config.authentication.JwtUtil;
 import com.academy.dtos.appointment.AppointmentMapper;
 import com.academy.dtos.appointment.AppointmentReviewResponseDTO;
+import com.academy.dtos.member.AutoLoginResponseDTO;
 import com.academy.dtos.member.MemberRequestDTO;
 import com.academy.dtos.member.MemberResponseDTO;
 import com.academy.dtos.register.LoginRequestDto;
@@ -37,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -46,7 +48,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -61,16 +62,15 @@ public class MemberService {
     private final MessageSource messageSource;
     private final EmailService emailService;
     private final GlobalConfigurationService globalConfigurationService;
-    private final AppProperties appProperties;
-    @Autowired(required = false)
-    private TestTokenStorage testTokenStorage;
-
+    private final AuthenticationFacade authenticationFacade;
     private final JwtCookieUtil jwtCookieUtil;
     private final ServiceProviderService serviceProviderService;
     private final ServiceProviderRepository serviceProviderRepository;
-    @Autowired
-    private AppointmentRepository appointmentRepository;
+    private final AppointmentRepository appointmentRepository;
     private final AppointmentMapper appointmentMapper;
+
+    @Autowired(required = false)
+    private TestTokenStorage testTokenStorage;
 
     @Autowired
     public MemberService(MemberRepository memberRepository,
@@ -82,7 +82,8 @@ public class MemberService {
                          JwtCookieUtil jwtCookieUtil,
                          EmailService emailService,
                          GlobalConfigurationService globalConfigurationService,
-                         AppProperties appProperties,
+                         AuthenticationFacade authenticationFacade,
+                         AppointmentRepository appointmentRepository,
                          @Lazy ServiceProviderService serviceProviderService,
                          ServiceProviderRepository serviceProviderRepository,
                          AppointmentMapper appointmentMapper) {
@@ -95,7 +96,8 @@ public class MemberService {
         this.jwtCookieUtil = jwtCookieUtil;
         this.emailService = emailService;
         this.globalConfigurationService = globalConfigurationService;
-        this.appProperties = appProperties;
+        this.authenticationFacade = authenticationFacade;
+        this.appointmentRepository = appointmentRepository;
         this.serviceProviderService = serviceProviderService;
         this.serviceProviderRepository = serviceProviderRepository;
         this.appointmentMapper = appointmentMapper;
@@ -131,6 +133,8 @@ public class MemberService {
         return createMember(request, optionalRole.get()).getId();
 
     }
+
+    @Transactional
     private Member createMember(RegisterRequestDto request, Role role){
         Member member = memberMapper.toMember(request);
         member.setPassword(passwordEncoder.encode(request.password()));
@@ -185,6 +189,7 @@ public class MemberService {
     private String generateEncodedToken(){
         return UUID.randomUUID().toString();
     }
+
     @Transactional
     public void confirmEmail(String confirmationToken) {
         Member member = memberRepository.findAll().stream()
@@ -285,12 +290,14 @@ public class MemberService {
         return memberRepository.findById(memberId);
     }
 
+    @Transactional
     public void deleteMember(long id) {
         if(!memberRepository.existsById(id)) throw new EntityNotFoundException(Member.class,id);
         unlinkServiceProviders(id);
         memberRepository.deleteById(id);
     }
 
+    @Transactional
     public MemberResponseDTO editMember(long id, MemberRequestDTO memberRequestDTO){
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Member.class, id));
@@ -339,10 +346,12 @@ public class MemberService {
                 .map(memberMapper::toResponseDTO)
                 .orElseThrow(() -> new EntityNotFoundException(Member.class, id));
     }
+
     public Member getMemberEntityById(long id){
         return memberRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(Member.class, id));
     }
 
+    @Transactional
     public void recreateConfirmationToken(String login) {
         Optional<Member> optionalMember = getMemberByLogin(login);
         if(optionalMember.isEmpty())
@@ -362,6 +371,7 @@ public class MemberService {
         emailService.sendConfirmationEmail(member, rawConfirmationToken);
     }
 
+    @Transactional
     public void saveProfilePic(Long id, String filename) {
         memberRepository.findById(id)
                 .map(m -> {
@@ -380,6 +390,7 @@ public class MemberService {
         }
     }
 
+    @Transactional
     public void createPasswordResetToken(String email) {
         Member member = getMemberByEmail(email);
         String rawPasswordResetToken = generateUniquePasswordResetToken();
@@ -406,6 +417,24 @@ public class MemberService {
         memberRepository.save(member);
     }
 
+    public AutoLoginResponseDTO attemptAutoLogin() {
+        Authentication auth = authenticationFacade.getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
+            throw new AuthenticationException("User not authenticated");
+        }
+
+        String username = auth.getName();
+        Member member = getMemberByUsername(username);
+        return new AutoLoginResponseDTO(
+                member.getId(),
+                username,
+                member.getProfilePicture() != null ? member.getProfilePicture() : "",
+                member.getRole().getName()
+        );
+    }
+
+    @Transactional
     public void updateMemberRating(Long memberId) {
         Double rating = serviceProviderRepository.findAverageRatingByMemberId(memberId);
         System.out.println("Updating Member rating with" + memberId + " to " +rating);

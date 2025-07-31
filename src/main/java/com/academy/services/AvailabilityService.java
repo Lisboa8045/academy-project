@@ -1,25 +1,22 @@
 package com.academy.services;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import com.academy.models.member.Member;
-import com.academy.models.service.Service;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-
 import com.academy.dtos.availability.AvailabilityMapper;
 import com.academy.dtos.availability.AvailabilityRequestDTO;
 import com.academy.dtos.availability.AvailabilityResponseDTO;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.exceptions.InvalidArgumentException;
 import com.academy.models.Availability;
+import com.academy.models.member.Member;
+import com.academy.models.service.Service;
 import com.academy.repositories.AvailabilityRepository;
-import jakarta.transaction.Transactional;
-
 import com.academy.utils.DateRange;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @org.springframework.stereotype.Service
 public class AvailabilityService {
@@ -159,8 +156,6 @@ public class AvailabilityService {
         availabilityRepository.deleteById(availabilityId);
     }
 
-
-
     // Get all availabilities
     public List<AvailabilityResponseDTO> getAllAvailabilities() {
         return availabilityRepository.findAll()
@@ -174,7 +169,6 @@ public class AvailabilityService {
         LocalDateTime end = now.plusDays(slotWindowDays);
         return new DateRange(now, end);
     }
-
 
     public List<Availability> getAvailabilitiesForProvider(Long providerId) {
         if (providerId == null) {

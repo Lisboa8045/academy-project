@@ -8,6 +8,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -23,6 +24,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtFilter;
 
@@ -38,15 +40,19 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/auth/logout").authenticated()
+                        .requestMatchers("/auth/uploads/profile-picture").authenticated()
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/services/search/**").permitAll()
                         .requestMatchers("/").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/service-types/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/admin/global_configurations/{configKey}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/members/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/services/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/service-providers/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/appointments/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/availabilities/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/service-types/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/tags/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/service-providers/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/appointments/confirm-appointment/**").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 ).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
         ;

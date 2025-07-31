@@ -1,8 +1,8 @@
 package com.academy.services;
 
 import com.academy.dtos.SlotDTO;
-import com.academy.models.appointment.Appointment;
 import com.academy.models.Availability;
+import com.academy.models.appointment.Appointment;
 import com.academy.models.appointment.AppointmentStatus;
 import com.academy.models.member.Member;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
@@ -141,7 +141,7 @@ public class SchedulingService {
             throw new IllegalArgumentException("Service ID cannot be null");
         }
         if (!serviceProviderService.existsByServiceId(serviceId)) {
-            throw new IllegalArgumentException("Service with ID " + serviceId + " does not exist");
+            throw new IllegalStateException("Service does not have any providers.");
         }
     }
 
