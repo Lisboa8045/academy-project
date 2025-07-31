@@ -136,7 +136,6 @@
                   </button>
                 </div>
               }
-              <button type="button" class="logout-button" (click)="logout()">Logout</button>
               <button
                 type="button"
                 class="logout-button"
@@ -144,6 +143,7 @@
                 [disabled]="user?.status === MemberStatusEnum.PENDING_DELETION">
                 Delete Account
               </button>
+              <button type="button" class="logout-button" (click)="logout()">Logout</button>
               }
             }
           }
