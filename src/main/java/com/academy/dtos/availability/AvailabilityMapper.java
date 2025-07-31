@@ -19,13 +19,6 @@ public abstract class AvailabilityMapper {
     AQ
      */
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    //@Mapping(target = "member", ignore = true)
-    @Mapping(target = "exception", constant = "false")
-    public abstract Availability toEntity(AvailabilityRequestDTO requestDTO);
-
     public List<DaySchedule> toDaySchedules(List<MemberAvailability> memberAvailabilities) {
         // Mapa que associa cada data a uma lista de DateTimeRanges
         Map<LocalDate, List<DateTimeRange>> map = new HashMap<>();
