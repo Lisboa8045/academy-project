@@ -61,13 +61,7 @@ export class EditServiceComponent implements OnInit {
     this.serviceApi.getServiceById(id).subscribe({
       next: (data: ServiceModel) => {
         this.service = data;
-        if (this.service?.images && this.service.images.length > 0) {
-          this.loadImages(this.service.images);
-        }
-        this.form = buildServiceForm(this.fb, this.service);
-        if (!this.userCanEdit()) {
-          this.form.disable();
-        }
+        this.setupServiceForm();
         this.loading.set(false);
       },
       error: () => {
@@ -81,6 +75,8 @@ export class EditServiceComponent implements OnInit {
   }
 
   async loadImages(fileNames: string[]) {
+    this.imageUrls = [];
+    this.selectedFiles = [];
     if (!fileNames || fileNames.length === 0) {
       return;
     }
@@ -145,6 +141,7 @@ export class EditServiceComponent implements OnInit {
           snackBarError(this.snackBar, 'Service update failed: \n' +  this.formErrorMessage(err.error));
         }
       });
+      this.form.disable();
     }
   }
 
@@ -247,5 +244,13 @@ export class EditServiceComponent implements OnInit {
     const tempUrl = this.imageUrls[imageIndex1];
     this.imageUrls[imageIndex1] = this.imageUrls[imageIndex2];
     this.imageUrls[imageIndex2] = tempUrl;
+  }
+
+  setupServiceForm() {
+    if (this.service?.images && this.service.images.length > 0) {
+      this.loadImages(this.service.images);
+    }
+    this.form = buildServiceForm(this.fb, this.service);
+    this.form.disable();
   }
 }

@@ -70,14 +70,14 @@
                         [class.selected]="i === currentImageIndex"
                         (click)="selectThumbnail(i, thumbContainer)"
                       />
-                      <ng-container class="image-icon-container" *ngIf="userCanEdit()">
+                      <ng-container class="image-icon-container" *ngIf="userCanEdit() && form.enabled">
                         <span class="image-icon" (click)="moveImageLeft(i)">⬅️</span>
                         <span class="image-icon" (click)="moveImageRight(i)">➡️</span>
                         <span class="image-icon" (click)="deleteImage(i)">🗑️</span>
                       </ng-container>
                     </div>
                   </ng-container>
-                  <div *ngIf="userCanEdit()" class="thumbnail-image">
+                  <div *ngIf="userCanEdit() && form.enabled" class="thumbnail-image">
                     <fa-icon [icon]="faPlus" class="fa-3x add-image-btn" (click)="fileInput.click()">
                     </fa-icon>
                     <input
@@ -95,7 +95,7 @@
           </div>
           <div class="tag-section">
             <!-- Input to add a new tag -->
-            <ng-container *ngIf="userCanEdit()">
+            <ng-container *ngIf="userCanEdit() && form.enabled">
               <input
                 type="text"
                 [(ngModel)]="newTag"
@@ -103,7 +103,7 @@
                 (keyup.enter)="addTag()"
                 placeholder="Add a tag"
               />
-              <button type="button" (click)="addTag()">Add Tag</button>
+              <button type="button" (click)="addTag()" class="edit-button">Add Tag</button>
             </ng-container>
 
             <!-- Display tags -->
@@ -112,7 +112,7 @@
                 <span class="tag" [title]="tag.value">
                   <span class="tag-text">{{ tag.value }}</span>
                   <fa-icon
-                    *ngIf="userCanEdit()"
+                    *ngIf="userCanEdit() && form.enabled"
                     [icon]="faTimes"
                     (click)="removeTag(i)"
                     class="remove-icon"
@@ -134,8 +134,13 @@
           <input type="number" formControlName="discount"/>
         </div>
       </fieldset>
-
-      <button *ngIf="userCanEdit()" type="submit" [disabled]="form.invalid">Submit</button>
+      @if(userCanEdit()) {
+        <div class="button-container">
+          <button *ngIf="form.enabled" type="submit" [disabled]="form.invalid" class="submit-button">Submit</button>
+          <button *ngIf="form.enabled" type="button" (click)="setupServiceForm()" class="cancel-button">Cancel</button>
+          <button *ngIf="!form.enabled" type="button" (click)="form.enable()" class="edit-button">Edit Service</button>
+        </div>
+      }
     </form>
   </div>
   <div class="card">

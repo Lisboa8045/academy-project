@@ -72,7 +72,8 @@ label, span{
   font-family: 'Poppins', sans-serif;
 }
 
-button {
+.edit-button,
+.submit-button, .cancel-button{
   background-color: #3B82F6;
   color: white;
   padding: 0.7rem 1.2rem;
@@ -84,6 +85,21 @@ button {
   transition: background 0.3s;
   margin-top: 0;
 }
+
+.edit-button:hover {
+  background-color: #2563EB;
+}
+
+.cancel-button {
+  background-color: #EF4444;
+}
+.cancel-button:hover {
+  background-color: #DC2626;
+}
+.submit-button:hover {
+  background-color: #4caf50; /* green on hover */
+}
+
 .button-container {
   display: inline-flex;
   align-items: center;
