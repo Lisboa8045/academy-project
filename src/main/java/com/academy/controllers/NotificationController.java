@@ -34,7 +34,7 @@ public class NotificationController {
         return ResponseEntity.ok(notifications.stream().map(notificationMapper::toDTO).toList());
     }
 
-    @PreAuthorize("@notificationSecurity.isNotificationOwnedByUser(#notificationId, authentication.name)")
+    @PreAuthorize("@notificationSecurity.isOwner(#notificationId, authentication.name)")
     @PatchMapping("{notificationId}")
     public ResponseEntity<Void> markNotificationAsSeen(@PathVariable("notificationId") long notificationId) {
         notificationService.markNotificationAsSeen(notificationId);

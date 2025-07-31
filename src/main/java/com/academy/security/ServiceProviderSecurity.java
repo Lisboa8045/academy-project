@@ -1,22 +1,22 @@
 package com.academy.security;
 
-import com.academy.services.MemberService;
-import com.academy.services.ServiceProviderService;
+import com.academy.repositories.ServiceProviderRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ServiceProviderSecurity {
 
-    private final ServiceProviderService serviceProviderService;
-    private final MemberService memberService;
+    private final ServiceProviderRepository serviceProviderRepository;
 
-    public ServiceProviderSecurity(ServiceProviderService spService, MemberService memberService) {
-        this.serviceProviderService = spService;
-        this.memberService = memberService;
+    @Autowired
+    public ServiceProviderSecurity(ServiceProviderRepository serviceProviderRepository) {
+        this.serviceProviderRepository = serviceProviderRepository;
     }
 
-    public boolean isOwner(Long serviceProviderId, String username) {
-        return true;
-        //TODO Implement
+    public boolean isSelf(Long serviceProviderId, String username) {
+        return serviceProviderRepository.findById(serviceProviderId)
+                .map(sp -> sp.getProvider().getUsername().equals(username))
+                .orElse(false);
     }
 }

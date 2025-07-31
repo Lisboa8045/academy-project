@@ -215,20 +215,4 @@ public class AppointmentService {
         appointmentRepository.save(appointment);
         return ResponseEntity.ok(new ConfirmAppointmentResponseDTO("Appointment confirmed successfully"));
     }
-
-    public boolean isAppointmentOwnedByClientOrProvider(Long appointmentId, String username) {
-        return appointmentRepository.findById(appointmentId)
-                .map(appointment -> {
-                    String clientUsername = appointment.getMember().getUsername();
-                    String providerUsername = appointment.getServiceProvider().getProvider().getUsername();
-                    return username.equals(clientUsername) || username.equals(providerUsername);
-                })
-                .orElse(false);
-    }
-
-    public boolean isAppointmentOwnedByClient(Long appointmentId, String username) {
-        return appointmentRepository.findById(appointmentId)
-                .map(appointment -> username.equals(appointment.getMember().getUsername()))
-                .orElse(false);
-    }
 }

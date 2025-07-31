@@ -1,20 +1,22 @@
 package com.academy.security;
 
-import com.academy.services.MemberService;
+import com.academy.repositories.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class MemberSecurity {
 
-    private final MemberService memberService;
+    private final MemberRepository memberRepository;
 
     @Autowired
-    public MemberSecurity(MemberService memberService) {
-        this.memberService = memberService;
+    public MemberSecurity(MemberRepository memberRepository) {
+        this.memberRepository = memberRepository;
     }
 
     public boolean isSelf(Long memberId, String username) {
-        return memberService.isMemberSelf(memberId, username);
+        return memberRepository.findById(memberId)
+                .map(member -> username.equals(member.getUsername()))
+                .orElse(false);
     }
 }

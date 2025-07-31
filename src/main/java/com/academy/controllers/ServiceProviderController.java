@@ -52,7 +52,7 @@ public class ServiceProviderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdServiceProvider);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or hasRole('WORKER')")
+    @PreAuthorize("hasRole('ADMIN') or @serviceProviderSecurity.isSelf(#id, authentication.name)")
     @PutMapping("/{id}")
     public ResponseEntity<ServiceProviderResponseDTO> updateServiceProvider(@PathVariable long id, @Valid @RequestBody ServiceProviderRequestDTO serviceProvider) {
         try {
@@ -63,7 +63,7 @@ public class ServiceProviderController {
         }
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or @serviceProviderSecurity.isSelf(#id, authentication.name)")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteServiceProvider(@PathVariable long id) {
         serviceProviderService.deleteServiceProvider(id);

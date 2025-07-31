@@ -316,10 +316,4 @@ public class ServiceService {
                 .orElseThrow(() -> new EntityNotFoundException(Service.class, id));
         return null;
     }
-
-    public boolean isServiceOwnedByUser(Long serviceId, String username) {
-        return serviceRepository.findById(serviceId)
-                .map(service -> service.getOwner().getUsername().equals(username))
-                .orElse(false);
-    }
 }

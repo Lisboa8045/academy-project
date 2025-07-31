@@ -1,20 +1,22 @@
 package com.academy.security;
 
-import com.academy.services.ServiceService;
+import com.academy.repositories.ServiceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ServiceSecurity {
 
-    private final ServiceService serviceService;
+    private final ServiceRepository serviceRepository;
 
     @Autowired
-    public ServiceSecurity(ServiceService serviceService) {
-        this.serviceService = serviceService;
+    public ServiceSecurity(ServiceRepository serviceRepository) {
+        this.serviceRepository = serviceRepository;
     }
 
     public boolean isOwner(Long serviceId, String username) {
-        return serviceService.isServiceOwnedByUser(serviceId, username);
+        return serviceRepository.findById(serviceId)
+                .map(service -> service.getOwner().getUsername().equals(username))
+                .orElse(false);
     }
 }
