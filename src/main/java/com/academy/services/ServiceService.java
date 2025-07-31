@@ -11,7 +11,6 @@ import com.academy.exceptions.AuthenticationException;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.ServiceType;
 import com.academy.models.Tag;
-import com.academy.models.appointment.Appointment;
 import com.academy.models.member.Member;
 import com.academy.models.notification.Notification;
 import com.academy.models.notification.NotificationTypeEnum;
@@ -30,6 +29,7 @@ import org.hibernate.collection.spi.PersistentBag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -108,7 +108,7 @@ public class ServiceService {
         Service existing = getServiceEntityById(id);
 
         List<ProviderPermissionEnum> permissions = getPermissionsByProviderUsernameAndServiceId(username, existing.getId());
-        checkIfHasPermission(permissions,ProviderPermissionEnum.UPDATE, "update service"); //TODO bypass this if it's an admin?
+        checkIfHasPermission(permissions,ProviderPermissionEnum.UPDATE, "update service");
 
         linkServiceToType(existing, dto.serviceTypeName());
         linkServiceToTags(existing, dto.tagNames());
@@ -146,17 +146,16 @@ public class ServiceService {
     public ServiceResponseDTO getById(Long id) {
         Service service = getServiceEntityById(id);
         String username =  authenticationFacade.getUsername();
-/*
-        if (!service.isEnabled()) { //TODO descomentar quando o enabled tiver implementado
+
+        if (!service.isEnabled()) {
             if (username == null) {
-                throw new AuthenticationException("This service is not currently available for the public.");
+                throw new AccessDeniedException("This service is not currently available for the public.");
             }
             Member member = memberService.getMemberByUsername(username);
             if (!"ADMIN".equals(member.getRole().getName())) {
-                throw new AuthenticationException("This service is not currently available for the public.");
+                throw new AccessDeniedException("This service is not currently available for the public.");
             }
         }
-*/
         return serviceMapper.toDto(service, getPermissionsByProviderUsernameAndServiceId(username, service.getId()));
     }
 
@@ -233,21 +232,33 @@ public class ServiceService {
 
         Specification<Service> spec = Specification.where(null); // start with no specifications, add each specification after if not null/empty
 
-        spec = addIfPresent(spec, name != null && !name.isBlank(), () -> ServiceSpecifications.nameOrTagMatches(name)); //TODO quando enabled tiver implementado, verificar se é admin, e se não for, adicionar spec de só mostrar enabled == true
+        boolean isAdmin = false;
+
+        if (username != null) {
+            Member member = memberService.getMemberByUsername(username);
+            isAdmin = "ADMIN".equals(member.getRole().getName());
+        }
+
+        spec = addIfPresent(spec, name != null && !name.isBlank(), () -> ServiceSpecifications.nameOrTagMatches(name));
         spec = addIfPresent(spec, minPrice != null, () -> ServiceSpecifications.hasPriceGreaterThanOrEqual(minPrice));
         spec = addIfPresent(spec, maxPrice != null, () -> ServiceSpecifications.hasPriceLessThanOrEqual(maxPrice));
         spec = addIfPresent(spec, minDuration != null, () -> ServiceSpecifications.hasDurationGreaterThanOrEqual(minDuration));
         spec = addIfPresent(spec, maxDuration != null, () -> ServiceSpecifications.hasDurationLessThanOrEqual(maxDuration));
         spec = addIfPresent(spec, negotiable != null, () -> ServiceSpecifications.canNegotiate(negotiable));
         spec = addIfPresent(spec, serviceTypeName != null, () -> ServiceSpecifications.hasServiceType(serviceTypeName));
-        spec = addIfPresent(spec, enabled != null, () -> ServiceSpecifications.isEnabled(enabled));
-        spec = addIfPresent(spec, enabled != null, () -> ServiceSpecifications.statusMatches(status));
+        spec = addIfPresent(spec, status != null, () -> ServiceSpecifications.statusMatches(status));
+
+        if (isAdmin)
+            spec = addIfPresent(spec, enabled != null, () -> ServiceSpecifications.isEnabled(enabled));
+        else
+            spec = addIfPresent(spec, true, () -> ServiceSpecifications.isEnabled(true));
 
         return serviceRepository.findAll(spec, pageable)
                 .map(service ->  serviceMapper.toDto(service,
                         getPermissionsByProviderUsernameAndServiceId(username, service.getId())
                 ));
     }
+
     private Specification<Service> addIfPresent(Specification<Service> spec, boolean condition, Supplier<Specification<Service>> supplier) {
         return condition ? spec.and(supplier.get()) : spec; // add specification on supplier, if the condition is met
     }
@@ -360,7 +371,7 @@ public class ServiceService {
     public void disable(Long id) {
         Service service = serviceRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Service.class, id));
-       // service.setEnabled(false); //TODO Uncomment this quando enabled done
+        service.setEnabled(false);
         serviceRepository.save(service);
     }
 
