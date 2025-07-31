@@ -2,7 +2,10 @@
   <app-loading/>
   } @else {
   <div class="card">
-    <h2>Manage Service</h2>
+    <span class="header">
+      <h2>Manage Service</h2>
+      <button *ngIf="!form.enabled && userCanEdit()" type="button" (click)="form.enable()" class="edit-button">Edit Service</button>
+    </span>
     <form [formGroup]="form"
           (ngSubmit)="submit()">
       <fieldset>
@@ -138,13 +141,12 @@
         <div class="button-container">
           <button *ngIf="form.enabled" type="submit" [disabled]="form.invalid" class="submit-button">Submit</button>
           <button *ngIf="form.enabled" type="button" (click)="setupServiceForm()" class="cancel-button">Cancel</button>
-          <button *ngIf="!form.enabled" type="button" (click)="form.enable()" class="edit-button">Edit Service</button>
         </div>
       }
     </form>
   </div>
   <div class="card">
-    <h2>Manage Workers</h2>
+    <h2>Manage Service</h2>
     <app-manage-workers [loggedUserPermissions]="service!.permissions"/>
   </div>
 }
