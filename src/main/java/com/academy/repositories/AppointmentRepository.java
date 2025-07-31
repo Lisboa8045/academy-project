@@ -1,8 +1,6 @@
 package com.academy.repositories;
-import com.academy.models.appointment.Appointment;
-import java.time.LocalDateTime;
-import java.util.List;
 
+import com.academy.models.appointment.Appointment;
 import com.academy.models.appointment.AppointmentStatus;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Sort;
@@ -11,10 +9,17 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
     List<Appointment> findAllByServiceProviderId(Long serviceProviderProviderId);
     List<Appointment> findByMember_Id(Long memberId);
     List<Appointment> findByMember_Username(String username, Sort sort);
+
+    @Query("SELECT a FROM Appointment a JOIN FETCH a.serviceProvider sp " +
+            "WHERE sp.service.id = :serviceId")
+    List<Appointment> findByServiceId(Long serviceId, Sort sort);
 
     @Query("SELECT a FROM Appointment a " +
             "WHERE a.serviceProvider.id = :providerId " +
