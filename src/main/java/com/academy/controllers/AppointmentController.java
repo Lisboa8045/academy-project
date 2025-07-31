@@ -43,7 +43,6 @@ public class AppointmentController {
         return appointmentService.getAllAppointments();
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @appointmentSecurity.isClientOrProvider(#id, authentication.name)")
     @GetMapping("/{id}")
     public ResponseEntity<AppointmentResponseDTO> getAppointmentById(@PathVariable Long id) {
         return ResponseEntity.ok(appointmentService.getAppointmentById(id));

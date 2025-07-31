@@ -1,7 +1,5 @@
 package com.academy.controllers;
 
-import com.academy.config.authentication.AuthenticationFacade;
-import com.academy.dtos.appointment.AppointmentReviewResponseDTO;
 import com.academy.dtos.appointment.AppointmentReviewResponseDTO;
 import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
@@ -62,6 +60,7 @@ public class ServiceController {
         return ResponseEntity.ok(responses);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/disabled")
     public ResponseEntity<List<ServiceResponseDTO>> getAllDisabled(){
 
@@ -70,7 +69,7 @@ public class ServiceController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ServiceResponseDTO> getById(@PathVariable Long id) {
+    public ResponseEntity<ServiceResponseDTO> getById(@PathVariable Long id) { // TODO, if service is disabled, should return an error
         ServiceResponseDTO response = serviceService.getById(id);
         return ResponseEntity.ok(response);
     }

@@ -1,6 +1,5 @@
 package com.academy.controllers;
 
-import com.academy.config.authentication.AuthenticationFacade;
 import com.academy.dtos.member.AutoLoginResponseDTO;
 import com.academy.dtos.register.ConfirmEmailResponseDto;
 import com.academy.dtos.register.CreatePasswordResetTokenRequestDto;
@@ -34,13 +33,11 @@ public class AuthController {
 
     private final MemberService memberService;
     private final MessageSource messageSource;
-    private final AuthenticationFacade authenticationFacade;
 
     @Autowired
-    public AuthController(MemberService memberService, MessageSource messageSource, AuthenticationFacade authenticationFacade) {
+    public AuthController(MemberService memberService, MessageSource messageSource) {
         this.memberService = memberService;
         this.messageSource = messageSource;
-        this.authenticationFacade = authenticationFacade;
     }
 
     @PostMapping("/register")

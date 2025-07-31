@@ -4,9 +4,9 @@ import com.academy.config.TestTokenStorage;
 import com.academy.config.authentication.AuthenticationFacade;
 import com.academy.config.authentication.JwtCookieUtil;
 import com.academy.config.authentication.JwtUtil;
-import com.academy.dtos.member.AutoLoginResponseDTO;
 import com.academy.dtos.appointment.AppointmentMapper;
 import com.academy.dtos.appointment.AppointmentReviewResponseDTO;
+import com.academy.dtos.member.AutoLoginResponseDTO;
 import com.academy.dtos.member.MemberRequestDTO;
 import com.academy.dtos.member.MemberResponseDTO;
 import com.academy.dtos.register.LoginRequestDto;
@@ -48,7 +48,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -66,16 +65,12 @@ public class MemberService {
     private final AuthenticationFacade authenticationFacade;
     private final JwtCookieUtil jwtCookieUtil;
     private final ServiceProviderService serviceProviderService;
+    private final ServiceProviderRepository serviceProviderRepository;
+    private final AppointmentRepository appointmentRepository;
+    private final AppointmentMapper appointmentMapper;
 
     @Autowired(required = false)
     private TestTokenStorage testTokenStorage;
-
-    private final JwtCookieUtil jwtCookieUtil;
-    private final ServiceProviderService serviceProviderService;
-    private final ServiceProviderRepository serviceProviderRepository;
-    @Autowired
-    private AppointmentRepository appointmentRepository;
-    private final AppointmentMapper appointmentMapper;
 
     @Autowired
     public MemberService(MemberRepository memberRepository,
@@ -87,8 +82,8 @@ public class MemberService {
                          JwtCookieUtil jwtCookieUtil,
                          EmailService emailService,
                          GlobalConfigurationService globalConfigurationService,
-                         AppProperties appProperties,
                          AuthenticationFacade authenticationFacade,
+                         AppointmentRepository appointmentRepository,
                          @Lazy ServiceProviderService serviceProviderService,
                          ServiceProviderRepository serviceProviderRepository,
                          AppointmentMapper appointmentMapper) {
@@ -102,6 +97,7 @@ public class MemberService {
         this.emailService = emailService;
         this.globalConfigurationService = globalConfigurationService;
         this.authenticationFacade = authenticationFacade;
+        this.appointmentRepository = appointmentRepository;
         this.serviceProviderService = serviceProviderService;
         this.serviceProviderRepository = serviceProviderRepository;
         this.appointmentMapper = appointmentMapper;

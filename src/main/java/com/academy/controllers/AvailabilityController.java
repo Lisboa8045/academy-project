@@ -30,7 +30,6 @@ public class AvailabilityController {
         this.availabilityService = availabilityService;
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<AvailabilityResponseDTO>> getAllAvailabilities() {
         List<AvailabilityResponseDTO> response = availabilityService.getAllAvailabilities();
