@@ -46,8 +46,11 @@ export class ProfileButtonComponent implements OnInit {
         }
       },
       {
-        label: 'BackOffice',
-        icon: '👔'
+        label: 'Admin Services',
+        icon: '👔',
+        command: () => {
+          this.router.navigate(['/administrate-services'])
+        }
       },
       {
         label: 'Settings',
