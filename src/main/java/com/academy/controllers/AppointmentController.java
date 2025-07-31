@@ -39,7 +39,6 @@ public class AppointmentController {
         this.appointmentService = appointmentService;
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public List<AppointmentResponseDTO> getAllAppointments() {
         return appointmentService.getAllAppointments();

@@ -52,7 +52,6 @@ public class ServiceController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<ServiceResponseDTO>> getAllServices() {
         List<ServiceResponseDTO> responses = serviceService.getAll();

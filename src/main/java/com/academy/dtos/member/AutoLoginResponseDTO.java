@@ -1,8 +1,8 @@
 package com.academy.dtos.member;
 
-public record CurrentUserInfoDTO(
-        String username,
+public record AutoLoginResponseDTO(
         long id,
+        String username,
         String profilePicture,
         String role
 ) {}

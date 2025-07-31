@@ -1,7 +1,7 @@
 package com.academy.controllers;
 
 import com.academy.config.authentication.AuthenticationFacade;
-import com.academy.dtos.member.CurrentUserInfoDTO;
+import com.academy.dtos.member.AutoLoginResponseDTO;
 import com.academy.dtos.register.ConfirmEmailResponseDto;
 import com.academy.dtos.register.CreatePasswordResetTokenRequestDto;
 import com.academy.dtos.register.CreatePasswordResetTokenResponseDto;
@@ -85,8 +85,8 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<CurrentUserInfoDTO> getCurrentUser() {
-        CurrentUserInfoDTO response = memberService.getCurrentUserInfo();
+    public ResponseEntity<AutoLoginResponseDTO> autoLogin() {
+        AutoLoginResponseDTO response = memberService.attemptAutoLogin();
         return ResponseEntity.ok(response);
     }
 

@@ -4,7 +4,7 @@ import com.academy.config.TestTokenStorage;
 import com.academy.config.authentication.AuthenticationFacade;
 import com.academy.config.authentication.JwtCookieUtil;
 import com.academy.config.authentication.JwtUtil;
-import com.academy.dtos.member.CurrentUserInfoDTO;
+import com.academy.dtos.member.AutoLoginResponseDTO;
 import com.academy.dtos.member.MemberRequestDTO;
 import com.academy.dtos.member.MemberResponseDTO;
 import com.academy.dtos.register.LoginRequestDto;
@@ -396,7 +396,7 @@ public class MemberService {
         memberRepository.save(member);
     }
 
-    public CurrentUserInfoDTO getCurrentUserInfo() {
+    public AutoLoginResponseDTO attemptAutoLogin() {
         Authentication auth = authenticationFacade.getAuthentication();
 
         if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
@@ -405,9 +405,9 @@ public class MemberService {
 
         String username = auth.getName();
         Member member = getMemberByUsername(username);
-        return new CurrentUserInfoDTO(
-                username,
+        return new AutoLoginResponseDTO(
                 member.getId(),
+                username,
                 member.getProfilePicture() != null ? member.getProfilePicture() : "",
                 member.getRole().getName()
         );
