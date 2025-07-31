@@ -9,7 +9,6 @@ import com.academy.dtos.appointment.ConfirmAppointmentResponseDTO;
 import com.academy.dtos.appointment.review.ReviewRequestDTO;
 import com.academy.dtos.appointment.review.ReviewResponseDTO;
 import com.academy.services.AppointmentService;
-import com.academy.services.EmailService;
 import com.academy.services.SchedulingService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -32,12 +31,10 @@ public class AppointmentController {
 
     private final AppointmentService appointmentService;
     private final SchedulingService schedulingService;
-    private final EmailService emailService;
 
-    public AppointmentController(AppointmentService appointmentService, SchedulingService schedulingService, EmailService emailService) {
+    public AppointmentController(AppointmentService appointmentService, SchedulingService schedulingService) {
         this.schedulingService = schedulingService;
         this.appointmentService = appointmentService;
-        this.emailService = emailService;
     }
 
     @GetMapping

@@ -132,12 +132,11 @@ public class EmailService{
 
     @Async
     public void sendCancelAppointmentProviderEmail(Appointment appointment) {
-        //Teste
         String compensationMessage = "";
         long daysBeforeStart = ChronoUnit.DAYS.between(LocalDate.now(), appointment.getStartDateTime().toLocalDate());
         int daysBeforeCancellationGlobalConfig = Integer.parseInt(globalConfigurationService.getConfigValue("minimum_days_before_cancellation_to_not_pay"));
         if(daysBeforeStart < daysBeforeCancellationGlobalConfig)
-            compensationMessage="<p>Since the appointment was cancelled 3 or less before the time, you will receive the full amount</p>\n";
+            compensationMessage = "<p>Since the appointment was cancelled " + daysBeforeCancellationGlobalConfig + " or fewer days before the scheduled time, you will receive the full amount.</p>\n";
 
         String html = loadEmailTemplate("templates/cancelled-appointment-provider.html")
                 .replace("[CLIENT_NAME]", appointment.getMember().getUsername())
