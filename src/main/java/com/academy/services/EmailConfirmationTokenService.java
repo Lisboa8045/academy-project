@@ -2,7 +2,6 @@ package com.academy.services;
 
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.member.Member;
-import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.models.token.EmailConfirmationToken;
 import com.academy.repositories.EmailConfirmationTokenRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,7 +38,7 @@ public class EmailConfirmationTokenService {
 
     public EmailConfirmationToken getTokenByRawValue(String rawValue) {
         EmailConfirmationToken token = emailConfirmationTokenRepository.findByRawValue(rawValue)
-                .orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, rawValue));
+                .orElseThrow(() -> new EntityNotFoundException(EmailConfirmationToken.class, rawValue));
         return token;
     }
 

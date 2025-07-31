@@ -26,7 +26,7 @@ public class EmailConfirmationToken extends BaseEntity {
     @Column(name="raw_value", nullable = false)
     private String rawValue;
 
-    @Column(name="enconded_value", nullable = false)
+    @Column(name = "encoded_value", nullable = false)
     private String encondedValue;
 
     @Column(name = "expiration_date", updatable = false)

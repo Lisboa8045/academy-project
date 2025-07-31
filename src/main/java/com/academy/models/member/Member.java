@@ -1,8 +1,8 @@
 package com.academy.models.member;
 
-import com.academy.models.appointment.Appointment;
 import com.academy.models.Availability;
 import com.academy.models.Role;
+import com.academy.models.appointment.Appointment;
 import com.academy.models.service.Service;
 import com.academy.models.shared.BaseEntity;
 import com.academy.models.token.EmailConfirmationToken;
@@ -22,15 +22,15 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 
 @Entity
 @Table(name = "member")
 @Getter
 @Setter
-@ToString(callSuper = true, exclude = {"availabilities", "appointments", "createdServices", "role"})
+@ToString(callSuper = true, exclude = {"availabilities", "appointments", "createdServices", "role", "emailConfirmationTokens"})
 public class Member extends BaseEntity {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)

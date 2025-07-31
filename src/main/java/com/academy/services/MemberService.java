@@ -25,7 +25,6 @@ import com.academy.models.member.Member;
 import com.academy.models.member.MemberStatusEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.models.token.EmailConfirmationToken;
-import com.academy.repositories.EmailConfirmationTokenRepository;
 import com.academy.repositories.MemberRepository;
 import com.academy.repositories.RoleRepository;
 import jakarta.servlet.http.HttpServletResponse;
@@ -63,7 +62,6 @@ public class MemberService {
 
     private final JwtCookieUtil jwtCookieUtil;
     private final ServiceProviderService serviceProviderService;
-    @Autowired
     private EmailConfirmationTokenService emailConfirmationTokenService;
 
     @Autowired
@@ -77,7 +75,7 @@ public class MemberService {
                          EmailService emailService,
                          GlobalConfigurationService globalConfigurationService,
                          AppProperties appProperties,
-                         EmailConfirmationTokenRepository emailConfirmationTokenRepository,
+                         EmailConfirmationTokenService emailConfirmationTokenService,
                          @Lazy ServiceProviderService serviceProviderService) {
         this.memberRepository = memberRepository;
         this.passwordEncoder = passwordEncoder;
@@ -90,6 +88,7 @@ public class MemberService {
         this.globalConfigurationService = globalConfigurationService;
         this.appProperties = appProperties;
         this.serviceProviderService = serviceProviderService;
+        this.emailConfirmationTokenService = emailConfirmationTokenService;
     }
 
 
