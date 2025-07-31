@@ -58,6 +58,10 @@ export class ServiceApiService {
     return this.http.put<ServiceModel>(`${this.BASE_URL}/${id}`, payload);
   }
 
+  deleteService(id: number) {
+    return this.http.delete(`${this.BASE_URL}/${id}`);
+  }
+
   uploadServiceImages(formData: FormData, id : number) {
     return this.http.post<{imageUrl: string}>(
       `${this.UPLOADS_URL}?id=${id}`,

@@ -4,7 +4,10 @@
   <div class="card">
     <span class="header">
       <h2>Manage Service</h2>
-      <button *ngIf="!form.enabled && userCanEdit()" type="button" (click)="form.enable()" class="edit-button">Edit Service</button>
+      <div>
+        <button *ngIf="!form.enabled && userCanEdit()" type="button" (click)="form.enable()" class="edit-button">Edit Service</button>
+        <button *ngIf="service!.permissions.includes(ProviderPermissionEnumModel.DELETE)" class="cancel-button" (click)="deleteServiceModal.set(true)">Delete Service</button>
+      </div>
     </span>
     <form [formGroup]="form"
           (ngSubmit)="submit()">
@@ -146,7 +149,14 @@
     </form>
   </div>
   <div class="card">
-    <h2>Manage Service</h2>
+    <h2>Manage Workers</h2>
     <app-manage-workers [loggedUserPermissions]="service!.permissions"/>
   </div>
 }
+
+<app-confirmation-modal *ngIf="deleteServiceModal()"
+                        [title]="'Delete Service'"
+                        text="delete this service"
+                        (confirm)="deleteService()"
+                        (close)="deleteServiceModal.set(false)"
+></app-confirmation-modal>

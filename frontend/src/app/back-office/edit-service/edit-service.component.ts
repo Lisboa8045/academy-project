@@ -6,7 +6,7 @@ import {NgForOf, NgIf} from '@angular/common';
 import {ServiceTypeResponseDTO} from '../../shared/models/service-type.model';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {faPlus, faTimes} from '@fortawesome/free-solid-svg-icons';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {ServiceModel} from '../../service/service.model';
 import {LoadingComponent} from '../../loading/loading.component';
 import {snackBarSuccess} from '../../shared/snackbar/snackbar-success';
@@ -14,6 +14,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {snackBarError} from '../../shared/snackbar/snackbar-error';
 import {ManageWorkersComponent} from './manage-workers/manage-workers.component';
 import {ProviderPermissionEnumModel} from '../../models/provider-permission.enum';
+import {ConfirmationModalComponent} from '../../shared/confirmation-component/confirmation-modal.component';
 
 
 @Component({
@@ -25,7 +26,8 @@ import {ProviderPermissionEnumModel} from '../../models/provider-permission.enum
     FontAwesomeModule,
     FormsModule,
     LoadingComponent,
-    ManageWorkersComponent
+    ManageWorkersComponent,
+    ConfirmationModalComponent
   ],
   templateUrl: './edit-service.component.html',
   standalone: true,
@@ -33,6 +35,7 @@ import {ProviderPermissionEnumModel} from '../../models/provider-permission.enum
 })
 export class EditServiceComponent implements OnInit {
   loading = signal(false);
+  deleteServiceModal = signal(false);
   service?: ServiceModel;
   selectedFiles: File[] = [];
   readonly imageUrl = 'https://placehold.co/300x200?text=No+Image';
@@ -47,6 +50,7 @@ export class EditServiceComponent implements OnInit {
   constructor(private fb: FormBuilder,
               private serviceApi: ServiceApiService,
               private route: ActivatedRoute,
+              private router: Router,
               private snackBar: MatSnackBar) {}
 
   ngOnInit() {
@@ -61,6 +65,9 @@ export class EditServiceComponent implements OnInit {
     this.serviceApi.getServiceById(id).subscribe({
       next: (data: ServiceModel) => {
         this.service = data;
+        if (!this.service.permissions.includes(ProviderPermissionEnumModel.READ)) {
+          this.router.navigate(['/unauthorized'])
+        }
         this.setupServiceForm();
         this.loading.set(false);
       },
@@ -252,5 +259,21 @@ export class EditServiceComponent implements OnInit {
     }
     this.form = buildServiceForm(this.fb, this.service);
     this.form.disable();
+  }
+
+  protected readonly ProviderPermissionEnumModel = ProviderPermissionEnumModel;
+
+  deleteService() {
+    this.deleteServiceModal.set(false);
+    console.log("DELETE SERVICE: " + this.service!.id);
+    this.serviceApi.deleteService(this.service!.id).subscribe({
+      next: () => {
+        snackBarSuccess(this.snackBar, 'Service Deleted Successfully');
+        this.router.navigate(['/my-services']);
+      },
+      error: () => {
+        snackBarError(this.snackBar, 'Service deletion failed.');
+      }
+    })
   }
 }

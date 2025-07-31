@@ -33,8 +33,6 @@ export const routes: Routes = [
   { path: 'services', component: SearchServicesComponent},
   { path: 'resend-email', component: ResendEmailConfirmationComponent },
   { path: 'confirm-email/:token', component: ConfirmEmailComponent },
-  { path: 'backoffice/services/:id', component: EditServiceComponent },
-  { path: 'backoffice/create-service', component: CreateServiceComponent },
   { path: 'about', component: AboutComponent },
   { path: 'terms', component: TermsComponent },
   { path: 'privacy', component: PrivacyComponent },
@@ -80,8 +78,14 @@ export const routes: Routes = [
     canActivate: [PermissionGuard],
     data: { roles: ['WORKER', 'ADMIN']}
   },
-  { path: 'service-management',
-    component: LandingPageComponent, //TODO
+  {
+    path: 'backoffice/create-service',
+    component: CreateServiceComponent,
+    canActivate: [PermissionGuard],
+    data: {roles: ['WORKER', 'ADMIN']}
+  },
+  { path: 'backoffice/services/:id',
+    component: EditServiceComponent,
     canActivate: [PermissionGuard],
     data: { roles: ['WORKER', 'ADMIN']}
   },

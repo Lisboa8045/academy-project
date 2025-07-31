@@ -15,6 +15,10 @@
   margin-bottom: 2rem;
 }
 
+.header button {
+  margin: .25rem;
+}
+
 fieldset{
   display: flex;
   flex-direction: column;
