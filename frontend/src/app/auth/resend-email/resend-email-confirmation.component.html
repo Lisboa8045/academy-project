@@ -12,7 +12,7 @@
                 </button>
                 <span *ngIf="loading" class="spinner"></span>
               <span *ngIf="resendDisabled && !loading && !error" class="checkmark">✅</span>
-              <span *ngIf="resendDisabled && !loading && error" class="error-icon">❌</span>
+              <span *ngIf="resendDisabled && !loading && error" class="checkmark">❌</span>
             </div>
 
             <button *ngIf="showBackToLogin" (click)="goToLogin()">
