@@ -267,11 +267,19 @@ public class MemberService {
         return optionalMember.get();
     }
 
+    public MemberResponseDTO getMemberDTOByUsername(String username) {
+        return memberMapper.toResponseDTO(getMemberByUsername(username));
+    }
+
     public Member getMemberByUsername(String username){
         Optional<Member> optionalMember = memberRepository.findByUsername(username);
         if(optionalMember.isEmpty())
             throw new MemberNotFoundException(username);
         return optionalMember.get();
+    }
+
+    public List<Member> searchByUsernameAndRole(String username, String roleName) {
+        return memberRepository.searchMemberByUsernameContainsIgnoreCaseAndRoleName(username, roleName);
     }
 
     public boolean existsById(Long memberId) {

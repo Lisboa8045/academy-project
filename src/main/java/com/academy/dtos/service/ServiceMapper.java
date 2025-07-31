@@ -2,7 +2,7 @@ package com.academy.dtos.service;
 
 import com.academy.models.Tag;
 import com.academy.models.service.Service;
-import com.academy.models.service.ServiceImages;
+import com.academy.models.service.ServiceImage;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.repositories.MemberRepository;
 import org.mapstruct.Mapper;
@@ -43,10 +43,10 @@ public abstract class ServiceMapper {
     public abstract void updateEntityFromDto(ServiceRequestDTO dto, @MappingTarget Service service);
 
     @Named("mapImagesToStrings")
-    public List<String> mapImagesToStrings(List<ServiceImages> images) {
+    public List<String> mapImagesToStrings(List<ServiceImage> images) {
         if (images == null) return List.of();
         return images.stream()
-                .map(ServiceImages::getImage)
+                .map(ServiceImage::getImage)
                 .toList();
     }
 

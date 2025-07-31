@@ -21,7 +21,7 @@
                     <p>Try checking spelling, using more general terms, or removing filters.</p>
                 </div>
             } @else {
-                <app-service-list [services]="services"></app-service-list>
+                <app-service-list [services]="services()" clickPath="/services"></app-service-list>
             }
 
             <app-pagination-bar
