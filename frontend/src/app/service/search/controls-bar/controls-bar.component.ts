@@ -8,17 +8,17 @@ import {Component, Input} from '@angular/core';
 export class ControlsBarComponent {
     @Input() pageSize!: { (): number; set: (value: number) => void };
     @Input() sortOrder!: { (): string; set: (value: string) => void };
-    @Input() onChange!: () => void;
+    @Input() onChange?: () => void;
 
     onPageSizeChange(event: Event) {
         const target = event.target as HTMLSelectElement;
         this.pageSize.set(Number(target.value));
-        this.onChange();
+        if (this.onChange) this.onChange();
     }
 
     onSortOrderChange(event: Event) {
         const target = event.target as HTMLSelectElement;
         this.sortOrder.set(target.value);
-        this.onChange();
+        if (this.onChange) this.onChange();
     }
 }
