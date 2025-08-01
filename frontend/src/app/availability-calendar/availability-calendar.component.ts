@@ -59,14 +59,12 @@ export class CalendarComponent implements OnInit, AfterViewInit {
       }
     },
     eventDidMount: (info) => {
-      if (info.event.title !== 'Available' && info.view.type.startsWith('timeGrid')) {
-        // Find all events that overlap this slot in this cell
+      if (info.event.extendedProps['appointment'] && info.view.type.startsWith('timeGrid')) {
         const cell = info.el.parentElement?.parentElement;
         if (!cell) return;
         // Apply left and width offset to stack
         info.el.style.left = `-80%`;
         info.el.style.width = `calc(200%-12px)`;
-        console.log(info.el.style)
       }
 
       // Optionally: Month view disables pointer events
@@ -103,10 +101,6 @@ export class CalendarComponent implements OnInit, AfterViewInit {
     FINISHED: '#95a5a6',   // Muted gray-blue
   };
   availableColor = '#3B82F6';
-
-  // --- Stacking event logic ---
-  private eventStackingTimer: any = null;
-  private eventsToStack: any[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -245,8 +239,7 @@ export class CalendarComponent implements OnInit, AfterViewInit {
     // Only allow drag/resize if event ends in the future
     const now = new Date();
     // dropInfo.end can be null if allDay
-    const eventEnd = dropInfo.end ? new Date(dropInfo.end) : new Date(dropInfo.start);
-    if (eventEnd <= now) {
+    if (new Date(dropInfo.start) <= now) {
       snackBarError(this.snackBar, 'Cannot edit or move past events.');
       return false;
     }
@@ -255,6 +248,13 @@ export class CalendarComponent implements OnInit, AfterViewInit {
 
   handleEventClick(clickInfo: EventClickArg) {
     const event = clickInfo.event;
+    if (event.start) {
+      const now = new Date();
+      const eventEnd = event.end ? event.end : event.start;
+      if (eventEnd < now) {
+        return
+      }
+    }
     if (event.title === 'Available') {
       return; // Skip available events
     }

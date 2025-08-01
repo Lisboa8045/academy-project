@@ -26,5 +26,5 @@ export const routes: Routes = [
   { path: 'confirm-email/:token', component: ConfirmEmailComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password/:token', component: ResetPasswordComponent },
-  { path: 'test', component: CalendarComponent}
+  { path: 'my-calendar', component: CalendarComponent}
 ];

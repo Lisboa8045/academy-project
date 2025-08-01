@@ -21,6 +21,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     @Query("SELECT a FROM Appointment a " +
             "WHERE a.serviceProvider.id = :providerId " +
+            "AND a.status <> 'CANCELLED' " +
             "AND ((a.startDateTime < :end AND a.endDateTime > :start) " +
             "OR (a.startDateTime = :start AND a.endDateTime = :end))")
     List<Appointment> findConflictingAppointments(
