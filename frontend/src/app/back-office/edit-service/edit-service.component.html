@@ -10,6 +10,7 @@
       </div>
     </span>
     <form [formGroup]="form"
+          (keydown.enter)="$event.preventDefault()"
           (ngSubmit)="submit()">
       <fieldset>
         <legend>Service Info</legend>

@@ -1,6 +1,8 @@
 <div class="card">
   <h2>Create Service</h2>
-  <form [formGroup]="form" (ngSubmit)="submit()">
+  <form [formGroup]="form"
+        (keydown.enter)="$event.preventDefault()"
+        (ngSubmit)="submit()">
     <fieldset>
       <legend>Service Info</legend>
       <div class="input-wrapper">
