@@ -8,7 +8,6 @@ import {
 import {Page} from '../../../appointment/page.model';
 import {AppointmentStatusEnumModel} from '../../../appointment/appointment-status.model';
 import {AppointmentService} from '../../../appointment/appointment.service';
-import {Router} from '@angular/router';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {snackBarError} from '../../../shared/snackbar/snackbar-error';
 import {SortingOrderComponent} from '../../../shared/sorting-order/sorting-order.component';
@@ -92,7 +91,7 @@ export class ServiceAppointmentsComponent implements OnInit {
         if(callback)
           callback();
       },
-      error: err => snackBarError(this.snackBar,'Error loading appointment.')
+      error: () => snackBarError(this.snackBar,'Error loading appointment.')
     });
   }
 
