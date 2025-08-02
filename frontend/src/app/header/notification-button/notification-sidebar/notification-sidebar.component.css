@@ -1,7 +1,7 @@
 .notification-list {
   list-style: none;
   overflow: auto;
-  height: 400px;
+  max-height: 400px;
   scrollbar-width: thin;
   scrollbar-color: #5c6bc0 #e0f7fa;
   padding: 0 10px;

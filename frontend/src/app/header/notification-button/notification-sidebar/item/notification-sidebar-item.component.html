@@ -1,6 +1,7 @@
-<div class="notification-card" >
+<div class="notification-card tailwind-scope" >
   <h3>{{item().title}}</h3>
   <p>{{item().body}}</p>
+  <p class="text-gray-400">{{getTimeDifference()}}</p>
   <div class="mark-as-read" (click)="markAsRead()">
     Mark as read
   </div>

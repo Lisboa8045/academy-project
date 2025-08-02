@@ -2,6 +2,8 @@ package com.academy.dtos.notification;
 
 import com.academy.models.notification.NotificationTypeEnum;
 
+import java.time.LocalDateTime;
+
 public record NotificationResponseDTO(
         long id,
         long memberId,
@@ -9,6 +11,7 @@ public record NotificationResponseDTO(
         String body,
         String url,
         boolean seen,
-        NotificationTypeEnum type
+        NotificationTypeEnum type,
+        LocalDateTime createdAt
 ) {
 }

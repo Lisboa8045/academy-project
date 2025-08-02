@@ -1,10 +1,10 @@
 import {Component, inject, input, output} from '@angular/core';
 import {NotificationModel} from '../notification.model';
 import {NotificationService} from '../../../../shared/notification.service';
+import {formatDistance} from 'date-fns';
 
 @Component({
   selector: 'app-notification-sidebar-item',
-  imports: [],
   templateUrl: './notification-sidebar-item.component.html',
   styleUrl: './notification-sidebar-item.component.css'
 })
@@ -15,6 +15,10 @@ export class NotificationSidebarItemComponent {
 
   navigateToUrl() {
     window.open(this.item().url);
+  }
+
+  getTimeDifference() {
+    return formatDistance(new Date(this.item().createdAt), new Date(), {addSuffix: true});
   }
 
   markAsRead() {
