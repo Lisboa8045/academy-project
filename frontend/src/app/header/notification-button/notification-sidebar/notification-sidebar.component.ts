@@ -1,13 +1,11 @@
 import {Component, input, output} from '@angular/core';
 import {NotificationModel} from './notification.model';
 import {NotificationSidebarItemComponent} from './item/notification-sidebar-item.component';
-import {NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-notification-sidebar',
   imports: [
-    NotificationSidebarItemComponent,
-    NgIf
+    NotificationSidebarItemComponent
   ],
   templateUrl: './notification-sidebar.component.html',
   styleUrl: './notification-sidebar.component.css'
