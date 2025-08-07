@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
+import com.academy.services.EmailService;
 
 @RestController
 @RequestMapping("/auth")
@@ -104,6 +105,13 @@ public class AuthController {
             @RequestBody RecreateConfirmationTokenRequestDto request) {
         memberService.recreateConfirmationToken(request.login());
         return ResponseEntity.ok(new RecreateConfirmationTokenResponseDto("Confirmation token recreated"));
+    }
+
+    @PostMapping("/recreate-cancel-account-token")
+    public ResponseEntity<RecreateAccountDeletionTokenResponseDto> recreateAccountDeletionToken(
+            @RequestBody RecreateAccountDeletionTokenRequestDto request) {
+        memberService.recreateDeletionToken(request.login());
+        return ResponseEntity.ok(new RecreateAccountDeletionTokenResponseDto("Account deletion token created"));
     }
 
     @PostMapping("/password-reset-token")
