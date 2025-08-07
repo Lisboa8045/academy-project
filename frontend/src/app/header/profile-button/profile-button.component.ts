@@ -25,7 +25,7 @@ export class ProfileButtonComponent implements OnInit {
   router = inject(Router);
   menuItems: MenuItem[] = [];
 
-  constructor(private authStore: AuthStore) {
+  constructor() {
     effect(() =>{this.insertByRole()});
   }
 
@@ -44,10 +44,6 @@ export class ProfileButtonComponent implements OnInit {
         command: () => {
           this.router.navigate(['/appointments'])
         }
-      },
-      {
-        label: 'Settings',
-        icon: '⚙️'
       },
       {
         label: 'Logout',
