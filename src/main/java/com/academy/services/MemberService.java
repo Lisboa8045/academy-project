@@ -425,7 +425,7 @@ public class MemberService {
         List<EmailConfirmationToken> validTokens = emailConfirmationTokenService.getValidTokensByMember(member);
         int maxValidTokens = Integer.parseInt(globalConfigurationService.getConfigValue("maximum_valid_confirmation_tokens"));
 
-        if(validTokens.size() > maxValidTokens)
+        if(validTokens.size() >= maxValidTokens)
             throw new RuntimeException("Maximum number of confirmation emails reached ");
 
     }
