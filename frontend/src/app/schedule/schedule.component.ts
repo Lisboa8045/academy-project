@@ -13,6 +13,9 @@ import {SlotSelectionComponent} from './slotSelectionComponent/slot-selection.co
 import {ServiceProviderModel} from '../models/service-provider.model';
 import {AuthStore} from '../auth/auth.store';
 import {ActivatedRoute, Router} from '@angular/router';
+import {snackBarSuccess} from '../shared/snackbar/snackbar-success';
+import {snackBarError} from '../shared/snackbar/snackbar-error';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-schedule',
@@ -52,7 +55,8 @@ export class ScheduleComponent implements OnInit {
       private serviceApi: ServiceApiService,
       private scheduleApi: ScheduleApiService,
       private route: ActivatedRoute,
-      private router: Router
+      private router: Router,
+      private snackBar: MatSnackBar
 ) {
     this.form = this.fb.group({
       serviceId: [null]
@@ -225,11 +229,14 @@ export class ScheduleComponent implements OnInit {
         };
 
         this.scheduleApi.confirmAppointment(appointment).subscribe({
-          next: () => alert('Appointment scheduled successfully!'),
-          error: err => alert('Error scheduling appointment: ' + err.message)
+          next: () => {
+            snackBarSuccess(this.snackBar, 'Appointment scheduled successfully!');
+            this.currentStep = 'slots';
+          },
+          error: err => snackBarError(this.snackBar, 'Error scheduling appointment: ' + err.message)
         });
       },
-      error: err => alert('Error obtaining service provider: ' + err.message)
+      error: err => snackBarError(this.snackBar, 'Error obtaining service provider: ' + err.message)
     });
   }
 

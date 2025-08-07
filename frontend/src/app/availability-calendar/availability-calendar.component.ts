@@ -453,8 +453,18 @@ export class CalendarComponent implements OnInit, AfterViewInit {
   }
 
   canSave(): boolean {
-    const current = this.getCurrentAvailabilitySnapshot();
-    return !this.arraysEqual(current, this.originalAvailabilitySnapshot);
+    const current = this.getCurrentAvailabilitySnapshot().slice().sort((a, b) =>
+      a.date.localeCompare(b.date) ||
+      a.start.localeCompare(b.start) ||
+      a.end.localeCompare(b.end)
+    );
+    const original = this.originalAvailabilitySnapshot.slice().sort((a, b) =>
+      a.date.localeCompare(b.date) ||
+      a.start.localeCompare(b.start) ||
+      a.end.localeCompare(b.end)
+    );
+
+    return !this.arraysEqual(current, original);
   }
 
   // ────────────── Calendar Rendering ──────────────

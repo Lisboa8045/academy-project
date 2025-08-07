@@ -1,10 +1,7 @@
 package com.academy.models.member;
 
-import com.academy.models.Availability;
 import com.academy.models.appointment.Appointment;
-import com.academy.models.availability.Availability;
 import com.academy.models.Role;
-import com.academy.models.appointment.Appointment;
 import com.academy.models.availability.MemberAvailability;
 import com.academy.models.service.Service;
 import com.academy.models.shared.BaseEntity;
@@ -24,7 +21,7 @@ import java.util.List;
 @Table(name = "member")
 @Getter
 @Setter
-@ToString(callSuper = true, exclude = {"availabilities", "appointments", "createdServices", "role", "emailConfirmationTokens"})
+@ToString(callSuper = true, exclude = {"memberAvailabilities", "appointments", "createdServices", "role", "emailConfirmationTokens"})
 public class Member extends BaseEntity {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
