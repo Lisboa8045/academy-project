@@ -23,7 +23,7 @@
               </ng-container>
           </div>
         } @else {
-          <app-service-list [services]="services" [shouldShowTags]="false">
+          <app-service-list [services]="services()" clickPath="/services" [shouldShowTags]="false">
             <ng-template let-service>
               <div class="flex justify-between p-2">
                 <button (click)="rejectService(service); $event.stopPropagation()"

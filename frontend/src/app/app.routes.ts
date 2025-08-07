@@ -41,7 +41,12 @@ export const routes: Routes = [
   { path: 'reset-password/:token', component: ResetPasswordComponent },
   { path: 'not-found', component: NotFoundComponent},
   { path: 'auth/confirm-prompt', component: ConfirmEmailPromptComponent },
-  { path: 'administrate-services', component: ServiceAdminApprovalComponent },
+  {
+    path: 'administrate-services',
+    component: ServiceAdminApprovalComponent,
+    canActivate: [PermissionGuard],
+    data: { roles: ['ADMIN']}
+  },
   {
     path: 'profile',
     component: ProfileComponent,
