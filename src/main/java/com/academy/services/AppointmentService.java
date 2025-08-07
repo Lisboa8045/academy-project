@@ -19,6 +19,7 @@ import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.AppointmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -70,10 +71,12 @@ public class AppointmentService {
                 .map(appointmentMapper::toResponseDTO)
                 .toList();
     }
+
     public Appointment getAppointmentEntityById(long id) {
         return appointmentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
     }
+
     public AppointmentResponseDTO getAppointmentById(Long id) {
         return appointmentMapper.toResponseDTO(getAppointmentEntityById(id));
     }
@@ -134,13 +137,10 @@ public class AppointmentService {
     public AppointmentResponseDTO updateAppointment(Long id, AppointmentRequestDTO appointmentDetails) {
 
         Appointment appointment = appointmentRepository.findById(id)
-
                 .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
-
 
         ServiceProvider serviceProvider = serviceProviderService.getServiceProviderEntityById(appointmentDetails.serviceProviderId());
         appointment.setServiceProvider(serviceProvider);
-
 
         if(appointmentDetails.rating().equals(appointment.getRating()))
             appointment.setRating(appointmentDetails.rating());
@@ -155,11 +155,9 @@ public class AppointmentService {
     public void deleteReview(Long id){
 
         Appointment appointment = appointmentRepository.findById(id)
-
                 .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
 
         appointment.setRating(null);
-
         appointment.setComment(null);
 
         appointmentRepository.save(appointment);
@@ -176,18 +174,9 @@ public class AppointmentService {
 
     }
 
-/*
-    public List<AppointmentResponseDTO> getAppointmentsForAuthenticatedProvider() {
-        return appointmentRepository.findByProvider_Username(authenticationFacade.getUsername()).stream()
-                .map(appointmentMapper::toResponseDTO)
-                .collect(Collectors.toList());
-    }
-
- */
-
     public List<Appointment> getAppointmentsForProvider(Long providerId) {
     if (providerId == null) {
-        throw new EntityNotFoundException(Appointment.class, providerId);
+        throw new EntityNotFoundException(Appointment.class, null);
     }
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime end = now.plusDays(slotWindowDays);

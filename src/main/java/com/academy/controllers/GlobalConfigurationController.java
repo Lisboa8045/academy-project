@@ -6,6 +6,7 @@ import com.academy.services.GlobalConfigurationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,6 +27,7 @@ public class GlobalConfigurationController {
         this.globalConfigurationService = globalConfigurationService;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<GlobalConfigurationResponseDTO>> getAll(){
         List<GlobalConfigurationResponseDTO> responses = globalConfigurationService.getAllConfigs();
@@ -38,12 +40,14 @@ public class GlobalConfigurationController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{configKey}")
     public ResponseEntity<GlobalConfigurationResponseDTO> updateConfig(@PathVariable String configKey, @Valid @RequestBody GlobalConfigurationRequestDTO request) {
         GlobalConfigurationResponseDTO response = globalConfigurationService.updateConfigValue(configKey, request);
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/edit")
     public ResponseEntity<Void> editConfigs(@Valid @RequestBody List<GlobalConfigurationRequestDTO> request) {
         globalConfigurationService.editConfigs(request);

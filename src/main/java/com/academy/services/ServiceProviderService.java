@@ -7,7 +7,6 @@ import com.academy.dtos.service_provider.ServiceProviderResponseDTO;
 import com.academy.exceptions.AuthenticationException;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.exceptions.MemberNotFoundException;
-import com.academy.models.appointment.Appointment;
 import com.academy.models.member.Member;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
@@ -130,15 +129,12 @@ public class ServiceProviderService {
         ServiceProvider serviceProvider = serviceProviderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
 
-        if(details.serviceId() != null) {
-            Service service = serviceService.getServiceEntityById(details.serviceId());
-            serviceProvider.setService(service);
-        }
+        Service service = serviceService.getServiceEntityById(details.serviceId());
+        serviceProvider.setService(service);
 
         serviceProvider = serviceProviderRepository.save(serviceProvider);
-        if (details.permissions() != null) {
-            providerPermissionService.createPermissionsViaList(details.permissions(), serviceProvider);
-        }
+        providerPermissionService.createPermissionsViaList(details.permissions(), serviceProvider);
+
         return serviceProviderMapper.toResponseDTO(serviceProvider);
     }
 
@@ -227,6 +223,7 @@ public class ServiceProviderService {
         return serviceProviderRepository.findProvidersByServiceIdAndPermission(serviceId, permission);
     }
 
+    @Transactional
     public void updateRating(Long id){
         Double rating = appointmentRepository.findAverageRatingByServiceProvider_Id(id);
         System.out.println("Updating rating for service provider with id " + id + " to " + rating);
@@ -237,8 +234,6 @@ public class ServiceProviderService {
             provider.setRating(roundedRating);
             serviceProviderRepository.save(provider);
         }
-
     }
-
-
+    
 }

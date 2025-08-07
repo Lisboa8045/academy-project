@@ -14,6 +14,7 @@ import com.academy.exceptions.UnavailableUserException;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -58,7 +59,6 @@ public class ExceptionController {
                 .body(Map.of("errors", e.getFieldErrors()));
     }
 
-//TODO eliminar esta para apenas utilizar a de baixo
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<Object> handleInvalidValue(BadRequestException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -86,6 +86,11 @@ public class ExceptionController {
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<Object> handleInvalidValue(AuthenticationException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Object> handleInvalidValue(AccessDeniedException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
     }
     
