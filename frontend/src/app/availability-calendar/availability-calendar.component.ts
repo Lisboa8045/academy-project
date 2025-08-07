@@ -402,7 +402,6 @@ export class CalendarComponent implements OnInit, AfterViewInit {
     const availableEvents = allEvents.filter(event => event.title === 'Available');
     const dto = this.mapEventsToDTO(availableEvents);
 
-    console.log('DTO ready to send:', dto);
 
     this.availabilityService.saveAvailabilities(dto).subscribe({
       next: () => {
