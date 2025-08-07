@@ -3,6 +3,12 @@ package com.academy.repositories;
 import com.academy.models.appointment.Appointment;
 import com.academy.models.appointment.AppointmentStatus;
 import jakarta.transaction.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import com.academy.models.appointment.AppointmentStatus;
+import com.academy.services.AppointmentService;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -14,7 +20,9 @@ import java.util.List;
 
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
     List<Appointment> findAllByServiceProviderId(Long serviceProviderProviderId);
+
     List<Appointment> findByMember_Id(Long memberId);
+
     List<Appointment> findByMember_Username(String username, Sort sort);
 
     @Query("SELECT a FROM Appointment a JOIN FETCH a.serviceProvider sp " +
@@ -23,6 +31,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     @Query("SELECT a FROM Appointment a " +
             "WHERE a.serviceProvider.id = :providerId " +
+            "AND a.status <> 'CANCELLED' " +
             "AND ((a.startDateTime < :end AND a.endDateTime > :start) " +
             "OR (a.startDateTime = :start AND a.endDateTime = :end))")
     List<Appointment> findConflictingAppointments(
@@ -37,7 +46,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     void cancelIfStillPending(Long id, AppointmentStatus status);
 
     List<Appointment> findByServiceProvider_Provider_IdAndStartDateTimeBetween(Long providerId, LocalDateTime now,
-            LocalDateTime in30Days);
+                                                                               LocalDateTime in30Days);
 
     List<Appointment> findByServiceProviderId(Long serviceProviderId);
 
@@ -46,4 +55,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     @Query("SELECT a FROM Appointment a WHERE a.serviceProvider.provider.id = :memberId")
     List<Appointment> findAllReviewsByMemberId(@Param("memberId") Long memberId);
+
+    List<Appointment> findAllByServiceProviderProviderUsernameAndStatusIsNot(String username, AppointmentStatus status);
 }

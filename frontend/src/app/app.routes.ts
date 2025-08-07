@@ -23,6 +23,7 @@ import { PermissionGuard } from './auth/permission.guard';
 import {ConfirmEmailPromptComponent} from "./auth/confirm-email-prompt/confirm-email-prompt.component";
 import {ServiceAdminApprovalComponent} from './service/admin-approval/service-admin-approval-component.component';
 import {NotFoundComponent} from './not-found.component';
+import {CalendarComponent} from './availability-calendar/availability-calendar.component';
 
 export const routes: Routes = [
   { path: '', component: LandingPageComponent},
@@ -95,6 +96,12 @@ export const routes: Routes = [
     component: EditServiceComponent,
     canActivate: [PermissionGuard],
     data: { roles: ['WORKER', 'ADMIN']}
+  },
+  {
+    path: 'my-calendar',
+    component: CalendarComponent,
+    canActivate: [PermissionGuard],
+    data: {roles: ['WORKER', 'ADMIN']}
   },
   { path: '**', redirectTo: '', pathMatch: 'full' }
 ];

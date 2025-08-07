@@ -1,6 +1,7 @@
 package com.academy.services;
 
 import com.academy.config.authentication.AuthenticationFacade;
+import com.academy.dtos.appointment.AppointmentCalendarDTO;
 import com.academy.dtos.appointment.AppointmentCardDTO;
 import com.academy.dtos.appointment.AppointmentMapper;
 import com.academy.dtos.appointment.AppointmentRequestDTO;
@@ -19,8 +20,8 @@ import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.AppointmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -174,6 +175,13 @@ public class AppointmentService {
 
         return appointmentList.stream().map(appointmentMapper::toAppointmentCardDTO).toList();
 
+    }
+
+    public List<AppointmentCalendarDTO> getAppointmentsForAuthenticatedServiceProviderCalendar() {
+
+        List<Appointment> appointmentList = appointmentRepository
+                .findAllByServiceProviderProviderUsernameAndStatusIsNot(authenticationFacade.getUsername(), AppointmentStatus.CANCELLED);
+        return appointmentList.stream().map(appointmentMapper::toAppointmentCalendarDTO).toList();
     }
 
 /*
