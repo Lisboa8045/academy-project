@@ -1,7 +1,8 @@
-import {Injectable, WritableSignal} from '@angular/core';
+import {Injectable} from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {MemberResponseDTO} from '../auth/member-response-dto.model';
 import {Observable} from 'rxjs';
+import {ServiceAppointmentReviewModel} from '../service/service-details/service-appointment-review-model';
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +19,18 @@ export class ProfileService {
     );
   }
 
+  getMemberByUsername(username: string){
+    return this.http.get<MemberResponseDTO>(
+      `${this.apiUrl}/byUsername/${username}`,
+    );
+  }
+
+  getWorkersContainsUsername(username: string){
+    return this.http.get<MemberResponseDTO[]>(
+      `${this.apiUrl}/search?username=${username}&roleName=WORKER`,
+    );
+  }
+
   uploadProfilePicture(formData: FormData, id : number) {
     return this.http.post<{imageUrl: string}>(
       `${this.uploadUrl}/profile-picture?id=${id}`,
@@ -27,6 +40,16 @@ export class ProfileService {
 
   updateMember(updatedUser: Partial<MemberResponseDTO>, id:number) {
     return this.http.put(`${this.apiUrl}/${id}`, updatedUser);
+  }
+
+  getAllMembers() {
+    return this.http.get<MemberResponseDTO[]>(
+      this.apiUrl
+    );
+  }
+
+  getReviewsByMemberId(memberId: number): Observable<ServiceAppointmentReviewModel[]> {
+    return this.http.get<ServiceAppointmentReviewModel[]>(`${this.apiUrl}/${memberId}/reviews`);
   }
 }
 

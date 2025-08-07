@@ -100,7 +100,13 @@ export class AuthComponent{
     if (this.isLoginMode()) {
       this.authService.login(login, password).subscribe({
         next: () => {
-          this.router.navigate(['/']);
+          const redirectUrl = localStorage.getItem('redirectAfterLogin');
+          if (redirectUrl) {
+            localStorage.removeItem('redirectAfterLogin');
+            this.router.navigateByUrl(redirectUrl);
+          } else {
+            this.router.navigate(['/']);
+          }
           this.loading.set(false);
         },
         error: (err) => {

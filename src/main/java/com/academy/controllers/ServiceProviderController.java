@@ -29,6 +29,12 @@
             return ResponseEntity.ok(serviceProviders);
         }
 
+        @GetMapping("/services/{serviceId}")
+        public ResponseEntity<List<ServiceProviderResponseDTO>> getServiceProvidersByServiceId(@PathVariable long serviceId) {
+            List<ServiceProviderResponseDTO> serviceProviders = serviceProviderService.getServiceProvidersByServiceId(serviceId);
+            return ResponseEntity.ok(serviceProviders);
+        }
+
         @GetMapping("/{id}")
         public ResponseEntity<ServiceProviderResponseDTO> getServiceProviderById(@PathVariable long id) {
             return serviceProviderService.getServiceProviderById(id)
@@ -56,7 +62,7 @@
         }
 
         @DeleteMapping("/{id}")
-        public ResponseEntity<Void> deleteServiceProvider(@PathVariable long id) {
+        public ResponseEntity<Void> deleteServiceProvider(@PathVariable long id) throws BadRequestException {
             serviceProviderService.deleteServiceProvider(id);
             return ResponseEntity.noContent().build();
         }

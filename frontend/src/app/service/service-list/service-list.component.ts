@@ -1,4 +1,5 @@
-import type {Signal} from '@angular/core';
+import {input} from '@angular/core';
+import {ContentChild, Signal, TemplateRef} from '@angular/core';
 import {Component, Input} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ServiceModel} from '../service.model';
@@ -13,12 +14,14 @@ import {ServiceCardComponent} from '../../shared/service-card/service-card.compo
   styleUrls: ['./service-list.component.css']
 })
 export class ServiceListComponent {
+  services = input.required<ServiceModel[]>();
+  clickPath = input.required<string>();
+  @Input() shouldShowTags = true;
+  @ContentChild(TemplateRef) contentTemplate!: TemplateRef<any>;
 
   constructor(private router: Router) {}
 
-  @Input() services!: Signal<ServiceModel[]>;
-
   onCardClick(id: number) {
-    this.router.navigate(['/services', id]);
+    this.router.navigate([this.clickPath(), id]);
   }
 }

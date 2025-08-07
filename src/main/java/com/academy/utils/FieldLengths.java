@@ -37,4 +37,7 @@ public final class FieldLengths {
 
     // Role
     public static final int ROLE_MAX = 30;
+
+    //Enum max length
+    public static final int ENUM_MAX_LENGTH = 50;
 }

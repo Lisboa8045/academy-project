@@ -4,6 +4,8 @@ import com.academy.config.AppProperties;
 import com.academy.config.TestTokenStorage;
 import com.academy.config.authentication.JwtCookieUtil;
 import com.academy.config.authentication.JwtUtil;
+import com.academy.dtos.appointment.AppointmentMapper;
+import com.academy.dtos.appointment.AppointmentReviewResponseDTO;
 import com.academy.dtos.member.MemberRequestDTO;
 import com.academy.dtos.member.MemberResponseDTO;
 import com.academy.dtos.register.LoginRequestDto;
@@ -21,12 +23,15 @@ import com.academy.exceptions.RegistrationConflictException;
 import com.academy.exceptions.TokenExpiredException;
 import com.academy.exceptions.UnavailableUserException;
 import com.academy.models.Role;
+import com.academy.models.appointment.Appointment;
 import com.academy.models.member.Member;
 import com.academy.models.member.MemberStatusEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.models.token.EmailConfirmationToken;
+import com.academy.repositories.AppointmentRepository;
 import com.academy.repositories.MemberRepository;
 import com.academy.repositories.RoleRepository;
+import com.academy.repositories.ServiceProviderRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +68,10 @@ public class MemberService {
     private final JwtCookieUtil jwtCookieUtil;
     private final ServiceProviderService serviceProviderService;
     private EmailConfirmationTokenService emailConfirmationTokenService;
+    private final ServiceProviderRepository serviceProviderRepository;
+    @Autowired
+    private AppointmentRepository appointmentRepository;
+    private final AppointmentMapper appointmentMapper;
 
     @Autowired
     public MemberService(MemberRepository memberRepository,
@@ -76,7 +85,9 @@ public class MemberService {
                          GlobalConfigurationService globalConfigurationService,
                          AppProperties appProperties,
                          EmailConfirmationTokenService emailConfirmationTokenService,
-                         @Lazy ServiceProviderService serviceProviderService) {
+                         @Lazy ServiceProviderService serviceProviderService,
+                         ServiceProviderRepository serviceProviderRepository,
+                         AppointmentMapper appointmentMapper) {
         this.memberRepository = memberRepository;
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
@@ -89,6 +100,8 @@ public class MemberService {
         this.appProperties = appProperties;
         this.serviceProviderService = serviceProviderService;
         this.emailConfirmationTokenService = emailConfirmationTokenService;
+        this.serviceProviderRepository = serviceProviderRepository;
+        this.appointmentMapper = appointmentMapper;
     }
 
 
@@ -257,11 +270,23 @@ public class MemberService {
         return optionalMember.get();
     }
 
+    public MemberResponseDTO getMemberDTOByUsername(String username) {
+        return memberMapper.toResponseDTO(getMemberByUsername(username));
+    }
+
     public Member getMemberByUsername(String username){
         Optional<Member> optionalMember = memberRepository.findByUsername(username);
         if(optionalMember.isEmpty())
             throw new MemberNotFoundException(username);
         return optionalMember.get();
+    }
+
+    public List<MemberResponseDTO> getMemberDTOByUsernameAndRole(String username, String roleName) {
+        return searchByUsernameAndRole(username, roleName).stream().map(memberMapper::toResponseDTO).toList();
+    }
+
+    public List<Member> searchByUsernameAndRole(String username, String roleName) {
+        return memberRepository.searchMemberByUsernameContainsIgnoreCaseAndRoleName(username, roleName);
     }
 
     public boolean existsById(Long memberId) {
@@ -403,5 +428,24 @@ public class MemberService {
         if(validTokens.size() > maxValidTokens)
             throw new RuntimeException("Maximum number of confirmation emails reached ");
 
+    }
+
+    public void updateMemberRating(Long memberId) {
+        Double rating = serviceProviderRepository.findAverageRatingByMemberId(memberId);
+        System.out.println("Updating Member rating with" + memberId + " to " +rating);
+        if (rating != null) {
+            int roundedRating = Math.toIntExact(Math.round(rating));
+            Member member = memberRepository.findById(memberId)
+                    .orElseThrow(() -> new EntityNotFoundException(Member.class, memberId));
+            member.setRating(roundedRating);
+            memberRepository.save(member);
+        }
+    }
+
+    public List<AppointmentReviewResponseDTO> getReviewsByMemberId(Long id) {
+        List<Appointment> appointments = appointmentRepository.findAllReviewsByMemberId(id);
+        return appointments.stream()
+                .map(appointmentMapper::toReviewResponseDTO)
+                .toList();
     }
 }

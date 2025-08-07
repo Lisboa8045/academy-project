@@ -25,7 +25,7 @@ export class ProfileButtonComponent implements OnInit {
   router = inject(Router);
   menuItems: MenuItem[] = [];
 
-  constructor(private authStore: AuthStore) {
+  constructor() {
     effect(() =>{this.insertByRole()});
   }
 
@@ -44,14 +44,6 @@ export class ProfileButtonComponent implements OnInit {
         command: () => {
           this.router.navigate(['/appointments'])
         }
-      },
-      {
-        label: 'BackOffice',
-        icon: '👔'
-      },
-      {
-        label: 'Settings',
-        icon: '⚙️'
       },
       {
         label: 'Logout',
@@ -78,11 +70,20 @@ export class ProfileButtonComponent implements OnInit {
   insertByRole(){
     this.menuItems = this.menuItems.filter(item => item.label !== 'My Services');
     if (this.role() === 'WORKER') {
-      this.menuItems.splice(3, 0, {
+      this.menuItems.splice(2, 0, {
         label: 'My Services',
         icon: '🛎️',
         command: () => this.router.navigate(['/my-services'])
       });
+    } else if (this.role() === 'ADMIN') {
+      this.menuItems.splice(2, 0,
+        {
+          label: 'Admin Services',
+          icon: '👔',
+          command: () => {
+            this.router.navigate(['/administrate-services'])
+          }
+        });
     }
   }
 }

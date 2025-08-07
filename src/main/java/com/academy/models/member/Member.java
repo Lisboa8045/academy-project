@@ -89,6 +89,9 @@ public class Member extends BaseEntity {
     @Column(name = "profile_picture")
     private String profilePicture;
 
+    @Column(name = "rating")
+    private Integer rating;
+
     public Long getId(){
         return id;
     }

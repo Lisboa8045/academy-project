@@ -5,6 +5,7 @@ import com.academy.exceptions.EmailTemplateLoadingException;
 import com.academy.exceptions.SendEmailException;
 import com.academy.models.appointment.Appointment;
 import com.academy.models.member.Member;
+import com.academy.models.service.ServiceStatusEnum;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.core.io.ClassPathResource;
@@ -17,6 +18,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 import static com.academy.utils.Utils.formatHours;
 
@@ -55,7 +58,7 @@ public class EmailService{
     protected void sendAppointmentConfirmationEmail(Appointment appointment) {
         String resetUrl = appProperties.getFrontendUrl() + "/confirm-appointment/" + appointment.getId();
         com.academy.models.service.Service service = appointment.getServiceProvider().getService();
-        String html = loadAppointmentConfirmationEmail()
+        String html = loadEmailTemplate("templates/confirm-appointment.html")
                 .replace("[SERVICE_NAME]", appointment.getMember().getUsername())
                 .replace("[User Name]", appointment.getMember().getUsername())
                 .replace("[ENTITY_NUMBER]", service.getEntity())
@@ -73,21 +76,11 @@ public class EmailService{
         );
     }
 
-    private String loadAppointmentConfirmationEmail() {
-        try {
-            ClassPathResource resource = new ClassPathResource("templates/confirm-appointment.html");
-            byte[] bytes = Files.readAllBytes(resource.getFile().toPath());
-            return new String(bytes, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new EmailTemplateLoadingException("Error loading e-mail template");
-        }
-    }
-
     @Async
     protected void sendPasswordResetEmail(Member member, String rawToken) {
         String resetUrl = appProperties.getFrontendUrl() + "/reset-password/" + rawToken;
 
-        String html = loadPasswordResetEmailHtml()
+        String html = loadEmailTemplate("templates/password-reset-email.html")
                 .replace("[User Name]", member.getUsername())
                 .replace("[PASSWORD_RESET_LINK]", resetUrl)
                 .replace("[App Name]", appProperties.getName())
@@ -105,7 +98,7 @@ public class EmailService{
     protected void sendConfirmationEmail(Member member, String rawToken) {
         String confirmationUrl = appProperties.getFrontendUrl() + "/confirm-email/" + rawToken;
 
-        String html = loadVerificationEmailHtml()
+        String html = loadEmailTemplate("templates/verification-email.html")
                 .replace("[User Name]", member.getUsername())
                 .replace("[CONFIRMATION_LINK]", confirmationUrl)
                 .replace("[App Name]", appProperties.getName())
@@ -119,24 +112,87 @@ public class EmailService{
         );
     }
 
-    private String loadVerificationEmailHtml(){
+    @Async
+    protected void sendAdminAnswerToServiceEmail(com.academy.models.service.Service service) {
+        String status = ServiceStatusEnum.APPROVED.equals(service.getStatus()) ? "Approved" : "Rejected";
+        String color = ServiceStatusEnum.APPROVED.equals(service.getStatus()) ? "#4CAF50" : "#F44336";
+        String html = loadAdminAnswerToServiceEmail()
+                .replace("[USER_NAME]", service.getOwner().getUsername())
+                .replace("[SERVICE_NAME]", service.getName())
+                .replace("[STATUS]", status)
+                .replace("[STATUS_COLOR]", color)
+                .replace("[APP_NAME]", appProperties.getName());
+
+        send(
+                service.getOwner().getEmail(),
+                service.getName() + " has been " + status.toLowerCase(),
+                "",
+                html
+        );
+    }
+
+    @Async
+    protected void sendCancelAppointmentClientEmail(Appointment appointment) {
+
+        String html = loadEmailTemplate("templates/cancelled-appointment-client.html")
+                .replace("[CLIENT_NAME]", appointment.getMember().getUsername())
+                .replace("[SERVICE_PRICE]" , String.valueOf(appointment.getPrice()))
+                .replace("[PROVIDER_NAME]", appointment.getServiceProvider().getProvider().getUsername())
+                .replace("[SERVICE_NAME]", appointment.getServiceProvider().getService().getName())
+                .replace("[START_TIME]", appointment.getStartDateTime().toString())
+                .replace("[App Name]", appProperties.getName());
+
+                send(
+                        appointment.getMember().getEmail(),
+                        "Canceled appointment",
+                        "",
+                        html
+                );
+    }
+
+    @Async
+    public void sendCancelAppointmentProviderEmail(Appointment appointment) {
+        String compensationMessage = "";
+        long daysBeforeStart = ChronoUnit.DAYS.between(LocalDate.now(), appointment.getStartDateTime().toLocalDate());
+        int daysBeforeCancellationGlobalConfig = Integer.parseInt(globalConfigurationService.getConfigValue("minimum_days_before_cancellation_to_not_pay"));
+        if(daysBeforeStart < daysBeforeCancellationGlobalConfig)
+            compensationMessage = "<p>Since the appointment was cancelled " + daysBeforeCancellationGlobalConfig + " or fewer days before the scheduled time, you will receive the full amount.</p>\n";
+
+        String html = loadEmailTemplate("templates/cancelled-appointment-provider.html")
+                .replace("[CLIENT_NAME]", appointment.getMember().getUsername())
+                .replace("[SERVICE_PRICE]" , String.valueOf(appointment.getPrice()))
+                .replace("[PROVIDER_NAME]", appointment.getServiceProvider().getProvider().getUsername())
+                .replace("[SERVICE_NAME]", appointment.getServiceProvider().getService().getName())
+                .replace("[START_TIME]", appointment.getStartDateTime().toString())
+                .replace("[App Name]", appProperties.getName())
+                .replace("[COMPENSATION_MESSAGE]", compensationMessage);
+
+        send(
+                appointment.getServiceProvider().getProvider().getEmail(),
+                "Canceled appointment",
+                "",
+                html
+        );
+    }
+
+
+    private String loadEmailTemplate(String templatePath) {
         try {
-            ClassPathResource resource = new ClassPathResource("templates/verification-email.html");
+            ClassPathResource resource = new ClassPathResource(templatePath);
+            byte[] bytes = Files.readAllBytes(resource.getFile().toPath());
+            return new String(bytes, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new EmailTemplateLoadingException("Error loading e-mail template: " + templatePath);
+        }
+    }
+
+    private String loadAdminAnswerToServiceEmail(){
+        try {
+            ClassPathResource resource = new ClassPathResource("templates/admin-answer-to-service-email.html");
             byte[] bytes = Files.readAllBytes(resource.getFile().toPath());
             return new String(bytes, StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new EmailTemplateLoadingException("Error loading e-mail template");
         }
     }
-
-    private String loadPasswordResetEmailHtml(){
-        try {
-            ClassPathResource resource = new ClassPathResource("templates/password-reset-email.html");
-            byte[] bytes = Files.readAllBytes(resource.getFile().toPath());
-            return new String(bytes, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new EmailTemplateLoadingException("Error loading e-mail template");
-        }
-    }
-
 }
