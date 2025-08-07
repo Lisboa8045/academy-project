@@ -16,6 +16,9 @@
       <div class="input-wrapper">
         <label>Description:</label>
         <textarea formControlName="description"></textarea>
+        <div class="validation-error" *ngIf="form.get('description')?.invalid && form.get('description')?.touched">
+          Description should exist and be less than 2000 characters.
+        </div>
       </div>
       <div class="input-wrapper">
         <label for="serviceTypeName">Service Type:</label>
@@ -34,6 +37,10 @@
       <div class="input-wrapper">
         <label>Duration (minutes):</label>
         <input type="number" formControlName="duration"/>
+        <div class="validation-error"
+             *ngIf="form.get('duration')?.invalid && form.get('duration')?.touched">
+          Duration should be greater than 0.
+        </div>
       </div>
     </fieldset>
     <fieldset>
@@ -123,10 +130,16 @@
       <div class="input-wrapper">
         <label>Price:</label>
         <input type="number" formControlName="price"/>
+        <div class="validation-error" *ngIf="form.get('price')?.invalid && form.get('price')?.touched">
+          Price should be greater than 0.
+        </div>
       </div>
       <div class="input-wrapper">
         <label>Discount (%):</label>
         <input type="number" formControlName="discount"/>
+        <div class="validation-error" *ngIf="form.get('discount')?.invalid && form.get('discount')?.touched">
+          Discount should be non-negative and less than 100.
+        </div>
       </div>
     </fieldset>
 
