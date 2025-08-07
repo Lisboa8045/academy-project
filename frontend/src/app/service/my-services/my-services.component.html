@@ -1,0 +1,51 @@
+@if (loading()) {
+  <app-loading/>
+} @else {
+  @if (!memberIdInput) {
+    <div class="card" style="max-width: 100%">
+      <div class="header-container">
+        <h2>My Services</h2>
+        <button class="new-service-btn" routerLink="/backoffice/create-service">New Service</button>
+      </div>
+      <ng-container *ngTemplateOutlet="mainContent"></ng-container>
+    </div>
+  } @else {
+    <ng-container *ngTemplateOutlet="mainContent"></ng-container>
+  }
+  <ng-template #mainContent>
+    <app-controls-bar
+      [pageSize]="pageSize"
+      [sortOrder]="sortOrder">
+    </app-controls-bar>
+    <div class="main-content">
+      <div class="results-container">
+        @if (services().length === 0) {
+          <div class="no-services-message">
+            @if (!memberIdInput) {
+              <ng-container>
+                <h2>You don't have any services</h2>
+                <p>Let's create one!</p>
+              </ng-container>
+            } @else {
+              <ng-container>
+                <h2 style="font-weight: lighter; text-align: center; margin-top:2rem">No services found for this user</h2>
+              </ng-container>
+            }
+          </div>
+        } @else {
+          <app-service-list [services]="services()" clickPath="/backoffice/services"></app-service-list>
+        }
+
+        <app-pagination-bar
+          [currentPage]="currentPage"
+          [totalPages]="totalPages"
+          [goToPageFn]="goToPage.bind(this)"
+          [goToPreviousPageFn]="goToPreviousPage.bind(this)"
+          [goToNextPageFn]="goToNextPage.bind(this)"
+        ></app-pagination-bar>
+
+      </div>
+    </div>
+  </ng-template>
+}
+

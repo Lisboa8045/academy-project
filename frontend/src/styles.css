@@ -48,11 +48,47 @@ button[disabled] {
 .success-snackbar .mdc-snackbar__surface {
   background-color: #4caf50 !important;
   color: white !important;
+  animation: slideUpFadeIn 0.5s ease-out;
 }
 
 .error-snackbar .mdc-snackbar__surface {
   background-color: #f44336 !important;
   color: white !important;
+  animation: slideUpFadeIn 0.5s ease-out;
+}
+
+.info-snackbar .mdc-snackbar__surface {
+  background-color: #007BFF !important; /* azul mais vivo */
+  color: #fff !important;
+  font-size: 1.1rem !important;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  animation: slideUpFadeIn 0.5s ease-out;
+}
+
+@keyframes slideUpFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+.no-scroll {
+  overflow: hidden;
+}
+.card {
+  max-width: 1000px;
+  margin: 0 auto 2rem;
+  padding: 2rem;
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  gap: 2rem;
 }
 
 

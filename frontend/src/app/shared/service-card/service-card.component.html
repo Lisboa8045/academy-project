@@ -1,14 +1,48 @@
 <div class="service-card" (click)="onClick()">
   <div class="image-container">
-    <img [src]="service.images[0] || defaultImage"
+    <img [src]="serviceImage()"
          (error)="onImgError($event)"
          alt="Service Image" />
-    <div class="rating-badge" *ngIf="service.averageRating !== undefined && service.averageRating !== null">
-      ★ {{ service.averageRating }}
+    <div *ngIf="discountedPrice" class="discount-badge">
+      -{{ service?.discount }}%
     </div>
   </div>
   <div class="service-info">
-    <h3>{{ service.name }}</h3>
-    <p>{{ service.price | currency:'EUR' }}</p>
+    <h3 class="service-title-flex">
+      <span>{{ service.name }}</span>
+      <span class="rating-badge">
+        {{ service.rating !== undefined && service.rating !== null ? service.rating : '–' }}★
+      </span>
+    </h3>
+    <div class="service-type-hours">
+      <small>{{ service.serviceTypeName }}</small> <small>🕒 {{formattedDuration}}</small>
+    </div>
+    <div class="price-container">
+    @if(discountedPrice){
+
+          <div class="original-price" style="text-decoration: line-through; color: grey;">
+            {{ service?.price }}€
+          </div>
+          <div class="discounted-price" style="font-weight: bold;">
+            {{ discountedPrice }}€
+          </div>
+    }@else{
+      <div style="font-weight: bold">
+        {{ service?.price }}€
+      </div>
+    }
+    </div>
+
+    @if(shouldShowTags){
+    <div class="labels-container">
+    @for (label of labels; track label){
+      <span class="role-tag" [ngStyle]="{ backgroundColor: label.color }">
+        <span class="circle"></span>
+        {{ label.label }}
+      </span>
+    }
+    </div>
+    }
   </div>
+  <ng-content></ng-content>
 </div>

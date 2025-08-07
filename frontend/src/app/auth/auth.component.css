@@ -85,3 +85,27 @@ button:hover {
 .forgot-password a:hover {
   text-decoration: underline;
 }
+
+.checkbox-group label {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: auto;
+  margin: 0 0.5rem 0 0;
+  cursor: pointer;
+}
+
+.checkbox-group a.link {
+  color: #3B82F6;
+  margin-left: 0.25rem;
+  text-decoration: underline;
+}
+
+.checkbox-group a.link:hover {
+  color: #2563EB;
+}
+

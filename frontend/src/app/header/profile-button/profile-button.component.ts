@@ -1,4 +1,4 @@
-import {Component, inject, OnInit, signal} from '@angular/core';
+import {Component, effect, inject, OnInit, signal} from '@angular/core';
 import {NgIf} from '@angular/common';
 import {MenuComponent} from '../../shared/menu/menu.component';
 import {MenuItem} from '../../shared/menu/menu.model';
@@ -21,8 +21,13 @@ export class ProfileButtonComponent implements OnInit {
   authService = inject(AuthService);
   readonly username = inject(AuthStore).username;
   readonly imageUrl = inject(UserProfileService).imageUrl;
+  readonly role = inject(AuthStore).role;
   router = inject(Router);
   menuItems: MenuItem[] = [];
+
+  constructor() {
+    effect(() =>{this.insertByRole()});
+  }
 
   ngOnInit() {
     this.menuItems = [
@@ -41,14 +46,6 @@ export class ProfileButtonComponent implements OnInit {
         }
       },
       {
-        label: 'BackOffice',
-        icon: '👔'
-      },
-      {
-        label: 'Settings',
-        icon: '⚙️'
-      },
-      {
         label: 'Logout',
         icon: '↩',
         command: () => {
@@ -59,6 +56,7 @@ export class ProfileButtonComponent implements OnInit {
         }
       },
     ];
+
   }
 
   toggleMenu() {
@@ -67,5 +65,25 @@ export class ProfileButtonComponent implements OnInit {
 
   closeMenu() {
     this.showMenu.set(false);
+  }
+
+  insertByRole(){
+    this.menuItems = this.menuItems.filter(item => item.label !== 'My Services');
+    if (this.role() === 'WORKER') {
+      this.menuItems.splice(2, 0, {
+        label: 'My Services',
+        icon: '🛎️',
+        command: () => this.router.navigate(['/my-services'])
+      });
+    } else if (this.role() === 'ADMIN') {
+      this.menuItems.splice(2, 0,
+        {
+          label: 'Admin Services',
+          icon: '👔',
+          command: () => {
+            this.router.navigate(['/administrate-services'])
+          }
+        });
+    }
   }
 }

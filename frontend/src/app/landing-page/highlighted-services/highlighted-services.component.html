@@ -1,9 +1,18 @@
-<h2>Highlighted services</h2>
-<div class="highlighted">
-  <app-service-card
-    *ngFor="let service of services"
-    [service]="service"
-    [defaultImage]="defaultImage"
-    (cardClick)="onCardClick($event)">
-  </app-service-card>
+<h2>Top 10 Rated services</h2>
+<div class="carousel-nav">
+  <button class="carousel-arrow left" (click)="scrollLeft()" aria-label="Scroll left">
+    &#8592;
+  </button>
+  <div class="carousel-wrapper" #carouselWrapper>
+    <div class="carousel-track">
+      <app-service-card
+        *ngFor="let service of services"
+        [service]="service"
+        (cardClick)="onCardClick($event)">
+      </app-service-card>
+    </div>
+  </div>
+  <button class="carousel-arrow right" (click)="scrollRight()" aria-label="Scroll right">
+    &#8594;
+  </button>
 </div>

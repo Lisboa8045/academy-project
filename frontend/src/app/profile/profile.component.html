@@ -35,6 +35,12 @@
                    placeholder="Enter username">
             </div>
           }
+          <div class="member-rating" *ngIf="user.rating != null">
+            <span *ngFor="let star of [1,2,3,4,5]">
+              <span class="star" [class.filled]="star <= Math.round(user.rating)">&#9733;</span>
+            </span>
+            <span class="rating-number">({{ user.rating | number:'1.1-2' }})</span>
+          </div>
           <p>{{ user.email }}</p>
           <div class="validation-error" *ngIf="profileForm.get('username')?.errors?.['required'] && profileForm.get('username')?.touched">
             Username is required.
@@ -107,20 +113,47 @@
         <div class="bottom-right-container">
           @if (editMode) {
             <div class="form-buttons">
-              <button type="submit" class="submit-button">Save</button>
-              @if(!editPasswordMode){
+              <button type="submit" class="submit-button" [disabled]="profileForm.invalid">Save</button>
+              @if (!editPasswordMode && !upgradeWorkerRole) {
                 <button type="button" class="edit-button" (click)="togglePasswordEditMode()">Change Password</button>
               }
               <button type="button" class="cancel-button" (click)="toggleEdit()">Cancel</button>
             </div>
 
           } @else {
-            <button type="button" class="edit-button" (click)="toggleEdit()">Edit</button>
-            <button type="button" class="logout-button" (click)="logout()">Logout</button>
+            @if(canEdit()){
+              @if (upgradeWorkerRole) {
+                <div class="form-buttons">
+                  <button type="submit" class="submit-button" [disabled]="profileForm.invalid">Save</button>
+                  <button type="button" class="cancel-button" (click)="toggleUpgradeRoleEditMode()">Cancel</button>
+                </div>
+              } @else {
+
+              <button type="button" class="edit-button" (click)="toggleEdit()">Edit</button>
+              @if (user.role === "CLIENT") {
+                <div class="form-buttons">
+                  <button type="button" class="edit-button" (click)="toggleUpgradeRoleEditMode()">Upgrade to Worker
+                  </button>
+                </div>
+              }
+              <button type="button" class="logout-button" (click)="logout()">Logout</button>
+              }
+            }
           }
         </div>
       </form>
 
     </div>
 </div>
+  @if (user) {
+    <div class="card">
+      <h2 style="font-size: 30px; margin-top: 0; margin-bottom: 10px">{{user.username}}'s services</h2>
+      <app-my-services [memberIdInput]="user!.id"></app-my-services>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size: 30px; margin-top: 0; margin-bottom: 10px">{{user.username}}'s reviews</h2>
+      <app-service-review [memberId]="user!.id"></app-service-review>
+    </div>
+  }
 }

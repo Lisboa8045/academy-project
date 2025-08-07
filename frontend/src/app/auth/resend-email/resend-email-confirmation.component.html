@@ -1,23 +1,26 @@
-<h2>Email Not Confirmed</h2>
-<p>
-    Please confirm your email using the verification code sent to this address: <strong>{{ email }}</strong>
-</p>
+<div class="tailwind-scope card">
+    <h1 class="text-2xl font-bold mb-4">Email Not Confirmed</h1>
+    <p class="mb-6">
+        Please confirm your email using the verification code sent to this address: <strong>{{ email }}</strong>
+    </p>
 
-<div class="resend-section">
-    <div class="button-column">
-        <div class="resend-row">
-            <button (click)="resend()" [disabled]="resendDisabled">
-                Resend Verification
+    <div class="resend-section">
+        <div class="button-column">
+            <div class="resend-row">
+                <button (click)="resend()" [disabled]="resendDisabled">
+                    Resend Verification
+                </button>
+                <span *ngIf="loading" class="spinner"></span>
+                <span *ngIf="resendDisabled && !loading && message" class="checkmark">✅</span>
+                <span *ngIf="error" class="prohibited">🚫</span>
+            </div>
+
+            <button *ngIf="showBackToLogin" (click)="goToLogin()">
+                Back to Login
             </button>
-            <span *ngIf="loading" class="spinner"></span>
-            <span *ngIf="resendDisabled && !loading" class="checkmark">✅</span>
         </div>
-
-        <button *ngIf="showBackToLogin" (click)="goToLogin()">
-            Back to Login
-        </button>
     </div>
-</div>
 
-<p *ngIf="message" class="success">{{ message }}</p>
-<p *ngIf="error" class="error">{{ error }}</p>
+    <p *ngIf="message" class="success">{{ message }}</p>
+    <p *ngIf="error" class="error">{{ error }}</p>
+</div>

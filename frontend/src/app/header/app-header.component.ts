@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, computed, inject} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {Router, RouterModule} from '@angular/router';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
@@ -18,37 +18,13 @@ import {UserProfileService} from '../profile/user-profile.service';
 export class AppHeaderComponent {
   readonly username = inject(AuthStore).username;
   readonly imageUrl = inject(UserProfileService).imageUrl;
+  readonly isAdmin = computed(() => this.authStore.role() === 'ADMIN');
 
   form = new FormGroup({
     query: new FormControl('')
   });
 
-  constructor(private router: Router) {}
-
-  onSearch(): void {
-    const query = this.form.value.query?.trim() ?? '';
-
-    if (query.length > 100) {
-      this.form.controls.query.setValue(query.slice(0, 100));
-    } else {
-      this.form.controls.query.setValue(query);
-    }
-
-    if (query) {
-      const currentUrl = this.router.url.split('?')[0];
-
-      if (currentUrl !== '/services') {
-        this.router.navigate(['/services'], {
-          queryParams: {q: query},
-        });
-      } else {
-        this.router.navigate([], {
-          queryParams: {q: query},
-          queryParamsHandling: 'merge',
-        });
-      }
-    }
-  }
+  constructor(private readonly router: Router, private readonly authStore: AuthStore) {}
 
   isLandingPage(): boolean {
     return this.router.url === '/';

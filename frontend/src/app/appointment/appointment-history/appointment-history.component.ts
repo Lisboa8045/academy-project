@@ -37,6 +37,8 @@ import {Review} from '../review/review.model';
   ]
 })
 export class AppointmentHistoryComponent implements OnInit {
+
+  protected readonly AppointmentStatusEnumModel = AppointmentStatusEnumModel;
   appointments: AppointmentResponseDTO[] = [];
   filteredAppointments: AppointmentResponseDTO[] = [];
   selectedAppointment: AppointmentResponseDetailedDTO | null | undefined;
@@ -97,7 +99,7 @@ export class AppointmentHistoryComponent implements OnInit {
         if(callback)
           callback();
       },
-      error: err => snackBarSuccess(this.snackBar,'Error loading appointment.')
+      error: err => snackBarError(this.snackBar,'Error loading appointment.')
     });
   }
 
@@ -136,6 +138,10 @@ export class AppointmentHistoryComponent implements OnInit {
     );
 
     return `cancel the appointment at ${formattedDate} for ${this.selectedAppointment.serviceName}`;
+  }
+
+  isCancelledOrFinished(status: AppointmentStatusEnumModel): boolean {
+    return [AppointmentStatusEnumModel.CANCELLED, AppointmentStatusEnumModel.FINISHED].includes(status);
   }
 
   confirmCancelAppointment() {
@@ -191,5 +197,4 @@ export class AppointmentHistoryComponent implements OnInit {
       }
     });
   }
-
 }

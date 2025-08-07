@@ -2,6 +2,10 @@
   <app-service-card
     *ngFor="let service of services()"
     [service]="service"
+    [shouldShowTags]="shouldShowTags"
     (cardClick)="onCardClick($event)">
+    <ng-container
+      *ngTemplateOutlet="contentTemplate; context: {$implicit: service}">
+    </ng-container>
   </app-service-card>
 </div>
