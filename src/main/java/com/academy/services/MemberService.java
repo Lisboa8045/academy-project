@@ -27,6 +27,7 @@ import com.academy.models.appointment.Appointment;
 import com.academy.models.member.Member;
 import com.academy.models.member.MemberStatusEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
+import com.academy.models.token.EmailConfirmationToken;
 import com.academy.repositories.AppointmentRepository;
 import com.academy.repositories.MemberRepository;
 import com.academy.repositories.RoleRepository;
@@ -66,6 +67,7 @@ public class MemberService {
 
     private final JwtCookieUtil jwtCookieUtil;
     private final ServiceProviderService serviceProviderService;
+    private EmailConfirmationTokenService emailConfirmationTokenService;
     private final ServiceProviderRepository serviceProviderRepository;
     @Autowired
     private AppointmentRepository appointmentRepository;
@@ -82,6 +84,7 @@ public class MemberService {
                          EmailService emailService,
                          GlobalConfigurationService globalConfigurationService,
                          AppProperties appProperties,
+                         EmailConfirmationTokenService emailConfirmationTokenService,
                          @Lazy ServiceProviderService serviceProviderService,
                          ServiceProviderRepository serviceProviderRepository,
                          AppointmentMapper appointmentMapper) {
@@ -96,6 +99,7 @@ public class MemberService {
         this.globalConfigurationService = globalConfigurationService;
         this.appProperties = appProperties;
         this.serviceProviderService = serviceProviderService;
+        this.emailConfirmationTokenService = emailConfirmationTokenService;
         this.serviceProviderRepository = serviceProviderRepository;
         this.appointmentMapper = appointmentMapper;
     }
@@ -128,7 +132,6 @@ public class MemberService {
             throw new NotFoundException(messageSource.getMessage("role.notfound", null, LocaleContextHolder.getLocale()));
 
         return createMember(request, optionalRole.get()).getId();
-
     }
     private Member createMember(RegisterRequestDto request, Role role){
         Member member = memberMapper.toMember(request);
@@ -136,16 +139,13 @@ public class MemberService {
         member.setRole(role);
         member.setEnabled(false);
         member.setStatus(MemberStatusEnum.WAITING_FOR_EMAIL_APPROVAL);
-        String rawConfirmationToken = generateUniqueConfirmationToken();
-        if (testTokenStorage != null) {
-            testTokenStorage.storeToken(rawConfirmationToken);
-        }
-        member.setConfirmationToken(passwordEncoder.encode(rawConfirmationToken));
-        member.setTokenExpiry(LocalDateTime.now().plusMinutes(
-                Integer.parseInt(globalConfigurationService.getConfigValue("confirmation_token_expiry_minutes"))));
-        memberRepository.save(member);
+        LocalDateTime expirationDateTime = LocalDateTime.now().plusMinutes(
+                Integer.parseInt(globalConfigurationService.getConfigValue("confirmation_token_expiry_minutes")));
 
-        emailService.sendConfirmationEmail(member, rawConfirmationToken);
+        Member memberSaved = memberRepository.save(member);
+
+        EmailConfirmationToken emailConfirmationToken = emailConfirmationTokenService.createEmailConfirmationToken(memberSaved, expirationDateTime);
+        emailService.sendConfirmationEmail(memberSaved, emailConfirmationToken.getRawValue());
         return member;
     }
 
@@ -186,20 +186,24 @@ public class MemberService {
     }
     @Transactional
     public void confirmEmail(String confirmationToken) {
-        Member member = memberRepository.findAll().stream()
-                .filter(m -> m.getConfirmationToken() != null &&
-                        passwordEncoder.matches(confirmationToken, m.getConfirmationToken()))
-                .findFirst()
-                .orElseThrow(() -> new BadRequestException("Confirmation Token is Invalid/Not found"));
+        EmailConfirmationToken token;
+        try{
+            token = emailConfirmationTokenService.getTokenByRawValue(confirmationToken);
+        }catch(EntityNotFoundException e){
+            throw new BadRequestException("Confirmation Token is Invalid/Not found");
+        }
 
-        if (member.getTokenExpiry().isBefore(LocalDateTime.now()))
+        if (token.getExpirationDate().isBefore(LocalDateTime.now()))
             throw new TokenExpiredException("Confirmation Token has Expired");
+        Member member = token.getMember();
 
         member.setConfirmationToken(null);
         member.setTokenExpiry(null);
         member.setEnabled(true);
         member.setStatus(MemberStatusEnum.ACTIVE);
         memberRepository.save(member);
+
+        emailConfirmationTokenService.deleteAllConfirmationTokensForMember(member);
     }
 
 
@@ -362,15 +366,15 @@ public class MemberService {
 
         if(member.isEnabled())
             throw new BadRequestException("Member already enabled");
-        member.setTokenExpiry(LocalDateTime.now().plusMinutes(
-                Integer.parseInt(globalConfigurationService.getConfigValue("confirmation_token_expiry_minutes"))));
-        String rawConfirmationToken = generateUniqueConfirmationToken();
-        if (testTokenStorage != null) {
-            testTokenStorage.storeToken(rawConfirmationToken);
-        }
-        member.setConfirmationToken(passwordEncoder.encode(rawConfirmationToken));
-        memberRepository.save(member);
-        emailService.sendConfirmationEmail(member, rawConfirmationToken);
+
+        validateIfReachedMaxConfirmationTokens(member);
+
+        LocalDateTime expirationDateTime = LocalDateTime.now().plusMinutes(
+                Integer.parseInt(globalConfigurationService.getConfigValue("confirmation_token_expiry_minutes")));
+        Member memberSaved = memberRepository.save(member);
+        EmailConfirmationToken emailConfirmationToken = emailConfirmationTokenService.createEmailConfirmationToken(member, expirationDateTime);
+
+        emailService.sendConfirmationEmail(memberSaved, emailConfirmationToken.getRawValue());
     }
 
     public void saveProfilePic(Long id, String filename) {
@@ -415,6 +419,15 @@ public class MemberService {
         member.setPasswordResetToken(null);
         member.setPasswordResetTokenExpiry(null);
         memberRepository.save(member);
+    }
+
+    private void validateIfReachedMaxConfirmationTokens(Member member) {
+        List<EmailConfirmationToken> validTokens = emailConfirmationTokenService.getValidTokensByMember(member);
+        int maxValidTokens = Integer.parseInt(globalConfigurationService.getConfigValue("maximum_valid_confirmation_tokens"));
+
+        if(validTokens.size() >= maxValidTokens)
+            throw new RuntimeException("Maximum number of confirmation emails reached ");
+
     }
 
     public void updateMemberRating(Long memberId) {
