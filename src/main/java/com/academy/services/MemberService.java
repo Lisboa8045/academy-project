@@ -46,7 +46,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -267,11 +266,23 @@ public class MemberService {
         return optionalMember.get();
     }
 
+    public MemberResponseDTO getMemberDTOByUsername(String username) {
+        return memberMapper.toResponseDTO(getMemberByUsername(username));
+    }
+
     public Member getMemberByUsername(String username){
         Optional<Member> optionalMember = memberRepository.findByUsername(username);
         if(optionalMember.isEmpty())
             throw new MemberNotFoundException(username);
         return optionalMember.get();
+    }
+
+    public List<MemberResponseDTO> getMemberDTOByUsernameAndRole(String username, String roleName) {
+        return searchByUsernameAndRole(username, roleName).stream().map(memberMapper::toResponseDTO).toList();
+    }
+
+    public List<Member> searchByUsernameAndRole(String username, String roleName) {
+        return memberRepository.searchMemberByUsernameContainsIgnoreCaseAndRoleName(username, roleName);
     }
 
     public boolean existsById(Long memberId) {

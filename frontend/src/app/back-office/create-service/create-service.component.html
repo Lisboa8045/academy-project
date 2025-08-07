@@ -1,0 +1,148 @@
+<div class="card">
+  <h2>Create Service</h2>
+  <form [formGroup]="form"
+        (keydown.enter)="$event.preventDefault()"
+        (ngSubmit)="submit()">
+    <fieldset>
+      <legend>Service Info</legend>
+      <div class="input-wrapper">
+        <label>Name:</label>
+        <input placeholder="Enter Service Name" formControlName="name"/>
+        <div class="validation-error" *ngIf="form.get('name')?.invalid && form.get('name')?.touched">
+          Name is required
+        </div>
+      </div>
+
+      <div class="input-wrapper">
+        <label>Description:</label>
+        <textarea formControlName="description"></textarea>
+        <div class="validation-error" *ngIf="form.get('description')?.invalid && form.get('description')?.touched">
+          Description should exist and be less than 2000 characters.
+        </div>
+      </div>
+      <div class="input-wrapper">
+        <label for="serviceTypeName">Service Type:</label>
+        <select id="serviceTypeName" formControlName="serviceTypeName">
+          <option value="" disabled selected>Select a service type</option>
+          <option *ngFor="let option of serviceTypeOptions" [value]="option.name">
+            {{ option.name }}
+          </option>
+        </select>
+        <div class="validation-error"
+             *ngIf="form.get('serviceTypeName')?.invalid && form.get('serviceTypeName')?.touched">
+          Required field.
+        </div>
+      </div>
+
+      <div class="input-wrapper">
+        <label>Duration (minutes):</label>
+        <input type="number" formControlName="duration"/>
+        <div class="validation-error"
+             *ngIf="form.get('duration')?.invalid && form.get('duration')?.touched">
+          Duration should be greater than 0.
+        </div>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>Images and tags</legend>
+      <div class="image-tags-section">
+        <div class="image-hover-container">
+          <div class="image-wrapper">
+            <button class="nav left" (click)="prevImage(thumbContainer)" type="button" [disabled]="currentImageIndex === 0">&#10094;
+            </button>
+            @if (imageUrls.length === 0) {
+              <div class="thumbnail-placeholder">
+                No Image Provided
+              </div>
+            } @else {
+              <img
+                [src]="imageUrls[currentImageIndex]"
+                alt="Service Image"
+                class="main-image"
+              />
+            }
+            <button class="nav right" (click)="nextImage(thumbContainer)" type="button"
+                    [disabled]="currentImageIndex === imageUrls.length - 1">&#10095;
+            </button>
+
+            <div class="thumbnails-overlay">
+              <div class="thumbnails-scroll-wrapper" #thumbContainer>
+                <ng-container *ngFor="let imageUrl of imageUrls; let i = index">
+                  <div class="thumbnail-container">
+                    <img
+                      [src]="imageUrl"
+                      class="thumbnail-image"
+                      [class.selected]="i === currentImageIndex"
+                      (click)="selectThumbnail(i, thumbContainer)"
+                    />
+                    <ng-container class="image-icon-container">
+                      <span class="image-icon" (click)="moveImageLeft(i)">⬅️</span>
+                      <span class="image-icon" (click)="moveImageRight(i)">➡️</span>
+                      <span class="image-icon" (click)="deleteImage(i)">🗑️</span>
+                    </ng-container>
+                  </div>
+                </ng-container>
+                <div class="thumbnail-image">
+                  <fa-icon [icon]="faPlus" class="fa-3x add-image-btn" (click)="fileInput.click()">
+                  </fa-icon>
+                  <input
+                    #fileInput
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    (change)="onImagesSelected($event)"
+                    style="display: none"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tag-section">
+          <!-- Input to add a new tag -->
+          <input
+            type="text"
+            [(ngModel)]="newTag"
+            [ngModelOptions]="{ standalone: true }"
+            (keyup.enter)="addTag()"
+            placeholder="Add a tag"
+          />
+          <button type="button" (click)="addTag()">Add Tag</button>
+
+          <!-- Display tags -->
+          <div class="tags-container">
+            @for (tag of tagNames.controls; track tag.value; let i = $index) {
+              <span class="tag" [title]="tag.value">
+                <span class="tag-text">{{ tag.value }}</span>
+                <fa-icon
+                  [icon]="faTimes"
+                  (click)="removeTag(i)"
+                  class="remove-icon"
+                ></fa-icon>
+              </span>
+            }
+          </div>
+        </div>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>Pricing</legend>
+      <div class="input-wrapper">
+        <label>Price:</label>
+        <input type="number" formControlName="price"/>
+        <div class="validation-error" *ngIf="form.get('price')?.invalid && form.get('price')?.touched">
+          Price should be greater than 0.
+        </div>
+      </div>
+      <div class="input-wrapper">
+        <label>Discount (%):</label>
+        <input type="number" formControlName="discount"/>
+        <div class="validation-error" *ngIf="form.get('discount')?.invalid && form.get('discount')?.touched">
+          Discount should be non-negative and less than 100.
+        </div>
+      </div>
+    </fieldset>
+
+    <button type="submit" [disabled]="form.invalid">Submit</button>
+  </form>
+</div>

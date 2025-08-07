@@ -93,6 +93,14 @@ public class AppointmentController {
     ) {
         return ResponseEntity.ok(appointmentService.getAppointmentsForAuthenticatedMember(dateOrder));
     }
+
+    @GetMapping("/service/{id}")
+    public ResponseEntity<List<AppointmentCardDTO>> getAppointmentsForService(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "asc") String dateOrder
+    ) {
+        return ResponseEntity.ok(appointmentService.getAppointmentsForService(id, dateOrder));
+    }
 /*
     @GetMapping("/provider")
     public ResponseEntity<List<AppointmentResponseDTO>> getAppointmentsForAuthenticatedProvider(){

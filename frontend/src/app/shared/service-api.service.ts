@@ -21,10 +21,11 @@ export interface PagedResponse {
 export class ServiceApiService {
   private BASE_URL = 'http://localhost:8080/services';
   private SERVICE_TYPE_URL = 'http://localhost:8080/service-types';
+  private UPLOADS_URL = 'http://localhost:8080/auth/uploads/service-image';
   private REVIEWS_URL = 'http://localhost:8080/services/service_with_review';
 
-
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+  }
 
   searchServices(name: string, options: ServiceQuery): Observable<PagedResponse> {
     let params = new HttpParams()
@@ -54,6 +55,25 @@ export class ServiceApiService {
 
   getServiceTypes(): Observable<ServiceTypeResponseDTO[]> {
     return this.http.get<ServiceTypeResponseDTO[]>(this.SERVICE_TYPE_URL);
+  }
+
+  createService(payload: ServiceModel): Observable<ServiceModel> {
+    return this.http.post<ServiceModel>(this.BASE_URL, payload);
+  }
+
+  editService(payload: ServiceModel, id: number): Observable<ServiceModel> {
+    return this.http.put<ServiceModel>(`${this.BASE_URL}/${id}`, payload);
+  }
+
+  deleteService(id: number) {
+    return this.http.delete(`${this.BASE_URL}/${id}`);
+  }
+
+  uploadServiceImages(formData: FormData, id : number) {
+    return this.http.post<{imageUrl: string}>(
+      `${this.UPLOADS_URL}?id=${id}`,
+      formData,
+    );
   }
 
   getServiceById(id: number): Observable<ServiceModel> {
