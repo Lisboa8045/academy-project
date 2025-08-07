@@ -1,25 +1,26 @@
-import {Component, effect, inject, OnInit, signal, WritableSignal} from '@angular/core';
+import {Component, effect, OnInit, signal, WritableSignal} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import { ProfileService } from './profile.service';
-import { AuthStore } from '../auth/auth.store';
-import { AuthService } from '../auth/auth.service';
-import { LoadingComponent } from '../loading/loading.component';
-import { MemberResponseDTO } from '../auth/member-response-dto.model';
-import { UserProfileService } from './user-profile.service';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import {ProfileService} from './profile.service';
+import {AuthStore} from '../auth/auth.store';
+import {AuthService} from '../auth/auth.service';
+import {LoadingComponent} from '../loading/loading.component';
+import {MemberResponseDTO} from '../auth/member-response-dto.model';
+import {UserProfileService} from './user-profile.service';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {CommonModule, DecimalPipe, NgIf} from '@angular/common';
-import { AppConfigService } from '../shared/app-config.service';
-import { strongPasswordValidator } from '../shared/validators/password.validator';
-import { noSpecialCharsValidator } from '../shared/validators/no-special-chars.validator';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { snackBarSuccess } from '../shared/snackbar/snackbar-success';
-import { snackBarError } from '../shared/snackbar/snackbar-error';
+import {AppConfigService} from '../shared/app-config.service';
+import {strongPasswordValidator} from '../shared/validators/password.validator';
+import {noSpecialCharsValidator} from '../shared/validators/no-special-chars.validator';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {snackBarSuccess} from '../shared/snackbar/snackbar-success';
+import {snackBarError} from '../shared/snackbar/snackbar-error';
 import {passwordsMatchValidator} from '../shared/validators/password-match-validator';
 import {MyServicesComponent} from '../service/my-services/my-services.component';
 import {ConfirmationModalComponent} from '../shared/confirmation-component/confirmation-modal.component';
 import {MemberStatusEnum} from '../models/member-status-enum.model';
 import {ServiceReviewComponent} from '../service/service-review/service-review.component';
 import {snackBarInfo} from '../shared/snackbar/snackbar-info';
+import {CountdownSnackbarComponent} from '../shared/snackbar/count-down-snackbar';
 
 @Component({
   selector: 'app-profile',
@@ -256,7 +257,6 @@ export class ProfileComponent implements OnInit {
         },
         error: (err) => {
           snackBarError(this.snackBar, 'Member Update failed. ' + err.error);
-          console.error(err);
         }
       });
     } else {
@@ -315,11 +315,11 @@ export class ProfileComponent implements OnInit {
 
   private showDeleteCountdownAndLogout() {
     let seconds = 5;
-    const updateMessage = () =>
-      `Account deleted successfully. Logging out in ${seconds}...`;
+    const message = `Account deleted successfully. Logging out in ${seconds}...`;
 
-    const snackBarRef = this.snackBar.open(updateMessage(), undefined, {
-      duration: 1000,
+    const snackBarRef = this.snackBar.openFromComponent(CountdownSnackbarComponent, {
+      data: { message },
+      duration: undefined, // keep open manually
       panelClass: ['success-snackbar'],
       horizontalPosition: 'right',
       verticalPosition: 'top'
@@ -327,15 +327,12 @@ export class ProfileComponent implements OnInit {
 
     const interval = setInterval(() => {
       seconds--;
-      snackBarRef.dismiss();
-      if (seconds > 0) {
-        this.snackBar.open(updateMessage(), undefined, {
-          duration: 1000,
-          panelClass: ['success-snackbar'],
-          horizontalPosition: 'right',
-          verticalPosition: 'top'
-        });
-      } else {
+      snackBarRef.instance.data.message = `Account deleted successfully. Logging out in ${seconds}...`;
+
+      // Force Angular change detection
+      snackBarRef.instance = {...snackBarRef.instance};
+
+      if (seconds <= 0) {
         clearInterval(interval);
         this.snackBar.dismiss();
         this.authService.logout().subscribe({
@@ -343,7 +340,7 @@ export class ProfileComponent implements OnInit {
             this.userProfileService.revoke();
             this.router.navigate(['/auth']);
           },
-          error: (err) => {
+          error: () => {
             this.userProfileService.revoke();
             this.router.navigate(['/auth']);
           }

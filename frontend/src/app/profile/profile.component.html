@@ -150,7 +150,6 @@
         </div>
       </form>
     </div>
-  <div class="tailwind-scope">
     <app-confirmation-modal
       *ngIf="showDeleteModal"
       [title]="'Delete Account'"
@@ -158,7 +157,6 @@
       (confirm)="onDeleteConfirmed()"
       (close)="showDeleteModal = false">
     </app-confirmation-modal>
-  </div>
 </div>
   @if (user) {
     <div class="card">

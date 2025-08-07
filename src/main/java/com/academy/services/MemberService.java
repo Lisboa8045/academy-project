@@ -26,7 +26,6 @@ import com.academy.models.Role;
 import com.academy.models.appointment.Appointment;
 import com.academy.models.member.Member;
 import com.academy.models.member.MemberStatusEnum;
-import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.AppointmentRepository;
 import com.academy.repositories.MemberRepository;
 import com.academy.repositories.RoleRepository;
@@ -67,11 +66,12 @@ public class MemberService {
     private TestTokenStorage testTokenStorage;
 
     private final JwtCookieUtil jwtCookieUtil;
-    private final ServiceProviderService serviceProviderService;
     private final ServiceProviderRepository serviceProviderRepository;
     @Autowired
     private AppointmentRepository appointmentRepository;
     private final AppointmentMapper appointmentMapper;
+
+    private final AccountCleanupService accountCleanupService;
 
     @Autowired
     public MemberService(MemberRepository memberRepository,
@@ -86,7 +86,8 @@ public class MemberService {
                          AppProperties appProperties,
                          @Lazy ServiceProviderService serviceProviderService,
                          ServiceProviderRepository serviceProviderRepository,
-                         AppointmentMapper appointmentMapper) {
+                         AppointmentMapper appointmentMapper,
+                         AccountCleanupService accountCleanupService) {
         this.memberRepository = memberRepository;
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
@@ -97,9 +98,9 @@ public class MemberService {
         this.emailService = emailService;
         this.globalConfigurationService = globalConfigurationService;
         this.appProperties = appProperties;
-        this.serviceProviderService = serviceProviderService;
         this.serviceProviderRepository = serviceProviderRepository;
         this.appointmentMapper = appointmentMapper;
+        this.accountCleanupService = accountCleanupService;
     }
 
 
@@ -399,14 +400,6 @@ public class MemberService {
                 .orElseThrow(() -> new EntityNotFoundException(Member.class, id));
     }
 
-    private void unlinkServiceProviders(long id) {
-        List<ServiceProvider> serviceProviders = serviceProviderService.getAllByProviderId(id);
-
-        for (ServiceProvider sp : serviceProviders) {
-            sp.setProvider(null);
-        }
-    }
-
     public void createPasswordResetToken(String email) {
         Member member = getMemberByEmail(email);
         String rawPasswordResetToken = generateUniquePasswordResetToken();
@@ -454,16 +447,11 @@ public class MemberService {
         memberRepository.save(member);
     }
 
-    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "0 0 0 * * ?") // Every day at midnight
     public void permanentlyDeleteExpiredAccounts() {
-        List<Member> expiredMembers = memberRepository.findAll().stream()
-                .filter(m -> m.getStatus() == MemberStatusEnum.PENDING_DELETION
-                        && m.getTokenExpiry() != null
-                        && m.getTokenExpiry().isBefore(LocalDateTime.now()))
-                .toList();
-
-        memberRepository.deleteAll(expiredMembers);
+        accountCleanupService.cleanupExpiredAccounts();
     }
+
 
     public void updateMemberRating(Long memberId) {
         Double rating = serviceProviderRepository.findAverageRatingByMemberId(memberId);
