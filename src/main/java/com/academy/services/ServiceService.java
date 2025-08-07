@@ -13,8 +13,11 @@ import com.academy.models.ServiceType;
 import com.academy.models.Tag;
 import com.academy.models.appointment.Appointment;
 import com.academy.models.member.Member;
+import com.academy.models.notification.Notification;
+import com.academy.models.notification.NotificationTypeEnum;
 import com.academy.models.service.Service;
 import com.academy.models.service.ServiceImage;
+import com.academy.models.service.ServiceStatusEnum;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.ServiceProviderRepository;
@@ -45,6 +48,8 @@ public class ServiceService {
     private final MemberService memberService;
     private final TagService tagService;
     private final ServiceTypeService serviceTypeService;
+    private final EmailService emailService;
+    private final NotificationService notificationService;
     private final AppointmentMapper appointmentMapper;
     private final ServiceProviderRepository serviceProviderRepository;
 
@@ -56,7 +61,9 @@ public class ServiceService {
                           TagService tagService,
                           ServiceTypeService serviceTypeService,
                           ServiceProviderRepository serviceProviderRepository,
-                          AppointmentMapper appointmentMapper) {
+                          AppointmentMapper appointmentMapper,
+                          EmailService emailService,
+                          NotificationService notificationService) {
         this.serviceRepository = serviceRepository;
         this.serviceMapper = serviceMapper;
         this.serviceProviderService = serviceProviderService;
@@ -64,8 +71,11 @@ public class ServiceService {
         this.memberService = memberService;
         this.tagService = tagService;
         this.serviceTypeService = serviceTypeService;
+        this.emailService = emailService;
+        this.notificationService = notificationService;
         this.appointmentMapper = appointmentMapper;
         this.serviceProviderRepository = serviceProviderRepository;
+
     }
 
     @Transactional
@@ -75,6 +85,8 @@ public class ServiceService {
 
         linkServiceToType(service, dto.serviceTypeName());
         linkServiceToTags(service, dto.tagNames());
+
+        service.setStatus(ServiceStatusEnum.PENDING_APPROVAL);
 
         Service savedService = serviceRepository.save(service);
         createAndLinkServiceOwner(savedService, member.getId());
@@ -107,10 +119,23 @@ public class ServiceService {
     }
 
     // Read all
-    public List<ServiceResponseDTO> getAll() {
+    public List<ServiceResponseDTO> getAllEnabled() {
         String username =  authenticationFacade.getUsername();
         return serviceRepository.findAll()
                 .stream()
+                .filter(Service::isEnabled)
+                .map(service ->  serviceMapper.toDto(service,
+                        getPermissionsByProviderUsernameAndServiceId(username, service.getId())
+                ))
+                .collect(Collectors.toList());
+    }
+
+    // Read all
+    public List<ServiceResponseDTO> getAllDisabled() {
+        String username =  authenticationFacade.getUsername();
+        return serviceRepository.findAll()
+                .stream()
+                .filter(service -> !service.isEnabled())
                 .map(service ->  serviceMapper.toDto(service,
                         getPermissionsByProviderUsernameAndServiceId(username, service.getId())
                 ))
@@ -192,7 +217,7 @@ public class ServiceService {
     }
 
     public Page<ServiceResponseDTO> searchServices(String name, Double minPrice, Double maxPrice,
-                                                   Integer minDuration, Integer maxDuration, Boolean negotiable, String serviceTypeName, Pageable pageable) {
+                                                   Integer minDuration, Integer maxDuration, Boolean negotiable, String serviceTypeName, Pageable pageable, Boolean enabled, String status) {
         String username = authenticationFacade.getUsername();
 
         Specification<Service> spec = Specification.where(null); // start with no specifications, add each specification after if not null/empty
@@ -204,6 +229,8 @@ public class ServiceService {
         spec = addIfPresent(spec, maxDuration != null, () -> ServiceSpecifications.hasDurationLessThanOrEqual(maxDuration));
         spec = addIfPresent(spec, negotiable != null, () -> ServiceSpecifications.canNegotiate(negotiable));
         spec = addIfPresent(spec, serviceTypeName != null, () -> ServiceSpecifications.hasServiceType(serviceTypeName));
+        spec = addIfPresent(spec, enabled != null, () -> ServiceSpecifications.isEnabled(enabled));
+        spec = addIfPresent(spec, enabled != null, () -> ServiceSpecifications.statusMatches(status));
 
         return serviceRepository.findAll(spec, pageable)
                 .map(service ->  serviceMapper.toDto(service,
@@ -301,7 +328,8 @@ public class ServiceService {
     }
 
     public Page<ServiceResponseDTO> getServicesByMemberId(Long memberId, Pageable pageable) {
-       return serviceRepository.queryServicesByMemberId(memberId, pageable).map(service ->  serviceMapper.toDto(service,
+       return serviceRepository.queryEnabledServicesByMemberId(memberId, pageable)
+               .map(service ->  serviceMapper.toDto(service,
                getPermissionsByProviderIdAndServiceId(memberId, service.getId())));
     }
 
@@ -338,4 +366,35 @@ public class ServiceService {
             serviceRepository.save(service);
         }
     }
+
+    public void approveService(Long id) {
+        Service service = getServiceEntityById(id);
+        service.setEnabled(true);
+        service.setStatus(ServiceStatusEnum.APPROVED);
+        serviceRepository.save(service);
+        emailService.sendAdminAnswerToServiceEmail(service);
+        sendNotification(service);
+    }
+
+    public void rejectService(Long id){
+        Service service = getServiceEntityById(id);
+        service.setEnabled(false);
+        service.setStatus(ServiceStatusEnum.REJECTED);
+        serviceRepository.save(service);
+        emailService.sendAdminAnswerToServiceEmail(service);
+        sendNotification(service);
+    }
+
+    private void sendNotification(Service service) {
+        String status = service.getStatus().toString().toLowerCase();
+        Notification notification = new Notification();
+        notification.setMember(service.getOwner());
+        notification.setTitle(service.getName() + " has been " + status);
+        notification.setBody("The service " + service.getName() + " that you have created, has been " + status);
+        notification.setNotificationTypeEnum(
+                ServiceStatusEnum.APPROVED.equals(service.getStatus()) ? NotificationTypeEnum.APPROVED_SERVICE : NotificationTypeEnum.REJECTED_SERVICE
+        );
+        notificationService.createNotification(notification);
+    }
+
 }

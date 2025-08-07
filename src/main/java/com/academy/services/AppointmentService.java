@@ -202,11 +202,21 @@ public class AppointmentService {
 
     public void cancelAppointment(Long id) {
         Appointment appointment = getAppointmentEntityById(id);
-        if(appointment.getStatus() != AppointmentStatus.PENDING)
+        if(appointment.getStatus() != AppointmentStatus.PENDING && appointment.getStatus() != AppointmentStatus.CONFIRMED)
             throw new BadRequestException("Appointment can't be canceled with status " + appointment.getStatus());
+        String loggedMemberUsername = authenticationFacade.getUsername();
+        if(appointment.getServiceProvider().getProvider().getUsername().equals(loggedMemberUsername)){
+            if(AppointmentStatus.PENDING.equals(appointment.getStatus()))
+                throw new BadRequestException("Pending payment appointment can't be cancelled");
+            emailService.sendCancelAppointmentClientEmail(appointment);
+        }
+        else
+            emailService.sendCancelAppointmentProviderEmail(appointment);
 
         appointment.setStatus(AppointmentStatus.CANCELLED);
         appointmentRepository.save(appointment);
+
+
     }
 
     public ResponseEntity<ReviewResponseDTO> addReview(Long appointmentId, ReviewRequestDTO request) {
@@ -242,4 +252,5 @@ public class AppointmentService {
 
         return appointmentList.stream().map(appointmentMapper::toAppointmentCardDTO).toList();
     }
+
 }

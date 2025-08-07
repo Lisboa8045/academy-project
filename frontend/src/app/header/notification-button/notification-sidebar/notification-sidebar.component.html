@@ -1,11 +1,12 @@
-<ul class="notification-list">
-@if (notifications().length > 0) {
-  <h3>Unread Notifications</h3>
-  @for (notification of notifications(); track notification.id) {
-    <app-notification-sidebar-item [item]="notification" (removeFromList)="removeFromList(notification.id)"/>
+<div class="notification-container">
+  @if (notifications().length > 0) {
+    <h3>Unread Notifications</h3>
+    <ul class="notification-list">
+      @for (notification of notifications(); track notification.id) {
+        <app-notification-sidebar-item [item]="notification" (removeFromList)="removeFromList(notification.id)"/>
+      }
+    </ul>
+  } @else {
+    <h3>No New Notifications</h3>
   }
-} @else {
-  <h3>No New Notifications</h3>
-}
-  <div class="see-all" (click)="goToNotificationHub()">Go to Notification Hub</div>
-</ul>
+</div>

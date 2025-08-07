@@ -1,5 +1,6 @@
 import {input} from '@angular/core';
-import {Component} from '@angular/core';
+import {ContentChild, Signal, TemplateRef} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ServiceModel} from '../service.model';
 import { Router } from '@angular/router';
@@ -13,11 +14,12 @@ import {ServiceCardComponent} from '../../shared/service-card/service-card.compo
   styleUrls: ['./service-list.component.css']
 })
 export class ServiceListComponent {
-
-  constructor(private router: Router) {}
-
   services = input.required<ServiceModel[]>();
   clickPath = input.required<string>();
+  @Input() shouldShowTags = true;
+  @ContentChild(TemplateRef) contentTemplate!: TemplateRef<any>;
+
+  constructor(private router: Router) {}
 
   onCardClick(id: number) {
     this.router.navigate([this.clickPath(), id]);

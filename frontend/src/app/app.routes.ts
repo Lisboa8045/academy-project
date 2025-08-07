@@ -21,6 +21,7 @@ import {ConfirmAppointmentComponent} from './confirm-appointment/confirm-appoint
 import {GlobalConfigurationEditComponent} from './global-configuration/global-configuration-edit.component';
 import { PermissionGuard } from './auth/permission.guard';
 import {ConfirmEmailPromptComponent} from "./auth/confirm-email-prompt/confirm-email-prompt.component";
+import {ServiceAdminApprovalComponent} from './service/admin-approval/service-admin-approval-component.component';
 import {NotFoundComponent} from './not-found.component';
 
 export const routes: Routes = [
@@ -40,6 +41,7 @@ export const routes: Routes = [
   { path: 'reset-password/:token', component: ResetPasswordComponent },
   { path: 'not-found', component: NotFoundComponent},
   { path: 'auth/confirm-prompt', component: ConfirmEmailPromptComponent },
+  { path: 'administrate-services', component: ServiceAdminApprovalComponent },
   {
     path: 'profile',
     component: ProfileComponent,
