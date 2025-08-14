@@ -59,4 +59,16 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findAllReviewsByMemberId(@Param("memberId") Long memberId);
 
     List<Appointment> findAllByServiceProviderProviderUsernameAndStatusIsNot(String username, AppointmentStatus status);
+
+    @Query("SELECT a FROM Appointment a WHERE a.serviceProvider.service.id = :serviceId")
+    List<Appointment> findAllByServiceId(@Param("serviceId") long serviceId);
+
+    @Modifying
+    @Query("""
+        update Appointment a
+        set a.status = :status
+        where a.serviceProvider.service.id = :serviceId
+    """)
+    int cancelAppointmentsByServiceId(@Param("serviceId") Long serviceId,
+                                      @Param("status") AppointmentStatus status);
 }

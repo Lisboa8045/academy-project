@@ -26,11 +26,13 @@ public class DataSeeder implements CommandLineRunner {
         Resource roles = new ClassPathResource("sql-scripts/populateRoles.sql");
         Resource serviceTypes = new ClassPathResource("sql-scripts/populateServiceTypes.sql");
         Resource defaultTags = new ClassPathResource("sql-scripts/populateDefaultTags.sql");
+        Resource deletedMember = new ClassPathResource("sql-scripts/populateDeletedMember.sql");
         try (Connection conn = dataSource.getConnection()) {
             ScriptUtils.executeSqlScript(conn, globalConfig);
             ScriptUtils.executeSqlScript(conn, roles);
             ScriptUtils.executeSqlScript(conn, serviceTypes);
             ScriptUtils.executeSqlScript(conn, defaultTags);
+            ScriptUtils.executeSqlScript(conn, deletedMember);
             System.out.println("Populated database");
         }
     }

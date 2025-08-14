@@ -4,6 +4,7 @@ import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -52,4 +53,8 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
 
     @Query("SELECT AVG(sp.rating) FROM ServiceProvider sp WHERE sp.provider.id = :memberId")
     Double findAverageRatingByMemberId(@Param("memberId") Long memberId);
+
+    @Modifying
+    @Query("UPDATE ServiceProvider sp SET sp.provider = NULL WHERE sp.provider.id = :memberId")
+    void unlinkByMemberId(@Param("memberId") Long memberId);
 }

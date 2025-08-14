@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface ServiceRepository extends JpaRepository<Service, Long>, JpaSpecificationExecutor<Service> {
 
     @Query("SELECT DISTINCT s FROM Service s " +
@@ -19,4 +21,13 @@ public interface ServiceRepository extends JpaRepository<Service, Long>, JpaSpec
             "LEFT JOIN s.serviceProviders sp " +
             "WHERE s.enabled = false AND( s.owner.id = :memberId OR sp.provider.id = :memberId)")
     Page<Service> queryNotEnabledServicesByMemberId(@Param("memberId") Long memberId, Pageable pageable);
+
+    @Query("""
+        select distinct s
+        from Service s
+        join s.serviceProviders sp
+        where sp.provider.id = :memberId
+          and s.owner.id = :memberId
+    """)
+    List<Service> findOwnedAndProvidedByMember(@Param("memberId") Long memberId);
 }
