@@ -10,10 +10,13 @@ import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.ServiceType;
 import com.academy.models.Tag;
 import com.academy.models.member.Member;
+import com.academy.models.notification.Notification;
+import com.academy.models.notification.NotificationTypeEnum;
 import com.academy.models.service.Service;
 import com.academy.models.service.ServiceImages;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
+import com.academy.repositories.ServiceProviderRepository;
 import com.academy.repositories.ServiceRepository;
 import com.academy.specifications.ServiceSpecifications;
 import com.academy.utils.Utils;
@@ -41,6 +44,8 @@ public class ServiceService {
     private final MemberService memberService;
     private final TagService tagService;
     private final ServiceTypeService serviceTypeService;
+    private final NotificationService notificationService;
+    private final ServiceProviderRepository serviceProviderRepository;
 
     public ServiceService(ServiceRepository serviceRepository,
                           ServiceMapper serviceMapper,
@@ -48,7 +53,8 @@ public class ServiceService {
                           AuthenticationFacade authenticationFacade,
                           MemberService memberService,
                           TagService tagService,
-                          ServiceTypeService serviceTypeService) {
+                          ServiceTypeService serviceTypeService,
+                          NotificationService notificationService, ServiceProviderRepository serviceProviderRepository) {
         this.serviceRepository = serviceRepository;
         this.serviceMapper = serviceMapper;
         this.serviceProviderService = serviceProviderService;
@@ -56,6 +62,8 @@ public class ServiceService {
         this.memberService = memberService;
         this.tagService = tagService;
         this.serviceTypeService = serviceTypeService;
+        this.notificationService = notificationService;
+        this.serviceProviderRepository = serviceProviderRepository;
     }
 
     @Transactional
@@ -84,7 +92,9 @@ public class ServiceService {
     public ServiceResponseDTO update(Long id, ServiceRequestDTO dto) throws AuthenticationException{
         String username = authenticationFacade.getUsername();
         Service existing = getServiceEntityById(id);
-
+        if(existing.getDiscount() < dto.discount()) {
+            sendDiscountNotification(existing, id, dto.discount());
+        }
         List<ProviderPermissionEnum> permissions = getPermissionsByProviderUsernameAndServiceId(username, existing.getId());
         checkIfHasPermission(permissions,ProviderPermissionEnum.UPDATE, "update service");
 
@@ -94,6 +104,20 @@ public class ServiceService {
         serviceMapper.updateEntityFromDto(dto, existing);
         serviceRepository.save(existing);
         return serviceMapper.toDto(existing, permissions);
+    }
+
+    private void sendDiscountNotification(Service service, Long id, int newDiscount) {
+
+        for (Member member : serviceProviderRepository.findAllByServiceId(id)) {
+            Notification notification = new Notification();
+            notification.setMember(member);
+            notification.setTitle("Service " + service.getName() + "in on Sale!");
+            notification.setNotificationTypeEnum(NotificationTypeEnum.SERVICE_ON_SALE);
+            notification.setBody("Service " + service.getName() + " is " + newDiscount + "% off");
+
+            notificationService.createNotification(notification);
+        }
+
     }
 
     // Read all

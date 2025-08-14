@@ -226,9 +226,10 @@ public class AppointmentService {
 
         appointment.setRating(request.rating());
         appointment.setComment(request.comment());
-        appointmentRepository.save(appointment);
+        appointment = appointmentRepository.save(appointment);
 
-        return ResponseEntity.ok(new ReviewResponseDTO("Review added successfully"));
+        sendNotificationToProviderReviewAdded(appointment);
+    return ResponseEntity.ok(new ReviewResponseDTO("Review added successfully"));
     }
 
     public ResponseEntity<ConfirmAppointmentResponseDTO> confirmAppointment(Long id) {
@@ -242,6 +243,15 @@ public class AppointmentService {
         appointmentRepository.save(appointment);
         sendNotificationToProviderConfirmedAppointment(appointment);
         return ResponseEntity.ok(new ConfirmAppointmentResponseDTO("Appointment confirmed successfully"));
+    }
+
+    private void sendNotificationToProviderReviewAdded(Appointment appointment) {
+        Notification notification = new Notification();
+        notification.setNotificationTypeEnum(NotificationTypeEnum.APPOINTMENT_REVIEW_ADDED);
+        notification.setTitle(appointment.getServiceProvider().getService().getName());
+        notification.setBody("A review has been added");
+        notification.setMember(appointment.getServiceProvider().getProvider());
+        notificationService.createNotification(notification);
     }
 
     private void sendNotificationToProviderConfirmedAppointment(Appointment appointment) {
