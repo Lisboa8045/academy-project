@@ -283,10 +283,6 @@ public class AppointmentService {
 
     }
 
-    public List<Member> getAllMembersThatHaveAppointmentsInAServiceProvider(Long serviceProviderId){
-        return appointmentRepository.findDistinctMembersByServiceProviderId(serviceProviderId);
-    }
-
     public List<AppointmentCardDTO> getAppointmentsForService(Long id, String dateOrder) {
         Sort sort = dateOrder.equalsIgnoreCase("desc") ? Sort.by("startDateTime").descending() : Sort.by("startDateTime").ascending();
         authenticationFacade.getUsername();

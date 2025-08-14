@@ -123,22 +123,19 @@ public class ServiceService {
 
     private void sendDiscountNotification(Service service, int newDiscount) {
 
-        List<ServiceProvider> serviceProviderList = serviceProviderRepository.findAllByServiceId(service.getId());
+        List<Member> clients = appointmentRepository.findDistinctMembersByServiceId(service.getId());
 
-        for (ServiceProvider serviceProvider : serviceProviderList) {
-            List<Member> clients = appointmentRepository.findDistinctMembersByServiceProviderId(serviceProvider.getId());
+        for (Member client : clients) {
+            Notification notification = new Notification();
+            notification.setMember(client);
+            notification.setTitle("Service " + service.getName() + " is on Sale!");
+            notification.setNotificationTypeEnum(NotificationTypeEnum.SERVICE_ON_SALE);
+            notification.setBody("Service " + service.getName() + " is " + newDiscount + "% off");
 
-            for(Member client : clients) {
-                Notification notification = new Notification();
-                notification.setMember(client);
-                notification.setTitle("Service " + service.getName() + "is on Sale!");
-                notification.setNotificationTypeEnum(NotificationTypeEnum.SERVICE_ON_SALE);
-                notification.setBody("Service " + service.getName() + " is " + newDiscount + "% off");
-
-                notificationService.createNotification(notification);
-            }
+            notificationService.createNotification(notification);
         }
     }
+
 
     public List<ServiceResponseDTO> getAllEnabled() {
         String username =  authenticationFacade.getUsername();
