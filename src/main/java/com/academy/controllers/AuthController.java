@@ -8,6 +8,8 @@ import com.academy.dtos.register.LoginRequestDto;
 import com.academy.dtos.register.LoginResponseDto;
 import com.academy.dtos.register.PasswordResetRequestDto;
 import com.academy.dtos.register.PasswordResetResponseDto;
+import com.academy.dtos.register.RecreateAccountDeletionTokenRequestDto;
+import com.academy.dtos.register.RecreateAccountDeletionTokenResponseDto;
 import com.academy.dtos.register.RecreateConfirmationTokenRequestDto;
 import com.academy.dtos.register.RecreateConfirmationTokenResponseDto;
 import com.academy.dtos.register.RegisterRequestDto;
