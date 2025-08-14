@@ -30,45 +30,14 @@ public class AvailabilityController {
         this.availabilityService = availabilityService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<AvailabilityResponseDTO>> getAllAvailabilities() {
-        List<AvailabilityResponseDTO> response = availabilityService.getAllAvailabilities();
-        return ResponseEntity.ok(response); 
+    @PostMapping("/create-availabilities")
+    public ResponseEntity<String> createAvailabilities( @RequestBody AvailabilityRequestNewDTO request){
+        availabilityService.createAvailabilities(request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @GetMapping("/members/{memberId}")
-    public ResponseEntity<List<AvailabilityResponseDTO>> getMemberAvailability(@PathVariable long memberId) {
-        List<AvailabilityResponseDTO> response = availabilityService.getAvailabilitiesByMemberId(memberId);
-        return ResponseEntity.ok(response); 
-    }
-
-    @GetMapping("/services/{serviceId}")
-    public ResponseEntity<List<AvailabilityResponseDTO>> getServiceAvailability(@PathVariable long serviceId) {
-        List<AvailabilityResponseDTO> response = availabilityService.getAvailabilitiesByServiceId(serviceId);
-        return ResponseEntity.ok(response);
-    }
-
-    @PreAuthorize("hasRole('ADMIN') or hasRole('WORKER')")
-    @PostMapping
-    public ResponseEntity<AvailabilityResponseDTO> createAvailability(@Valid @RequestBody AvailabilityRequestDTO availabilityRequestDTO) {
-        AvailabilityResponseDTO response = availabilityService.createAvailability(availabilityRequestDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-    @PreAuthorize("hasRole('ADMIN') or @availabilitySecurity.isOwner(#availabilityId, authentication.name)")
-    @PutMapping("/{availabilityId}")
-    public ResponseEntity<AvailabilityResponseDTO> updateAvailability(
-            @PathVariable long availabilityId,
-            @Valid @RequestBody AvailabilityRequestDTO availabilityRequestDTO) {
-
-        AvailabilityResponseDTO response = availabilityService.updateAvailability(availabilityId, availabilityRequestDTO);
-        return ResponseEntity.ok(response);
-    }
-
-    @PreAuthorize("hasRole('ADMIN') or @availabilitySecurity.isOwner(#availabilityId, authentication.name)")
-    @DeleteMapping("/{availabilityId}")
-    public ResponseEntity<Void> deleteAvailability(@PathVariable long availabilityId) {
-        availabilityService.deleteAvailabilityById(availabilityId);
-        return ResponseEntity.noContent().build(); 
+    @GetMapping("/member")
+    public ResponseEntity<AvailabilityRequestNewDTO> getMemberAvailability() {
+        return ResponseEntity.ok(availabilityService.getMemberAvailability());
     }
 }

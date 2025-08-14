@@ -57,6 +57,10 @@ button:hover {
     color: green;
 }
 
+.prohibited{
+  font-size: 1.5rem;
+}
+
 .spinner {
   position: absolute;
   right: -2.5rem;

@@ -43,6 +43,12 @@ public class ServiceProviderController {
                 .orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
     }
 
+    @GetMapping("/services/{serviceId}")
+    public ResponseEntity<List<ServiceProviderResponseDTO>> getServiceProvidersByServiceId(@PathVariable long serviceId) {
+        List<ServiceProviderResponseDTO> serviceProviders = serviceProviderService.getServiceProvidersByServiceId(serviceId);
+        return ResponseEntity.ok(serviceProviders);
+    }
+
     @PreAuthorize("hasRole('ADMIN') or hasRole('WORKER')")
     @PostMapping
     public ResponseEntity<ServiceProviderResponseDTO> createServiceProvider(

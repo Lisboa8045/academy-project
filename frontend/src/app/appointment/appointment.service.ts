@@ -27,6 +27,18 @@ export class AppointmentService {
     );
   }
 
+  getServiceAppointments(serviceId: number, dateOrder: string){
+    return this.http
+      .get<AppointmentResponseDTO[]>(
+      `${this.apiUrl}/service/${serviceId}`
+        ,{
+          params: {
+            dateOrder: dateOrder,
+          }
+        }
+    );
+  }
+
   getAppointmentById(id: number): Observable<AppointmentResponseDetailedDTO> {
     return this.http.get<AppointmentResponseDetailedDTO>(
       `${this.apiUrl}/${id}`

@@ -15,7 +15,7 @@ import com.academy.models.member.Member;
 import com.academy.models.notification.Notification;
 import com.academy.models.notification.NotificationTypeEnum;
 import com.academy.models.service.Service;
-import com.academy.models.service.ServiceImages;
+import com.academy.models.service.ServiceImage;
 import com.academy.models.service.ServiceStatusEnum;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
@@ -355,10 +355,10 @@ public class ServiceService {
                getPermissionsByProviderIdAndServiceId(memberId, service.getId())));
     }
 
-    // este saveImages será para usado depois para o endpoint de criação do serviço
     @Transactional
-    public Service saveImages(Long id, List<ServiceImages> images) {
+    public Service saveImages(Long id, List<ServiceImage> images) {
         serviceRepository.findById(id).map(s -> {
+                    s.getImages().clear();
                     s.setImages(images);
                     serviceRepository.save(s);
                     return s;
