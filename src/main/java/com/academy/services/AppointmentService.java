@@ -6,6 +6,12 @@ import com.academy.dtos.appointment.AppointmentMapper;
 import com.academy.dtos.appointment.AppointmentRequestDTO;
 import com.academy.dtos.appointment.AppointmentResponseDTO;
 import com.academy.dtos.appointment.ConfirmAppointmentResponseDTO;
+import com.academy.dtos.appointment.AppointmentCalendarDTO;
+import com.academy.dtos.appointment.AppointmentCardDTO;
+import com.academy.dtos.appointment.AppointmentMapper;
+import com.academy.dtos.appointment.AppointmentRequestDTO;
+import com.academy.dtos.appointment.AppointmentResponseDTO;
+import com.academy.dtos.appointment.ConfirmAppointmentResponseDTO;
 import com.academy.dtos.appointment.review.ReviewRequestDTO;
 import com.academy.dtos.appointment.review.ReviewResponseDTO;
 import com.academy.exceptions.BadRequestException;
@@ -20,6 +26,7 @@ import com.academy.models.service.service_provider.ProviderPermission;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.AppointmentRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
@@ -38,15 +45,11 @@ public class AppointmentService {
     private final AppointmentMapper appointmentMapper;
     private final MemberService memberService;
     private final AuthenticationFacade authenticationFacade;
+    private final ServiceService serviceService;
     private final EmailService emailService;
     private final AppointmentSchedulerService appointmentSchedulerService;
     private final GlobalConfigurationService globalConfigurationService;
     private final NotificationService notificationService;
-
-    @Value("${slot.window.days:30}")
-    private int slotWindowDays;
-
-    @Autowired
 
     public AppointmentService(AppointmentRepository appointmentRepository
             , ServiceProviderService serviceProviderService,
@@ -56,12 +59,14 @@ public class AppointmentService {
                               EmailService emailService,
                               AppointmentSchedulerService appointmentSchedulerService,
                               GlobalConfigurationService globalConfigurationService,
+                              ServiceService serviceService,
                               NotificationService notificationService) {
         this.appointmentRepository = appointmentRepository;
         this.serviceProviderService = serviceProviderService;
         this.appointmentMapper = appointmentMapper;
         this.memberService = memberService;
         this.authenticationFacade = authenticationFacade;
+        this.serviceService = serviceService;
         this.emailService = emailService;
         this.appointmentSchedulerService = appointmentSchedulerService;
         this.globalConfigurationService = globalConfigurationService;
@@ -139,15 +144,12 @@ public class AppointmentService {
     public AppointmentResponseDTO updateAppointment(Long id, AppointmentRequestDTO appointmentDetails) {
 
         Appointment appointment = appointmentRepository.findById(id)
-
                 .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
-
 
         ServiceProvider serviceProvider = serviceProviderService.getServiceProviderEntityById(appointmentDetails.serviceProviderId());
         appointment.setServiceProvider(serviceProvider);
 
-
-        if (appointmentDetails.rating().equals(appointment.getRating()))
+        if(appointmentDetails.rating().equals(appointment.getRating()))
             appointment.setRating(appointmentDetails.rating());
 
         if (appointmentDetails.comment() != null) appointment.setComment(appointmentDetails.comment());
@@ -160,11 +162,9 @@ public class AppointmentService {
     public void deleteReview(Long id) {
 
         Appointment appointment = appointmentRepository.findById(id)
-
                 .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
 
         appointment.setRating(null);
-
         appointment.setComment(null);
 
         appointmentRepository.save(appointment);
@@ -181,14 +181,12 @@ public class AppointmentService {
 
     }
 
-/*
-    public List<AppointmentResponseDTO> getAppointmentsForAuthenticatedProvider() {
-        return appointmentRepository.findByProvider_Username(authenticationFacade.getUsername()).stream()
-                .map(appointmentMapper::toResponseDTO)
-                .collect(Collectors.toList());
-    }
+    public List<AppointmentCalendarDTO> getAppointmentsForAuthenticatedServiceProviderCalendar() {
 
- */
+        List<Appointment> appointmentList = appointmentRepository
+                .findAllByServiceProviderProviderUsernameAndStatusIsNot(authenticationFacade.getUsername(), AppointmentStatus.CANCELLED);
+        return appointmentList.stream().map(appointmentMapper::toAppointmentCalendarDTO).toList();
+    }
 
     public List<Appointment> getAppointmentsForProvider(Long providerId) {
         if (providerId == null) {
@@ -207,18 +205,21 @@ public class AppointmentService {
 
     public void cancelAppointment(Long id) {
         Appointment appointment = getAppointmentEntityById(id);
-        if (appointment.getStatus() != AppointmentStatus.PENDING)
+        if(appointment.getStatus() != AppointmentStatus.PENDING && appointment.getStatus() != AppointmentStatus.CONFIRMED)
             throw new BadRequestException("Appointment can't be canceled with status " + appointment.getStatus());
-
-        appointment.setStatus(AppointmentStatus.CANCELLED);
-        appointmentRepository.save(appointment);
-
         String loggedMemberUsername = authenticationFacade.getUsername();
         if(appointment.getServiceProvider().getProvider().getUsername().equals(loggedMemberUsername)){
+            if(AppointmentStatus.PENDING.equals(appointment.getStatus()))
+                throw new BadRequestException("Pending payment appointment can't be cancelled");
+            emailService.sendCancelAppointmentClientEmail(appointment);
             sendNotificationToClientCancelledAppointment(appointment);
         }
-        else
+        else{
+            emailService.sendCancelAppointmentProviderEmail(appointment);
             sendNotificationToProviderCancelledAppointment(appointment);
+        }
+        appointment.setStatus(AppointmentStatus.CANCELLED);
+        appointmentRepository.save(appointment);
     }
 
     public ResponseEntity<ReviewResponseDTO> addReview(Long appointmentId, ReviewRequestDTO request) {
@@ -227,6 +228,10 @@ public class AppointmentService {
         appointment.setRating(request.rating());
         appointment.setComment(request.comment());
         appointment = appointmentRepository.save(appointment);
+
+        serviceProviderService.updateRating(appointment.getServiceProvider().getId());
+        serviceService.updateRating(appointment.getServiceProvider().getService().getId());
+        memberService.updateMemberRating(appointment.getServiceProvider().getProvider().getId());
 
         sendNotificationToProviderReviewAdded(appointment);
     return ResponseEntity.ok(new ReviewResponseDTO("Review added successfully"));
@@ -297,4 +302,14 @@ public class AppointmentService {
     public List<Member> getAllMembersThatHaveAppointmentsInAServiceProvider(Long serviceProviderId){
         return appointmentRepository.findDistinctMembersByServiceProviderId(serviceProviderId);
     }
+
+    public List<AppointmentCardDTO> getAppointmentsForService(Long id, String dateOrder) {
+        Sort sort = dateOrder.equalsIgnoreCase("desc") ? Sort.by("startDateTime").descending() : Sort.by("startDateTime").ascending();
+        authenticationFacade.getUsername();
+        List<Appointment> appointmentList = appointmentRepository
+                .findByServiceId(id, sort);
+
+        return appointmentList.stream().map(appointmentMapper::toAppointmentCardDTO).toList();
+    }
+
 }

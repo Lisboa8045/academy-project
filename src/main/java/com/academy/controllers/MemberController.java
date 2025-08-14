@@ -2,14 +2,23 @@ package com.academy.controllers;
 
 import com.academy.config.authentication.JwtCookieUtil;
 import com.academy.config.authentication.JwtUtil;
+import com.academy.dtos.appointment.AppointmentReviewResponseDTO;
 import com.academy.dtos.member.MemberRequestDTO;
 import com.academy.dtos.member.MemberResponseDTO;
 import com.academy.services.MemberService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -29,12 +38,14 @@ public class MemberController {
         this.jwtCookieUtil = jwtCookieUtil;
     }
 
+    @PreAuthorize("hasRole('ADMIN') or @memberSecurity.isSelf(#id, authentication.name)")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMember(@PathVariable Long id) {
         memberService.deleteMember(id);
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasRole('ADMIN') or @memberSecurity.isSelf(#id, authentication.name)")
     @PutMapping("/{id}")
     public ResponseEntity<MemberResponseDTO> editMember(@PathVariable long id, @RequestBody MemberRequestDTO memberRequestDTO, HttpServletResponse response){
         MemberResponseDTO memberResponseDTO = memberService.editMember(id, memberRequestDTO);
@@ -46,9 +57,11 @@ public class MemberController {
         return ResponseEntity.ok(memberResponseDTO);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public List<MemberResponseDTO> getAllMembers() {
-        return memberService.getAllMembers();
+    public ResponseEntity<List<MemberResponseDTO>> getAllMembers() {
+        List<MemberResponseDTO> members = memberService.getAllMembers();
+        return ResponseEntity.ok(members);
     }
 
     @GetMapping("/{id}")
@@ -56,5 +69,20 @@ public class MemberController {
         return ResponseEntity.ok(memberService.getMemberById(id));
     }
 
+    @GetMapping("/byUsername/{username}")
+    public ResponseEntity<MemberResponseDTO> getMemberByUserName(@PathVariable String username) {
+        return ResponseEntity.ok(memberService.getMemberDTOByUsername(username));
+    }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<MemberResponseDTO>> searchMembersByContainsUsernameAndRoleName(@RequestParam String username,
+                                                                                              @RequestParam String roleName) {
+        return ResponseEntity.ok(memberService.getMemberDTOByUsernameAndRole(username, roleName));
+    }
+
+    @GetMapping("/{id}/reviews")
+    public ResponseEntity<List<AppointmentReviewResponseDTO>> getReviewsByMemberId(@PathVariable Long id) {
+        List<AppointmentReviewResponseDTO> reviews = memberService.getReviewsByMemberId(id);
+        return ResponseEntity.ok(reviews);
+    }
 }

@@ -11,7 +11,8 @@
                     Resend Verification
                 </button>
                 <span *ngIf="loading" class="spinner"></span>
-                <span *ngIf="resendDisabled && !loading" class="checkmark">✅</span>
+                <span *ngIf="resendDisabled && !loading && message" class="checkmark">✅</span>
+                <span *ngIf="error" class="prohibited">🚫</span>
             </div>
 
             <button *ngIf="showBackToLogin" (click)="goToLogin()">

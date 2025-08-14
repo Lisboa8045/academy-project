@@ -1,0 +1,88 @@
+<div class="tailwind-scope">
+<div class="flex items-center space-x-6 mb-4">
+  <app-sorting-order
+    *ngIf="totalPages > 0"
+    [sortBy]="'Date'"
+    [order]="dateOrder"
+    (orderChange)="onOrderChange($event)"
+  ></app-sorting-order>
+
+  <app-status-filter
+    [status]= "status"
+    (statusChange)="statusChange($event)"
+  ></app-status-filter>
+</div>
+
+<!-- Appointment Table -->
+<table class="w-full mt-6 text-sm text-center border border-gray-200 shadow-sm rounded-lg overflow-hidden" *ngIf="totalItems > 0;">
+  <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
+  <tr>
+    <th class="px-4 py-3">Provider</th>
+    <th class="px-4 py-3">Date</th>
+    <th class="px-4 py-3">Status</th>
+  </tr>
+  </thead>
+  <tbody class="bg-white divide-y divide-gray-100">
+  <tr
+    *ngFor="let appointment of filteredAppointments"
+    (click)="onViewAppointment(appointment.id)"
+    class="hover:bg-blue-50 transition-colors cursor-pointer"
+  >
+    <td class="px-4 py-3 text-center">{{ appointment.serviceProviderUsername }}</td>
+    <td class="px-4 py-3 text-center">{{ appointment.startDateTime | date:'MMM d, y, h:mm a' }}</td>
+    <td class="px-4 py-3 text-center">{{ appointment.status }}</td>
+  </tr>
+  </tbody>
+</table>
+
+<!-- No Appointments Message -->
+<div *ngIf="totalItems < 1">
+  <p class="text-center text-gray-500 mt-4">No appointments found.</p>
+</div>
+
+<!-- Pagination Controls -->
+<nav  class="mt-6">
+  <ul class="flex justify-center items-center gap-1 text-sm">
+    <!-- Previous -->
+    <li *ngIf="totalPages > 1">
+      <button
+        class="px-3 py-1 rounded-md border text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+        [disabled]="currentPage === 0"
+        (click)="changePage(currentPage - 1)"
+      >
+        Previous
+      </button>
+    </li>
+
+    <!-- Page Numbers -->
+    <li *ngFor="let page of [].constructor(totalPages); let i = index">
+      <button
+        class="px-3 py-1 rounded-md border hover:bg-gray-100 transition"
+        [ngClass]="{
+        'bg-blue-600 text-white': i === currentPage,
+        'text-gray-700': i !== currentPage
+      }"
+        (click)="changePage(i)"
+      >
+        {{ i + 1 }}
+      </button>
+    </li>
+
+    <!-- Next -->
+    <li *ngIf="totalPages > 1">
+      <button
+        class="px-3 py-1 rounded-md border text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+        [disabled]="currentPage + 1 >= totalPages"
+        (click)="changePage(currentPage + 1)"
+      >
+        Next
+      </button>
+    </li>
+  </ul>
+</nav>
+
+<app-appointment-modal *ngIf="viewAppointmentModal && selectedAppointment"
+                       [appointment]="selectedAppointment"
+                       (close)="closeModal()"
+></app-appointment-modal>
+</div>

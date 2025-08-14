@@ -12,27 +12,26 @@
   border-radius: 8px;
   transition: transform 0.2s;
   height: 350px;
+  min-width:300px;
+  max-width: 350px;
 }
 
 .service-card:hover {
   transform: scale(1.02);
 }
 
+.service-title-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1.1rem;
+  margin: 0;
+  /* Add any other styles you need */
+}
+
 .rating-badge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: linear-gradient(
-    90deg,
-    #3b2ff5 0%,
-    #00d4ff 100%
-  );
-  color: #fff;
-  padding: 4px 8px;
-  border-radius: 12px;
   font-weight: bold;
-  font-size: 14px;
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+  font-size: 20px;
 }
 
 .image-container {

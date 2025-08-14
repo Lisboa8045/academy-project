@@ -6,6 +6,7 @@ target/
 
 ##Ignore app properties
 src/main/resources/application.properties
+src/uploads/
 
 ### STS ###
 .apt_generated

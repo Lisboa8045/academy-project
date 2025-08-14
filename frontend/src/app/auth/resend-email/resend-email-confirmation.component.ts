@@ -49,9 +49,7 @@ export class ResendEmailConfirmationComponent implements OnInit {
       error: () => {
         this.loading = false;
         this.message = '';
-        this.error = 'Failed to resend verification. Please try again later.';
-        this.showBackToLogin = true;
-      }
+        this.error = 'You have reached the limit for resending verification emails. Please wait a while before trying again.';      }
     });
   }
 

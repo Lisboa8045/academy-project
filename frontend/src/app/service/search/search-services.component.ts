@@ -61,7 +61,7 @@ export class SearchServicesComponent implements OnInit {
     });
     this.route.queryParams.subscribe(params => {
       const q = (params['q'] || '').trim();
-      const serviceType = params['serviceType'] || '';
+      const serviceType = (params['serviceType'] || params['serviceTypeName'] || '').trim();
       this.searchTerm.set(q);
       // aplica serviceType vindo da URL nos filtros
       if (serviceType) {
@@ -118,7 +118,6 @@ export class SearchServicesComponent implements OnInit {
       this.fetchServices(this.buildQuery({ page: newPage }));
     }
   }
-
 
   goToNextPage() {
     if (this.currentPage() + 1 < this.totalPages()) {

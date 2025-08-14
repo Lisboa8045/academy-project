@@ -10,5 +10,6 @@ export interface NotificationModel {
   body: string,
   url: string,
   seen: boolean,
+  createdAt: string,
   notificationType: NotificationType;
 }

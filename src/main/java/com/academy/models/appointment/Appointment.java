@@ -4,7 +4,14 @@ import com.academy.models.member.Member;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.models.shared.BaseEntity;
 import com.academy.utils.FieldLengths;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -33,7 +40,7 @@ public class Appointment extends BaseEntity {
     private ServiceProvider serviceProvider;
 
     @Column(name="rating")
-    private Integer rating;
+    private Integer rating = 0;
 
     @Column(name="comment", length = FieldLengths.REVIEW_MAX)
     private String comment;

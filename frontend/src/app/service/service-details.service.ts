@@ -16,4 +16,6 @@ export class ServiceDetailsService {
   getServiceById(id:number): Observable<ServiceModel>{
     return this.http.get<ServiceModel>(`${this.baseUrl}/${id}`);
   }
+
+
 }

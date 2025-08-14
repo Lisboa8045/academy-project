@@ -8,5 +8,6 @@ public record MemberResponseDTO(
         String postalCode,
         String phoneNumber,
         String role,
-        String profilePicture
+        String profilePicture,
+        Integer rating
 ) {}

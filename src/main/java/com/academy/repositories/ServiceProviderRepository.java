@@ -19,14 +19,18 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
 
     @Query("SELECT sp.provider.id FROM ServiceProvider sp WHERE sp.service.id = :serviceId")
     List<Long> findMemberIdsByServiceId(Long serviceId);
+    Optional<ServiceProvider> findByProviderUsernameAndServiceId(String username, Long serviceId);
 
     @Query("SELECT sp FROM ServiceProvider sp WHERE sp.service.id = :serviceId")
     List<ServiceProvider> findAllByServiceId(@Param("serviceId") Long serviceId);
 
-    Optional<ServiceProvider> findByProviderUsernameAndServiceId(String username, Long serviceId);
+    @Query("SELECT sp FROM ServiceProvider sp JOIN FETCH sp.service s " +
+            "WHERE s.owner.id = :ownerId")
+    List<ServiceProvider> findAllByServiceOwnerId(Long ownerId);
 
     Optional<ServiceProvider> findByProviderIdAndServiceId(Long id, Long serviceId);
-    List<ServiceProvider> service(Service service);
+
+    List<ServiceProvider> findByServiceId(Long serviceId);
 
     boolean existsByServiceId(Long serviceId);
 
@@ -40,4 +44,12 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
     List<ServiceProvider> findProvidersByServiceIdAndPermission(Long serviceId, ProviderPermissionEnum permission);
 
     boolean existsByServiceIdAndPermissions_Permission(Long id, ProviderPermissionEnum providerPermissionEnum);
+
+    boolean existsByProvider_UsernameAndService_IdAndPermissions_Permission(String username, Long serviceId, ProviderPermissionEnum permission);
+
+    @Query("SELECT AVG(sp.rating) FROM ServiceProvider sp WHERE sp.service.id = :serviceId")
+    Double findAverageRatingByService_Id(@Param("serviceId") Long serviceId);
+
+    @Query("SELECT AVG(sp.rating) FROM ServiceProvider sp WHERE sp.provider.id = :memberId")
+    Double findAverageRatingByMemberId(@Param("memberId") Long memberId);
 }

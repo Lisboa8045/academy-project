@@ -4,6 +4,7 @@ import com.academy.models.member.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -14,4 +15,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     boolean existsByConfirmationToken(String encodedToken);
 
     Optional<Member> findByConfirmationToken(String confirmationToken);
+
+    List<Member> searchMemberByUsernameContainsIgnoreCaseAndRoleName(String username, String roleName);
 }

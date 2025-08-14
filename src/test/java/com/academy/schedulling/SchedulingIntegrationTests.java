@@ -6,7 +6,7 @@ import com.academy.models.appointment.AppointmentStatus;
 import com.academy.models.member.Member;
 import com.academy.models.member.MemberStatusEnum;
 import com.academy.models.Role;
-import com.academy.models.Availability;
+import com.academy.models.availability.Availability;
 import com.academy.models.ServiceType;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermission;
@@ -95,6 +95,15 @@ public class SchedulingIntegrationTests {
         user.setPhoneNumber("912345678");
         memberRepository.save(user);
 
+        user = new Member();
+        user.setUsername("testUser");
+        user.setEmail("testUser@example.com");
+        user.setPassword("Teste123.");
+        user.setRole(defaultRole);
+        user.setEnabled(true);
+        user.setStatus(MemberStatusEnum.ACTIVE);
+        memberRepository.save(user);
+
         var authentication = new UsernamePasswordAuthenticationToken("teste1", "Teste123.", List.of());
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
@@ -120,7 +129,7 @@ public class SchedulingIntegrationTests {
 
         LocalDateTime start = LocalDateTime.now().plusHours(2);
         Availability av = new Availability();
-        av.setMember(provider);
+        //av.setMember(provider);
         av.setStartDateTime(start);
         av.setEndDateTime(start.plusMinutes(90)); // 1h30
         availabilityRepository.save(av);
@@ -145,7 +154,7 @@ public class SchedulingIntegrationTests {
 
         LocalDateTime start = LocalDateTime.now().plusHours(3);
         Availability av = new Availability();
-        av.setMember(provider);
+        //av.setMember(provider);
         av.setStartDateTime(start);
         av.setEndDateTime(start.plusMinutes(40)); // menos do que 1h
 
@@ -165,7 +174,7 @@ public class SchedulingIntegrationTests {
 
         LocalDateTime start = LocalDateTime.now().plusHours(1).truncatedTo(ChronoUnit.MINUTES);
         Availability av = new Availability();
-        av.setMember(provider);
+        //av.setMember(provider);
         av.setStartDateTime(start);
         av.setEndDateTime(start.plusHours(2));
         availabilityRepository.save(av);
@@ -231,6 +240,7 @@ public class SchedulingIntegrationTests {
         service.setPrice(20.1);
         service.setDiscount(0);
         service.setNegotiable(false);
+        service.setEnabled(true);
         service.setTags(new ArrayList<>());
         return serviceRepository.save(service);
     }

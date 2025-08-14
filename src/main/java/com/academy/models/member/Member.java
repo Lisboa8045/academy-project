@@ -1,10 +1,11 @@
 package com.academy.models.member;
 
-import com.academy.models.appointment.Appointment;
-import com.academy.models.Availability;
 import com.academy.models.Role;
+import com.academy.models.appointment.Appointment;
+import com.academy.models.availability.MemberAvailability;
 import com.academy.models.service.Service;
 import com.academy.models.shared.BaseEntity;
+import com.academy.models.token.EmailConfirmationToken;
 import com.academy.utils.FieldLengths;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -21,22 +22,25 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 
 @Entity
 @Table(name = "member")
 @Getter
 @Setter
-@ToString(callSuper = true, exclude = {"availabilities", "appointments", "createdServices", "role"})
+@ToString(callSuper = true, exclude = {"memberAvailabilities", "appointments", "createdServices", "role", "emailConfirmationTokens"})
 public class Member extends BaseEntity {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Availability> availabilities = new ArrayList<>();
+    private List<MemberAvailability> memberAvailabilities = new ArrayList<>();
 
     @OneToMany(mappedBy = "member")
     private List<Appointment> appointments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member")
+    private List<EmailConfirmationToken> emailConfirmationTokens = new ArrayList<>();
 
     @Column(name = "username", unique = true, nullable = false, length = FieldLengths.USERNAME_MAX)
     private String username;
@@ -47,10 +51,10 @@ public class Member extends BaseEntity {
     @Column(name = "email", nullable = false, length = FieldLengths.EMAIL_MAX)
     private String email;
 
-    @Column(name = "enabled") //TODO should be nullable quando alterarem os testes para usar service
+    @Column(name = "enabled", nullable = false)
     private boolean enabled;
 
-    @Column(name = "status") //TODO should be nullable quando alterarem os testes para usar service
+    @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private MemberStatusEnum status;
 
@@ -84,6 +88,9 @@ public class Member extends BaseEntity {
 
     @Column(name = "profile_picture")
     private String profilePicture;
+
+    @Column(name = "rating")
+    private Integer rating;
 
     public Long getId(){
         return id;
