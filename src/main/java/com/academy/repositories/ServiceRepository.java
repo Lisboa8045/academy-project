@@ -19,4 +19,9 @@ public interface ServiceRepository extends JpaRepository<Service, Long>, JpaSpec
             "LEFT JOIN s.serviceProviders sp " +
             "WHERE s.enabled = false AND( s.owner.id = :memberId OR sp.provider.id = :memberId)")
     Page<Service> queryNotEnabledServicesByMemberId(@Param("memberId") Long memberId, Pageable pageable);
+
+    @Query("SELECT DISTINCT s FROM Service s " +
+            "LEFT JOIN s.serviceProviders sp " +
+            "WHERE s.status != 'REJECTED' AND (s.owner.id = :memberId OR sp.provider.id = :memberId)")
+    Page<Service> queryNotRejectedServicesByMemberId(@Param("memberId") Long memberId, Pageable pageable);
 }

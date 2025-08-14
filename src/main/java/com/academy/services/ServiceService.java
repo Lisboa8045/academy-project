@@ -348,7 +348,7 @@ public class ServiceService {
     }
 
     public Page<ServiceResponseDTO> getServicesByMemberId(Long memberId, Pageable pageable) {
-       return serviceRepository.queryEnabledServicesByMemberId(memberId, pageable)
+       return serviceRepository.queryNotRejectedServicesByMemberId(memberId, pageable)
                .map(service ->  serviceMapper.toDto(service,
                getPermissionsByProviderIdAndServiceId(memberId, service.getId())));
     }

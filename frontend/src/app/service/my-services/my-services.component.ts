@@ -46,7 +46,11 @@ export class MyServicesComponent{
     fetchServices(query: ServiceQuery){
       this.serviceApiService.getServicesOfMember(query, this.memberId()).subscribe({
         next: (res: PagedResponse) => {
-          this.services.set(res.content);
+          let services = res.content;
+          if (this.memberIdInput) {
+            services = services.filter(service => service.status == 'APPROVED');
+          }
+          this.services.set(services);
           this.totalPages.set(res.totalPages);
           this.currentPage.set(res.number);
           this.loading.set(false);
