@@ -308,7 +308,6 @@ export class ProfileComponent implements OnInit {
       },
       error: (err) => {
         snackBarError(this.snackBar, 'Delete failed: ' + (err.error?.message || err.statusText));
-        console.error(err);
       }
     });
   }

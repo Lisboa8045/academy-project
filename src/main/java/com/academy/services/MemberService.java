@@ -24,14 +24,17 @@ import com.academy.exceptions.TokenExpiredException;
 import com.academy.exceptions.UnavailableUserException;
 import com.academy.models.Role;
 import com.academy.models.appointment.Appointment;
+import com.academy.models.appointment.AppointmentStatus;
 import com.academy.models.member.Member;
 import com.academy.models.member.MemberStatusEnum;
+import com.academy.models.service.ServiceStatusEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.models.token.EmailConfirmationToken;
 import com.academy.repositories.AppointmentRepository;
 import com.academy.repositories.MemberRepository;
 import com.academy.repositories.RoleRepository;
 import com.academy.repositories.ServiceProviderRepository;
+import com.academy.repositories.ServiceRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +78,8 @@ public class MemberService {
     private final AppointmentMapper appointmentMapper;
 
     private final AccountCleanupService accountCleanupService;
+    @Autowired
+    private ServiceRepository serviceRepository;
 
     @Autowired
     public MemberService(MemberRepository memberRepository,
@@ -305,10 +310,18 @@ public class MemberService {
         return memberRepository.findById(memberId);
     }
 
+    @Transactional
     public void deleteMember(long id) {
         Member member = getMemberEntityById(id);
         member.setEnabled(false);
         member.setStatus(MemberStatusEnum.PENDING_DELETION);
+        serviceRepository.findOwnedAndProvidedByMember(id).forEach(service -> {
+            appointmentRepository.cancelAppointmentsByServiceId(service.getId(), AppointmentStatus.CANCELLED);
+            service.setEnabled(false);
+            service.setStatus(ServiceStatusEnum.DISABLED_OWNER_DELETED);
+            serviceRepository.save(service);
+        });
+
         member.setTokenExpiry(LocalDateTime.now().plusDays(
                 Integer.parseInt(globalConfigurationService.getConfigValue("account_deletion_expiry_days"))));
         memberRepository.save(member);
@@ -462,6 +475,10 @@ public class MemberService {
         member.setConfirmationToken(null);
         member.setTokenExpiry(null);
         memberRepository.save(member);
+        serviceRepository.findOwnedAndProvidedByMember(member.getId()).forEach(service -> {
+            service.setEnabled(true);
+            service.setStatus(ServiceStatusEnum.PENDING_APPROVAL);
+        });
     }
 
     @Scheduled(cron = "0 0 0 * * ?") // Every day at midnight
