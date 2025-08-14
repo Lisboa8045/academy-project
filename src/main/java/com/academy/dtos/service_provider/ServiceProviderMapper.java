@@ -25,14 +25,7 @@ public abstract class ServiceProviderMapper {
     public abstract ServiceProviderResponseDTO toResponseDTO(ServiceProvider serviceProvider);
 
     @Mapping(target = "permissions", ignore = true)
-    public abstract ServiceProvider toEntity(ServiceProviderRequestDTO ServiceProviderRequestDTO);
-
-
-    /*@Named("enumToString")
-    static String enumToString(ProviderPermission permission) {
-        return permission.name();
-    }
-     */
+    public abstract ServiceProvider toEntity(ServiceProviderRequestDTO serviceProviderRequestDTO);
 
     @Named("mapPermissionsToEnums")
     public List<ProviderPermissionEnum> mapPermissionsToEnums(List<ProviderPermission> permissions) {
@@ -46,6 +39,7 @@ public abstract class ServiceProviderMapper {
     public Long mapServiceIdOrDefault(Service service) {
         return service != null ? service.getId() : -1L;
     }
+
     @Named("mapServiceProviderNameOrDefault")
     public String mapServiceProviderNameOrDefault(Member member) {
         return member != null ? member.getUsername() : "Deleted User";

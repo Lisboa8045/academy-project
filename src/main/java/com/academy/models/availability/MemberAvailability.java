@@ -2,7 +2,11 @@ package com.academy.models.availability;
 
 import com.academy.models.member.Member;
 import com.academy.models.shared.BaseEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -1,23 +1,19 @@
 package com.academy.dtos.availability;
 
-import com.academy.models.availability.Availability;
 import com.academy.models.availability.MemberAvailability;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public abstract class AvailabilityMapper {
-
-    /*@Mapping(target = "memberId", source = "member.id")
-    @Mapping(target = "isException", source = "exception")
-    public abstract AvailabilityResponseDTO toResponseDTOWithMember(Availability availability);
-    AQ
-     */
 
     public List<DaySchedule> toDaySchedules(List<MemberAvailability> memberAvailabilities) {
         // Mapa que associa cada data a uma lista de DateTimeRanges

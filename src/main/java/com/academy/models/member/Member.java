@@ -1,13 +1,22 @@
 package com.academy.models.member;
 
-import com.academy.models.appointment.Appointment;
 import com.academy.models.Role;
+import com.academy.models.appointment.Appointment;
 import com.academy.models.availability.MemberAvailability;
 import com.academy.models.service.Service;
 import com.academy.models.shared.BaseEntity;
 import com.academy.models.token.EmailConfirmationToken;
 import com.academy.utils.FieldLengths;
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -42,10 +51,10 @@ public class Member extends BaseEntity {
     @Column(name = "email", nullable = false, length = FieldLengths.EMAIL_MAX)
     private String email;
 
-    @Column(name = "enabled") //TODO should be nullable quando alterarem os testes para usar service
+    @Column(name = "enabled", nullable = false)
     private boolean enabled;
 
-    @Column(name = "status") //TODO should be nullable quando alterarem os testes para usar service
+    @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private MemberStatusEnum status;
 

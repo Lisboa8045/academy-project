@@ -95,6 +95,15 @@ public class SchedulingIntegrationTests {
         user.setPhoneNumber("912345678");
         memberRepository.save(user);
 
+        user = new Member();
+        user.setUsername("testUser");
+        user.setEmail("testUser@example.com");
+        user.setPassword("Teste123.");
+        user.setRole(defaultRole);
+        user.setEnabled(true);
+        user.setStatus(MemberStatusEnum.ACTIVE);
+        memberRepository.save(user);
+
         var authentication = new UsernamePasswordAuthenticationToken("teste1", "Teste123.", List.of());
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
@@ -231,6 +240,7 @@ public class SchedulingIntegrationTests {
         service.setPrice(20.1);
         service.setDiscount(0);
         service.setNegotiable(false);
+        service.setEnabled(true);
         service.setTags(new ArrayList<>());
         return serviceRepository.save(service);
     }

@@ -128,8 +128,6 @@ public class SchedulingService {
         return freeSlots;
     }
 
-
-
     public static List<SlotDTO> generateCompleteSlots(Long providerId, String providerName,
                                                       LocalDateTime start, LocalDateTime end, int slotDurationMinutes) {
         if (start == null || end == null)
@@ -164,7 +162,7 @@ public class SchedulingService {
             throw new IllegalArgumentException("Service ID cannot be null");
         }
         if (!serviceProviderService.existsByServiceId(serviceId)) {
-            throw new IllegalArgumentException("Service with ID " + serviceId + " does not exist");
+            throw new IllegalStateException("Service does not have any providers.");
         }
     }
 
