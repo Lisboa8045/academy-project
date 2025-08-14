@@ -43,9 +43,9 @@ public class NotificationService {
         return this.notificationRepository.findByMemberAndSeen(member, false);
     }
 
-    public Notification createNotification(Notification notification) {
-        notificationWebSocketService.sendNotification(notification.getMember().getId(), notificationMapper.toDTO(notification));
-        return this.notificationRepository.save(notification);
+    public void createNotification(Notification notification) {
+        Notification createdNotification = this.notificationRepository.save(notification);
+        notificationWebSocketService.sendNotification(createdNotification.getMember().getId(), notificationMapper.toDTO(createdNotification));
     }
 
     public void markNotificationAsSeen(long notificationId) {
