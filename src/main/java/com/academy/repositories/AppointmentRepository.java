@@ -2,13 +2,8 @@ package com.academy.repositories;
 
 import com.academy.models.appointment.Appointment;
 import com.academy.models.appointment.AppointmentStatus;
+import com.academy.models.member.Member;
 import jakarta.transaction.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
-
-import com.academy.models.appointment.AppointmentStatus;
-import com.academy.services.AppointmentService;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -49,6 +44,13 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
                                                                                LocalDateTime in30Days);
 
     List<Appointment> findByServiceProviderId(Long serviceProviderId);
+
+    @Query("""
+        SELECT DISTINCT a.member
+        FROM Appointment a
+        WHERE a.serviceProvider.service.id = :serviceId
+    """)
+    List<Member> findDistinctMembersByServiceId(Long serviceId);
 
     @Query("SELECT AVG(ap.rating) FROM Appointment ap WHERE ap.serviceProvider.id = :serviceProviderId")
     Double findAverageRatingByServiceProvider_Id(@Param("serviceProviderId") Long serviceProviderId);

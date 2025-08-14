@@ -19,6 +19,7 @@ import com.academy.models.service.ServiceImage;
 import com.academy.models.service.ServiceStatusEnum;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
+import com.academy.repositories.AppointmentRepository;
 import com.academy.repositories.ServiceProviderRepository;
 import com.academy.repositories.ServiceRepository;
 import com.academy.specifications.ServiceSpecifications;
@@ -48,10 +49,11 @@ public class ServiceService {
     private final MemberService memberService;
     private final TagService tagService;
     private final ServiceTypeService serviceTypeService;
-    private final EmailService emailService;
     private final NotificationService notificationService;
-    private final AppointmentMapper appointmentMapper;
+    private final AppointmentRepository appointmentRepository;
     private final ServiceProviderRepository serviceProviderRepository;
+    private final EmailService emailService;
+    private final AppointmentMapper appointmentMapper;
 
     public ServiceService(ServiceRepository serviceRepository,
                           ServiceMapper serviceMapper,
@@ -62,6 +64,7 @@ public class ServiceService {
                           ServiceTypeService serviceTypeService,
                           ServiceProviderRepository serviceProviderRepository,
                           AppointmentMapper appointmentMapper,
+                          AppointmentRepository appointmentRepository,
                           EmailService emailService,
                           NotificationService notificationService) {
         this.serviceRepository = serviceRepository;
@@ -75,7 +78,7 @@ public class ServiceService {
         this.notificationService = notificationService;
         this.appointmentMapper = appointmentMapper;
         this.serviceProviderRepository = serviceProviderRepository;
-
+        this.appointmentRepository = appointmentRepository;
     }
 
     @Transactional
@@ -104,7 +107,9 @@ public class ServiceService {
     public ServiceResponseDTO update(Long id, ServiceRequestDTO dto) throws AuthenticationException{
         String username = authenticationFacade.getUsername();
         Service existing = getServiceEntityById(id);
-
+        if(existing.getDiscount() < dto.discount()) {
+            sendDiscountNotification(existing, dto.discount());
+        }
         List<ProviderPermissionEnum> permissions = getPermissionsByProviderUsernameAndServiceId(username, existing.getId());
         checkIfHasPermission(permissions,ProviderPermissionEnum.UPDATE, "update service");
 
@@ -115,6 +120,22 @@ public class ServiceService {
         serviceRepository.save(existing);
         return serviceMapper.toDto(existing, permissions);
     }
+
+    private void sendDiscountNotification(Service service, int newDiscount) {
+
+        List<Member> clients = appointmentRepository.findDistinctMembersByServiceId(service.getId());
+
+        for (Member client : clients) {
+            Notification notification = new Notification();
+            notification.setMember(client);
+            notification.setTitle("Service " + service.getName() + " is on Sale!");
+            notification.setNotificationTypeEnum(NotificationTypeEnum.SERVICE_ON_SALE);
+            notification.setBody("Service " + service.getName() + " is " + newDiscount + "% off");
+
+            notificationService.createNotification(notification);
+        }
+    }
+
 
     public List<ServiceResponseDTO> getAllEnabled() {
         String username =  authenticationFacade.getUsername();
