@@ -1,29 +1,22 @@
 package com.academy.services;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.academy.config.authentication.AuthenticationFacade;
-import com.academy.dtos.availability.*;
-import com.academy.exceptions.EntityNotFoundException;
-import com.academy.exceptions.InvalidArgumentException;
+import com.academy.dtos.availability.AvailabilityMapper;
+import com.academy.dtos.availability.AvailabilityRequestNewDTO;
+import com.academy.dtos.availability.DateTimeRange;
+import com.academy.dtos.availability.DaySchedule;
 import com.academy.models.availability.Availability;
 import com.academy.models.availability.MemberAvailability;
 import com.academy.models.member.Member;
-import com.academy.models.service.service_provider.ProviderPermissionEnum;
-import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.AvailabilityRepository;
 import com.academy.repositories.MemberAvailabilityRepository;
-import com.academy.repositories.MemberRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class AvailabilityService {
@@ -31,7 +24,6 @@ public class AvailabilityService {
     private final AvailabilityRepository availabilityRepository;
     private final MemberService memberService;
     private final AvailabilityMapper availabilityMapper;
-    private final ServiceProviderService serviceProviderService;
     private final AuthenticationFacade authenticationFacade;
     private final MemberAvailabilityRepository memberAvailabilityRepository;
 
@@ -39,23 +31,18 @@ public class AvailabilityService {
     public AvailabilityService(
             AvailabilityRepository availabilityRepository,
             MemberService memberService,
-            AvailabilityMapper availabilityMapper, ServiceProviderService serviceProviderService,
+            AvailabilityMapper availabilityMapper,
             AuthenticationFacade authenticationFacade,
             MemberAvailabilityRepository memberAvailabilityRepository) {
         this.availabilityRepository = availabilityRepository;
         this.memberService = memberService;
         this.availabilityMapper = availabilityMapper;
-        this.serviceProviderService = serviceProviderService;
         this.authenticationFacade = authenticationFacade;
         this.memberAvailabilityRepository = memberAvailabilityRepository;
     }
 
     public List<Availability> getAllAvailabilitiesEntity() {
         return availabilityRepository.findAll();
-    }
-    private Member validateMemberExists(Long memberId) {
-        return memberService.findbyId(memberId)
-                .orElseThrow(() -> new EntityNotFoundException(Member.class, memberId));
     }
 
     @Transactional

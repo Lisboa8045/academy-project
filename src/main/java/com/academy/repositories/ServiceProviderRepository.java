@@ -41,6 +41,8 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
 
     boolean existsByServiceIdAndPermissions_Permission(Long id, ProviderPermissionEnum providerPermissionEnum);
 
+    boolean existsByProvider_UsernameAndService_IdAndPermissions_Permission(String username, Long serviceId, ProviderPermissionEnum permission);
+    
     @Query("SELECT AVG(sp.rating) FROM ServiceProvider sp WHERE sp.service.id = :serviceId")
     Double findAverageRatingByService_Id(@Param("serviceId") Long serviceId);
 
