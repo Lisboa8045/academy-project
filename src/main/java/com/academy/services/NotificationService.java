@@ -7,6 +7,7 @@ import com.academy.models.notification.Notification;
 import com.academy.repositories.NotificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -43,11 +44,13 @@ public class NotificationService {
         return this.notificationRepository.findByMemberAndSeen(member, false);
     }
 
+    @Transactional
     public void createNotification(Notification notification) {
         Notification createdNotification = this.notificationRepository.save(notification);
         notificationWebSocketService.sendNotification(createdNotification.getMember().getId(), notificationMapper.toDTO(createdNotification));
     }
 
+    @Transactional
     public void markNotificationAsSeen(long notificationId) {
         Notification notification = this.notificationRepository.findById(notificationId).orElseThrow(() -> new EntityNotFoundException(Notification.class, notificationId));
         notification.setSeen(true);

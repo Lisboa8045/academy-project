@@ -8,6 +8,7 @@ import com.academy.dtos.member.MemberResponseDTO;
 import com.academy.services.MemberService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -37,12 +38,14 @@ public class MemberController {
         this.jwtCookieUtil = jwtCookieUtil;
     }
 
+    @PreAuthorize("hasRole('ADMIN') or @memberSecurity.isSelf(#id, authentication.name)")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMember(@PathVariable Long id) {
         memberService.deleteMember(id);
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasRole('ADMIN') or @memberSecurity.isSelf(#id, authentication.name)")
     @PutMapping("/{id}")
     public ResponseEntity<MemberResponseDTO> editMember(@PathVariable long id, @RequestBody MemberRequestDTO memberRequestDTO, HttpServletResponse response){
         MemberResponseDTO memberResponseDTO = memberService.editMember(id, memberRequestDTO);
@@ -54,9 +57,11 @@ public class MemberController {
         return ResponseEntity.ok(memberResponseDTO);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public List<MemberResponseDTO> getAllMembers() {
-        return memberService.getAllMembers();
+    public ResponseEntity<List<MemberResponseDTO>> getAllMembers() {
+        List<MemberResponseDTO> members = memberService.getAllMembers();
+        return ResponseEntity.ok(members);
     }
 
     @GetMapping("/{id}")

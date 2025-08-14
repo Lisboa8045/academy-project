@@ -11,7 +11,6 @@ import com.academy.exceptions.AuthenticationException;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.models.ServiceType;
 import com.academy.models.Tag;
-import com.academy.models.appointment.Appointment;
 import com.academy.models.member.Member;
 import com.academy.models.notification.Notification;
 import com.academy.models.notification.NotificationTypeEnum;
@@ -30,6 +29,7 @@ import org.hibernate.collection.spi.PersistentBag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -93,7 +93,6 @@ public class ServiceService {
         return savedService;
     }
 
-    // Create
     @Transactional
     public ServiceResponseDTO create(ServiceRequestDTO dto) throws AuthenticationException, BadRequestException {
         Service service = createToEntity(dto);
@@ -101,7 +100,6 @@ public class ServiceService {
         return serviceMapper.toDto(service, getPermissionsByProviderUsernameAndServiceId(username, service.getId()));
     }
 
-    // Update
     @Transactional
     public ServiceResponseDTO update(Long id, ServiceRequestDTO dto) throws AuthenticationException{
         String username = authenticationFacade.getUsername();
@@ -118,7 +116,6 @@ public class ServiceService {
         return serviceMapper.toDto(existing, permissions);
     }
 
-    // Read all
     public List<ServiceResponseDTO> getAllEnabled() {
         String username =  authenticationFacade.getUsername();
         return serviceRepository.findAll()
@@ -130,7 +127,6 @@ public class ServiceService {
                 .collect(Collectors.toList());
     }
 
-    // Read all
     public List<ServiceResponseDTO> getAllDisabled() {
         String username =  authenticationFacade.getUsername();
         return serviceRepository.findAll()
@@ -142,14 +138,22 @@ public class ServiceService {
                 .collect(Collectors.toList());
     }
 
-    // Read one
     public ServiceResponseDTO getById(Long id) {
         Service service = getServiceEntityById(id);
-        String username =  authenticationFacade.getUsername();
+        String username = authenticationFacade.getUsername();
+
+        if (!service.isEnabled()) {
+            if (username == null) {
+                throw new AccessDeniedException("This service is not currently available for the public.");
+            }
+            Member member = memberService.getMemberByUsername(username);
+            if (!"ADMIN".equals(member.getRole().getName())) {
+                throw new AccessDeniedException("This service is not currently available for the public.");
+            }
+        }
         return serviceMapper.toDto(service, getPermissionsByProviderUsernameAndServiceId(username, service.getId()));
     }
 
-    // Delete
     @Transactional
     public void delete(Long id) {
         String username =  authenticationFacade.getUsername();
@@ -203,15 +207,18 @@ public class ServiceService {
             return Collections.emptyList();
         return serviceProviderService.getPermissionsByProviderUsernameAndServiceId(username, serviceId);
     }
+
     public List<ProviderPermissionEnum> getPermissionsByProviderIdAndServiceId(Long providerId, Long serviceId){
         return hasServiceProvider(providerId, serviceId) ?
                 serviceProviderService.getPermissionsByProviderIdAndServiceId(providerId, serviceId)
                 :
                 Collections.emptyList();
     }
+
     private boolean hasServiceProvider(String username, Long serviceId){
         return serviceProviderService.existsByServiceIdAndProviderUsername(serviceId, username);
     }
+
     private boolean hasServiceProvider(Long id, Long  serviceId){
         return serviceProviderService.existsByServiceIdAndProviderId(id, serviceId);
     }
@@ -222,6 +229,13 @@ public class ServiceService {
 
         Specification<Service> spec = Specification.where(null); // start with no specifications, add each specification after if not null/empty
 
+        boolean isAdmin = false;
+
+        if (username != null && !"anonymousUser".equals(username)) {
+            Member member = memberService.getMemberByUsername(username);
+            isAdmin = "ADMIN".equals(member.getRole().getName());
+        }
+
         spec = addIfPresent(spec, name != null && !name.isBlank(), () -> ServiceSpecifications.nameOrTagMatches(name));
         spec = addIfPresent(spec, minPrice != null, () -> ServiceSpecifications.hasPriceGreaterThanOrEqual(minPrice));
         spec = addIfPresent(spec, maxPrice != null, () -> ServiceSpecifications.hasPriceLessThanOrEqual(maxPrice));
@@ -229,14 +243,19 @@ public class ServiceService {
         spec = addIfPresent(spec, maxDuration != null, () -> ServiceSpecifications.hasDurationLessThanOrEqual(maxDuration));
         spec = addIfPresent(spec, negotiable != null, () -> ServiceSpecifications.canNegotiate(negotiable));
         spec = addIfPresent(spec, serviceTypeName != null, () -> ServiceSpecifications.hasServiceType(serviceTypeName));
-        spec = addIfPresent(spec, enabled != null, () -> ServiceSpecifications.isEnabled(enabled));
-        spec = addIfPresent(spec, enabled != null, () -> ServiceSpecifications.statusMatches(status));
+        spec = addIfPresent(spec, status != null, () -> ServiceSpecifications.statusMatches(status));
+
+        if (isAdmin)
+            spec = addIfPresent(spec, enabled != null, () -> ServiceSpecifications.isEnabled(enabled));
+        else
+            spec = addIfPresent(spec, true, () -> ServiceSpecifications.isEnabled(true));
 
         return serviceRepository.findAll(spec, pageable)
                 .map(service ->  serviceMapper.toDto(service,
                         getPermissionsByProviderUsernameAndServiceId(username, service.getId())
                 ));
     }
+
     private Specification<Service> addIfPresent(Specification<Service> spec, boolean condition, Supplier<Specification<Service>> supplier) {
         return condition ? spec.and(supplier.get()) : spec; // add specification on supplier, if the condition is met
     }
@@ -278,7 +297,7 @@ public class ServiceService {
         boolean isOwnerBeingUpdated = oldPermissions.contains(ProviderPermissionEnum.OWNER);
         checkIfHasPermission(updaterPermissions, ProviderPermissionEnum.UPDATE_PERMISSIONS, "update permissions");
 
-        if(updaterId == memberToBeUpdatedId)
+        if(updaterId.equals(memberToBeUpdatedId))
             throw new BadRequestException("Cannot edit your own permissions");
         if(isOwnerBeingUpdated)
             throw new BadRequestException("Cannot edit owner's permissions");
@@ -290,6 +309,7 @@ public class ServiceService {
         if (!Utils.hasPermission(permissions, permission))
             throw new AuthenticationException("Member doesn't have permission to " + permissionName);
     }
+
     public Service getServiceEntityById(Long id) {
         return serviceRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(Service.class, id));
     }
@@ -333,7 +353,7 @@ public class ServiceService {
                getPermissionsByProviderIdAndServiceId(memberId, service.getId())));
     }
 
-    // este saveImages será para usado depois para o endpoint de criação do serviço
+    @Transactional
     public Service saveImages(Long id, List<ServiceImage> images) {
         serviceRepository.findById(id).map(s -> {
                     s.getImages().clear();
@@ -345,6 +365,14 @@ public class ServiceService {
         return null;
     }
 
+    @Transactional
+    public void disable(Long id) {
+        Service service = serviceRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(Service.class, id));
+        service.setEnabled(false);
+        serviceRepository.save(service);
+    }
+
     public List<AppointmentReviewResponseDTO> getReviewsByServiceId(Long serviceId) {
         Service service = serviceRepository.findById(serviceId)
                 .orElseThrow(() -> new EntityNotFoundException(Service.class, serviceId));
@@ -354,6 +382,8 @@ public class ServiceService {
                 .map(appointmentMapper::toReviewResponseDTO)
                 .toList();
     }
+
+    @Transactional
     public void updateRating(Long id){
         Double rating = serviceProviderRepository.findAverageRatingByService_Id(id);
         System.out.println("Updating rating for service id " + id + " to " + rating);
@@ -367,6 +397,7 @@ public class ServiceService {
         }
     }
 
+    @Transactional
     public void approveService(Long id) {
         Service service = getServiceEntityById(id);
         service.setEnabled(true);
@@ -376,6 +407,7 @@ public class ServiceService {
         sendNotification(service);
     }
 
+    @Transactional
     public void rejectService(Long id){
         Service service = getServiceEntityById(id);
         service.setEnabled(false);
