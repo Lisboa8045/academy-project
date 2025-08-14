@@ -1,11 +1,6 @@
 package com.academy.services;
 
 import com.academy.config.authentication.AuthenticationFacade;
-import com.academy.dtos.appointment.AppointmentCardDTO;
-import com.academy.dtos.appointment.AppointmentMapper;
-import com.academy.dtos.appointment.AppointmentRequestDTO;
-import com.academy.dtos.appointment.AppointmentResponseDTO;
-import com.academy.dtos.appointment.ConfirmAppointmentResponseDTO;
 import com.academy.dtos.appointment.AppointmentCalendarDTO;
 import com.academy.dtos.appointment.AppointmentCardDTO;
 import com.academy.dtos.appointment.AppointmentMapper;
@@ -26,9 +21,6 @@ import com.academy.models.service.service_provider.ProviderPermission;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.repositories.AppointmentRepository;
-import org.springframework.data.domain.Sort;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -188,14 +180,6 @@ public class AppointmentService {
         return appointmentList.stream().map(appointmentMapper::toAppointmentCalendarDTO).toList();
     }
 
-    public List<Appointment> getAppointmentsForProvider(Long providerId) {
-        if (providerId == null) {
-            throw new EntityNotFoundException(Appointment.class, providerId);
-        }
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime end = now.plusDays(slotWindowDays);
-        return appointmentRepository.findByServiceProvider_Provider_IdAndStartDateTimeBetween(providerId, now, end);
-    }
 
     public List<Appointment> getAppointmentsForServiceProvider(Long serviceProviderId) {
         return appointmentRepository.findByServiceProviderId(serviceProviderId).stream().filter(

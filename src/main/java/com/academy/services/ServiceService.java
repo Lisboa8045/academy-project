@@ -19,6 +19,7 @@ import com.academy.models.service.ServiceImage;
 import com.academy.models.service.ServiceStatusEnum;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
+import com.academy.repositories.AppointmentRepository;
 import com.academy.repositories.ServiceProviderRepository;
 import com.academy.repositories.ServiceRepository;
 import com.academy.specifications.ServiceSpecifications;
@@ -49,7 +50,7 @@ public class ServiceService {
     private final TagService tagService;
     private final ServiceTypeService serviceTypeService;
     private final NotificationService notificationService;
-    private final AppointmentService appointmentService;
+    private final AppointmentRepository appointmentRepository;
     private final ServiceProviderRepository serviceProviderRepository;
     private final EmailService emailService;
     private final AppointmentMapper appointmentMapper;
@@ -63,7 +64,7 @@ public class ServiceService {
                           ServiceTypeService serviceTypeService,
                           ServiceProviderRepository serviceProviderRepository,
                           AppointmentMapper appointmentMapper,
-                          AppointmentService appointmentService,
+                          AppointmentRepository appointmentRepository,
                           EmailService emailService,
                           NotificationService notificationService) {
         this.serviceRepository = serviceRepository;
@@ -77,8 +78,7 @@ public class ServiceService {
         this.notificationService = notificationService;
         this.appointmentMapper = appointmentMapper;
         this.serviceProviderRepository = serviceProviderRepository;
-        this.appointmentService = appointmentService;
-
+        this.appointmentRepository = appointmentRepository;
     }
 
     @Transactional
@@ -108,7 +108,7 @@ public class ServiceService {
         String username = authenticationFacade.getUsername();
         Service existing = getServiceEntityById(id);
         if(existing.getDiscount() < dto.discount()) {
-            sendDiscountNotification(existing, id, dto.discount());
+            sendDiscountNotification(existing, dto.discount());
         }
         List<ProviderPermissionEnum> permissions = getPermissionsByProviderUsernameAndServiceId(username, existing.getId());
         checkIfHasPermission(permissions,ProviderPermissionEnum.UPDATE, "update service");
@@ -121,12 +121,12 @@ public class ServiceService {
         return serviceMapper.toDto(existing, permissions);
     }
 
-    private void sendDiscountNotification(Service service, Long id, int newDiscount) {
+    private void sendDiscountNotification(Service service, int newDiscount) {
 
         List<ServiceProvider> serviceProviderList = serviceProviderRepository.findAllByServiceId(service.getId());
 
         for (ServiceProvider serviceProvider : serviceProviderList) {
-            List<Member> clients = appointmentService.getAllMembersThatHaveAppointmentsInAServiceProvider(serviceProvider.getId());
+            List<Member> clients = appointmentRepository.findDistinctMembersByServiceProviderId(serviceProvider.getId());
 
             for(Member client : clients) {
                 Notification notification = new Notification();

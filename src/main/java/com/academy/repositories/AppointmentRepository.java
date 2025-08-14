@@ -2,13 +2,8 @@ package com.academy.repositories;
 
 import com.academy.models.appointment.Appointment;
 import com.academy.models.appointment.AppointmentStatus;
-import jakarta.transaction.Transactional;
-import java.time.LocalDateTime;
-import java.util.List;
-import com.academy.models.appointment.AppointmentStatus;
 import com.academy.models.member.Member;
 import jakarta.transaction.Transactional;
-import com.academy.services.AppointmentService;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
