@@ -113,14 +113,6 @@ public class AppointmentController {
     public ResponseEntity<List<AppointmentCalendarDTO>> getAppointmentsCalendarForAuthenticatedServiceProvider(){
         return ResponseEntity.ok(appointmentService.getAppointmentsForAuthenticatedServiceProviderCalendar());
     }
-    
-/*
-    @GetMapping("/provider")
-    public ResponseEntity<List<AppointmentResponseDTO>> getAppointmentsForAuthenticatedProvider(){
-        return ResponseEntity.ok(appointmentService.getAppointmentsForAuthenticatedProvider());
-    }
-
- */
 
     @GetMapping("/services/{serviceId}/free-slots")
     public ResponseEntity<List<SlotDTO>> getFreeSlots(@PathVariable Long serviceId) {

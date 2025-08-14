@@ -128,8 +128,6 @@ public class SchedulingService {
         return freeSlots;
     }
 
-
-
     public static List<SlotDTO> generateCompleteSlots(Long providerId, String providerName,
                                                       LocalDateTime start, LocalDateTime end, int slotDurationMinutes) {
         if (start == null || end == null)

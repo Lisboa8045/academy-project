@@ -41,18 +41,21 @@ public class GlobalConfigurationTests {
     void setUp() {
         this.globalConfigurationRepository.deleteAll();
         GlobalConfiguration config = new GlobalConfiguration();
+        config.setConfigName("configName1");
         config.setConfigKey("configKey_string");
         config.setConfigValue("configValue");
         config.setConfigType(GlobalConfigurationTypeEnum.STRING);
         this.globalConfigurationRepository.save(config);
 
         config = new GlobalConfiguration();
+        config.setConfigName("configName2");
         config.setConfigKey("configKey_int");
         config.setConfigValue("123");
         config.setConfigType(GlobalConfigurationTypeEnum.INT);
         this.globalConfigurationRepository.save(config);
 
         config = new GlobalConfiguration();
+        config.setConfigName("configName3");
         config.setConfigKey("configKey_boolean");
         config.setConfigValue("true");
         config.setConfigType(GlobalConfigurationTypeEnum.BOOLEAN);

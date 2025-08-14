@@ -38,9 +38,7 @@ public class ServiceProviderController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ServiceProviderResponseDTO> getServiceProviderById(@PathVariable long id) {
-        return serviceProviderService.getServiceProviderById(id)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
+        return ResponseEntity.ok(serviceProviderService.getServiceProviderById(id));
     }
 
     @GetMapping("/services/{serviceId}")
@@ -71,7 +69,7 @@ public class ServiceProviderController {
 
     @PreAuthorize("hasRole('ADMIN') or @serviceProviderSecurity.isSelf(#id, authentication.name)")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteServiceProvider(@PathVariable long id) {
+    public ResponseEntity<Void> deleteServiceProvider(@PathVariable long id) throws BadRequestException {
         serviceProviderService.deleteServiceProvider(id);
         return ResponseEntity.noContent().build();
     }

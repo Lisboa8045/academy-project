@@ -66,10 +66,8 @@ public class ServiceProviderService {
                 .toList();
     }
 
-    //TODO refactor deste método para dar return de um não Optional
-    public Optional<ServiceProviderResponseDTO> getServiceProviderById(long id) {
-        return serviceProviderRepository.findById(id)
-                .map(serviceProviderMapper::toResponseDTO);
+    public ServiceProviderResponseDTO getServiceProviderById(long id) {
+        return serviceProviderMapper.toResponseDTO(getServiceProviderEntityById(id));
     }
 
     public ServiceProvider getServiceProviderByUsername(String username){
@@ -123,6 +121,7 @@ public class ServiceProviderService {
         ServiceProvider serviceProviderWithPermissions = providerPermissionService.createPermissionsViaList(dto.permissions(),saved);
         return serviceProviderRepository.save(serviceProviderWithPermissions);
     }
+
     private boolean checkIfHasPermissionToAddServiceProvider(Member loggedMember, com.academy.models.service.Service service, boolean isServiceCreation){
         if(isServiceCreation)
             return true;
@@ -179,6 +178,7 @@ public class ServiceProviderService {
         ServiceProvider serviceProvider= getServiceProviderByProviderUsernameAndServiceID(username, serviceId);
         return getPermissions(serviceProvider.getId());
     }
+
     public List<ProviderPermissionEnum> getPermissionsByProviderIdAndServiceId(Long id, Long serviceId){
         ServiceProvider serviceProvider= getServiceProviderByProviderIdAndServiceID(id, serviceId);
         return getPermissions(serviceProvider.getId());
@@ -192,6 +192,7 @@ public class ServiceProviderService {
                     " not found for user " + username + " and serviceId " + serviceId);
         return optionalServiceProvider.get();
     }
+
     public ServiceProvider getServiceProviderByProviderIdAndServiceID(Long id, Long serviceId) {
         Optional<ServiceProvider> optionalServiceProvider =
                 serviceProviderRepository.findByProviderIdAndServiceId(id, serviceId);
@@ -217,6 +218,7 @@ public class ServiceProviderService {
     public boolean existsByServiceIdAndProviderUsername(Long serviceId, String username) {
         return serviceProviderRepository.existsByServiceIdAndProviderUsername(serviceId, username);
     }
+
     public boolean existsByServiceIdAndProviderId(Long serviceId, Long id) {
         return serviceProviderRepository.existsByServiceIdAndProviderId(serviceId, id);
     }

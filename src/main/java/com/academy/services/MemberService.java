@@ -1,5 +1,6 @@
 package com.academy.services;
 
+import com.academy.config.AppProperties;
 import com.academy.config.TestTokenStorage;
 import com.academy.config.authentication.AuthenticationFacade;
 import com.academy.config.authentication.JwtCookieUtil;
@@ -66,7 +67,7 @@ public class MemberService {
     private final AuthenticationFacade authenticationFacade;
     private final JwtCookieUtil jwtCookieUtil;
     private final ServiceProviderService serviceProviderService;
-    private EmailConfirmationTokenService emailConfirmationTokenService;
+    private final EmailConfirmationTokenService emailConfirmationTokenService;
     private final ServiceProviderRepository serviceProviderRepository;
     private final AppointmentRepository appointmentRepository;
     private final AppointmentMapper appointmentMapper;
@@ -138,7 +139,6 @@ public class MemberService {
         return createMember(request, optionalRole.get()).getId();
     }
 
-    @Transactional
     private Member createMember(RegisterRequestDto request, Role role){
         Member member = memberMapper.toMember(request);
         member.setPassword(passwordEncoder.encode(request.password()));
@@ -213,7 +213,6 @@ public class MemberService {
         emailConfirmationTokenService.deleteAllConfirmationTokensForMember(member);
     }
 
-
     public Member verifyPasswordResetToken(String passwordResetToken) {
         Member member = memberRepository.findAll().stream()
                 .filter(m -> m.getPasswordResetToken() != null &&
@@ -250,6 +249,7 @@ public class MemberService {
 
         return optionalMember.get();
     }
+
     public LoginResponseDto login(LoginRequestDto request, HttpServletResponse response) {
             Member member = tryToAuthenticateMember(request.login(), request.password());
 
@@ -294,10 +294,6 @@ public class MemberService {
 
     public List<Member> searchByUsernameAndRole(String username, String roleName) {
         return memberRepository.searchMemberByUsernameContainsIgnoreCaseAndRoleName(username, roleName);
-    }
-
-    public boolean existsById(Long memberId) {
-        return memberRepository.existsById(memberId);
     }
 
     public Optional<Member> findbyId(long memberId) {
@@ -451,7 +447,6 @@ public class MemberService {
         );
     }
 
-    @Transactional
     private void validateIfReachedMaxConfirmationTokens(Member member) {
         List<EmailConfirmationToken> validTokens = emailConfirmationTokenService.getValidTokensByMember(member);
         int maxValidTokens = Integer.parseInt(globalConfigurationService.getConfigValue("maximum_valid_confirmation_tokens"));
@@ -460,6 +455,7 @@ public class MemberService {
             throw new RuntimeException("Maximum number of confirmation emails reached ");
     }
 
+    @Transactional
     public void updateMemberRating(Long memberId) {
         Double rating = serviceProviderRepository.findAverageRatingByMemberId(memberId);
         System.out.println("Updating Member rating with" + memberId + " to " +rating);
