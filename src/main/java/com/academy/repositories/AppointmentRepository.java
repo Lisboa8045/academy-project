@@ -1,15 +1,17 @@
 package com.academy.repositories;
-import com.academy.models.appointment.Appointment;
-import java.time.LocalDateTime;
-import java.util.List;
 
+import com.academy.models.appointment.Appointment;
 import com.academy.models.appointment.AppointmentStatus;
+import com.academy.models.member.Member;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
     List<Appointment> findAllByServiceProviderId(Long serviceProviderProviderId);
@@ -35,4 +37,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             LocalDateTime in30Days);
 
     List<Appointment> findByServiceProviderId(Long serviceProviderId);
+
+        @Query("SELECT DISTINCT a.member " +
+                "FROM Appointment a " +
+                "WHERE a.serviceProvider.id = :serviceProviderId")
+        List<Member> findDistinctMembersByServiceProviderId(Long serviceProviderId);
 }

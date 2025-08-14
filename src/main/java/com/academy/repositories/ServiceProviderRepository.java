@@ -1,6 +1,5 @@
 package com.academy.repositories;
 
-import com.academy.models.member.Member;
 import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
@@ -21,8 +20,8 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
     @Query("SELECT sp.provider.id FROM ServiceProvider sp WHERE sp.service.id = :serviceId")
     List<Long> findMemberIdsByServiceId(Long serviceId);
 
-    @Query("SELECT sp.provider FROM ServiceProvider sp WHERE sp.service.id = :serviceId")
-    List<Member> findAllByServiceId(@Param("serviceId") Long serviceId);
+    @Query("SELECT sp FROM ServiceProvider sp WHERE sp.service.id = :serviceId")
+    List<ServiceProvider> findAllByServiceId(@Param("serviceId") Long serviceId);
 
     Optional<ServiceProvider> findByProviderUsernameAndServiceId(String username, Long serviceId);
 

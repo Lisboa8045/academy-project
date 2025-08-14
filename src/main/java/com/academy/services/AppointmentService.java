@@ -293,4 +293,8 @@ public class AppointmentService {
         return dateTime.format(formatter);
 
     }
+
+    public List<Member> getAllMembersThatHaveAppointmentsInAServiceProvider(Long serviceProviderId){
+        return appointmentRepository.findDistinctMembersByServiceProviderId(serviceProviderId);
+    }
 }

@@ -45,6 +45,7 @@ public class ServiceService {
     private final TagService tagService;
     private final ServiceTypeService serviceTypeService;
     private final NotificationService notificationService;
+    private final AppointmentService appointmentService;
     private final ServiceProviderRepository serviceProviderRepository;
 
     public ServiceService(ServiceRepository serviceRepository,
@@ -54,7 +55,9 @@ public class ServiceService {
                           MemberService memberService,
                           TagService tagService,
                           ServiceTypeService serviceTypeService,
-                          NotificationService notificationService, ServiceProviderRepository serviceProviderRepository) {
+                          NotificationService notificationService,
+                          ServiceProviderRepository serviceProviderRepository,
+                          AppointmentService appointmentService) {
         this.serviceRepository = serviceRepository;
         this.serviceMapper = serviceMapper;
         this.serviceProviderService = serviceProviderService;
@@ -64,6 +67,7 @@ public class ServiceService {
         this.serviceTypeService = serviceTypeService;
         this.notificationService = notificationService;
         this.serviceProviderRepository = serviceProviderRepository;
+        this.appointmentService = appointmentService;
     }
 
     @Transactional
@@ -108,16 +112,21 @@ public class ServiceService {
 
     private void sendDiscountNotification(Service service, Long id, int newDiscount) {
 
-        for (Member member : serviceProviderRepository.findAllByServiceId(id)) {
-            Notification notification = new Notification();
-            notification.setMember(member);
-            notification.setTitle("Service " + service.getName() + "in on Sale!");
-            notification.setNotificationTypeEnum(NotificationTypeEnum.SERVICE_ON_SALE);
-            notification.setBody("Service " + service.getName() + " is " + newDiscount + "% off");
+        List<ServiceProvider> serviceProviderList = serviceProviderRepository.findAllByServiceId(service.getId());
 
-            notificationService.createNotification(notification);
+        for (ServiceProvider serviceProvider : serviceProviderList) {
+            List<Member> clients = appointmentService.getAllMembersThatHaveAppointmentsInAServiceProvider(serviceProvider.getId());
+
+            for(Member client : clients) {
+                Notification notification = new Notification();
+                notification.setMember(client);
+                notification.setTitle("Service " + service.getName() + "is on Sale!");
+                notification.setNotificationTypeEnum(NotificationTypeEnum.SERVICE_ON_SALE);
+                notification.setBody("Service " + service.getName() + " is " + newDiscount + "% off");
+
+                notificationService.createNotification(notification);
+            }
         }
-
     }
 
     // Read all
