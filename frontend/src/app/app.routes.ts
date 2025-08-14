@@ -7,14 +7,16 @@ import { SearchServicesComponent} from "./service/search/search-services.compone
 import { ScheduleComponent } from './schedule/schedule.component';
 import { LandingPageComponent } from './landing-page/landing-page.component';
 import {MyServicesComponent} from './service/my-services/my-services.component';
-import { ResendEmailConfirmationComponent } from "./auth/resend-email/resend-email-confirmation.component";
-import { ConfirmEmailComponent } from './auth/confirm-email/confirm-email.component';
-import { ServiceDetailsComponent } from './service/service-details/service-details.component';
-import { AboutComponent } from './info-pages/about/about.component';
-import { TermsComponent } from './info-pages/terms/terms.component';
-import { PrivacyComponent } from './info-pages/privacy/privacy.component';
-import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.component';
-import { ResetPasswordComponent } from './auth/reset-password/reset-password.component';
+import {EditServiceComponent} from './back-office/edit-service/edit-service.component';
+import {CreateServiceComponent} from './back-office/create-service/create-service.component';
+import {ResendEmailConfirmationComponent} from "./auth/resend-email/resend-email-confirmation.component";
+import {ConfirmEmailComponent} from './auth/confirm-email/confirm-email.component';
+import {ServiceDetailsComponent} from './service/service-details/service-details.component';
+import {AboutComponent} from './info-pages/about/about.component';
+import {TermsComponent} from './info-pages/terms/terms.component';
+import {PrivacyComponent} from './info-pages/privacy/privacy.component';
+import {ForgotPasswordComponent} from './auth/forgot-password/forgot-password.component';
+import {ResetPasswordComponent} from './auth/reset-password/reset-password.component';
 import {ConfirmAppointmentComponent} from './confirm-appointment/confirm-appointment.component';
 import {GlobalConfigurationEditComponent} from './global-configuration/global-configuration-edit.component';
 import { PermissionGuard } from './auth/permission.guard';
@@ -23,6 +25,7 @@ import {ServiceAdminApprovalComponent} from './service/admin-approval/service-ad
 import {RevertDeleteAccountComponent} from './auth/revert-delete-account/revert-delete-account.component';
 import {ResendAccountDeletionEmailComponent} from './auth/resend-account-deletion-email/resend-account-deletion-email.component';
 import {NotFoundComponent} from './not-found.component';
+import {CalendarComponent} from './availability-calendar/availability-calendar.component';
 
 export const routes: Routes = [
   { path: '', component: LandingPageComponent},
@@ -45,7 +48,12 @@ export const routes: Routes = [
   { path: 'config', component: GlobalConfigurationEditComponent },
   { path: 'not-found', component: NotFoundComponent},
   { path: 'auth/confirm-prompt', component: ConfirmEmailPromptComponent },
-  { path: 'administrate-services', component: ServiceAdminApprovalComponent },
+  {
+    path: 'administrate-services',
+    component: ServiceAdminApprovalComponent,
+    canActivate: [PermissionGuard],
+    data: { roles: ['ADMIN']}
+  },
   {
     path: 'profile',
     component: ProfileComponent,
@@ -84,10 +92,22 @@ export const routes: Routes = [
     canActivate: [PermissionGuard],
     data: { roles: ['WORKER', 'ADMIN']}
   },
-  { path: 'service-management',
-    component: LandingPageComponent, //TODO
+  {
+    path: 'backoffice/create-service',
+    component: CreateServiceComponent,
+    canActivate: [PermissionGuard],
+    data: {roles: ['WORKER', 'ADMIN']}
+  },
+  { path: 'backoffice/services/:id',
+    component: EditServiceComponent,
     canActivate: [PermissionGuard],
     data: { roles: ['WORKER', 'ADMIN']}
+  },
+  {
+    path: 'my-calendar',
+    component: CalendarComponent,
+    canActivate: [PermissionGuard],
+    data: {roles: ['WORKER', 'ADMIN']}
   },
   { path: '**', redirectTo: '', pathMatch: 'full' }
 ];

@@ -29,4 +29,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Query("SELECT s FROM Service s WHERE s.owner.id = :memberId")
     List<Service> findOwnerServices(@Param("memberId") Long memberId);
+
+    List<Member> searchMemberByUsernameContainsIgnoreCaseAndRoleName(String username, String roleName);
 }

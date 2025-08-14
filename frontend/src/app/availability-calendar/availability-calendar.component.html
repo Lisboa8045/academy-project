@@ -1,0 +1,62 @@
+<div class="content card">
+    <div class="content-header">
+        <h2>
+            My calendar
+        </h2>
+        @if (canSave()) {
+            <button (click)="saveAvailability()" class="save-button">
+                💾 Save Availability
+            </button>
+        }
+    </div>
+    <div class="calendar-container">
+        <full-calendar #calendar [options]="calendarOptions"></full-calendar>
+    </div>
+
+    <div *ngIf="showRepeatModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Repeat availability from {{ selectedRepeatDate }}</h3>
+            <form [formGroup]="replicateForm" (ngSubmit)="submitModalRepeat()">
+                <label>
+                    Repeat from:
+                    <input type="date" formControlName="startDate" [min]="todayString" required/>
+                </label>
+                <label>
+                    To:
+                    <input type="date" formControlName="endDate"  [min]="replicateForm.value.startDate || todayString" required/>
+                </label>
+                <ng-select
+                        [items]="weekDays"
+                        bindLabel="label"
+                        bindValue="value"
+                        [multiple]="true"
+                        formControlName="repeatDays"
+                        placeholder="Repeat on...">
+                </ng-select>
+                <div class="modal-actions">
+                    <button type="submit" [disabled]="replicateForm.invalid">Confirm</button>
+                    <button type="button" (click)="closeRepeatModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div *ngIf="conflictModalVisible" class="modal-overlay">
+        <div class="modal-content">
+            <h3>⚠️ Conflicts Detected</h3>
+            <ul>
+                <li *ngFor="let msg of conflictMessages" style="white-space: pre-line;">
+                    {{ msg }}
+                </li>
+            </ul>
+            <div class="modal-actions">
+                <button (click)="closeConflictsModal()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<app-appointment-modal
+  *ngIf="showAppointmentModal && selectedAppointment"
+  [appointment]="selectedAppointment"
+  [isCalendarContext]="true"
+  (close)="refetchAppointments()"
+></app-appointment-modal>

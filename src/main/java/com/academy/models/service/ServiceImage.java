@@ -14,7 +14,7 @@ import lombok.Setter;
 @Table(name="service_images")
 @Getter
 @Setter
-public class ServiceImages extends BaseEntity {
+public class ServiceImage extends BaseEntity {
 
 
     @Column(name="image")

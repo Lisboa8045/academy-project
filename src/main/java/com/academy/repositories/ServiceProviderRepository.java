@@ -1,6 +1,5 @@
 package com.academy.repositories;
 
-import com.academy.models.service.Service;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,10 +19,15 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
 
     @Query("SELECT sp.provider.id FROM ServiceProvider sp WHERE sp.service.id = :serviceId")
     List<Long> findMemberIdsByServiceId(Long serviceId);
+
+    @Query("SELECT sp FROM ServiceProvider sp JOIN FETCH sp.service s " +
+            "WHERE s.owner.id = :ownerId")
+    List<ServiceProvider> findAllByServiceOwnerId(Long ownerId);
     Optional<ServiceProvider> findByProviderUsernameAndServiceId(String username, Long serviceId);
 
     Optional<ServiceProvider> findByProviderIdAndServiceId(Long id, Long serviceId);
-    List<ServiceProvider> service(Service service);
+
+    List<ServiceProvider> findByServiceId(Long serviceId);
 
     boolean existsByServiceId(Long serviceId);
 
