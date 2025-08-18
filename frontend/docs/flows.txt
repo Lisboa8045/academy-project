@@ -1,0 +1,54 @@
+DOCUMENT: Flows Reference Guide
+This document describes user flows in the [Application Name] service marketplace web application.
+A flow is a series of steps the user follows to complete a task.
+It is intended as a reference for support and guidance systems, such as chatbots, to help users complete tasks successfully.
+Each flow entry includes:
+- Purpose: The goal of the flow
+- Starting Point: Where the flow begins in the application
+- Steps: Ordered actions the user needs to take, described clearly and concisely
+- Notes: Optional details, rules, conditions, or restrictions
+
+The descriptions are factual and reflect the intended functionality of the application.
+
+Flow: Resetting a Forgotten Password
+Purpose:
+- Help a user regain access to their account when they have forgotten their password.
+Starting Point:
+- Authentication page (Login form).
+Steps:
+1. Click "Forgot Password?" link.
+2. Enter the email associated with the account.
+3. Click "Send Reset Link".
+4. Open the received email and click the reset link.
+5. Enter and confirm a new password.
+6. Click "Reset Password" to complete the process.
+Notes:
+- The "Send Reset Link" message does not reveal whether the email exists in the system.
+
+Flow: Upgrading a Client to Worker Role
+Purpose:
+- Allow a registered client to become a worker and offer services.
+Starting Point:
+- User Profile page (own profile).
+Steps:
+1. Navigate to own User Profile page via header profile button.
+2. Click the "Upgrade Role" button.
+3. Confirm the upgrade.
+Notes:
+- Upgrading grants access to creating, working for, and managing services.
+
+Flow: Searching and Booking a Service
+Purpose:
+- Let a client search for and schedule an appointment with a service provider.
+Starting Point:
+- Home page or Search Services page.
+Steps:
+1. Navigate to the Search Services page (via header search bar, category click, or home search bar).
+2. Apply filters or search terms to find the desired service.
+3. Click on a service to open its Service Details page.
+4. Click the "Schedule Appointment" button.
+5. Select an available provider, date and time slot.
+6. Confirm the appointment.
+Notes:
+- Client must be logged in to complete the booking.
+- If not logged in, user will be redirected to Authentication page.

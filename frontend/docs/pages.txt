@@ -1,0 +1,237 @@
+DOCUMENT: Pages Reference Guide
+This document describes every page in the AcademyProject service marketplace web application.
+It is intended as a reference for support and guidance systems, such as chatbots, to help users navigate the application.
+Each page entry includes:
+- Purpose: Why this page exists
+- Location/Access: How the user can get to this page
+- Key Elements: Important UI components or information shown on the page
+- Possible Actions: Actions the user can take on this page
+- Notes: Optional details, rules, conditions, or restrictions
+
+The descriptions are factual and reflect the intended functionality of the application.
+
+Page: Home
+Purpose:
+- Display available service categories
+- Highlight the top 10 most popular services.
+- Search for services directly.
+Location/Access:
+- First page shown to all users when accessing the application.
+Key Elements:
+- Service categories
+- Top 10 services section
+- Search bar
+Possible Actions:
+- Click a listed service to navigate to its details page
+- Search for services using the search bar (navigates to Search Services page)
+- Click a category to navigate to Search Services page (auto-filters by category)
+
+Page: Authentication
+Purpose:
+- Authenticate the user 
+- Create an account
+Location/Access:
+- Accessible from the Login button in the header (see Global Feature: Header).
+Key Elements:
+- Login form with email/password inputs
+- Signup form with email/username/password/confirm password inputs
+- Forgot Password link
+- Create Account / Login button to submit the form
+- Sign up / Login button below the form (changes the displayed form type from login to register and vice versa)
+- Terms and Conditions checkbox and link
+- Privacy Policy checkbox and link
+Possible Actions:
+- Submit login form to sign in
+- Submit registration form to create an account
+- Navigate to the Forgot Password page
+- Navigate to the Terms and Conditions page
+- Navigate to the Privacy Policy page
+Notes:
+- Passwords are hidden by default, user can click on the eye in the input box to show them
+
+Page: Terms and Conditions
+Purpose:
+- Display the app's Terms and Conditions
+Location/Access:
+- Link on the register account checkbox
+- Accessible from the footer (see Global Feature: Footer)
+Key Elements:
+- List of every Terms the user has to agree to
+Possible Actions:
+- View the page contents
+
+Page: Privacy Policy
+Purpose:
+- Display the app's Privacy Policy
+Location/Access:
+- Link on the register account checkbox
+- Accessible from the footer (see Global Feature: Footer)
+Key Elements:
+- Privacy Policy that the user has to agree to
+Possible Actions:
+- View the page contents
+
+Page: About Us
+Purpose:
+- Display information about the app and its developers
+Location/Access:
+- Accessible from the footer (see Global Feature: Footer)
+Key Elements:
+- Brief overview of the application's goal
+- List of developers and links to their github pages
+Possible Actions:
+- Click a developer’s avatar to navigate to their GitHub profile
+
+Page: Unauthorized
+Purpose:
+- Display a warning/error message saying the user is unauthorized to access the resource
+Location/Access:
+- None, only if changing URL to access something the user shouldn't
+Key Elements:
+- Error message warning about the 403 Error
+Possible Actions:
+- View the page contents
+
+Page: Search Services
+Purpose:
+- Search for services listed on the application
+Location/Access:
+- Search bar located on the home page
+- Search bar located on the header (see Global Feature: Header), if not on home page
+Key Elements:
+- Sorting option
+- Items per page option
+- List of filters to search by (min price, max price, min duration (minutes), max duration (minutes), Service Category
+- List of services (showing their image, discount, price, duration, and service category)
+- Pagination bar at the bottom
+Possible Actions:
+- Type values into filters (min price, max price, min duration, max duration)
+- Select a service category to filter results
+- Select items per page or sorting option
+- Use pagination bar to change the displayed page (via previous/next or direct number selection)
+- Navigate to the service details page by clicking on a shown service
+
+Page: Service Details
+Purpose:
+- Show everything relevant to a client about a Service
+Location/Access:
+- Clicking on a service card from the search services page
+- Clicking on a service card from the home page
+- Clicking on a service card from a user profile's My Services tab
+Key Elements:
+- List of service's images
+- Service's title, category, tags, duration, price, discount
+- Service description
+- List of reviews
+- Button to schedule an appointment
+Possible Actions:
+- Click the schedule appointment button to navigate to the Scheduling page
+- Click arrows or thumbnails to browse service images
+- Click a reviewer’s name to navigate to their user profile
+
+Page: Not Found
+Purpose:
+- Show an error message when trying to access a resource that does not exist
+Location/Access:
+- Accessing any resource that doesn't exist
+Key Elements:
+- 404 Error message
+Possible Actions:
+- View the page contents
+
+Page: Forgot Password
+Purpose:
+- Let user obtain a link to reset their forgotten password
+Location/Access:
+- Clicking on "Forgot Password?" available on the Login page
+Key Elements:
+- Form to submit an email linked to an account
+- Button to send reset link
+Possible Actions:
+- Enter the account email to receive a password reset link
+- Click the send button to request the reset email
+Notes:
+- Regardless if email exists in database or not, same message appears: "If an account with [email] exists, a reset link was sent.". To prevent database sniffing attacks
+
+Page: Confirm Email Prompt
+Purpose:
+- Inform user that they need to confirm email
+Location/Access:
+- First page the user sees/gets redirected to once creating an account
+Key Elements:
+- Message informing user
+- Button to go back to login page
+Possible Actions:
+- Click the button to navigate to the login page
+
+Page: Resend Email
+Purpose:
+- Inform the user the email was not confirmed yet
+- Allow user to resend the confirmation email
+Location/Access:
+- Attempting to login with an unconfirmed email
+Key Elements:
+- Message informing user of unconfirmed account
+- Message informing user of success/error of verification link resending
+- Button to resend verification link 
+- Button to go back to login page
+Possible Actions:
+- Click the resend button to obtain a new verification link
+- Click the login button to navigate to the login page
+
+Page: Confirm Email
+Purpose:
+- Confirm the user's email and enable access to the application
+Location/Access:
+- Clicking on the link given in the email after registering
+Key Elements:
+- Message informing user of success/error on confirming the email
+- Button to go back to login page
+Possible Actions:
+- Click the login button to navigate to the login page
+
+Page: Reset Password
+Purpose:
+- Let user reset their password
+Location/Access:
+- Clicking on the link given on the email sent by the application, after Forgot Password feature
+Key Elements:
+- New password input
+- Confirm password input
+- Button to reset password
+Possible Actions:
+- Click the reset button to update the password
+Notes:
+- Passwords are hidden by default, user can click on the eye in the input box to show them
+
+Page: User Profile
+Purpose:
+- Show any user's basic profile info
+- Show own user's basic + sensitive profile info
+- Edit a user's own profile
+Location/Access:
+- Accessible from the Profile button in the header (see Global Feature: Header).
+- //TODO how to go to other profiles?
+Key Elements:
+- Display user's basic information (avatar, name, email)
+- If own user, display sensitive information (address, postal code, phone number)
+- If own user, button to edit sensitive information
+- If own user, and only a client, button to upgrade to worker Role, giving access to having/working on services
+- If own user, button to logout
+- Display user's services (owning or working for)
+- Display user's reviews on services they work for
+Possible Actions:
+- Click on the edit button to enable editing own sensitive information
+- Click on the upgrade role button to upgrade own's role from client to worker
+- Click on the logout button to logout
+- Click a service in My Services tab to navigate to its Service Details page
+
+
+
+
+
+
+
+
+
+

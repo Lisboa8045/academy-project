@@ -1,0 +1,43 @@
+DOCUMENT: Features Reference Guide
+This document describes global and specific features of the [Application Name] service marketplace web application.
+It is intended as a reference for support and guidance systems, such as chatbots, to help users understand and use these features.
+Each feature entry includes:
+- Purpose: Why this feature exists
+- Location/Access: Where this feature is available in the application
+- Components: Key elements that make up the feature
+- Possible Actions: Actions the user can perform with this feature
+- Notes: Optional details, rules, conditions, or restrictions
+
+The descriptions are factual and reflect the intended functionality of the application.
+
+Feature: Header (Global)
+Purpose:
+- Provide navigation and quick access to important pages and features across the application.
+Location/Access:
+- Displayed at the top of every page in the application.
+Components:
+- Application logo (clickable, navigates to Home page)
+- Search bar (if not already on Home page)
+- Profile button (visible when logged in, navigates to User Profile page)
+- Login button (visible when logged out)
+- Notifications icon (visible when logged in, shows appointment/service updates, among others)
+Possible Actions:
+- Click the logo to go to the Home page
+- Use the search bar to find services (navigates to Search Services page)
+- Click the profile button to open the User Profile page
+- Click the login button to authenticate
+- Click notifications icon to view latest updates
+Notes:
+- Persistent across all pages.
+
+Feature: Footer (Global)
+Purpose:
+- Provide access to informational and legal pages.
+Location/Access:
+- Displayed at the bottom of every page in the application.
+Components:
+- Links to Terms and Conditions, Privacy Policy, and About Us pages
+Possible Actions:
+- Click any link to navigate to the respective page
+Notes:
+- Persistent across all pages.
