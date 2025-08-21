@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Lazy;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
 public class TagService {
@@ -78,9 +77,11 @@ public class TagService {
         List<Tag> existingTags = tagRepository.findAllByNameIn(tagNames);
         List<String> existingTagNames = existingTags.stream()
                 .map(Tag::getName)
+                .map(String::toLowerCase)
                 .toList();
 
         List<String> newTagNames = tagNames.stream()
+                .map(String::toLowerCase)
                 .filter(name -> !existingTagNames.contains(name))
                 .toList();
         List<Tag> newTags = createTagsFromNames(newTagNames);

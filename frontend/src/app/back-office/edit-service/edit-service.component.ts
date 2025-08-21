@@ -68,7 +68,7 @@ export class EditServiceComponent implements OnInit {
       next: (data: ServiceModel) => {
         this.service = data;
         if (!this.service.permissions.includes(ProviderPermissionEnumModel.READ)) {
-          this.router.navigate(['/unauthorized'])
+          this.router.navigate(['/services', id])
         }
         this.setupServiceForm();
         this.loading.set(false);

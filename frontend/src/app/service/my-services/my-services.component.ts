@@ -1,4 +1,4 @@
-import {Component, computed, effect, Input, OnInit, signal} from '@angular/core';
+import {Component, computed, effect, Input, signal} from '@angular/core';
 import {PagedResponse, ServiceApiService} from '../../shared/service-api.service';
 import {ServiceModel} from '../service.model';
 import {ControlsBarComponent} from '../search/controls-bar/controls-bar.component';
@@ -7,7 +7,7 @@ import {PaginationBarComponent} from '../search/pagination-bar/pagination-bar.co
 import {ServiceListComponent} from '../service-list/service-list.component';
 import {ServiceQuery} from '../../shared/models/service-query.model';
 import {AuthStore} from '../../auth/auth.store';
-import {NgIf, NgTemplateOutlet} from '@angular/common';
+import {NgTemplateOutlet} from '@angular/common';
 import {RouterLink} from '@angular/router';
 
 @Component({
@@ -46,7 +46,11 @@ export class MyServicesComponent{
     fetchServices(query: ServiceQuery){
       this.serviceApiService.getServicesOfMember(query, this.memberId()).subscribe({
         next: (res: PagedResponse) => {
-          this.services.set(res.content);
+          let services = res.content;
+          if (this.memberIdInput) {
+            services = services.filter(service => service.status == 'APPROVED');
+          }
+          this.services.set(services);
           this.totalPages.set(res.totalPages);
           this.currentPage.set(res.number);
           this.loading.set(false);

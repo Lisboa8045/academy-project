@@ -1,3 +1,4 @@
+export type ServiceStatus = 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED';
 
 export interface ServiceModel {
   id: number;
@@ -9,6 +10,7 @@ export interface ServiceModel {
   negotiable: boolean;
   duration: number;
   permissions: string[];
+  status:  ServiceStatus;
   serviceTypeName: string;
   tagNames: string[];
   createdAt: string;
