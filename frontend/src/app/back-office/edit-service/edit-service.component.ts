@@ -127,7 +127,7 @@ export class EditServiceComponent implements OnInit {
   }
 
   addTag(tagName: string) :boolean {
-    const trimmed = tagName.trim();
+    const trimmed = tagName.trim().toLowerCase();
     if (trimmed && !this.tagNames.value.includes(trimmed)) {
       this.tagNames.push(this.fb.control(trimmed));
       return true;
