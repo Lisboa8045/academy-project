@@ -287,7 +287,7 @@ export class EditServiceComponent implements OnInit {
         this.selectedFiles.push(this.blobToFile(blob, 'service_' + this.service!.id + '.png'));
         this.generatingImage.set(false);
       },
-      error: (err) => {
+      error: () => {
         snackBarError(this.snackBar, 'Image generation failed.');
         this.generatingImage.set(false);
       }
