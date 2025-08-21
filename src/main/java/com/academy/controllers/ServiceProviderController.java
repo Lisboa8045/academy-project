@@ -1,5 +1,6 @@
 package com.academy.controllers;
 
+import com.academy.dtos.service_provider.ServiceProviderBubblesResponseDTO;
 import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
 import com.academy.dtos.service_provider.ServiceProviderResponseDTO;
 import com.academy.exceptions.EntityNotFoundException;
@@ -82,6 +83,13 @@ public class ServiceProviderController {
         ServiceProviderResponseDTO serviceProvider = serviceProviderService.getServiceProviderDTOByProviderIdAndServiceID(providerId, serviceId);
 
         return ResponseEntity.ok(serviceProvider);
+    }
+
+    @GetMapping("bubbles/services/{serviceId}")
+    public ResponseEntity<List<ServiceProviderBubblesResponseDTO>> getServiceProvidersByServiceIdForBubble(
+            @PathVariable Long serviceId){
+        List<ServiceProviderBubblesResponseDTO> bubbles = serviceProviderService.getServiceProvidersByServiceIdBubbles(serviceId);
+        return ResponseEntity.ok(bubbles);
     }
 
 }

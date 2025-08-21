@@ -202,6 +202,7 @@ app-service-review {
 }
 
 .price-container {
+  margin-top:-1rem;
   display: flex;
   align-items: first baseline;
   gap: 1rem;
@@ -280,8 +281,8 @@ app-service-review {
 .type-and-duration {
   display: flex;
   align-items: center;
-  gap: 2rem;
-  margin-bottom: 3rem;
+  gap: 5px;
+  margin-top: -2rem;
 }
 
 .type-and-duration h3 {

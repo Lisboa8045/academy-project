@@ -1,6 +1,6 @@
 package com.academy.repositories;
 
-import com.academy.models.service.Service;
+import com.academy.models.member.Member;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -57,4 +57,13 @@ public interface ServiceProviderRepository extends JpaRepository<ServiceProvider
     @Modifying
     @Query("UPDATE ServiceProvider sp SET sp.provider = NULL WHERE sp.provider.id = :memberId")
     void unlinkByMemberId(@Param("memberId") Long memberId);
+
+    @Query("""
+       SELECT sp.provider
+       FROM ServiceProvider sp
+       JOIN sp.permissions p
+       WHERE sp.service.id = :serviceId
+         AND p.permission = :permission
+       """)
+       List<Member> findMembersByServiceId(@Param("serviceId") Long serviceId, @Param("permission") ProviderPermissionEnum permission);
 }

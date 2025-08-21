@@ -5,12 +5,14 @@
     <div class="review-header">
       <div class="reviewer-info">
         <div class="profile-and-name">
-          <img
-            *ngIf="imageUrls[i]; else placeholder"
-            [src]="imageUrls[i]"
-            alt="🧑"
-            class="profile-picture"
-          />
+          <a [routerLink]="'/profile/' + review.memberId">
+            <img
+              *ngIf="imageUrls[i]; else placeholder"
+              [src]="imageUrls[i]"
+              alt="🧑"
+              class="profile-picture"
+            />
+          </a>
 
           <ng-template #placeholder>
             <span class="profile-picture placeholder-emoji">🧑</span>
