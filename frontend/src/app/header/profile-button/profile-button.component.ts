@@ -90,7 +90,7 @@ export class ProfileButtonComponent implements OnInit {
             this.router.navigate(['/administrate-services'])
           }
         },{
-          label: 'Admin Office',
+          label: 'Configurations',
           icon: '⚙️',
           command: () => {
             this.router.navigate(['/config'])
