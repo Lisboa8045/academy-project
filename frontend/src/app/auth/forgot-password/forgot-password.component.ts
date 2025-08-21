@@ -13,7 +13,6 @@ import {AuthService} from '../auth.service';
 })
 export class ForgotPasswordComponent {
   private fb = inject(FormBuilder);
-  private router = inject(Router);
   private authService = inject(AuthService);
 
   forgotForm: FormGroup = this.fb.group({

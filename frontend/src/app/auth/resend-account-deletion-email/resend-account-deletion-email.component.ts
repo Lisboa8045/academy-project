@@ -37,10 +37,10 @@ export class ResendAccountDeletionEmailComponent implements OnInit {
 
     this.loading = true;
     this.resendDisabled = true;
-    this.authService.resendCancelAccountEmail(this.email).subscribe({
+    this.authService.resendDeleteAccountEmail(this.email).subscribe({
       next: () => {
         this.loading = false;
-        this.message = 'Cancellation email sent!';
+        this.message = 'Account deletion email sent!';
         this.error = '';
         this.showBackToLogin = true;
         sessionStorage.removeItem('pendingCancelEmail');
@@ -48,7 +48,7 @@ export class ResendAccountDeletionEmailComponent implements OnInit {
       error: () => {
         this.loading = false;
         this.message = '';
-        this.error = 'Failed to resend cancellation email. Please try again later.';
+        this.error = 'Failed to resend account deletion email. Please try again later.';
         this.showBackToLogin = true;
       }
     });
