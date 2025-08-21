@@ -45,10 +45,14 @@ export class ResendAccountDeletionEmailComponent implements OnInit {
         this.showBackToLogin = true;
         sessionStorage.removeItem('pendingCancelEmail');
       },
-      error: () => {
+      error: (err: any) => {
         this.loading = false;
         this.message = '';
-        this.error = 'Failed to resend account deletion email. Please try again later.';
+        if (err?.error) {
+          this.error = err.error;
+        } else {
+          this.error = 'Failed to resend account deletion email. Please try again later.';
+        }
         this.showBackToLogin = true;
       }
     });

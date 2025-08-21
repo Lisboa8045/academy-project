@@ -17,6 +17,8 @@ import com.academy.exceptions.AuthenticationException;
 import com.academy.exceptions.BadRequestException;
 import com.academy.exceptions.EntityNotFoundException;
 import com.academy.exceptions.InvalidArgumentException;
+import com.academy.exceptions.MaxDailyTokensException;
+import com.academy.exceptions.MaxTokensException;
 import com.academy.exceptions.MemberNotFoundByEmailException;
 import com.academy.exceptions.MemberNotFoundException;
 import com.academy.exceptions.NotFoundException;
@@ -29,7 +31,6 @@ import com.academy.models.appointment.AppointmentStatus;
 import com.academy.models.member.Member;
 import com.academy.models.member.MemberStatusEnum;
 import com.academy.models.service.ServiceStatusEnum;
-import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.models.token.MemberToken;
 import com.academy.models.token.TokenTypeEnum;
 import com.academy.repositories.AppointmentRepository;
@@ -154,6 +155,7 @@ public class MemberService {
         member.setRole(role);
         member.setEnabled(false);
         member.setStatus(MemberStatusEnum.WAITING_FOR_EMAIL_APPROVAL);
+        member.setDeletionTokensSentToday(0);
         LocalDateTime expirationDateTime = LocalDateTime.now().plusMinutes(
                 Integer.parseInt(globalConfigurationService.getConfigValue("confirmation_token_expiry_minutes")));
 
@@ -471,7 +473,7 @@ public class MemberService {
             int dailyTokens = Integer.parseInt(globalConfigurationService.getConfigValue("account_deletion_daily_tokens"));
             int sentTokens = member.getDeletionTokensSentToday();
             if ((sentTokens + 1) > dailyTokens) {
-                throw new RuntimeException("Maximum number of daily " + tokenType.name().toLowerCase().replace("_", " ") + " requests reached. Please try again tomorrow.");
+                throw new MaxDailyTokensException("Maximum number of daily " + tokenType.name().toLowerCase().replace("_", " ") + " requests reached. Please try again tomorrow.");
             }
             else
                 return;
@@ -480,7 +482,7 @@ public class MemberService {
             maxValidTokens = Integer.parseInt(globalConfigurationService.getConfigValue("maximum_valid_tokens"));
 
         if(validTokens.size() >= maxValidTokens)
-            throw new RuntimeException("Maximum number of " + tokenType.name().toLowerCase().replace("_", " ") + " requests reached.");
+            throw new MaxTokensException("Maximum number of " + tokenType.name().toLowerCase().replace("_", " ") + " requests reached.");
     }
 
     @Transactional
@@ -516,7 +518,7 @@ public class MemberService {
 
         LocalDateTime expirationDateTime = LocalDateTime.now().plusMinutes(
                 Integer.parseInt(globalConfigurationService.getConfigValue("account_deletion_expiry_days")));
-        MemberToken accountDeletionToken = memberTokenService.createToken(member, expirationDateTime, TokenTypeEnum.EMAIL_CONFIRMATION);
+        MemberToken accountDeletionToken = memberTokenService.createToken(member, expirationDateTime, TokenTypeEnum.ACCOUNT_DELETION);
 
         emailService.sendConfirmationEmail(member, accountDeletionToken.getRawValue());
     }
