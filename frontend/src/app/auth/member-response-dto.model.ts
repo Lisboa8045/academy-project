@@ -1,3 +1,5 @@
+import { MemberStatusEnum } from '../models/member-status-enum.model';
+
 export interface MemberResponseDTO {
   id: number;
   username: string;
@@ -12,4 +14,5 @@ export interface MemberResponseDTO {
   newPassword: string;
   confirmPassword: string;
   rating: number;
+  status: MemberStatusEnum;
 }

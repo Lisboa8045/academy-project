@@ -8,6 +8,8 @@ import com.academy.dtos.register.LoginRequestDto;
 import com.academy.dtos.register.LoginResponseDto;
 import com.academy.dtos.register.PasswordResetRequestDto;
 import com.academy.dtos.register.PasswordResetResponseDto;
+import com.academy.dtos.register.RecreateAccountDeletionTokenRequestDto;
+import com.academy.dtos.register.RecreateAccountDeletionTokenResponseDto;
 import com.academy.dtos.register.RecreateConfirmationTokenRequestDto;
 import com.academy.dtos.register.RecreateConfirmationTokenResponseDto;
 import com.academy.dtos.register.RegisterRequestDto;
@@ -26,6 +28,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+import java.util.Map;
+import com.academy.services.EmailService;
 
 @RestController
 @RequestMapping("/auth")
@@ -92,6 +98,13 @@ public class AuthController {
             @RequestBody RecreateConfirmationTokenRequestDto request) {
         memberService.recreateConfirmationToken(request.login());
         return ResponseEntity.ok(new RecreateConfirmationTokenResponseDto("Confirmation token recreated"));
+    }
+
+    @PostMapping("/recreate-cancel-account-token")
+    public ResponseEntity<RecreateAccountDeletionTokenResponseDto> recreateAccountDeletionToken(
+            @RequestBody RecreateAccountDeletionTokenRequestDto request) {
+        memberService.recreateDeletionToken(request.login());
+        return ResponseEntity.ok(new RecreateAccountDeletionTokenResponseDto("Account deletion token created"));
     }
 
     @PostMapping("/password-reset-token")

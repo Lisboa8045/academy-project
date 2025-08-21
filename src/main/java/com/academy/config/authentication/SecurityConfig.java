@@ -53,6 +53,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/tags/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/service-providers/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/appointments/confirm-appointment/**").permitAll()
+                        .requestMatchers("/members/revert-delete/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 ).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
         ;

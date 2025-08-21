@@ -6,6 +6,5 @@ INSERT IGNORE INTO global_configuration (id, config_name, config_key, config_val
     (4, 'Password reset token expiry minutes', 'password_reset_token_expiry_minutes', 20, 'INT', NOW(), NOW(), 'system', 'system'),
     (5,'Time to Confirm Appointment in minutes', 'confirm_appointment_expiry_minutes', 15, 'INT', NOW(), NOW(), 'system', 'system'),
     (6,'Maximum of valid confirmation emails at the same time', 'maximum_valid_confirmation_tokens', 3, 'INT', NOW(), NOW(), 'system', 'system'),
-    (7,'Minimum days before cancellation in order to not pay', 'minimum_days_before_cancellation_to_not_pay', 3, 'INT', NOW(), NOW(), 'system', 'system');
-
-
+    (7,'Minimum days before cancellation in order to not pay', 'minimum_days_before_cancellation_to_not_pay', 3, 'INT', NOW(), NOW(), 'system', 'system'),
+    (8,'Account Deletion Expiry (days)', 'account_deletion_expiry_days', 30, 'INT', NOW(), NOW(), 'system', 'system');
