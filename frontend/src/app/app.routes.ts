@@ -30,7 +30,6 @@ import {CalendarComponent} from './availability-calendar/availability-calendar.c
 export const routes: Routes = [
   { path: '', component: LandingPageComponent},
   { path: 'auth', component: AuthComponent },
-  { path: 'appointments', component: AppointmentHistoryComponent },
   { path: 'profile/:id', component: ProfileComponent },
   { path: 'unauthorized', component: UnauthorizedComponent },
   { path: 'services/:id', component: ServiceDetailsComponent},
@@ -77,10 +76,6 @@ export const routes: Routes = [
     component: MyServicesComponent,
     canActivate: [PermissionGuard],
     data: { roles: ['ADMIN', 'WORKER']}
-  },
-  { path: 'confirm-appointment/:id',
-    component: ConfirmAppointmentComponent,
-    canActivate: [PermissionGuard],
   },
   { path: 'config',
     component: GlobalConfigurationEditComponent,
