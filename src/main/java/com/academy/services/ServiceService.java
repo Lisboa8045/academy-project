@@ -169,7 +169,7 @@ public class ServiceService {
                 throw new AccessDeniedException("This service is not currently available for the public.");
             }
             Member member = memberService.getMemberByUsername(username);
-            if (!"ADMIN".equals(member.getRole().getName())) {
+            if (!("ADMIN".equals(member.getRole().getName()) || serviceProviderService.existsByServiceIdAndProviderUsername(id, username))) {
                 throw new AccessDeniedException("This service is not currently available for the public.");
             }
         }
@@ -370,7 +370,7 @@ public class ServiceService {
     }
 
     public Page<ServiceResponseDTO> getServicesByMemberId(Long memberId, Pageable pageable) {
-       return serviceRepository.queryEnabledServicesByMemberId(memberId, pageable)
+       return serviceRepository.queryNotRejectedServicesByMemberId(memberId, pageable)
                .map(service ->  serviceMapper.toDto(service,
                getPermissionsByProviderIdAndServiceId(memberId, service.getId())));
     }

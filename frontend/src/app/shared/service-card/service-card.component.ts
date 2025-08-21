@@ -91,6 +91,9 @@ export class ServiceCardComponent implements OnInit {
         this.labels.push({label: 'new', color: '#FFC107'});
       }
     }
+    if (this.service.status === 'PENDING_APPROVAL') {
+      this.labels.push({label: 'pending', color: '#8751ed'});
+    }
   }
 }
 
