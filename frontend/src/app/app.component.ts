@@ -6,10 +6,11 @@ import {AuthStore} from './auth/auth.store';
 import {MemberResponseDTO} from "./auth/member-response-dto.model";
 import {AppFooterComponent} from './footer/app-footer.component';
 import {filter} from 'rxjs';
+import {AppChatbotComponent} from './app-chatbot/app-chatbot.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, AppHeaderComponent, AppFooterComponent],
+  imports: [RouterOutlet, AppHeaderComponent, AppFooterComponent, AppChatbotComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
