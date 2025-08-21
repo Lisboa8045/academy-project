@@ -31,6 +31,7 @@ export class CalendarComponent implements OnInit, AfterViewInit {
 
   calendarOptions: CalendarOptions = {
     initialView: 'timeGridWeek',
+    slotLabelFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',
@@ -271,7 +272,8 @@ export class CalendarComponent implements OnInit, AfterViewInit {
 
   handleEventClick(clickInfo: EventClickArg) {
     const event = clickInfo.event;
-    if (event.start) {
+
+    if (event.title !== 'Available' && event.extendedProps['appointment'].status !== 'PENDING' && event.start) {
       const now = new Date();
       const eventEnd = event.end ? event.end : event.start;
       if (eventEnd < now) {
@@ -534,23 +536,18 @@ export class CalendarComponent implements OnInit, AfterViewInit {
     const formatTime = (date: Date) =>
       `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
 
-    // Custom rendering for MONTH VIEW
+    // MONTH
     if (viewType === 'dayGridMonth') {
       const background = event.backgroundColor || event.color || this.availableColor;
       const container = document.createElement('div');
-      container.style.display = 'flex';
-      container.style.flexDirection = 'column';
-      container.style.alignItems = 'flex-start';
-      container.style.background = background;
-      container.style.borderRadius = '10px';
-      container.style.padding = '6px 12px';
-      container.style.margin = '3px 0';
-      container.style.fontSize = '13px';
-      container.style.position = 'relative';
-      container.style.minHeight = '32px';
-      container.style.width = '100%';
+      container.style.cssText = `
+      display:flex; flex-direction:column; align-items:flex-start;
+      background:${background}; border-radius:10px; padding:6px 12px; margin:3px 0;
+      font-size:13px; position:relative; min-height:32px; width:100%;
+      overflow:hidden;          /* important: children can be clipped */
+      min-height:0;             /* important for flex children to shrink */
+    `;
 
-      // Time
       if (!event.allDay) {
         const timeEl = document.createElement('div');
         timeEl.textContent = `${formatTime(event.start!)} - ${formatTime(event.end!)}`;
@@ -561,24 +558,29 @@ export class CalendarComponent implements OnInit, AfterViewInit {
         timeEl.style.textShadow = '0 0 0 white';
         container.appendChild(timeEl);
       }
-      // Title
+
+      // Title — clamp to 2 lines (adjust if you want 1)
       const titleEl = document.createElement('div');
       titleEl.textContent = event.title;
-      titleEl.style.overflow = 'hidden';
-      titleEl.style.textOverflow = 'ellipsis';
-      titleEl.style.whiteSpace = 'nowrap';
-      titleEl.style.width = '100%';
-      titleEl.style.pointerEvents = 'none';
-      titleEl.style.color = 'transparent';
-      titleEl.style.textShadow = '0 0 0 white';
+      titleEl.style.cssText = `
+      width:100%;
+      overflow:hidden;
+      display:-webkit-box;              /* enables multi-line clamp */
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;            /* number of visible lines */
+      white-space:normal;                /* allow wrapping */
+      line-height:1.2;
+      pointer-events:none;
+      color:transparent; text-shadow:0 0 0 white;
+    `;
       container.appendChild(titleEl);
 
-      return {domNodes: [container]};
+      return { domNodes: [container] };
     }
 
-    // Custom rendering for timeGrid
+    // TIMEGRID
     const container = document.createElement('div');
-    container.style.position = 'relative';
+    container.style.cssText = `position:relative; display:flex; flex-direction:column; gap:2px; overflow:hidden; min-height:0; max-height:100%; max-width:100%;`;
 
     const timeEl = document.createElement('div');
     timeEl.textContent = `${formatTime(event.start!)} - ${formatTime(event.end!)}`;
@@ -586,30 +588,38 @@ export class CalendarComponent implements OnInit, AfterViewInit {
 
     const titleEl = document.createElement('div');
     titleEl.textContent = event.title;
-    titleEl.style.fontWeight = 'bold';
+    titleEl.style.cssText = `
+    font-weight:bold;
+    overflow:hidden;
+    display:-webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;     /* default, will update below */
+    white-space:normal;
+    line-height:1.2;
+  `;
+
+    // (optional) dynamically set how many lines fit in the available height
+    requestAnimationFrame(() => {
+      const padY = 0; // adjust if you add vertical padding
+      const free = container.clientHeight - timeEl.offsetHeight - padY;
+      const lineHeight = parseFloat(getComputedStyle(titleEl).lineHeight) || 16;
+      const lines = Math.max(1, Math.floor(free / lineHeight));
+      titleEl.style.webkitLineClamp = String(lines);
+    });
 
     if (event.title === 'Available') {
       const now = new Date();
-      // Only allow delete if event is in the future
       const isFuture = event.end > now;
       if (isFuture) {
         const deleteBtn = document.createElement('span');
         deleteBtn.innerHTML = '❌';
         deleteBtn.title = 'Delete availability';
         deleteBtn.style.cssText = `
-        position: absolute;
-        top: 2px;
-        right: 4px;
-        font-size: 14px;
-        cursor: pointer;
-        display: none;
-        z-index: 1000;
-        pointer-events: auto;
-        color: transparent;
-        text-shadow: 0 0 0 white;
+        position:absolute; top:2px; right:4px; font-size:14px; cursor:pointer; display:none; z-index:1000; pointer-events:auto;
+        color:transparent; text-shadow:0 0 0 white;
       `;
-        container.addEventListener('mouseenter', () => deleteBtn.style.display = 'block');
-        container.addEventListener('mouseleave', () => deleteBtn.style.display = 'none');
+        container.addEventListener('mouseenter', () => (deleteBtn.style.display = 'block'));
+        container.addEventListener('mouseleave', () => (deleteBtn.style.display = 'none'));
         deleteBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           if (confirm('Delete this availability?')) {
@@ -620,10 +630,11 @@ export class CalendarComponent implements OnInit, AfterViewInit {
         container.appendChild(deleteBtn);
       }
     }
+
     container.appendChild(timeEl);
     container.appendChild(titleEl);
 
-    return {domNodes: [container]};
+    return { domNodes: [container] };
   }
 
   // ────────────── Utility Methods ──────────────
