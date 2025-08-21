@@ -4,7 +4,7 @@ import {FullCalendarComponent, FullCalendarModule} from '@fullcalendar/angular';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import {CalendarOptions, DateSelectArg, EventApi, EventClickArg} from '@fullcalendar/core';
+import {CalendarOptions, DateSelectArg, DateSpanApi, EventApi, EventClickArg} from '@fullcalendar/core';
 import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {NgSelectComponent} from '@ng-select/ng-select';
 import {AvailabilityDTO, DateTimeRange} from './availability.models';
@@ -49,12 +49,13 @@ export class CalendarComponent implements OnInit, AfterViewInit {
     eventContent: this.renderEventContent.bind(this),
     eventOverlap: false,
     eventAllow: this.allowEventEdit.bind(this),
+    selectAllow:this.allowEventCreation.bind(this),
     views: {
       dayGridMonth: {
         editable: false,
         eventStartEditable: false,
         eventDurationEditable: false,
-        selectable: true, // allow selecting a day to navigate
+        selectable: true,
         selectMirror: false,
       }
     },
@@ -185,6 +186,28 @@ export class CalendarComponent implements OnInit, AfterViewInit {
 
     const calendarApi = this.calendarComponent.getApi();
     this.originalNumberOfAvailabilitys = calendarApi.getEvents().filter(event => event.title === 'Available').length;
+  }
+
+  private allowEventCreation(span: DateSpanApi): boolean {
+    const start = span.start;
+    const end = span.end ?? span.start;
+
+    // guard: no calendar yet
+    if (!this.calendarComponent) return false;
+
+    // overlap check: start < evEnd && end > evStart (touching edges allowed)
+    const calendarApi = this.calendarComponent.getApi();
+    const overlaps = calendarApi.getEvents().some(ev => {
+      const evStart = ev.start!;
+      const evEnd = ev.end ?? ev.start!;
+      return start < evEnd && end > evStart;
+    });
+
+    if (overlaps) {
+      snackBarError(this.snackBar, 'That time overlaps an existing event.');
+      return false;
+    }
+    return true;
   }
 
   private getCurrentAvailabilitySnapshot(): { date: string, start: string, end: string }[] {

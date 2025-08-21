@@ -22,7 +22,7 @@
         </div>
         <div class="star-rating">
           <ng-container *ngFor="let star of [1,2,3,4,5]">
-            <span [ngClass]="{'filled': star ===1 || star <= review.rating, 'empty': star > review.rating && star!==1}">
+            <span [ngClass]="{'filled': star ===1 || star <= review.rating, 'empty-star': star > review.rating && star!==1}">
               &#9733;
             </span>
           </ng-container>

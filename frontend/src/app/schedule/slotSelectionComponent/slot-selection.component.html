@@ -19,7 +19,7 @@
 <div class="weekly-slots">
   <div class="day-column"
        *ngFor="let day of getWeekDays()"
-       [class.empty]="getSlotsForDay(day).length === 0">
+       [class.empty-star]="getSlotsForDay(day).length === 0">
     <h4>{{ day | date: 'EEE dd/MM' }}</h4>
     <ul *ngIf="getSlotsForDay(day).length > 0; else emptyDay">
       <li *ngFor="let slot of getSlotsForDay(day)" (click)="selectSlot(slot)">
