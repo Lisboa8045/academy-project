@@ -124,10 +124,10 @@
                 type="text"
                 [(ngModel)]="newTag"
                 [ngModelOptions]="{ standalone: true }"
-                (keyup.enter)="addTag()"
+                (keyup.enter)="addNewTag()"
                 placeholder="Add a tag"
               />
-              <button type="button" (click)="addTag()" class="edit-button">Add Tag</button>
+              <button type="button" (click)="addNewTag()" class="edit-button">Add Tag</button>
             </ng-container>
 
             <!-- Display tags -->
@@ -143,6 +143,16 @@
                   ></fa-icon>
                 </span>
               }
+            </div>
+            <div *ngIf="form.enabled" class="button-wrapper">
+              <button type="button"
+                      (click)="generateTags()"
+                      class="ai-button"
+                      [disabled]="generatingTags()"
+              >
+                {{ generatingTags() ? 'Generating Tags...' : 'Generate Tags with AI' }}
+              </button>
+              <span *ngIf="generatingTags()" class="spinner"></span>
             </div>
           </div>
         </div>

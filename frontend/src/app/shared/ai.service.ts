@@ -1,6 +1,11 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {ServiceModel} from '../service/service.model';
+
+export interface ServiceModelBasicInfo {
+  name: string;
+  description: string;
+  tags: string[];
+}
 
 @Injectable({ providedIn: 'root' })
 export class AiService {
@@ -8,8 +13,13 @@ export class AiService {
   constructor(private http: HttpClient) {
   }
 
-  generateServiceImage(service: ServiceModel) {
+  generateServiceImage(service: ServiceModelBasicInfo) {
     const webhookUrl = 'http://localhost:5678/webhook-test/generate-service-image';
     return this.http.post(webhookUrl, service, { responseType: 'blob' });
+  }
+
+  generateServiceTags(service: ServiceModelBasicInfo) {
+    const webhookUrl = 'http://localhost:5678/webhook-test/generate-service-tags';
+    return this.http.post<string[]>(webhookUrl, service);
   }
 }

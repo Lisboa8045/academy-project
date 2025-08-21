@@ -9,6 +9,19 @@
   color: #0056b3; /* darker blue on hover */
 }
 
+button{
+  background-color: #3B82F6;
+  color: white;
+  padding: 0.7rem 1.2rem;
+  border: none;
+  border-radius: 1rem;
+  cursor: pointer;
+  min-width: 100px;
+  text-align: center;
+  transition: background 0.3s;
+  margin-top: 0;
+}
+
 .tag-list {
   margin-top: -50px;
 }

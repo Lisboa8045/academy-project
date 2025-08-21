@@ -16,7 +16,7 @@ import {ManageWorkersComponent} from './manage-workers/manage-workers.component'
 import {ProviderPermissionEnumModel} from '../../models/provider-permission.enum';
 import {ConfirmationModalComponent} from '../../shared/confirmation-component/confirmation-modal.component';
 import {ServiceAppointmentsComponent} from './service-appointments/service-appointments.component';
-import {AiService} from '../../shared/ai.service';
+import {AiService, ServiceModelBasicInfo} from '../../shared/ai.service';
 
 
 @Component({
@@ -39,6 +39,7 @@ import {AiService} from '../../shared/ai.service';
 export class EditServiceComponent implements OnInit {
   loading = signal(false);
   generatingImage = signal(false);
+  generatingTags = signal(false);
   deleteServiceModal = signal(false);
   service?: ServiceModel;
   selectedFiles: File[] = [];
@@ -118,12 +119,20 @@ export class EditServiceComponent implements OnInit {
     return this.form.get('tagNames') as FormArray;
   }
 
-  addTag(): void {
-    const trimmed = this.newTag.trim();
-    if (trimmed && !this.tagNames.value.includes(trimmed)) {
-      this.tagNames.push(this.fb.control(trimmed));
+  addNewTag(): void {
+    let tagWasAdded = this.addTag(this.newTag);
+    if (tagWasAdded) {
       this.newTag = '';
     }
+  }
+
+  addTag(tagName: string) :boolean {
+    const trimmed = tagName.trim();
+    if (trimmed && !this.tagNames.value.includes(trimmed)) {
+      this.tagNames.push(this.fb.control(trimmed));
+      return true;
+    }
+    return false;
   }
 
   removeTag(index: number): void {
@@ -279,7 +288,12 @@ export class EditServiceComponent implements OnInit {
   generateImage() {
     this.generatingImage.set(true);
 
-    this.aiService.generateServiceImage(this.service!).subscribe({
+    let serviceBasicInfo: ServiceModelBasicInfo = {
+      name: this.service!.name,
+      description: this.service!.description,
+      tags: this.service!.tagNames
+    }
+    this.aiService.generateServiceImage(serviceBasicInfo).subscribe({
       next: (blob) => {
         snackBarSuccess(this.snackBar, 'Image Generated Successfully');
         const objectUrl = URL.createObjectURL(blob);
@@ -290,6 +304,29 @@ export class EditServiceComponent implements OnInit {
       error: () => {
         snackBarError(this.snackBar, 'Image generation failed.');
         this.generatingImage.set(false);
+      }
+    });
+  }
+
+  generateTags() {
+    this.generatingTags.set(true);
+
+    let serviceBasicInfo: ServiceModelBasicInfo = {
+      name: this.service!.name,
+      description: this.service!.description,
+      tags: this.service!.tagNames
+    }
+    this.aiService.generateServiceTags(serviceBasicInfo).subscribe({
+      next: (tags) => {
+        snackBarSuccess(this.snackBar, 'Tags Generated Successfully');
+        tags.forEach(tag => {
+          this.addTag(tag);
+        })
+        this.generatingTags.set(false);
+      },
+      error: () => {
+        snackBarError(this.snackBar, 'Tag generation failed.');
+        this.generatingTags.set(false);
       }
     });
   }
