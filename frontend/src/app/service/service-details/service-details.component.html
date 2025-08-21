@@ -105,7 +105,12 @@
                 <div class="normal-price" style="font-weight: bold;">{{ service?.price }}€</div>
             </ng-template>
       </div>
-            <button class="schedule-btn" (click)="onClick(service?.id)">Schedule Appointment</button>
+            <button class="schedule-btn"
+                    (click)="onClick(service?.id)"
+                    [disabled]="service?.status != 'APPROVED'"
+            >
+              Schedule Appointment
+            </button>
 
         </div>
 
