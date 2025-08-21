@@ -25,6 +25,100 @@ Steps:
 Notes:
 - The "Send Reset Link" message does not reveal whether the email exists in the system.
 
+Flow: Confirming Email After Registration
+Purpose:
+- Verify the user’s email to activate the account.
+Starting Point:
+- Registration completion (email sent).
+Steps:
+1. Open the email sent after registering.
+2. Click the email confirmation link.
+3. Observe the confirmation message in the application.
+4. Click "Login" to go to the Login page.
+Notes:
+- Confirmation link is time-limited; expired links will trigger Resend Email flow.
+
+Flow: Resending Email Confirmation
+Purpose:
+- Allow users to request a new verification email if the original was missed or expired.
+Starting Point:
+- Attempt to log in with an unconfirmed email.
+Steps:
+1. See message indicating the account is unconfirmed.
+2. Click "Resend Link" to send a new confirmation email.
+3. Observe success or error message.
+4. Click "Login" to return to the login page.
+Notes:
+- Prevents users from being blocked due to missing the original confirmation email.
+
+Flow: Logging In
+Purpose:
+- Authenticate an existing user to access their account.
+Starting Point:
+- Login page, from the header Login button.
+Steps:
+1. Enter email and password.
+2. Click "Login" button.
+3. If email is unconfirmed, follow Resend Email flow.
+4. If login succeeds, redirect to Home or previous page.
+Notes:
+- Passwords are hidden by default; users can toggle visibility.
+
+Flow: Registering a New Account
+Purpose:
+- Create a new user account.
+Starting Point:
+- Login page, toggled to Registration form.
+Steps:
+1. Fill in email, username, password, and confirm password.
+2. Accept Terms and Conditions and Privacy Policy.
+3. Click "Create Account".
+4. Check email for confirmation link and follow Confirm Email flow.
+Notes:
+- Passwords are hidden by default; users can toggle visibility.
+
+Flow: Viewing Own Profile
+Purpose:
+- Display and manage personal information and services.
+Starting Point:
+- Header profile button (logged in).
+Steps:
+1. Click profile button in header to open own profile.
+2. Browse tabs: Personal Information, My Services (if worker), Reviews.
+Notes:
+- Sensitive information is visible only to the user.
+
+Flow: Editing Own Profile
+Purpose:
+- Update personal or sensitive information.
+Starting Point:
+- Own profile page.
+Steps:
+1. Navigate to own profile page.
+2. Edit fields like address, phone, or postal code.
+3. Click "Save" to apply changes, or "Cancel" to discard.
+
+Flow: Viewing Another User's Profile
+Purpose:
+- See the public profile of another user or service provider.
+Starting Point:
+- Click on another user’s avatar or name (e.g., in reviews or service cards).
+Steps:
+1. Click user’s avatar or name.
+2. Browse public profile information: avatar, name, services provided, reviews.
+Notes:
+- Sensitive information is not shown.
+
+Flow: Logging Out
+Purpose:
+- End current user session.
+Starting Point:
+- Header dropdown or own profile page.
+Steps:
+1. Click "Logout" button.
+2. Confirm action if prompted.
+3. Redirected to Home page.
+
 Flow: Upgrading a Client to Worker Role
 Purpose:
 - Allow a registered client to become a worker and offer services.
@@ -52,3 +146,15 @@ Steps:
 Notes:
 - Client must be logged in to complete the booking.
 - If not logged in, user will be redirected to Authentication page.
+
+Flow: Accessing About Us Page
+Purpose:
+- Learn about the application and development team.
+Starting Point:
+- Footer link.
+Steps:
+1. Click "About Us" link in footer.
+2. Browse application overview and developer list.
+3. Click developer avatars to view GitHub profiles.
+Notes:
+- Mostly informational.

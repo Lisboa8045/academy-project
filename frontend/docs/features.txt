@@ -41,3 +41,236 @@ Possible Actions:
 - Click any link to navigate to the respective page
 Notes:
 - Persistent across all pages.
+
+Feature: Login
+Purpose:
+- Allow users to authenticate and access their account.
+Location/Access:
+- Available via the Login button in the Header.
+Components:
+- Email input
+- Password input
+- Login button
+- Forgot Password link
+- Toggle to switch to Registration form
+Possible Actions:
+- Enter email and password and click Login
+- Click "Forgot Password?" to navigate to the reset password page
+- Switch to Registration form
+Notes:
+- Passwords are hidden by default; users can toggle visibility using the eye icon.
+
+Feature: Register / Create Account
+Purpose:
+- Allow new users to create an account.
+Location/Access:
+- Accessible via the Login button in Header, then toggling to registration form.
+Components:
+- Email input
+- Username input
+- Password and Confirm Password inputs
+- Create Account button
+- Terms and Conditions / Privacy Policy checkboxes and links
+- Toggle to switch to Login form
+Possible Actions:
+- Fill in the form and click Create Account
+- Click Terms or Privacy links to view the respective page
+- Switch to Login form
+Notes:
+- Passwords are hidden by default; users can toggle visibility using the eye icon.
+
+Feature: Forgot Password
+Purpose:
+- Allow users to request a password reset link if they have forgotten their password.
+Location/Access:
+- Accessible via the "Forgot Password?" link on the Login page.
+Components:
+- Email input field
+- Send button
+Possible Actions:
+- Enter the account email and click Send to request a password reset link
+Notes:
+- The same confirmation message appears whether the email exists or not, preventing disclosure of account existence.
+
+Feature: Reset Password
+Purpose:
+- Enable users to set a new password using the link received by email.
+Location/Access:
+- Accessed via the password reset link sent after using the Forgot Password feature.
+Components:
+- New password input
+- Confirm password input
+- Reset Password button
+Possible Actions:
+- Enter a new password and confirm it
+- Click Reset Password to update the account password
+Notes:
+- Passwords are hidden by default; users can toggle visibility using the eye icon.
+
+Feature: Email Confirmation
+Purpose:
+- Confirm the user’s email and enable access to the application.
+Location/Access:
+- Accessed via the confirmation link sent in the email after registering.
+Components:
+- Message indicating success or error of the email confirmation
+- Button to navigate to the Login page
+Possible Actions:
+- Click Login button to return to the Login page
+Notes:
+- Access is valid only for a limited time after registration.
+
+Feature: Resend Email
+Purpose:
+- Inform the user that their email is not confirmed yet and allow resending the confirmation email.
+Location/Access:
+- Triggered when attempting to log in with an unconfirmed email.
+Components:
+- Message about unconfirmed account
+- Message showing success or error of resending the verification link
+- Resend Link button
+- Login button
+Possible Actions:
+- Click Resend Link to receive a new confirmation email
+- Click Login button to return to the Login page
+Notes:
+- Prevents users from being blocked if they missed the original confirmation email.
+
+Feature: View Own Profile
+Purpose:
+- Display the user’s own profile information, including sensitive details.
+Location/Access:
+- Profile button in Header
+Components:
+- Avatar, name, email
+- Services (own or provided), if user is worker
+- Reviews
+- Sensitive information (address, postal code, phone)
+Possible Actions:
+- Navigate through profile tabs (My Services (if user is worker), Reviews)
+- Click service to open Service Details page, if user is worker
+
+Feature: View Another User's Profile
+Purpose:
+- Display another user’s basic profile information.
+Location/Access:
+- Click on another user’s name or avatar (e.g., in reviews or service cards)
+Components:
+- Avatar, name, email
+- Services provided
+- Reviews
+Possible Actions:
+- Navigate through services or reviews
+- Click service to view Service Details
+
+Feature: Edit Own Profile
+Purpose:
+- Enable the user to update their personal and sensitive information.
+Location/Access:
+- Own User Profile page
+Components:
+- Editable fields for address, phone, postal code
+- Save / Cancel buttons
+Possible Actions:
+- Update information and click Save
+
+Feature: Upgrade Role (Client → Worker)
+Purpose:
+- Allow users to become service providers to manage or offer services.
+Location/Access:
+- Own User Profile page
+Components:
+- Upgrade Role button
+Possible Actions:
+- Click Upgrade Role to change user role
+
+Feature: Logout
+Purpose:
+- Sign out from the user account.
+Location/Access:
+- Own User Profile page or Header dropdown
+Components:
+- Logout button
+Possible Actions:
+- Click Logout
+
+Feature: Search Services (with filters, sorting, pagination)
+Purpose:
+- Enable users to find services efficiently.
+Location/Access:
+- Search bar in Header
+- Search bar on Home page
+Components:
+- Filters: min/max price, min/max duration, category
+- Sorting options
+- Items per page selector
+- Pagination
+- List of services with images, discount, price, duration, and category
+Possible Actions:
+- Apply filters, sorting, items per page
+- Navigate pages using pagination
+- Click a service to view Service Details
+
+Feature: View Service Details
+Purpose:
+- Show all information about a specific service.
+Location/Access:
+- Clicking on a service card from Search Services, Home, or User Profile
+Components:
+- Images, title, category, tags, duration, price, discount
+- Description
+- Reviews
+- Schedule Appointment button
+Possible Actions:
+- Browse images
+- Read reviews
+- Click Schedule Appointment to book service
+- Click reviewer name to view profile
+
+Feature: Schedule Appointment
+Purpose:
+- Let users book appointments with service providers.
+Location/Access:
+- Service Details page (Schedule Appointment button)
+Components:
+- Provider selector
+- Calendar and available slots
+- Confirmation modal
+- Back to Services button
+Possible Actions:
+- Select provider and slot
+- Confirm booking
+- Navigate back to Search Services
+
+Feature: Read Terms and Conditions
+Purpose:
+- Let users review legal terms they must agree to.
+Location/Access:
+- Footer link
+- Registration checkbox link
+Components:
+- List of terms
+Possible Actions:
+- Scroll and read
+
+Feature: Read Privacy Policy
+Purpose:
+- Inform users about data handling practices.
+Location/Access:
+- Footer link
+- Registration checkbox link
+Components:
+- Privacy Policy text
+Possible Actions:
+- Scroll and read
+
+Feature: About Us
+Purpose:
+- Display information about the app and developers.
+Location/Access:
+- Footer link
+Components:
+- Application overview
+- Developer list with GitHub links
+Possible Actions:
+- Click developer avatar to view GitHub profile
