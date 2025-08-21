@@ -43,7 +43,7 @@ export class ResendAccountDeletionEmailComponent implements OnInit {
         this.message = 'Account deletion email sent!';
         this.error = '';
         this.showBackToLogin = true;
-        sessionStorage.removeItem('pendingCancelEmail');
+        sessionStorage.removeItem('pendingDeletionEmail');
       },
       error: (err: any) => {
         this.loading = false;
