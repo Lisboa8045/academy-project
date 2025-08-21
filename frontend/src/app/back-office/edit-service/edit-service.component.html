@@ -106,6 +106,16 @@
                 </div>
               </div>
             </div>
+            <div *ngIf="form.enabled" class="button-wrapper">
+              <button type="button"
+                      (click)="generateImage()"
+                      class="ai-button"
+                      [disabled]="generatingImage()"
+              >
+                {{ generatingImage() ? 'Generating Image...' : 'Generate Image with AI' }}
+              </button>
+              <span *ngIf="generatingImage()" class="spinner"></span>
+            </div>
           </div>
           <div class="tag-section">
             <!-- Input to add a new tag -->

@@ -16,6 +16,7 @@ import {ManageWorkersComponent} from './manage-workers/manage-workers.component'
 import {ProviderPermissionEnumModel} from '../../models/provider-permission.enum';
 import {ConfirmationModalComponent} from '../../shared/confirmation-component/confirmation-modal.component';
 import {ServiceAppointmentsComponent} from './service-appointments/service-appointments.component';
+import {AiService} from '../../shared/ai.service';
 
 
 @Component({
@@ -37,6 +38,7 @@ import {ServiceAppointmentsComponent} from './service-appointments/service-appoi
 })
 export class EditServiceComponent implements OnInit {
   loading = signal(false);
+  generatingImage = signal(false);
   deleteServiceModal = signal(false);
   service?: ServiceModel;
   selectedFiles: File[] = [];
@@ -53,7 +55,8 @@ export class EditServiceComponent implements OnInit {
               private serviceApi: ServiceApiService,
               private route: ActivatedRoute,
               private router: Router,
-              private snackBar: MatSnackBar) {}
+              private snackBar: MatSnackBar,
+              private aiService: AiService) {}
 
   ngOnInit() {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -271,5 +274,23 @@ export class EditServiceComponent implements OnInit {
         snackBarError(this.snackBar, 'Service deletion failed.');
       }
     })
+  }
+
+  generateImage() {
+    this.generatingImage.set(true);
+
+    this.aiService.generateServiceImage(this.service!).subscribe({
+      next: (blob) => {
+        snackBarSuccess(this.snackBar, 'Image Generated Successfully');
+        const objectUrl = URL.createObjectURL(blob);
+        this.imageUrls.push(objectUrl);
+        this.selectedFiles.push(this.blobToFile(blob, 'service_' + this.service!.id + '.png'));
+        this.generatingImage.set(false);
+      },
+      error: (err) => {
+        snackBarError(this.snackBar, 'Image generation failed.');
+        this.generatingImage.set(false);
+      }
+    });
   }
 }
