@@ -37,18 +37,22 @@ export class ResendAccountDeletionEmailComponent implements OnInit {
 
     this.loading = true;
     this.resendDisabled = true;
-    this.authService.resendCancelAccountEmail(this.email).subscribe({
+    this.authService.resendDeleteAccountEmail(this.email).subscribe({
       next: () => {
         this.loading = false;
-        this.message = 'Cancellation email sent!';
+        this.message = 'Account deletion email sent!';
         this.error = '';
         this.showBackToLogin = true;
-        sessionStorage.removeItem('pendingCancelEmail');
+        sessionStorage.removeItem('pendingDeletionEmail');
       },
-      error: () => {
+      error: (err: any) => {
         this.loading = false;
         this.message = '';
-        this.error = 'Failed to resend cancellation email. Please try again later.';
+        if (err?.error) {
+          this.error = err.error;
+        } else {
+          this.error = 'Failed to resend account deletion email. Please try again later.';
+        }
         this.showBackToLogin = true;
       }
     });

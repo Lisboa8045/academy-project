@@ -4,6 +4,8 @@ import com.academy.exceptions.AuthenticationException;
 import com.academy.exceptions.EmailTemplateLoadingException;
 import com.academy.exceptions.EntityAlreadyExists;
 import com.academy.exceptions.EntityNotFoundException;
+import com.academy.exceptions.MaxDailyTokensException;
+import com.academy.exceptions.MaxTokensException;
 import com.academy.exceptions.MemberNotFoundByEmailException;
 import com.academy.exceptions.MemberNotFoundException;
 import com.academy.exceptions.NotFoundException;
@@ -144,4 +146,13 @@ public class ExceptionController {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(MaxDailyTokensException.class)
+    public ResponseEntity<Object> handleInvalidValue(MaxDailyTokensException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MaxTokensException.class)
+    public ResponseEntity<Object> handleInvalidValue(MaxTokensException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 }

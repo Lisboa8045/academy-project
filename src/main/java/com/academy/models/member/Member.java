@@ -5,7 +5,6 @@ import com.academy.models.appointment.Appointment;
 import com.academy.models.availability.MemberAvailability;
 import com.academy.models.service.Service;
 import com.academy.models.shared.BaseEntity;
-import com.academy.models.token.EmailConfirmationToken;
 import com.academy.utils.FieldLengths;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -21,16 +20,14 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
 
 @Entity
 @Table(name = "member")
 @Getter
 @Setter
-@ToString(callSuper = true, exclude = {"memberAvailabilities", "appointments", "createdServices", "role", "emailConfirmationTokens"})
+@ToString(callSuper = true, exclude = {"memberAvailabilities", "appointments", "createdServices", "role"})
 public class Member extends BaseEntity {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -38,9 +35,6 @@ public class Member extends BaseEntity {
 
     @OneToMany(mappedBy = "member")
     private List<Appointment> appointments = new ArrayList<>();
-
-    @OneToMany(mappedBy = "member")
-    private List<EmailConfirmationToken> emailConfirmationTokens = new ArrayList<>();
 
     @Column(name = "username", unique = true, nullable = false, length = FieldLengths.USERNAME_MAX)
     private String username;
@@ -57,18 +51,6 @@ public class Member extends BaseEntity {
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private MemberStatusEnum status;
-
-    @Column(name = "confirmation_token")
-    private String confirmationToken;
-
-    @Column(name = "password_reset_token")
-    private String passwordResetToken;
-
-    @Column(name = "token_expiry")
-    private LocalDateTime tokenExpiry;
-
-    @Column(name = "password_reset_token_expiry")
-    private LocalDateTime passwordResetTokenExpiry;
 
     @Column(name = "address", length = FieldLengths.ADDRESS_MAX)
     private String address;
@@ -92,8 +74,6 @@ public class Member extends BaseEntity {
     @Column(name = "rating")
     private Integer rating;
 
-    public Long getId(){
-        return id;
-    }
-
+    @Column(name = "deletion_tokens_sent_today")
+    private Integer deletionTokensSentToday;
 }

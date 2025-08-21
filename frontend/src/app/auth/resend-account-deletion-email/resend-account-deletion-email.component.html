@@ -10,7 +10,7 @@
     <div class="button-column">
       <div class="resend-row">
         <button (click)="resend()" [disabled]="resendDisabled">
-          Resend Cancel Account Email
+          Resend Cancel Account Deletion Email
         </button>
         <span *ngIf="loading" class="spinner"></span>
         <span *ngIf="resendDisabled && !loading && !error" class="checkmark">✅</span>

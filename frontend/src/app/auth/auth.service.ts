@@ -81,8 +81,8 @@ export class AuthService {
     });
   }
 
-  resendCancelAccountEmail(login: string) {
-    return this.http.post(`${this.apiUrl}/recreate-cancel-account-token`, {
+  resendDeleteAccountEmail(login: string) {
+    return this.http.post(`${this.apiUrl}/recreate-delete-account-token`, {
       login: login
     });
   }
