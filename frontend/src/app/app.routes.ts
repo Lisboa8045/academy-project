@@ -26,30 +26,29 @@ import {NotFoundComponent} from './not-found.component';
 import {CalendarComponent} from './availability-calendar/availability-calendar.component';
 
 export const routes: Routes = [
-  { path: '', component: LandingPageComponent}, // done
-  { path: 'auth', component: AuthComponent }, // done
-  { path: 'appointments', component: AppointmentHistoryComponent },
-  { path: 'profile/:id', component: ProfileComponent }, // done
-  { path: 'unauthorized', component: UnauthorizedComponent }, // done
-  { path: 'services/:id', component: ServiceDetailsComponent}, // done
-  { path: 'services', component: SearchServicesComponent}, // done
-  { path: 'resend-email', component: ResendEmailConfirmationComponent }, // done
-  { path: 'confirm-email/:token', component: ConfirmEmailComponent }, // done
-  { path: 'about', component: AboutComponent }, // done
-  { path: 'terms', component: TermsComponent }, // done
-  { path: 'privacy', component: PrivacyComponent }, // done
-  { path: 'forgot-password', component: ForgotPasswordComponent }, // done
-  { path: 'reset-password/:token', component: ResetPasswordComponent }, // done
-  { path: 'not-found', component: NotFoundComponent}, // done
-  { path: 'auth/confirm-prompt', component: ConfirmEmailPromptComponent }, // done
+  { path: '', component: LandingPageComponent},
+  { path: 'auth', component: AuthComponent },
+  { path: 'profile/:id', component: ProfileComponent },
+  { path: 'unauthorized', component: UnauthorizedComponent },
+  { path: 'services/:id', component: ServiceDetailsComponent},
+  { path: 'services', component: SearchServicesComponent},
+  { path: 'resend-email', component: ResendEmailConfirmationComponent },
+  { path: 'confirm-email/:token', component: ConfirmEmailComponent },
+  { path: 'about', component: AboutComponent },
+  { path: 'terms', component: TermsComponent },
+  { path: 'privacy', component: PrivacyComponent },
+  { path: 'forgot-password', component: ForgotPasswordComponent },
+  { path: 'reset-password/:token', component: ResetPasswordComponent },
+  { path: 'not-found', component: NotFoundComponent},
+  { path: 'auth/confirm-prompt', component: ConfirmEmailPromptComponent },
   {
-    path: 'administrate-services', // done
+    path: 'administrate-services',
     component: ServiceAdminApprovalComponent,
     canActivate: [PermissionGuard],
     data: { roles: ['ADMIN']}
   },
   {
-    path: 'profile', // done
+    path: 'profile',
     component: ProfileComponent,
     canActivate: [PermissionGuard],
   },
@@ -72,11 +71,7 @@ export const routes: Routes = [
     canActivate: [PermissionGuard],
     data: { roles: ['ADMIN', 'WORKER']}
   },
-  { path: 'confirm-appointment/:id',
-    component: ConfirmAppointmentComponent,
-    canActivate: [PermissionGuard],
-  },
-  { path: 'config', // done
+  { path: 'config',
     component: GlobalConfigurationEditComponent,
     canActivate: [PermissionGuard],
     data: { roles: ['ADMIN']}
