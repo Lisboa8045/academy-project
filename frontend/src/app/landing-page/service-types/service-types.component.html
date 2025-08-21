@@ -2,7 +2,7 @@
      *ngFor="let type of serviceTypes$ | async"
      (click)="onIconClick(type.name)">
   <div class="type-icon">
-    <img [src]="type.icon" (error)="onIconError($event)">
+    <fa-icon [icon]="getIconTuple(type.icon)"></fa-icon>
   </div>
   <span>{{ type.name }}</span>
 </div>

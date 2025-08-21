@@ -53,7 +53,7 @@
     </div>
 
     <!-- Right side: Profile Form -->
-    <div class="profile-right" *ngIf="user">
+    <div class="profile-right" *ngIf="user && canEdit()">
       <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
 
         <div class="form-group">
@@ -136,14 +136,27 @@
                   </button>
                 </div>
               }
+              <button
+                type="button"
+                class="logout-button"
+                (click)="deleteMember()"
+                [disabled]="user?.status === MemberStatusEnum.PENDING_DELETION">
+                Delete Account
+              </button>
               <button type="button" class="logout-button" (click)="logout()">Logout</button>
               }
             }
           }
         </div>
       </form>
-
     </div>
+    <app-confirmation-modal
+      *ngIf="showDeleteModal"
+      [title]="'Delete Account'"
+      [text]="'delete your account'"
+      (confirm)="onDeleteConfirmed()"
+      (close)="showDeleteModal = false">
+    </app-confirmation-modal>
 </div>
   @if (user) {
     <div class="card">

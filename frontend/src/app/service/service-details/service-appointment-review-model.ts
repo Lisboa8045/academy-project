@@ -1,6 +1,7 @@
 export interface ServiceAppointmentReviewModel {
 
   id: number;
+  memberId: number;
   rating: number;
   comment: string;
   memberUsername: string;

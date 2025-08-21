@@ -1,13 +1,10 @@
 package com.academy.controllers;
 
-import com.academy.config.authentication.AuthenticationFacade;
-import com.academy.dtos.appointment.AppointmentReviewResponseDTO;
 import com.academy.dtos.appointment.AppointmentReviewResponseDTO;
 import com.academy.dtos.service.ServiceRequestDTO;
 import com.academy.dtos.service.ServiceResponseDTO;
 import com.academy.dtos.service.UpdatePermissionsRequestDto;
 import com.academy.exceptions.AuthenticationException;
-import com.academy.services.MemberService;
 import com.academy.services.ServiceService;
 import jakarta.validation.Valid;
 import org.apache.coyote.BadRequestException;
@@ -17,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -35,21 +33,19 @@ import java.util.List;
 public class ServiceController {
 
     private final ServiceService serviceService;
-    private final AuthenticationFacade authenticationFacade;
-    private final MemberService memberService;
 
     @Autowired
-    public ServiceController(ServiceService serviceService, AuthenticationFacade authenticationFacade, MemberService memberService) {
+    public ServiceController(ServiceService serviceService) {
         this.serviceService = serviceService;
-        this.authenticationFacade = authenticationFacade;
-        this.memberService = memberService;
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasRole('WORKER')")
     @PostMapping
     public ResponseEntity<ServiceResponseDTO> create(@Valid @RequestBody ServiceRequestDTO dto) throws AuthenticationException, BadRequestException {
         return ResponseEntity.ok(serviceService.create(dto));
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasRole('WORKER')")
     @PutMapping("/{id}")
     public ResponseEntity<ServiceResponseDTO> update(@PathVariable Long id,
                                                      @Valid @RequestBody ServiceRequestDTO dto) {
@@ -64,13 +60,12 @@ public class ServiceController {
         return ResponseEntity.ok(responses);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/disabled")
     public ResponseEntity<List<ServiceResponseDTO>> getAllDisabled(){
 
         List<ServiceResponseDTO> responses = serviceService.getAllDisabled();
         return ResponseEntity.ok(responses);
-
-
     }
 
     @GetMapping("/{id}")
@@ -97,12 +92,21 @@ public class ServiceController {
         return ResponseEntity.ok(responses);
     }
 
+    @PreAuthorize("@serviceSecurity.isOwner(#id, authentication.name) or hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         serviceService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{id}/disable")
+    public ResponseEntity<Void> disableService(@PathVariable Long id) {
+        serviceService.disable(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or hasRole('WORKER')")
     @PatchMapping("/{id}")
     public ResponseEntity<ServiceResponseDTO> updatePermissions(
             @PathVariable Long id,

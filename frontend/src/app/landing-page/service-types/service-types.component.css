@@ -1,7 +1,6 @@
 .type-card {
   flex: 0 0 auto;
-  width: 100px;
-  height: 120px;
+  margin: 1rem;
   text-align: center;
   scroll-snap-align: start;
   cursor: pointer;
@@ -19,7 +18,6 @@
 .type-card:hover {
   /* Use um scale menor se possível */
   transform: scale(1.05);
-  background-color: #f0f0f0;
   z-index: 2; /* Garante que fique acima dos vizinhos */
 }
 

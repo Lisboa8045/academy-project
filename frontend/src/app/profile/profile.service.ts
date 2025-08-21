@@ -51,6 +51,12 @@ export class ProfileService {
   getReviewsByMemberId(memberId: number): Observable<ServiceAppointmentReviewModel[]> {
     return this.http.get<ServiceAppointmentReviewModel[]>(`${this.apiUrl}/${memberId}/reviews`);
   }
+
+  deleteMember(id: number) {
+    return this.http.delete(`${this.apiUrl}/${id}`);
+  }
+
+  revertDeleteAccount(token: string) {
+    return this.http.post(`${this.apiUrl}/revert-delete/${token}`, {});
+  }
 }
-
-

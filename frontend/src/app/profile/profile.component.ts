@@ -1,23 +1,26 @@
-import {Component, effect, inject, OnInit, signal, WritableSignal} from '@angular/core';
+import {Component, effect, OnInit, signal, WritableSignal} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import { ProfileService } from './profile.service';
-import { AuthStore } from '../auth/auth.store';
-import { AuthService } from '../auth/auth.service';
-import { LoadingComponent } from '../loading/loading.component';
-import { MemberResponseDTO } from '../auth/member-response-dto.model';
-import { UserProfileService } from './user-profile.service';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import {ProfileService} from './profile.service';
+import {AuthStore} from '../auth/auth.store';
+import {AuthService} from '../auth/auth.service';
+import {LoadingComponent} from '../loading/loading.component';
+import {MemberResponseDTO} from '../auth/member-response-dto.model';
+import {UserProfileService} from './user-profile.service';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {CommonModule, DecimalPipe, NgIf} from '@angular/common';
-import { AppConfigService } from '../shared/app-config.service';
-import { strongPasswordValidator } from '../shared/validators/password.validator';
-import { noSpecialCharsValidator } from '../shared/validators/no-special-chars.validator';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { snackBarSuccess } from '../shared/snackbar/snackbar-success';
-import { snackBarError } from '../shared/snackbar/snackbar-error';
+import {AppConfigService} from '../shared/app-config.service';
+import {strongPasswordValidator} from '../shared/validators/password.validator';
+import {noSpecialCharsValidator} from '../shared/validators/no-special-chars.validator';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {snackBarSuccess} from '../shared/snackbar/snackbar-success';
+import {snackBarError} from '../shared/snackbar/snackbar-error';
 import {passwordsMatchValidator} from '../shared/validators/password-match-validator';
 import {MyServicesComponent} from '../service/my-services/my-services.component';
+import {ConfirmationModalComponent} from '../shared/confirmation-component/confirmation-modal.component';
+import {MemberStatusEnum} from '../models/member-status-enum.model';
 import {ServiceReviewComponent} from '../service/service-review/service-review.component';
 import {snackBarInfo} from '../shared/snackbar/snackbar-info';
+import {CountdownSnackbarComponent} from '../shared/snackbar/count-down-snackbar';
 
 @Component({
   selector: 'app-profile',
@@ -25,6 +28,8 @@ import {snackBarInfo} from '../shared/snackbar/snackbar-info';
     LoadingComponent,
     ReactiveFormsModule,
     NgIf,
+    MyServicesComponent,
+    ConfirmationModalComponent,
     MyServicesComponent,
     ServiceReviewComponent,
     DecimalPipe,
@@ -42,6 +47,9 @@ export class ProfileComponent implements OnInit {
   editMode = false;
   editPasswordMode = false;
   selectedFile: File | null = null;
+  showDeleteModal = false;
+
+  protected readonly MemberStatusEnum = MemberStatusEnum;
   upgradeWorkerRole = false;
 
   constructor(
@@ -56,9 +64,12 @@ export class ProfileComponent implements OnInit {
     private route: ActivatedRoute,
   ) {
     effect(() => {
-      if(this.route.snapshot.paramMap.get('id')) return;
-      this.loading.set(true);
-      if (this.authStore.id() > -1) this.getMember(this.authStore.id());
+      if (this.route.snapshot.paramMap.get('id')) return;
+      const id = this.authStore.id();
+      if (id > -1) {
+        this.loading.set(true);
+        this.getMember(id);
+      }
     });
   }
 
@@ -246,7 +257,6 @@ export class ProfileComponent implements OnInit {
         },
         error: (err) => {
           snackBarError(this.snackBar, 'Member Update failed. ' + err.error);
-          console.error(err);
         }
       });
     } else {
@@ -286,4 +296,55 @@ export class ProfileComponent implements OnInit {
   }
 
   protected readonly Math = Math;
+
+  deleteMember() {
+    this.showDeleteModal = true;
+  }
+
+  onDeleteConfirmed() {
+    this.profileService.deleteMember(this.authStore.id()).subscribe({
+      next: () => {
+        this.showDeleteCountdownAndLogout();
+      },
+      error: (err) => {
+        snackBarError(this.snackBar, 'Delete failed: ' + (err.error?.message || err.statusText));
+      }
+    });
+  }
+
+  private showDeleteCountdownAndLogout() {
+    let seconds = 5;
+    const message = `Account deleted successfully. Logging out in ${seconds}...`;
+
+    const snackBarRef = this.snackBar.openFromComponent(CountdownSnackbarComponent, {
+      data: { message },
+      duration: undefined, // keep open manually
+      panelClass: ['success-snackbar'],
+      horizontalPosition: 'right',
+      verticalPosition: 'top'
+    });
+
+    const interval = setInterval(() => {
+      seconds--;
+      snackBarRef.instance.data.message = `Account deleted successfully. Logging out in ${seconds}...`;
+
+      // Force Angular change detection
+      snackBarRef.instance = {...snackBarRef.instance};
+
+      if (seconds <= 0) {
+        clearInterval(interval);
+        this.snackBar.dismiss();
+        this.authService.logout().subscribe({
+          next: () => {
+            this.userProfileService.revoke();
+            this.router.navigate(['/auth']);
+          },
+          error: () => {
+            this.userProfileService.revoke();
+            this.router.navigate(['/auth']);
+          }
+        });
+      }
+    }, 1000);
+  }
 }

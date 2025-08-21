@@ -3,6 +3,7 @@ package com.academy.services;
 import com.academy.models.service.ServiceImage;
 import com.academy.repositories.ServiceImageRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,10 +27,14 @@ import java.util.Objects;
 
 @Service
 public class UploadImagesService {
+    @Lazy
     private final ServiceService serviceService;
     private final ServiceImageRepository serviceImageRepository;
     @Value("${file.upload-dir}")
     private String uploadDir;
+    @Value("${app.url:}")                 // optional absolute base (empty = use current request)
+    private String appBaseUrl;
+    private String imagesPublicPath = "/auth/uploads";
 
     private final MemberService memberService;
 
@@ -125,5 +131,13 @@ public class UploadImagesService {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    public String getImageUrl(String filename) {
+        if (filename == null || filename.isBlank()) return null;
+        String base = appBaseUrl.endsWith("/") ? appBaseUrl.substring(0, appBaseUrl.length()-1) : appBaseUrl;
+        String path = imagesPublicPath.startsWith("/") ? imagesPublicPath : "/" + imagesPublicPath;
+        if (!path.endsWith("/")) path += "/";
+        return base + path + filename;
     }
 }

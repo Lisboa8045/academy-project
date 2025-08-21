@@ -2,10 +2,12 @@ package com.academy.services;
 
 import com.academy.config.AppProperties;
 import com.academy.config.TestTokenStorage;
+import com.academy.config.authentication.AuthenticationFacade;
 import com.academy.config.authentication.JwtCookieUtil;
 import com.academy.config.authentication.JwtUtil;
 import com.academy.dtos.appointment.AppointmentMapper;
 import com.academy.dtos.appointment.AppointmentReviewResponseDTO;
+import com.academy.dtos.member.AutoLoginResponseDTO;
 import com.academy.dtos.member.MemberRequestDTO;
 import com.academy.dtos.member.MemberResponseDTO;
 import com.academy.dtos.register.LoginRequestDto;
@@ -24,20 +26,25 @@ import com.academy.exceptions.TokenExpiredException;
 import com.academy.exceptions.UnavailableUserException;
 import com.academy.models.Role;
 import com.academy.models.appointment.Appointment;
+import com.academy.models.appointment.AppointmentStatus;
 import com.academy.models.member.Member;
 import com.academy.models.member.MemberStatusEnum;
+import com.academy.models.service.ServiceStatusEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
 import com.academy.models.token.EmailConfirmationToken;
 import com.academy.repositories.AppointmentRepository;
 import com.academy.repositories.MemberRepository;
 import com.academy.repositories.RoleRepository;
 import com.academy.repositories.ServiceProviderRepository;
+import com.academy.repositories.ServiceRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.security.core.Authentication;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -61,17 +68,20 @@ public class MemberService {
     private final MessageSource messageSource;
     private final EmailService emailService;
     private final GlobalConfigurationService globalConfigurationService;
-    private final AppProperties appProperties;
+    private final AuthenticationFacade authenticationFacade;
+    private final JwtCookieUtil jwtCookieUtil;
+    private final ServiceProviderService serviceProviderService;
+    private final EmailConfirmationTokenService emailConfirmationTokenService;
+    private final ServiceProviderRepository serviceProviderRepository;
+    private final AppointmentRepository appointmentRepository;
+    private final AppointmentMapper appointmentMapper;
+
     @Autowired(required = false)
     private TestTokenStorage testTokenStorage;
 
-    private final JwtCookieUtil jwtCookieUtil;
-    private final ServiceProviderService serviceProviderService;
-    private EmailConfirmationTokenService emailConfirmationTokenService;
-    private final ServiceProviderRepository serviceProviderRepository;
+    private final AccountCleanupService accountCleanupService;
     @Autowired
-    private AppointmentRepository appointmentRepository;
-    private final AppointmentMapper appointmentMapper;
+    private ServiceRepository serviceRepository;
 
     @Autowired
     public MemberService(MemberRepository memberRepository,
@@ -83,11 +93,14 @@ public class MemberService {
                          JwtCookieUtil jwtCookieUtil,
                          EmailService emailService,
                          GlobalConfigurationService globalConfigurationService,
+                         AuthenticationFacade authenticationFacade,
+                         AppointmentRepository appointmentRepository,
                          AppProperties appProperties,
                          EmailConfirmationTokenService emailConfirmationTokenService,
                          @Lazy ServiceProviderService serviceProviderService,
                          ServiceProviderRepository serviceProviderRepository,
-                         AppointmentMapper appointmentMapper) {
+                         AppointmentMapper appointmentMapper,
+                         AccountCleanupService accountCleanupService) {
         this.memberRepository = memberRepository;
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
@@ -97,11 +110,13 @@ public class MemberService {
         this.jwtCookieUtil = jwtCookieUtil;
         this.emailService = emailService;
         this.globalConfigurationService = globalConfigurationService;
-        this.appProperties = appProperties;
+        this.authenticationFacade = authenticationFacade;
+        this.appointmentRepository = appointmentRepository;
         this.serviceProviderService = serviceProviderService;
         this.emailConfirmationTokenService = emailConfirmationTokenService;
         this.serviceProviderRepository = serviceProviderRepository;
         this.appointmentMapper = appointmentMapper;
+        this.accountCleanupService = accountCleanupService;
     }
 
 
@@ -133,6 +148,7 @@ public class MemberService {
 
         return createMember(request, optionalRole.get()).getId();
     }
+
     private Member createMember(RegisterRequestDto request, Role role){
         Member member = memberMapper.toMember(request);
         member.setPassword(passwordEncoder.encode(request.password()));
@@ -184,6 +200,7 @@ public class MemberService {
     private String generateEncodedToken(){
         return UUID.randomUUID().toString();
     }
+
     @Transactional
     public void confirmEmail(String confirmationToken) {
         EmailConfirmationToken token;
@@ -205,7 +222,6 @@ public class MemberService {
 
         emailConfirmationTokenService.deleteAllConfirmationTokensForMember(member);
     }
-
 
     public Member verifyPasswordResetToken(String passwordResetToken) {
         Member member = memberRepository.findAll().stream()
@@ -243,6 +259,7 @@ public class MemberService {
 
         return optionalMember.get();
     }
+
     public LoginResponseDto login(LoginRequestDto request, HttpServletResponse response) {
             Member member = tryToAuthenticateMember(request.login(), request.password());
 
@@ -289,10 +306,6 @@ public class MemberService {
         return memberRepository.searchMemberByUsernameContainsIgnoreCaseAndRoleName(username, roleName);
     }
 
-    public boolean existsById(Long memberId) {
-        return memberRepository.existsById(memberId);
-    }
-
     public Optional<Member> findbyId(long memberId) {
         if (!memberRepository.existsById(memberId)) {
             throw new EntityNotFoundException(Member.class, memberId);
@@ -300,12 +313,43 @@ public class MemberService {
         return memberRepository.findById(memberId);
     }
 
+    @Transactional
     public void deleteMember(long id) {
-        if(!memberRepository.existsById(id)) throw new EntityNotFoundException(Member.class,id);
-        unlinkServiceProviders(id);
-        memberRepository.deleteById(id);
+        Member member = getMemberEntityById(id);
+        member.setEnabled(false);
+        member.setStatus(MemberStatusEnum.PENDING_DELETION);
+        serviceRepository.findOwnedAndProvidedByMember(id).forEach(service -> {
+            appointmentRepository.cancelAppointmentsByServiceId(service.getId(), AppointmentStatus.CANCELLED);
+            service.setEnabled(false);
+            service.setStatus(ServiceStatusEnum.DISABLED_OWNER_DELETED);
+            serviceRepository.save(service);
+        });
+
+        member.setTokenExpiry(LocalDateTime.now().plusDays(
+                Integer.parseInt(globalConfigurationService.getConfigValue("account_deletion_expiry_days"))));
+        memberRepository.save(member);
+        emailService.sendDeleteAccountConfirmationEmail(member, generateAccountDeletionRevertToken(member));
     }
 
+    private String generateAccountDeletionRevertToken(Member member) {
+        String rawToken;
+        Optional<Member> optionalMember;
+
+        do {
+            rawToken = generateEncodedToken();
+            String finalRawToken = rawToken;
+            optionalMember = memberRepository.findAll().stream()
+                .filter(m -> m.getConfirmationToken() != null && passwordEncoder.matches(finalRawToken, m.getConfirmationToken()))
+                .findFirst();
+        } while (optionalMember.isPresent());
+
+        member.setConfirmationToken(passwordEncoder.encode(rawToken));
+        memberRepository.save(member);
+        return rawToken;
+    }
+
+
+    @Transactional
     public MemberResponseDTO editMember(long id, MemberRequestDTO memberRequestDTO){
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Member.class, id));
@@ -354,10 +398,12 @@ public class MemberService {
                 .map(memberMapper::toResponseDTO)
                 .orElseThrow(() -> new EntityNotFoundException(Member.class, id));
     }
+
     public Member getMemberEntityById(long id){
         return memberRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(Member.class, id));
     }
 
+    @Transactional
     public void recreateConfirmationToken(String login) {
         Optional<Member> optionalMember = getMemberByLogin(login);
         if(optionalMember.isEmpty())
@@ -377,6 +423,11 @@ public class MemberService {
         emailService.sendConfirmationEmail(memberSaved, emailConfirmationToken.getRawValue());
     }
 
+    public void recreateDeletionToken(String login) {
+       //TODO
+    }
+
+    @Transactional
     public void saveProfilePic(Long id, String filename) {
         memberRepository.findById(id)
                 .map(m -> {
@@ -395,6 +446,7 @@ public class MemberService {
         }
     }
 
+    @Transactional
     public void createPasswordResetToken(String email) {
         Member member = getMemberByEmail(email);
         String rawPasswordResetToken = generateUniquePasswordResetToken();
@@ -421,15 +473,62 @@ public class MemberService {
         memberRepository.save(member);
     }
 
+    public AutoLoginResponseDTO attemptAutoLogin() {
+        Authentication auth = authenticationFacade.getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
+            throw new AuthenticationException("User not authenticated");
+        }
+
+        String username = auth.getName();
+        Member member = getMemberByUsername(username);
+        return new AutoLoginResponseDTO(
+                member.getId(),
+                username,
+                member.getProfilePicture() != null ? member.getProfilePicture() : "",
+                member.getRole().getName()
+        );
+    }
+
+    @Transactional
+    public void revertAccountDelete(String token) {
+        Member member = memberRepository.findAll().stream()
+            .filter(m -> m.getConfirmationToken() != null &&
+                    passwordEncoder.matches(token, m.getConfirmationToken()) &&
+                    m.getStatus() == MemberStatusEnum.PENDING_DELETION)
+            .findFirst()
+            .orElseThrow(() -> new BadRequestException("Invalid or expired revert token."));
+
+        if (member.getTokenExpiry() == null || member.getTokenExpiry().isBefore(LocalDateTime.now())) {
+            throw new TokenExpiredException("Revert token has expired.");
+        }
+
+        member.setEnabled(true);
+        member.setStatus(MemberStatusEnum.ACTIVE);
+        member.setConfirmationToken(null);
+        member.setTokenExpiry(null);
+        memberRepository.save(member);
+        serviceRepository.findOwnedAndProvidedByMember(member.getId()).forEach(service -> {
+            service.setEnabled(true);
+            service.setStatus(ServiceStatusEnum.PENDING_APPROVAL);
+        });
+    }
+
+    @Scheduled(cron = "0 0 0 * * ?") // Every day at midnight
+    public void permanentlyDeleteExpiredAccounts() {
+        accountCleanupService.cleanupExpiredAccounts();
+    }
+
+
     private void validateIfReachedMaxConfirmationTokens(Member member) {
         List<EmailConfirmationToken> validTokens = emailConfirmationTokenService.getValidTokensByMember(member);
         int maxValidTokens = Integer.parseInt(globalConfigurationService.getConfigValue("maximum_valid_confirmation_tokens"));
 
         if(validTokens.size() >= maxValidTokens)
             throw new RuntimeException("Maximum number of confirmation emails reached ");
-
     }
 
+    @Transactional
     public void updateMemberRating(Long memberId) {
         Double rating = serviceProviderRepository.findAverageRatingByMemberId(memberId);
         System.out.println("Updating Member rating with" + memberId + " to " +rating);

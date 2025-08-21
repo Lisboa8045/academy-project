@@ -1,5 +1,7 @@
 package com.academy.dtos.member;
 
+import com.academy.models.member.MemberStatusEnum;
+
 public record MemberResponseDTO(
         long id,
         String username,
@@ -9,5 +11,6 @@ public record MemberResponseDTO(
         String phoneNumber,
         String role,
         String profilePicture,
+        MemberStatusEnum status,
         Integer rating
 ) {}

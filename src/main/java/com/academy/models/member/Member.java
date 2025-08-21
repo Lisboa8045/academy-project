@@ -1,8 +1,8 @@
 package com.academy.models.member;
 
-import com.academy.models.Availability;
 import com.academy.models.Role;
 import com.academy.models.appointment.Appointment;
+import com.academy.models.availability.MemberAvailability;
 import com.academy.models.service.Service;
 import com.academy.models.shared.BaseEntity;
 import com.academy.models.token.EmailConfirmationToken;
@@ -30,11 +30,11 @@ import java.util.List;
 @Table(name = "member")
 @Getter
 @Setter
-@ToString(callSuper = true, exclude = {"availabilities", "appointments", "createdServices", "role", "emailConfirmationTokens"})
+@ToString(callSuper = true, exclude = {"memberAvailabilities", "appointments", "createdServices", "role", "emailConfirmationTokens"})
 public class Member extends BaseEntity {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Availability> availabilities = new ArrayList<>();
+    private List<MemberAvailability> memberAvailabilities = new ArrayList<>();
 
     @OneToMany(mappedBy = "member")
     private List<Appointment> appointments = new ArrayList<>();
@@ -51,10 +51,10 @@ public class Member extends BaseEntity {
     @Column(name = "email", nullable = false, length = FieldLengths.EMAIL_MAX)
     private String email;
 
-    @Column(name = "enabled") //TODO should be nullable quando alterarem os testes para usar service
+    @Column(name = "enabled", nullable = false)
     private boolean enabled;
 
-    @Column(name = "status") //TODO should be nullable quando alterarem os testes para usar service
+    @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private MemberStatusEnum status;
 

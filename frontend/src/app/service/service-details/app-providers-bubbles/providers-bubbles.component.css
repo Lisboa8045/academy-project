@@ -1,0 +1,43 @@
+.service-providers-bubbles {
+  margin-left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  transition: gap .25s ease;
+}
+
+.service-providers-bubbles:hover{
+  cursor: pointer;
+  gap: 22px;
+}
+
+.service-providers-bubbles .bubble{
+  --size: 40px;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  overflow: hidden;
+  margin-left: -20px;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.25);
+}
+
+.service-providers-bubbles .bubble:not(:first-child){ margin-left: -20px; }
+
+.service-providers-bubbles .avatar{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.bubble:hover{
+  transform: scale(1.1);
+}

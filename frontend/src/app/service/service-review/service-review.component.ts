@@ -3,6 +3,7 @@ import {ServiceApiService} from '../../shared/service-api.service';
 import {ServiceAppointmentReviewModel} from '../service-details/service-appointment-review-model';
 import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
 import {ProfileService} from '../../profile/profile.service';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-service-review',
@@ -10,7 +11,8 @@ import {ProfileService} from '../../profile/profile.service';
     NgClass,
     NgForOf,
     NgIf,
-    DatePipe
+    DatePipe,
+    RouterLink
   ],
   templateUrl: './service-review.component.html',
   styleUrl: './service-review.component.css'

@@ -40,7 +40,7 @@ export class ProfileButtonComponent implements OnInit {
       },
       {
         label: 'Appointments',
-        icon: '📅',
+        icon: '📋',
         command: () => {
           this.router.navigate(['/appointments'])
         }
@@ -74,6 +74,12 @@ export class ProfileButtonComponent implements OnInit {
         label: 'My Services',
         icon: '🛎️',
         command: () => this.router.navigate(['/my-services'])
+      },{
+        label: 'My Calendar',
+        icon: '📅',
+        command: () => {
+          this.router.navigate(['/my-calendar'])
+        }
       });
     } else if (this.role() === 'ADMIN') {
       this.menuItems.splice(2, 0,
@@ -82,6 +88,12 @@ export class ProfileButtonComponent implements OnInit {
           icon: '👔',
           command: () => {
             this.router.navigate(['/administrate-services'])
+          }
+        },{
+          label: 'Configurations',
+          icon: '⚙️',
+          command: () => {
+            this.router.navigate(['/config'])
           }
         });
     }

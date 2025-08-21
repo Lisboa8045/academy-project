@@ -1,0 +1,253 @@
+DOCUMENT: Pages Reference Guide
+This document describes every page in the AcademyProject service marketplace web application.
+It is intended as a reference for support and guidance systems, such as chatbots, to help users navigate the application.
+Each page entry includes:
+- Purpose: Why this page exists
+- Location/Access: How the user can get to this page
+- Key Elements: Important UI components or information shown on the page
+- Possible Actions: Actions the user can take on this page
+- Notes: Optional details, rules, conditions, or restrictions
+
+The descriptions are factual and reflect the intended functionality of the application.
+
+Page: Home
+Purpose:
+- Display available service categories
+- Highlight the top 10 most popular services.
+- Search for services directly.
+Location/Access:
+- First page shown to all users when accessing the application.
+Key Elements:
+- Service categories
+- Top 10 services section
+- Search bar
+Possible Actions:
+- Click a listed service to navigate to its details page
+- Search for services using the search bar (navigates to Search Services page)
+- Click a category to navigate to Search Services page (auto-filters by category)
+
+Page: Authentication
+Purpose:
+- Authenticate the user 
+- Create an account
+Location/Access:
+- Clicking on the Login button in the header (see Global Feature: Header).
+Key Elements:
+- Login form with email/password inputs
+- Signup form with email/username/password/confirm password inputs
+- Forgot Password link
+- Create Account / Login button to submit the form
+- Sign up / Login button below the form (changes the displayed form type from login to register and vice versa)
+- Terms and Conditions checkbox and link
+- Privacy Policy checkbox and link
+Possible Actions:
+- Click Login to sign in
+- Click Create Account to register
+- Click "Forgot Password?" to navigate to the reset page
+- Click Terms and Conditions link to view the page
+- Click Privacy Policy link to view the page
+Notes:
+- Passwords are hidden by default, user can click on the eye in the input box to show them
+
+Page: Terms and Conditions
+Purpose:
+- Display the app's Terms and Conditions
+Location/Access:
+- Clicking on the link in the register account checkbox
+- Clicking on the link in the footer (see Global Feature: Footer)
+Key Elements:
+- List of every Terms the user has to agree to
+Possible Actions:
+- Read the Terms and Conditions
+
+Page: Privacy Policy
+Purpose:
+- Display the app's Privacy Policy
+Location/Access:
+- Link on the register account checkbox
+- Clicking on the link in the footer (see Global Feature: Footer)
+Key Elements:
+- Privacy Policy that the user has to agree to
+Possible Actions:
+- Read the Privacy Policy
+
+Page: About Us
+Purpose:
+- Display information about the app and its developers
+Location/Access:
+- Clicking on the link in the footer (see Global Feature: Footer)
+Key Elements:
+- Brief overview of the application's goal
+- List of developers and links to their github pages
+Possible Actions:
+- Click a developer’s avatar to navigate to their GitHub profile
+
+Page: Unauthorized
+Purpose:
+- Display a warning/error message saying the user is unauthorized to access the resource
+Location/Access:
+- None, only if changing URL to access something the user shouldn't
+Key Elements:
+- Error message warning about the 403 Error
+Possible Actions:
+- Read the error message
+Notes:
+- No further actions are available; the user must navigate elsewhere
+
+Page: Search Services
+Purpose:
+- Search for services listed on the application
+Location/Access:
+- Search bar located on the home page
+- Search bar located on the header (see Global Feature: Header), if not on home page
+Key Elements:
+- Sorting option
+- Items per page option
+- List of filters to search by: min price, max price, min duration (minutes), max duration (minutes), Service Category
+- List of services (showing their image, discount, price, duration, and service category)
+- "No results found" message if no services match the search
+- Pagination bar at the bottom
+Possible Actions:
+- Type values into filters (min price, max price, min duration, max duration)
+- Select a service category to filter results
+- Select items per page or sorting option
+- Use pagination bar to change the displayed page (via previous/next or direct number selection)
+- Navigate to the service details page by clicking on a shown service
+
+Page: Service Details
+Purpose:
+- Show everything relevant to a client about a Service
+Location/Access:
+- Clicking on a service card from the search services page
+- Clicking on a service card from the home page
+- Clicking on a service card from a user profile's My Services tab
+Key Elements:
+- List of service's images
+- Service's title, category, tags, duration, price, discount
+- Service description
+- List of reviews
+- Button to schedule an appointment
+Possible Actions:
+- Click Schedule Appointment to navigate to the Scheduling page
+- Click arrows or thumbnails to browse service images
+- Click a reviewer’s name to navigate to their user profile
+
+Page: Not Found
+Purpose:
+- Show an error message when trying to access a resource that does not exist
+Location/Access:
+- Accessing any resource that doesn't exist
+Key Elements:
+- 404 Error message
+Possible Actions:
+- Read the error message
+Notes:
+- No further actions are available; the user must navigate elsewhere
+
+Page: Forgot Password
+Purpose:
+- Let user obtain a link to reset their forgotten password
+Location/Access:
+- Clicking on "Forgot Password?" available on the Login page
+Key Elements:
+- Form to submit an email linked to an account
+- Button to send reset link
+Possible Actions:
+- Enter the account email to receive a password reset link
+- Click Send to request the reset email
+Notes:
+- Regardless if email exists in database or not, same message appears: "If an account with [email] exists, a reset link was sent." - to prevent database sniffing attacks
+
+Page: Confirm Email Prompt
+Purpose:
+- Inform user that they need to confirm email
+Location/Access:
+- First page the user sees/gets redirected to once creating an account
+Key Elements:
+- Message informing user
+- Button to go back to login page
+Possible Actions:
+- Click Back to Login button to return to the login page
+
+Page: Resend Email
+Purpose:
+- Inform the user the email was not confirmed yet
+- Allow user to resend the confirmation email
+Location/Access:
+- When attempting to login with an unconfirmed email
+Key Elements:
+- Message informing user of unconfirmed account
+- Message informing user of success/error of verification link resending
+- Button to resend verification link 
+- Button to go back to login page
+Possible Actions:
+- Click Resend Link button to obtain a new verification link
+- Click Login button to navigate to the login page
+
+Page: Confirm Email
+Purpose:
+- Confirm the user's email and enable access to the application
+Location/Access:
+- Clicking on the link given in the email after registering
+Key Elements:
+- Message informing user of success/error on confirming the email
+- Button to go back to login page
+Possible Actions:
+- Click Login button to navigate to the login page
+
+Page: Reset Password
+Purpose:
+- Let user reset their password
+Location/Access:
+- Clicking on the link given on the email sent by the application, after Forgot Password feature
+Key Elements:
+- New password input
+- Confirm password input
+- Button to reset password
+Possible Actions:
+- Click Reset Password button to update the password
+Notes:
+- Passwords are hidden by default, user can click on the eye in the input box to show them
+
+Page: User Profile
+Purpose:
+- Show any user's basic profile info
+- Show own user's basic + sensitive profile info
+- Edit a user's own profile
+Location/Access:
+- Clicking on the Profile button in the header, to go to own profile (see Global Feature: Header).
+- Clicking on a user's name in a user's review, to go to other user's profile
+- Clicking on a service provider avatar, in service details page, to go to the service provider's user profile
+- Clicking on a service provider avatar, in schedule appointment page, to go to the service provider's user profile
+Key Elements:
+- User’s basic information (avatar, name, email)
+- User’s services (owning or working for)
+- User’s reviews on services they work for
+- For own user only:
+  - Sensitive information (address, postal code, phone number)
+  - Button to edit sensitive information
+  - Button to upgrade role from client to worker (to manage/provide services)
+  - Button to logout
+Possible Actions:
+- Click Edit button to enable editing your information
+- Click Upgrade Role button to change your role from client to worker
+- Click Logout button to sign out
+- Click a service in My Services tab to navigate to its Service Details page
+
+Page: Schedule Appointment
+Purpose: 
+- Let user schedule an appointment with a service provider
+Location/Access: 
+- Clicking on the "Schedule Appointment" button on the service details page
+Key Elements:
+- Error message (if no providers are available)
+- Service provider selector (choose between providers)
+- Calendar for browsing available days/times
+- List of available Date/Time slots (opens a confirmation modal when clicked)
+- "Back to Services" button (returns to the Search Services page)
+Possible Actions:
+- Click All or a provider name to select available providers
+- Click Previous Week, Next Week, or Today to scroll the calendar
+- Click a Date/Time to open the confirmation modal
+- Click Confirm button to schedule the appointment
+- Click Back to Services button to return to the search page

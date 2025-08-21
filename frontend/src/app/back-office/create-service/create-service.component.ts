@@ -79,12 +79,10 @@ export class CreateServiceComponent implements OnInit {
             this.serviceApi.uploadServiceImages(formData, res.id).subscribe({
               error: () => {
                 snackBarError(this.snackBar, 'Upload failed.')
-              },
-              complete: () => {
-                this.router.navigate([`/backoffice/services/${res.id}`]);
               }
             });
           }
+          this.router.navigate([`/backoffice/services/${res.id}`]);
         },
         error: () => {
           snackBarError(this.snackBar, 'Service creation failed.');

@@ -11,106 +11,112 @@
           <button class="nav left" (click)="prevImage(thumbContainer)" [disabled]="currentImageIndex === 0">&#10094;
           </button>
 
+          <img
+            [src]="userProfileService.serviceImageUrl[currentImageIndex]"
+            alt="Service Image"
+            class="main-image"
+          />
+
+
+          <ng-template #noImage>
             <img
-              [src]="userProfileService.serviceImageUrl[currentImageIndex]"
-              alt="Service Image"
-              class="main-image"
+              src="https://placehold.co/300x200?text=No+Image"
+              alt="No image available"
+              class="main-image placeholder"
             />
+          </ng-template>
 
 
-            <ng-template #noImage>
+          <button class="nav right" (click)="nextImage(thumbContainer)"
+                  [disabled]="currentImageIndex === userProfileService.serviceImageUrl.length - 1">&#10095;
+          </button>
+
+          <div class="thumbnails-overlay">
+            <div class="thumbnails-scroll-wrapper" #thumbContainer>
               <img
-                src="https://placehold.co/300x200?text=No+Image"
-                alt="No image available"
-                class="main-image placeholder"
+                *ngFor="let imageUrl of userProfileService.serviceImageUrl; let i = index"
+                [src]="imageUrl"
+                class="thumbnail-image"
+                [class.selected]="i === currentImageIndex"
+                (click)="selectThumbnail(i, thumbContainer)"
               />
-            </ng-template>
 
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-            <button class="nav right" (click)="nextImage(thumbContainer)"
-                    [disabled]="currentImageIndex === userProfileService.serviceImageUrl.length - 1">&#10095;
-            </button>
+    <div class="info-section">
+      <div class="info-content">
+        <h2>{{ service?.name }}</h2>
+        <div class="type-and-duration">
+          <h3 (click)="searchServiceType(service?.serviceTypeName ?? '' )"
+              class="clickable"
+          >
+            {{ service?.serviceTypeName }}
+          </h3>
+          <div *ngIf="formatedTimeHours > 0">
+            <span class="duration-info">🕒 {{ formatedTimeHours }}H {{ formatedTimeMinutes }} m</span>
+          </div>
 
-            <div class="thumbnails-overlay">
-              <div class="thumbnails-scroll-wrapper" #thumbContainer>
-                <img
-                  *ngFor="let imageUrl of userProfileService.serviceImageUrl; let i = index"
-                  [src]="imageUrl"
-                  class="thumbnail-image"
-                  [class.selected]="i === currentImageIndex"
-                  (click)="selectThumbnail(i, thumbContainer)"
-                />
+          <div *ngIf="formatedTimeHours === 0 && formatedTimeMinutes > 0">
+            <span class="duration-info">🕒 {{ formatedTimeMinutes }} m</span>
+          </div>
 
+          <div *ngIf="formatedTimeHours === 0 && formatedTimeMinutes === 0">
+            <span class="duration-info">🕒 No Time</span>
+          </div>
+        </div>
+        <app-providers-bubbles [serviceId]="serviceId"></app-providers-bubbles>
+        <!--        <div *ngIf="service?.tagNames?.length" class="tag-list">
+                <span *ngFor="let tag of service?.tagNames"
+                      class="tag"
+                      (click)="search(tag)">
+            {{ tag }}
+                </span>
+                </div>-->
+        <tag-list [tags]="service?.tagNames ?? []" (tagClicked)="search($event)"></tag-list>
+
+        <ng-container *ngIf="discountedPrice !== null; else normalPrice">
+          <div class="price-container">
+            <div class="price-details">
+              <div class="original-price" style="text-decoration: line-through; color: grey;">
+                {{ service?.price }}€
+              </div>
+              <div class="discounted-price" style="font-weight: bold;">
+                {{ discountedPrice }}€
               </div>
             </div>
-          </div>
-        </div>
-      </div>
+            <div class="discount-badge"
+                 style="background-color: red; color: white; padding: 4px 8px; border-radius: 5px;">
+              -{{ service?.discount }}%
 
-      <div class="info-section">
-      <div class="info-content">
-      <h2>{{ service?.name }}</h2>
-      <div class="type-and-duration">
-        <h3 (click)="searchServiceType(service?.serviceTypeName ?? '' )"
-            class="clickable"
-        >
-          {{ service?.serviceTypeName }}
-        </h3>
-        <div *ngIf="formatedTimeHours > 0">
-          <span class="duration-info">🕒 {{ formatedTimeHours }}H {{ formatedTimeMinutes }} m</span>
-        </div>
-
-        <div *ngIf="formatedTimeHours === 0 && formatedTimeMinutes > 0">
-          <span class="duration-info">🕒 {{ formatedTimeMinutes }} m</span>
-        </div>
-
-        <div *ngIf="formatedTimeHours === 0 && formatedTimeMinutes === 0">
-          <span class="duration-info">🕒 No Time</span>
-        </div>
-      </div>
-      <!--        <div *ngIf="service?.tagNames?.length" class="tag-list">
-              <span *ngFor="let tag of service?.tagNames"
-                    class="tag"
-                    (click)="search(tag)">
-          {{ tag }}
-              </span>
-              </div>-->
-      <tag-list [tags]="service?.tagNames ?? []" (tagClicked)="search($event)"></tag-list>
-
-      <ng-container *ngIf="discountedPrice !== null; else normalPrice">
-        <div class="price-container">
-          <div class="price-details">
-            <div class="original-price" style="text-decoration: line-through; color: grey;">
-              {{ service?.price }}€
             </div>
-            <div class="discounted-price" style="font-weight: bold;">
-              {{ discountedPrice }}€
-            </div>
-          </div>
-          <div class="discount-badge"
-               style="background-color: red; color: white; padding: 4px 8px; border-radius: 5px;">
-            -{{ service?.discount }}%
 
           </div>
 
-        </div>
+          <!--                COMENTADO PORQUE NAO SABEMOS SE VAMOS IMPLEMENTAR ALGUMA MANEIRA DE CONTACTAR O SERVICE-->
+          <!--                <span *ngIf="service!.negotiable" class="negotiable-label">-->
+          <!--                                NEGOTIABLE-->
+          <!--                            </span>-->
+        </ng-container>
 
-        <!--                COMENTADO PORQUE NAO SABEMOS SE VAMOS IMPLEMENTAR ALGUMA MANEIRA DE CONTACTAR O SERVICE-->
-        <!--                <span *ngIf="service!.negotiable" class="negotiable-label">-->
-        <!--                                NEGOTIABLE-->
-        <!--                            </span>-->
-      </ng-container>
-
-            <ng-template #normalPrice>
-                <div class="normal-price" style="font-weight: bold;">{{ service?.price }}€</div>
-            </ng-template>
+        <ng-template #normalPrice>
+          <div class="normal-price" style="font-weight: bold;">{{ service?.price }}€</div>
+        </ng-template>
       </div>
-            <button class="schedule-btn" (click)="onClick(service?.id)">Schedule Appointment</button>
+      <button class="schedule-btn"
+              (click)="onClick(service?.id)"
+              [disabled]="service?.status != 'APPROVED'"
+      >
+        Schedule Appointment
+      </button>
 
-        </div>
+    </div>
 
 
-      <div class="service-description">
+    <div class="service-description">
       <h3> Description</h3>
       <p>{{ service?.description }}</p>
     </div>
