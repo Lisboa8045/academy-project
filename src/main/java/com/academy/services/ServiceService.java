@@ -27,6 +27,7 @@ import com.academy.utils.Utils;
 import jakarta.transaction.Transactional;
 import org.apache.coyote.BadRequestException;
 import org.hibernate.collection.spi.PersistentBag;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -57,7 +58,7 @@ public class ServiceService {
 
     public ServiceService(ServiceRepository serviceRepository,
                           ServiceMapper serviceMapper,
-                          ServiceProviderService serviceProviderService,
+                          @Lazy ServiceProviderService serviceProviderService,
                           AuthenticationFacade authenticationFacade,
                           MemberService memberService,
                           TagService tagService,

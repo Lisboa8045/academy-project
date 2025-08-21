@@ -40,8 +40,9 @@ public abstract class AppointmentMapper {
     })
     public abstract AppointmentCalendarDTO toAppointmentCalendarDTO(Appointment appointment);
 
-    @Mapping(source="member.username", target = "memberUsername")
+    @Mapping(source = "member.username", target = "memberUsername")
     @Mapping(source = "member.profilePicture", target = "memberProfilePicture")
+    @Mapping(source = "member.id", target = "memberId")
     public abstract AppointmentReviewResponseDTO toReviewResponseDTO(Appointment appointment);
 
     @Named("mapEntityIdOrDefault")

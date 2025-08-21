@@ -53,7 +53,7 @@
     </div>
 
     <!-- Right side: Profile Form -->
-    <div class="profile-right" *ngIf="user">
+    <div class="profile-right" *ngIf="user && canEdit()">
       <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
 
         <div class="form-group">
