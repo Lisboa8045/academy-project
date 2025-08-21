@@ -49,7 +49,7 @@
 
     <div class="info-section">
       <div class="info-content">
-        <h2>{{ service?.name }}</h2>
+        <h2 class="service-title" [attr.title]="service?.name">{{ service?.name }}</h2>
         <div class="type-and-duration">
           <h3 (click)="searchServiceType(service?.serviceTypeName ?? '' )"
               class="clickable"

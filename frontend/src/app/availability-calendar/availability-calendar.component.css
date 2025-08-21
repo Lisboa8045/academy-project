@@ -16,6 +16,24 @@
   color: #333;
 }
 
+/* Taller rows for each 30-min slot */
+:host ::ng-deep .fc .fc-timegrid-slot,
+:host ::ng-deep .fc .fc-timegrid-slot-lane {
+  height: 3.25em; /* tweak to taste: 2.5em, 3em, 4em, etc. */
+}
+
+/* Vertically center the time labels to match the new row height */
+:host ::ng-deep .fc .fc-timegrid-slot-label-cushion {
+  line-height: 3.25em;
+}
+
+/* Make events themselves feel roomier */
+:host ::ng-deep .fc .fc-timegrid-event {
+  min-height: 32px;
+  padding: 6px 8px;
+  border-radius: 5px; /* optional, matches your style */
+}
+
 .save-button {
   padding: 8px 16px;
   font-size: 16px;

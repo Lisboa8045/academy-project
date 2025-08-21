@@ -6,6 +6,9 @@ import {AppointmentResponseDetailedDTO, AppointmentResponseDTO} from './appointm
 import {AppointmentQuery} from './appointment-query-service.model';
 import {Page} from './page.model';
 import {Review} from './review/review.model';
+export interface ConfirmAppointmentResponseDTO {
+  message: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -47,6 +50,10 @@ export class AppointmentService {
 
   cancelAppointment(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  finishAppointment(id: number) {
+    return this.http.post<ConfirmAppointmentResponseDTO>(`${this.apiUrl}/confirm-appointment/${id}`, null);
   }
 
   sendReview(id: number, review: Review): Observable<{ message: string }> {
