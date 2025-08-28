@@ -75,34 +75,29 @@ export const routes: Routes = [
   { path: 'my-services',
     component: MyServicesComponent,
     canActivate: [PermissionGuard],
-    data: { roles: ['ADMIN', 'WORKER']}
+    data: { roles: ['WORKER']}
   },
   { path: 'config',
     component: GlobalConfigurationEditComponent,
     canActivate: [PermissionGuard],
     data: { roles: ['ADMIN']}
   },
-  { path: 'availability-management',
-    component: LandingPageComponent, //TODO
-    canActivate: [PermissionGuard],
-    data: { roles: ['WORKER', 'ADMIN']}
-  },
   {
     path: 'backoffice/create-service',
     component: CreateServiceComponent,
     canActivate: [PermissionGuard],
-    data: {roles: ['WORKER', 'ADMIN']}
+    data: {roles: ['WORKER']}
   },
   { path: 'backoffice/services/:id',
     component: EditServiceComponent,
     canActivate: [PermissionGuard],
-    data: { roles: ['WORKER', 'ADMIN']}
+    data: { roles: ['WORKER']}
   },
   {
     path: 'my-calendar',
     component: CalendarComponent,
     canActivate: [PermissionGuard],
-    data: {roles: ['WORKER', 'ADMIN']}
+    data: {roles: ['WORKER']}
   },
   { path: '**', redirectTo: '', pathMatch: 'full' }
 ];

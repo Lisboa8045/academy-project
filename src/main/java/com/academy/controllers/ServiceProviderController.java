@@ -48,7 +48,7 @@ public class ServiceProviderController {
         return ResponseEntity.ok(serviceProviders);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or hasRole('WORKER')")
+    @PreAuthorize("hasRole('WORKER')")
     @PostMapping
     public ResponseEntity<ServiceProviderResponseDTO> createServiceProvider(
             @Valid @RequestBody ServiceProviderRequestDTO serviceProvider) throws BadRequestException {
@@ -57,7 +57,7 @@ public class ServiceProviderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdServiceProvider);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @serviceProviderSecurity.canUpdateServiceProvider(#id, authentication.name)")
+    @PreAuthorize("@serviceProviderSecurity.canUpdateServiceProvider(#id, authentication.name)")
     @PutMapping("/{id}")
     public ResponseEntity<ServiceProviderResponseDTO> updateServiceProvider(@PathVariable long id, @Valid @RequestBody ServiceProviderRequestDTO serviceProvider) {
         try {
@@ -68,7 +68,7 @@ public class ServiceProviderController {
         }
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @serviceProviderSecurity.isSelf(#id, authentication.name)")
+    @PreAuthorize("@serviceProviderSecurity.isSelf(#id, authentication.name)")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteServiceProvider(@PathVariable long id) throws BadRequestException {
         serviceProviderService.deleteServiceProvider(id);
