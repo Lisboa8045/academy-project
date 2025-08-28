@@ -7,18 +7,19 @@ import interactionPlugin from '@fullcalendar/interaction';
 import {CalendarOptions, DateSelectArg, EventApi, EventClickArg} from '@fullcalendar/core';
 import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {NgSelectComponent} from '@ng-select/ng-select';
-import {AvailabilityDTO, DateTimeRange} from './availability.models';
+import {AppointmentCalendarDTO, AvailabilityDTO, DateTimeRange} from './availability.models';
 import {AvailabilityService} from './availability.service';
 import {snackBarError} from '../shared/snackbar/snackbar-error';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {snackBarSuccess} from '../shared/snackbar/snackbar-success';
 import {AppointmentResponseDetailedDTO} from '../appointment/appointment-response-dto.model';
 import {AppointmentModalComponent} from '../appointment/appointment-modal/appointment-modal.component';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [CommonModule, FullCalendarModule, ReactiveFormsModule, NgSelectComponent, AppointmentModalComponent],
+  imports: [CommonModule, FullCalendarModule, ReactiveFormsModule, NgSelectComponent, AppointmentModalComponent, FormsModule],
   templateUrl: './availability-calendar.component.html',
   styleUrls: ['./availability-calendar.component.css']
 })
@@ -28,6 +29,14 @@ export class CalendarComponent implements OnInit, AfterViewInit {
   private originalAvailabilitySnapshot: { date: string, start: string, end: string }[] = [];
   selectedAppointment: AppointmentResponseDetailedDTO | null = null;
   showAppointmentModal = false;
+  viewMode: 'calendar' | 'list' = 'calendar';
+  fromDate: string | null = null;
+  toDate: string | null = null;
+  // list data & filters
+  appointments: AppointmentCalendarDTO[] = [];
+  listAppointments: AppointmentCalendarDTO[] = [];
+  statusFilter: 'ALL' | 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'FINISHED' = 'ALL';
+  dateSort: 'ASC' | 'DESC' = 'DESC';
 
   calendarOptions: CalendarOptions = {
     initialView: 'timeGridWeek',
@@ -119,6 +128,8 @@ export class CalendarComponent implements OnInit, AfterViewInit {
     // Load appointments as "busy"
     this.availabilityService.getAppointments().subscribe({
       next: (appointments) => {
+        this.appointments = appointments;
+        this.recomputeList();
         const calendarApi = this.calendarComponent.getApi();
         const calendarEvents = appointments.map(app => ({
           title: `${app.serviceName} ${app.status}`,
@@ -662,5 +673,49 @@ export class CalendarComponent implements OnInit, AfterViewInit {
       hours: date.getHours(),
       minutes: date.getMinutes()
     };
+  }
+
+  setView(mode: 'calendar' | 'list') {
+    this.viewMode = mode;
+  }
+
+  protected recomputeList() {
+    const base = this.statusFilter === 'ALL'
+      ? [...this.appointments]
+      : this.appointments.filter(a => a.status === this.statusFilter);
+
+    // apply period range
+    let filtered = base;
+    if (this.fromDate) {
+      const from = new Date(this.fromDate);
+      filtered = filtered.filter(a => new Date(a.startDateTime) >= from);
+    }
+    if (this.toDate) {
+      const to = new Date(this.toDate);
+      to.setHours(23, 59, 59, 999);
+      filtered = filtered.filter(a => new Date(a.startDateTime) <= to);
+    }
+
+    // sort by selected order (existing)
+    filtered.sort((a, b) => {
+      const da = new Date(a.startDateTime).getTime();
+      const db = new Date(b.startDateTime).getTime();
+      return this.dateSort === 'ASC' ? da - db : db - da;
+    });
+
+    this.listAppointments = filtered;
+  }
+
+  clearPeriod() {
+    this.fromDate = this.toDate = null;
+    this.recomputeList();
+
+    // also clear calendar constraint if applied
+    const api = this.calendarComponent?.getApi();
+    if (api) {
+      // remove validRange (cast because setOption expects specific type)
+      api.setOption('validRange', null as any);
+      setTimeout(() => api.updateSize());
+    }
   }
 }

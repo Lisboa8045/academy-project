@@ -155,6 +155,7 @@ public class MemberService {
         member.setEnabled(false);
         member.setStatus(MemberStatusEnum.WAITING_FOR_EMAIL_APPROVAL);
         member.setDeletionTokensSentToday(0);
+        member.setProfilePicture("placeholderavatar.png");
         LocalDateTime expirationDateTime = LocalDateTime.now().plusMinutes(
                 Integer.parseInt(globalConfigurationService.getConfigValue("confirmation_token_expiry_minutes")));
 
