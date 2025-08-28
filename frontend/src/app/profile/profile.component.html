@@ -159,14 +159,9 @@
     </app-confirmation-modal>
 </div>
   @if (user) {
-    <div class="card">
-      <h2 style="font-size: 30px; margin-top: 0; margin-bottom: 10px">{{user.username}}'s services</h2>
-      <app-my-services [memberIdInput]="user!.id"></app-my-services>
-    </div>
-
-    <div class="card">
-      <h2 style="font-size: 30px; margin-top: 0; margin-bottom: 10px">{{user.username}}'s reviews</h2>
-      <app-service-review [memberId]="user!.id"></app-service-review>
+    <app-my-services [member]="user" *ngIf="user.role=='WORKER'"></app-my-services>
+    <div *ngIf="user && user.role=='WORKER'" class="card">
+      <app-service-review [member]="user"></app-service-review>
     </div>
   }
 }

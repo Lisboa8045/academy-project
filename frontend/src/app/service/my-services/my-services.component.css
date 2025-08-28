@@ -1,23 +1,15 @@
-h2{
-  font-size: 40px;
-  margin: 0;
-}
-
 .new-service-btn{
-  font-size: 20px;
   font-family: 'Poppins', sans-serif;
   font-weight: bold;
   align-items: center;
-  gap: 6px;
   background-color: #3B82F6;
   color: white;
-  padding: 0.7rem 1.2rem;
   border: none;
-  border-radius: 1rem;
+  border-radius: 15px;
   cursor: pointer;
-  min-width: 100px;
   text-align: center;
   transition: background 0.3s, transform 0.3s;
+  padding: 15px;
 }
 
 .new-service-btn:hover{
@@ -25,8 +17,18 @@ h2{
   transform: scale(1.05);
 }
 
-.header-container{
+.header-container {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 10px;
 }
+
+.title{
+  margin-bottom: 1rem;
+  color: #007bff;
+  border-left: 5px solid #007bff;
+  padding-left: 1rem;
+  font-weight: 600;
+}
+

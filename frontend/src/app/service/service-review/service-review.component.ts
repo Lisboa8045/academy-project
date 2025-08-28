@@ -23,7 +23,7 @@ export class ServiceReviewComponent implements OnInit {
   private fetched = false;
   private apiUrl = 'http://localhost:8080/auth/uploads';
   @Input() serviceId?: number;
-  @Input() memberId?: number;
+  @Input() member : any;
   reviews?: ServiceAppointmentReviewModel[] = [];
 
   constructor(
@@ -64,8 +64,8 @@ export class ServiceReviewComponent implements OnInit {
           console.error("Error loading service reviews", err);
         }
       });
-    } else if (this.memberId) {
-      this.profileService.getReviewsByMemberId(this.memberId).subscribe({
+    } else if (this.member.id) {
+      this.profileService.getReviewsByMemberId(this.member.id).subscribe({
         next: (data) => {
           this.handleReviews(data);
         },
