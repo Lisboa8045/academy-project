@@ -14,12 +14,12 @@ export class AiService {
   }
 
   generateServiceImage(service: ServiceModelBasicInfo) {
-    const webhookUrl = 'http://localhost:5678/webhook-test/generate-service-image';
+    const webhookUrl = 'http://localhost:5678/webhook/generate-service-image';
     return this.http.post(webhookUrl, service, { responseType: 'blob' });
   }
 
   generateServiceTags(service: ServiceModelBasicInfo) {
-    const webhookUrl = 'http://localhost:5678/webhook-test/generate-service-tags';
+    const webhookUrl = 'http://localhost:5678/webhook/generate-service-tags';
     return this.http.post<string[]>(webhookUrl, service);
   }
 }

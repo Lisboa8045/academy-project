@@ -61,18 +61,19 @@ export class CreateServiceComponent implements OnInit {
   }
 
   addNewTag(): void {
-    let tagWasAdded = this.addTag(this.newTag);
+    let tagWasAdded = this.addTag(this.newTag, false);
     if (tagWasAdded) {
       this.newTag = '';
     }
   }
 
-  addTag(tagName: string) :boolean {
-    const trimmed = tagName.trim();
+  addTag(tagName: string, aiGenerated: boolean) :boolean {
+    const trimmed = tagName.trim().toLowerCase();
     if (trimmed && !this.tagNames.value.includes(trimmed)) {
       this.tagNames.push(this.fb.control(trimmed));
       return true;
     }
+    if (!aiGenerated) snackBarError(this.snackBar, 'Tag already exists.');
     return false;
   }
 
@@ -234,7 +235,7 @@ export class CreateServiceComponent implements OnInit {
       next: (tags) => {
         snackBarSuccess(this.snackBar, 'Tags Generated Successfully');
         tags.forEach(tag => {
-          this.addTag(tag);
+          this.addTag(tag, true);
         })
         this.generatingTags.set(false);
       },
