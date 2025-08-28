@@ -1,4 +1,4 @@
-import {Component, computed, effect, Input, signal} from '@angular/core';
+import {Component, effect, Input, signal} from '@angular/core';
 import {PagedResponse, ServiceApiService} from '../../shared/service-api.service';
 import {ServiceModel} from '../service.model';
 import {ControlsBarComponent} from '../search/controls-bar/controls-bar.component';
