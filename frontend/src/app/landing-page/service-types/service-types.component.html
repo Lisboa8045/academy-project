@@ -1,8 +1,90 @@
-<div class="type-card"
-     *ngFor="let type of serviceTypes$ | async"
-     (click)="onIconClick(type.name)">
-  <div class="type-icon">
-    <fa-icon [icon]="getIconTuple(type.icon)"></fa-icon>
+<ng-container *ngIf="serviceTypes$ | async as types">
+  <div class="snake-carousel" aria-label="Service types">
+    <!-- View all button -->
+    <button
+      class="view-all-btn"
+      type="button"
+      (click)="openAll()"
+      aria-haspopup="dialog"
+      [attr.aria-expanded]="isAllOpen"
+    >
+      View all
+    </button>
+
+    <!-- Row 1 (LTR) -->
+    <div class="row">
+      <div class="track track-ltr">
+        <ng-container *ngFor="let type of types">
+          <div class="type-card" (click)="onIconClick(type.name)">
+            <div class="type-icon">
+              <fa-icon [icon]="getIconTuple(type.icon)"></fa-icon>
+            </div>
+            <span>{{ type.name }}</span>
+          </div>
+        </ng-container>
+        <!-- duplicate once for seamless loop -->
+        <ng-container *ngFor="let type of types">
+          <div class="type-card" (click)="onIconClick(type.name)">
+            <div class="type-icon">
+              <fa-icon [icon]="getIconTuple(type.icon)"></fa-icon>
+            </div>
+            <span>{{ type.name }}</span>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- Row 2 (RTL) -->
+    <div class="row">
+      <div class="track track-rtl">
+        <ng-container *ngFor="let type of types">
+          <div class="type-card" (click)="onIconClick(type.name)">
+            <div class="type-icon">
+              <fa-icon [icon]="getIconTuple(type.icon)"></fa-icon>
+            </div>
+            <span>{{ type.name }}</span>
+          </div>
+        </ng-container>
+        <ng-container *ngFor="let type of types">
+          <div class="type-card" (click)="onIconClick(type.name)">
+            <div class="type-icon">
+              <fa-icon [icon]="getIconTuple(type.icon)"></fa-icon>
+            </div>
+            <span>{{ type.name }}</span>
+          </div>
+        </ng-container>
+      </div>
+    </div>
   </div>
-  <span>{{ type.name }}</span>
-</div>
+
+  <!-- Modal: all service types -->
+  <div
+    class="all-dialog"
+    *ngIf="isAllOpen"
+    role="dialog"
+    aria-modal="true"
+    aria-label="All service types"
+    (click)="closeAll()"
+  >
+    <div class="dialog-panel" (click)="$event.stopPropagation()">
+      <header class="dialog-header">
+        <h3>All service types</h3>
+        <button class="icon-btn" type="button" (click)="closeAll()" aria-label="Close">×</button>
+      </header>
+
+      <div class="types-grid">
+        <button
+          class="type-card type-card-btn"
+          *ngFor="let type of types"
+          (click)="onIconClick(type.name); closeAll()"
+          type="button"
+        >
+          <div class="type-icon">
+            <fa-icon [icon]="getIconTuple(type.icon)"></fa-icon>
+          </div>
+          <span>{{ type.name }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</ng-container>

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, HostListener} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LandingPageService } from '../landing-page.service';
 import { Observable } from 'rxjs';
@@ -17,6 +17,7 @@ import { fas } from '@fortawesome/free-solid-svg-icons';
 })
 export class ServiceTypesComponent {
   serviceTypes$: Observable<ServiceTypeModel[]>;
+  isAllOpen = false;
 
   constructor(
     private landingService: LandingPageService,
@@ -39,6 +40,22 @@ export class ServiceTypesComponent {
     this.router.navigate(['/services'], {
       queryParams: { serviceType: type }
     });
+  }
+
+  openAll() {
+    this.isAllOpen = true;
+    // Optional: lock page scroll when modal is open
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeAll() {
+    this.isAllOpen = false;
+    document.body.style.overflow = '';
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  onEsc(ev: KeyboardEvent) {
+    if (this.isAllOpen) this.closeAll();
   }
 
 }
