@@ -243,6 +243,7 @@ export class ProfileComponent implements OnInit {
         next: () => {
           if (this.upgradeWorkerRole) {
             snackBarSuccess(this.snackBar, 'Member is now a Worker');
+            this.authStore.setRole('WORKER');
             this.toggleUpgradeRoleEditMode();
           } else {
             snackBarSuccess(this.snackBar, 'Member Updated Successfully');
