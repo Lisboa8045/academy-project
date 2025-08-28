@@ -171,7 +171,7 @@ export class ProfileComponent implements OnInit {
 
     const { maxSizeMB, maxWidth, maxHeight } = this.appConfigService.imageUploadConfig;
     if (file.size > maxSizeMB * 1024 * 1024) {
-      alert(this.appConfigService.messages.fileTooLarge(maxSizeMB));
+      snackBarError(this.snackBar, this.appConfigService.messages.fileTooLarge(maxSizeMB));
     }
 
     const img = new Image();
@@ -179,7 +179,7 @@ export class ProfileComponent implements OnInit {
     img.src = objectUrl;
     img.onload = () => {
       if (img.width > maxWidth || img.height > maxHeight) {
-        alert(this.appConfigService.messages.imageTooBig(maxWidth, maxHeight));
+        snackBarError(this.snackBar, this.appConfigService.messages.imageTooBig(maxWidth, maxHeight));
         input.value = '';
         URL.revokeObjectURL(objectUrl);
         return;
