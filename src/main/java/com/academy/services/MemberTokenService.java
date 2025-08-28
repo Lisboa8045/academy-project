@@ -6,6 +6,7 @@ import com.academy.models.token.MemberToken;
 import com.academy.models.token.TokenTypeEnum;
 import com.academy.repositories.MemberTokenRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -72,5 +73,12 @@ public class MemberTokenService {
     @Transactional
     public void deleteAllByTokenTypeForMember(Member member, TokenTypeEnum tokenType) {
         memberTokenRepository.deleteByMemberAndTokenType(member, tokenType);
+    }
+
+    @Transactional
+    @Scheduled(cron = "0 0 0 * * ?") // Every day at midnight
+    public void deleteOldExpiredTokens() {
+        LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1);
+        memberTokenRepository.deleteAllExpiredTokensBefore(oneWeekAgo);
     }
 }

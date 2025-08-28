@@ -5,6 +5,7 @@ import com.academy.models.member.MemberStatusEnum;
 import com.academy.models.token.MemberToken;
 import com.academy.models.token.TokenTypeEnum;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -32,4 +33,8 @@ public interface MemberTokenRepository extends JpaRepository<MemberToken, Long> 
     Optional<MemberToken> findByRawValueAndTokenType(String rawValue, TokenTypeEnum tokenType);
 
     void deleteByMemberAndTokenType(Member member, TokenTypeEnum tokenType);
+
+    @Modifying
+    @Query("DELETE FROM MemberToken t WHERE t.expirationDate < :threshold")
+    void deleteAllExpiredTokensBefore(@Param("threshold") LocalDateTime threshold);
 }
