@@ -14,6 +14,7 @@ import com.academy.dtos.register.RecreateConfirmationTokenRequestDto;
 import com.academy.dtos.register.RecreateConfirmationTokenResponseDto;
 import com.academy.dtos.register.RegisterRequestDto;
 import com.academy.dtos.register.RegisterResponseDto;
+import com.academy.exceptions.MaxTokensException;
 import com.academy.services.MemberService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -106,7 +107,11 @@ public class AuthController {
     @PostMapping("/password-reset-token")
     public ResponseEntity<CreatePasswordResetTokenResponseDto> createPasswordResetToken(
             @RequestBody CreatePasswordResetTokenRequestDto request) {
-        memberService.createPasswordResetToken(request.email());
+        try {
+            memberService.createPasswordResetToken(request.email());
+        } catch (MaxTokensException ignored) {
+            // Always return success response to avoid leaking info
+        }
         return ResponseEntity.ok(new CreatePasswordResetTokenResponseDto("Password reset token created"));
     }
 }
