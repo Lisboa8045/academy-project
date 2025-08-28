@@ -19,7 +19,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Query("SELECT s FROM Service s WHERE s.owner.id = :memberId")
     List<Service> findOwnerServices(@Param("memberId") Long memberId);
 
-    List<Member> searchMemberByUsernameContainsIgnoreCaseAndRoleName(String username, String roleName);
+    List<Member> searchMemberByUsernameContainsIgnoreCaseAndRoleNameAndEnabled(String username, String roleName, boolean enabled);
 
     @Modifying
     @Query("UPDATE Member m SET m.deletionTokensSentToday = 0")
