@@ -400,7 +400,7 @@ public class ServiceService {
                 .orElseThrow(() -> new EntityNotFoundException(Service.class, serviceId));
         return service.getServiceProviders().stream()
                 .flatMap(sp -> sp.getAppointmentList().stream())
-                .filter(app -> app.getComment() != null)
+                .filter(app -> app.getComment() != null || app.getRating() != null)
                 .map(appointmentMapper::toReviewResponseDTO)
                 .toList();
     }
