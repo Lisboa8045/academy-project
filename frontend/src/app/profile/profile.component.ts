@@ -99,7 +99,9 @@ export class ProfileComponent implements OnInit {
         this.loading.set(false);
         this.user = res;
         this.userProfileService.getImage(res.profilePicture).then((url) => {
-          this.imageUrl.set(url);
+          const safeUrl = url ?? "";
+          this.imageUrl.set(safeUrl);
+          this.authStore.setProfilePicture(safeUrl);
         });
         this.loadForm(this.user);
       },
@@ -225,57 +227,56 @@ export class ProfileComponent implements OnInit {
   }
 
   onSubmit(): void {
-
     if (this.profileForm.invalid) {
       this.profileForm.markAllAsTouched();
       return;
     }
 
     const updatedUser: Partial<MemberResponseDTO> = this.profileForm.value;
+
+    const doUpdateMember = () => {
+      const payload = this.upgradeWorkerRole
+          ? { ...updatedUser, roleId: 3 }
+          : updatedUser;
+
+      this.profileService.updateMember(payload, this.authStore.id()).subscribe({
+        next: () => {
+          if (this.upgradeWorkerRole) {
+            snackBarSuccess(this.snackBar, 'Member is now a Worker');
+            this.toggleUpgradeRoleEditMode();
+          } else {
+            snackBarSuccess(this.snackBar, 'Member Updated Successfully');
+            this.toggleEdit();
+          }
+          this.authStore.setUsername(updatedUser.username ?? "");
+          this.getMember(this.authStore.id()); // refresh view
+        },
+        error: (err) => {
+          snackBarError(this.snackBar, 'Member Update failed. ' + err.error);
+          console.error(err);
+        }
+      });
+    };
+
     if (this.tempImageUrl()) {
       const formData = new FormData();
       formData.append('file', this.selectedFile!);
+
       this.profileService.uploadProfilePicture(formData, this.authStore.id()).subscribe({
         next: () => {
           this.authStore.setProfilePicture(this.tempImageUrl());
+          doUpdateMember();
         },
         error: (err) => {
-          alert('Upload failed.');
+          snackBarError(this.snackBar, 'Upload failed. ' + err.error);
           console.error(err);
-        }
-      });
-    }
-    if (!this.upgradeWorkerRole) {
-
-      this.profileService.updateMember(updatedUser, this.authStore.id()).subscribe({
-        next: (res) => {
-          snackBarSuccess(this.snackBar, 'Member Updated Successfully');
-          this.getMember(this.authStore.id());
-          this.toggleEdit();
-        },
-        error: (err) => {
-          snackBarError(this.snackBar, 'Member Update failed. ' + err.error);
         }
       });
     } else {
-      const upgradeUser: Partial<MemberResponseDTO> = {
-        ...updatedUser,
-        roleId: 3
-      }
-
-      this.profileService.updateMember(upgradeUser, this.authStore.id()).subscribe({
-        next: (res) => {
-          snackBarSuccess(this.snackBar, 'Member is now a Worker');
-          this.getMember(this.authStore.id());
-          this.toggleUpgradeRoleEditMode();
-        },
-        error: (err) => {
-          snackBarError(this.snackBar, 'Member Update failed. ' + err.error);
-          console.error(err);
-        }
-      });
+      doUpdateMember();
     }
   }
+
 
   logout() {
     this.authService.logout().subscribe({
@@ -286,8 +287,6 @@ export class ProfileComponent implements OnInit {
       error: (err) => console.error('Logout failed', err)
     });
   }
-
-  protected readonly UserProfileService = UserProfileService;
 
   canEdit(): Boolean{
     return this.user ? this.authStore.id() === this.user.id : false;
