@@ -6,10 +6,10 @@ import com.academy.models.service.Service;
 import com.academy.models.member.MemberStatusEnum;
 import com.academy.models.service.ServiceStatusEnum;
 import com.academy.repositories.MemberRepository;
+import com.academy.repositories.MemberTokenRepository;
 import com.academy.repositories.ServiceProviderRepository;
 
 import com.academy.repositories.ServiceRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +25,7 @@ public class AccountCleanupService {
     private String deletedUserId;
 
     private final MemberRepository memberRepository;
+    private final MemberTokenRepository memberTokenRepository;
     private final ServiceProviderRepository serviceProviderRepository;
     private final AppointmentCleanupService appointmentCleanupService;
     private final ServiceRepository serviceRepository;
@@ -32,8 +33,7 @@ public class AccountCleanupService {
     @Transactional
     public void cleanupExpiredAccounts() {
         Member deletedMember = getDeleteMember();
-        // Using the new repository method
-        List<Member> expiredMembers = memberRepository.findExpiredForDeletion(
+        List<Member> expiredMembers = memberTokenRepository.findMembersWithExpiredRevertDeletionTokens(
                 MemberStatusEnum.PENDING_DELETION,
                 LocalDateTime.now()
         );
