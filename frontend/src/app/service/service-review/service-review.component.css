@@ -1,7 +1,5 @@
 .reviews-section {
-  padding: 1.5rem;
   background-color: #fff;
-  padding: 1rem;
   border-radius: 1rem;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
   transition: transform 0.3s ease;
@@ -97,4 +95,12 @@
   white-space: nowrap;
   margin-top: -3rem;
   margin-right: 2rem;
+}
+
+.title{
+    margin-bottom: 1rem;
+    color: #007bff;
+    border-left: 5px solid #007bff;
+    padding-left: 1rem;
+    font-weight: 600;
 }
