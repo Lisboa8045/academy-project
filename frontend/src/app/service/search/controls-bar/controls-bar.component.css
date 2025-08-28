@@ -1,11 +1,12 @@
 .controls-bar {
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
     align-items: center;
     margin-bottom: 1rem;
     padding: 0.5rem;
     border-radius: 0.5rem;
     margin-top: 10px;
+  font-family: 'Poppins', sans-serif;
 }
 
 .control-group {
@@ -19,4 +20,5 @@
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
     border: 1px solid #ccc;
+    font-family: 'Poppins', sans-serif;
 }
