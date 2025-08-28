@@ -28,9 +28,11 @@ export class AppComponent implements OnInit {
         this.authStore.setId(res.id);
         this.authStore.setProfilePicture(res.profilePicture);
         this.authStore.setRole(res.role);
+        this.authStore.markLoaded();
       },  error: err => {
         console.warn('Auto-login failed', err.status, err.message);
         this.authStore.clear();
+        this.authStore.markLoaded();
         //this.router.navigate(['/auth']);
       }
     });
