@@ -37,6 +37,13 @@ export class MyServicesComponent{
     this.loading.set(true);
     effect(() => {
       const id = this.memberId();
+      if (id === -1) {
+        this.services.set([]);
+        this.totalPages.set(0);
+        this.currentPage.set(0);
+        this.loading.set(false);
+        return;
+      }
       if (id !== undefined && id !== null && id > 0) {
         this.fetchServices(this.buildQuery({ page: 0 }));
       }
@@ -62,8 +69,6 @@ export class MyServicesComponent{
         },
       });
     }
-
-
 
   buildQuery(overrides: Partial<ServiceQuery> = {}): ServiceQuery {
     return {

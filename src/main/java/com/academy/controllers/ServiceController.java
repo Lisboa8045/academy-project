@@ -39,7 +39,7 @@ public class ServiceController {
         this.serviceService = serviceService;
     }
 
-    @PreAuthorize("hasRole('ADMIN') or hasRole('WORKER')")
+    @PreAuthorize("hasRole('WORKER')")
     @PostMapping
     public ResponseEntity<ServiceResponseDTO> create(@Valid @RequestBody ServiceRequestDTO dto) throws AuthenticationException, BadRequestException {
         return ResponseEntity.ok(serviceService.create(dto));
@@ -106,7 +106,7 @@ public class ServiceController {
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasRole('ADMIN') or hasRole('WORKER')")
+    @PreAuthorize("hasRole('WORKER')")
     @PatchMapping("/{id}")
     public ResponseEntity<ServiceResponseDTO> updatePermissions(
             @PathVariable Long id,
@@ -119,12 +119,14 @@ public class ServiceController {
         return ResponseEntity.ok(serviceService.getServicesByMemberId(id, pageable));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/approve-service/{id}")
     public ResponseEntity<Void> approveService(@PathVariable Long id){
         serviceService.approveService(id);
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/reject-service/{id}")
     public ResponseEntity<Void> rejectService(@PathVariable Long id){
         serviceService.rejectService(id);

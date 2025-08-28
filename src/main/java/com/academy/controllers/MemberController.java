@@ -39,7 +39,7 @@ public class MemberController {
         this.jwtCookieUtil = jwtCookieUtil;
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @memberSecurity.isSelf(#id, authentication.name)")
+    @PreAuthorize("@memberSecurity.isSelf(#id, authentication.name)")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMember(@PathVariable Long id) {
         memberService.deleteMember(id);

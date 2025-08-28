@@ -1,5 +1,7 @@
 package com.academy.models.token;
 
 public enum TokenTypeEnum {
-    CONFIRMATION_TOKEN
+    EMAIL_CONFIRMATION,
+    PASSWORD_RESET,
+    ACCOUNT_DELETION
 }
