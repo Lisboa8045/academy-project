@@ -43,6 +43,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/logout").authenticated()
                         .requestMatchers("/auth/uploads/profile-picture").authenticated()
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/chatbot/**").permitAll()
                         .requestMatchers("/").permitAll()
                         .requestMatchers(HttpMethod.GET, "/admin/global_configurations/{configKey}").permitAll()
                         .requestMatchers(HttpMethod.GET, "/members/**").permitAll()
