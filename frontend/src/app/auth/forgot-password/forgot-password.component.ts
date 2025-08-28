@@ -1,7 +1,6 @@
 import {Component, inject} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {Router} from '@angular/router';
 import {AuthService} from '../auth.service';
 
 @Component({
@@ -13,7 +12,6 @@ import {AuthService} from '../auth.service';
 })
 export class ForgotPasswordComponent {
   private fb = inject(FormBuilder);
-  private router = inject(Router);
   private authService = inject(AuthService);
 
   forgotForm: FormGroup = this.fb.group({
