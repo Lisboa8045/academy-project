@@ -472,7 +472,7 @@ public class MemberService {
         if (tokenType == TokenTypeEnum.ACCOUNT_DELETION) {
             int dailyTokens = Integer.parseInt(globalConfigurationService.getConfigValue("account_deletion_daily_tokens"));
             int sentTokens = member.getDeletionTokensSentToday();
-            if ((sentTokens + 1) > dailyTokens) {
+            if (sentTokens >= dailyTokens) {
                 throw new MaxDailyTokensException("Maximum number of daily " + tokenType.name().toLowerCase().replace("_", " ") + " requests reached. Please try again tomorrow.");
             }
             else
