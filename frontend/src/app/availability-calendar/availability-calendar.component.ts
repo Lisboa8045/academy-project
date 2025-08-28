@@ -100,7 +100,7 @@ export class CalendarComponent implements OnInit, AfterViewInit {
     PENDING: '#f0ad4e',    // Softer amber
     CONFIRMED: '#2ecc71',  // Lighter green
     CANCELLED: '#e74c3c',  // Bright red
-    FINISHED: '#95a5a6',   // Muted gray-blue
+    FINISHED: '#03ac4b',   // Muted gray-blue
   };
   availableColor = '#3B82F6';
 
