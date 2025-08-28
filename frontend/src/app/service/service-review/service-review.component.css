@@ -6,12 +6,12 @@
 }
 
 .review {
-  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
   padding: 1rem 0;
 }
 
-.review:first-child {
-  border-top: none;
+.review:last-child {
+  border-bottom: none;
 }
 
 .review-header {

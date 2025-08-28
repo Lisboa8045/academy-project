@@ -4,6 +4,7 @@ import {ServiceAppointmentReviewModel} from '../service-details/service-appointm
 import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
 import {ProfileService} from '../../profile/profile.service';
 import {RouterLink} from '@angular/router';
+import {MemberResponseDTO} from '../../auth/member-response-dto.model';
 
 @Component({
   selector: 'app-service-review',
@@ -23,7 +24,7 @@ export class ServiceReviewComponent implements OnInit {
   private fetched = false;
   private apiUrl = 'http://localhost:8080/auth/uploads';
   @Input() serviceId?: number;
-  @Input() member : any;
+  @Input() member : MemberResponseDTO | undefined;
   reviews?: ServiceAppointmentReviewModel[] = [];
 
   constructor(
@@ -64,7 +65,7 @@ export class ServiceReviewComponent implements OnInit {
           console.error("Error loading service reviews", err);
         }
       });
-    } else if (this.member.id) {
+    } else if (this.member?.id) {
       this.profileService.getReviewsByMemberId(this.member.id).subscribe({
         next: (data) => {
           this.handleReviews(data);
