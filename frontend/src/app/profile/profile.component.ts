@@ -66,7 +66,7 @@ export class ProfileComponent implements OnInit {
     effect(() => {
       if (this.route.snapshot.paramMap.get('id')) return;
       const id = this.authStore.id();
-      if (id > -1) {
+      if (id > 0) {
         this.loading.set(true);
         this.getMember(id);
       }
@@ -76,15 +76,21 @@ export class ProfileComponent implements OnInit {
   ngOnInit() {
     this.loading.set(true);
     const idParam = this.route.snapshot.paramMap.get('id');
+    let id: number;
+
     if (idParam) {
-      const id = Number(idParam);
-      if (!isNaN(id)) {
-        this.getMember(id);
-      }
+      id = Number(idParam);
     } else {
-      this.getMember(this.authStore.id());
+      id = this.authStore.id();
     }
-    this.loading.set(false);
+
+    if (!id || id <= 0) {
+      this.loading.set(false);
+      this.router.navigate(['/not-found']);
+      return;
+    }
+
+    this.getMember(id);
   }
 
   getMember(id: number) {
@@ -100,6 +106,7 @@ export class ProfileComponent implements OnInit {
       error: (err: any) => {
         this.loading.set(false);
         console.error('Member Retrieval Failed', err);
+        this.router.navigate(['/not-found']);
       }
     });
   }
@@ -118,15 +125,6 @@ export class ProfileComponent implements OnInit {
 
     this.profileForm.disable();
   }
-
-  /*private passwordsMatchValidator(group: AbstractControl): ValidationErrors | null {
-    const password = group.get('newPassword')?.value;
-    const confirm = group.get('confirmPassword')?.value;
-    if (!password || !confirm) return null;
-    return password === confirm ? null : { passwordsMismatch: true };
-  }
-
-   */
 
   private updatePasswordValidators() {
     if (this.editPasswordMode) {
