@@ -152,8 +152,17 @@
     </div>
 
     <div class="card">
-      <h2 style="font-size: 30px; margin-top: 0; margin-bottom: 10px">{{user.username}}'s reviews</h2>
+      <div class="title-row" style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 30px;">
+          {{ user.username }}'s reviews
+        </h2>
+        @if (this.hasReviews) {
+          <app-review-analyse/>
+        }
+      </div>
+
       <app-service-review [memberId]="user!.id"></app-service-review>
     </div>
+
   }
 }

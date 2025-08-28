@@ -43,6 +43,7 @@
 .review-comment {
   margin-top: 0.5rem;
   color: #555;
+  word-break: break-all;
 }
 
 .star-rating span {

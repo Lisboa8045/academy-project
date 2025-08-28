@@ -1,11 +1,11 @@
-import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, OnInit, signal, ViewChild} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FullCalendarComponent, FullCalendarModule} from '@fullcalendar/angular';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import {CalendarOptions, DateSelectArg, EventApi, EventClickArg} from '@fullcalendar/core';
-import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {NgSelectComponent} from '@ng-select/ng-select';
 import {AvailabilityDTO, DateTimeRange} from './availability.models';
 import {AvailabilityService} from './availability.service';
@@ -28,6 +28,8 @@ export class CalendarComponent implements OnInit, AfterViewInit {
   private originalAvailabilitySnapshot: { date: string, start: string, end: string }[] = [];
   selectedAppointment: AppointmentResponseDetailedDTO | null = null;
   showAppointmentModal = false;
+  eventToDelete = signal<any | null>(null);
+  showDeleteModal = signal(false);
 
   calendarOptions: CalendarOptions = {
     initialView: 'timeGridWeek',
@@ -106,6 +108,7 @@ export class CalendarComponent implements OnInit, AfterViewInit {
     private fb: FormBuilder,
     private availabilityService: AvailabilityService,
     private snackBar: MatSnackBar,
+    private cdr: ChangeDetectorRef
   ) {
     this.replicateForm = this.fb.group({
       sourceDate: ['', Validators.required],
@@ -589,10 +592,9 @@ export class CalendarComponent implements OnInit, AfterViewInit {
         container.addEventListener('mouseleave', () => deleteBtn.style.display = 'none');
         deleteBtn.addEventListener('click', (e) => {
           e.stopPropagation();
-          if (confirm('Delete this availability?')) {
-            event.remove();
-            this.forceHeaderRerender();
-          }
+          this.openDeleteModal(event);
+          this.cdr.detectChanges();
+
         });
         container.appendChild(deleteBtn);
       }
@@ -601,6 +603,25 @@ export class CalendarComponent implements OnInit, AfterViewInit {
     container.appendChild(titleEl);
 
     return {domNodes: [container]};
+  }
+
+  openDeleteModal(event: any) {
+    this.eventToDelete.set(event);
+    this.showDeleteModal.set(true);
+  }
+
+  confirmDelete() {
+    const event = this.eventToDelete();
+    if (event) {
+      event.remove();
+      this.forceHeaderRerender();
+    }
+    this.closeDeleteModal();
+  }
+
+  closeDeleteModal() {
+    this.showDeleteModal.set(false);
+    this.eventToDelete.set(null);
   }
 
   // ────────────── Utility Methods ──────────────

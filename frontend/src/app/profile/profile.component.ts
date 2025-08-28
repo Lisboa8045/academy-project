@@ -1,23 +1,24 @@
-import {Component, effect, inject, OnInit, signal, WritableSignal} from '@angular/core';
+import {Component, effect, OnInit, signal, WritableSignal} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import { ProfileService } from './profile.service';
-import { AuthStore } from '../auth/auth.store';
-import { AuthService } from '../auth/auth.service';
-import { LoadingComponent } from '../loading/loading.component';
-import { MemberResponseDTO } from '../auth/member-response-dto.model';
-import { UserProfileService } from './user-profile.service';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import {ProfileService} from './profile.service';
+import {AuthStore} from '../auth/auth.store';
+import {AuthService} from '../auth/auth.service';
+import {LoadingComponent} from '../loading/loading.component';
+import {MemberResponseDTO} from '../auth/member-response-dto.model';
+import {UserProfileService} from './user-profile.service';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {CommonModule, DecimalPipe, NgIf} from '@angular/common';
-import { AppConfigService } from '../shared/app-config.service';
-import { strongPasswordValidator } from '../shared/validators/password.validator';
-import { noSpecialCharsValidator } from '../shared/validators/no-special-chars.validator';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { snackBarSuccess } from '../shared/snackbar/snackbar-success';
-import { snackBarError } from '../shared/snackbar/snackbar-error';
+import {AppConfigService} from '../shared/app-config.service';
+import {strongPasswordValidator} from '../shared/validators/password.validator';
+import {noSpecialCharsValidator} from '../shared/validators/no-special-chars.validator';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {snackBarSuccess} from '../shared/snackbar/snackbar-success';
+import {snackBarError} from '../shared/snackbar/snackbar-error';
 import {passwordsMatchValidator} from '../shared/validators/password-match-validator';
 import {MyServicesComponent} from '../service/my-services/my-services.component';
 import {ServiceReviewComponent} from '../service/service-review/service-review.component';
 import {snackBarInfo} from '../shared/snackbar/snackbar-info';
+import {ReviewAnalyseComponent} from '../service/review-analyse/review-analyse/review-analyse.component';
 
 @Component({
   selector: 'app-profile',
@@ -28,7 +29,8 @@ import {snackBarInfo} from '../shared/snackbar/snackbar-info';
     MyServicesComponent,
     ServiceReviewComponent,
     DecimalPipe,
-    CommonModule
+    CommonModule,
+    ReviewAnalyseComponent
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
@@ -43,6 +45,7 @@ export class ProfileComponent implements OnInit {
   editPasswordMode = false;
   selectedFile: File | null = null;
   upgradeWorkerRole = false;
+  hasReviews = false;
 
   constructor(
     private fb: FormBuilder,
@@ -73,6 +76,7 @@ export class ProfileComponent implements OnInit {
     } else {
       this.getMember(this.authStore.id());
     }
+    this.getReviews();
     this.loading.set(false);
   }
 
@@ -91,6 +95,14 @@ export class ProfileComponent implements OnInit {
         console.error('Member Retrieval Failed', err);
       }
     });
+  }
+
+  getReviews() {
+    this.profileService.getReviewsByMemberId(this.authStore.id()).subscribe({
+      next: (res) => {
+        this.hasReviews = res.length > 0;
+      }
+    })
   }
 
   loadForm(user: MemberResponseDTO) {
@@ -278,8 +290,6 @@ export class ProfileComponent implements OnInit {
       error: (err) => console.error('Logout failed', err)
     });
   }
-
-  protected readonly UserProfileService = UserProfileService;
 
   canEdit(): Boolean{
     return this.user ? this.authStore.id() === this.user.id : false;

@@ -67,6 +67,8 @@
 
 .modal {
   background: white;
+  flex-direction: column;
+  gap: 1rem;
   padding: 1rem;
   border-radius: 8px;
   width: 250px;
@@ -74,6 +76,23 @@
 
 .modal-title {
   text-align: center;
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #333;
+  transition: color 0.2s;
+  align-self: flex-start;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
 }
 
 

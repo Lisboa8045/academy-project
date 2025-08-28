@@ -1,0 +1,29 @@
+<div class="button-container">
+  <button class="ai-button" (click)="analyzeReviews()" [disabled]="loading()">
+
+    <i class="fas fa-microchip"></i> Reviews Analysis
+  </button>
+  <span *ngIf="loading()" class="spinner"></span>
+</div>
+@if (showModal() && result()) {
+  <div class="modal-backdrop">
+    <div class="modal">
+      <button class="modal-close" (click)="closeModal()">×</button>
+
+      <h3>Reviews Analysis</h3>
+
+      <h4>Introduction</h4>
+      <p>{{ result()?.introduction }}</p>
+
+      <h4>Strengths</h4>
+      <p>{{ result()?.positive }}</p>
+
+      <h4>Weaknesses</h4>
+      <p>{{ result()?.negative }}</p>
+
+      <h4>To improve</h4>
+      <p>{{ result()?.conclusion }}</p>
+
+    </div>
+  </div>
+}
