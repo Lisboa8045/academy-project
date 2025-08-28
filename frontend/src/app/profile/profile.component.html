@@ -45,6 +45,9 @@
           <div class="validation-error" *ngIf="profileForm.get('username')?.errors?.['required'] && profileForm.get('username')?.touched">
             Username is required.
           </div>
+            <div class="validation-error" *ngIf="(profileForm.get('username')?.errors?.['minlength'] || profileForm.get('username')?.errors?.['maxlength']) && profileForm.get('username')?.touched">
+                Username must be between 4 and 20 characters.
+            </div>
           <div class="validation-error" *ngIf="profileForm.get('username')?.errors?.['specialCharsNotAllowed'] && profileForm.get('username')?.touched">
             Username must not contain special characters.
           </div>
@@ -93,6 +96,9 @@
             <div class="validation-error" *ngIf="profileForm.get('newPassword')?.errors?.['required'] && profileForm.get('newPassword')?.touched">
               New password is required.
             </div>
+              <div class="validation-error" *ngIf="(profileForm.get('newPassword')?.errors?.['minlength'] || profileForm.get('newPassword')?.errors?.['maxlength']) && profileForm.get('newPassword')?.touched">
+                  Password must be between 8 and 64 characters.
+              </div>
             <div class="validation-error" *ngIf="profileForm.get('newPassword')?.errors?.['weakPassword'] && profileForm.get('newPassword')?.touched">
               Password must include uppercase, lowercase, digit, and special character.
             </div>

@@ -113,7 +113,7 @@ export class ProfileComponent implements OnInit {
 
   loadForm(user: MemberResponseDTO) {
     this.profileForm = this.fb.group({
-      username: [user.username, [Validators.required, noSpecialCharsValidator()]],
+      username: [user.username, [Validators.required, noSpecialCharsValidator(), Validators.minLength(4), Validators.maxLength(20)]],
       email: [user.email, Validators.required],
       address: [user.address],
       postalCode: [user.postalCode, Validators.pattern(/^[0-9]{4}-[0-9]{3}$/)],
@@ -129,8 +129,8 @@ export class ProfileComponent implements OnInit {
   private updatePasswordValidators() {
     if (this.editPasswordMode) {
       this.profileForm.get('oldPassword')?.setValidators([Validators.required]);
-      this.profileForm.get('newPassword')?.setValidators([Validators.required, strongPasswordValidator()]);
-      this.profileForm.get('confirmPassword')?.setValidators([Validators.required]);
+      this.profileForm.get('newPassword')?.setValidators([Validators.required, Validators.minLength(8), Validators.maxLength(64), strongPasswordValidator()]);
+      this.profileForm.get('confirmPassword')?.setValidators([Validators.required, Validators.maxLength(64)]);
     } else {
       this.profileForm.get('oldPassword')?.clearValidators();
       this.profileForm.get('newPassword')?.clearValidators();

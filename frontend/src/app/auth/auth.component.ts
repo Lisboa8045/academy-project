@@ -13,7 +13,6 @@ import {Router, RouterLink} from '@angular/router';
 import {strongPasswordValidator} from '../shared/validators/password.validator';
 import {noSpecialCharsValidator} from '../shared/validators/no-special-chars.validator';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {snackBarSuccess} from '../shared/snackbar/snackbar-success';
 
 @Component({
   selector: 'app-auth',
