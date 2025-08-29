@@ -2,9 +2,9 @@
   overflow-x: auto;
   overflow-y: visible;
   width: 100%;
-  padding-bottom: 1rem;
   scrollbar-width: thin;
   scrollbar-color: #5c6bc0 #f3f5fb;
+  padding: 5px;
 }
 
 .carousel-track {
@@ -57,16 +57,15 @@
   opacity: 0.92;
 }
 .carousel-arrow.left {
-  left: 12px;
+  left: -50px;
 }
 .carousel-arrow.right {
-  right: 12px;
+  right: -50px;
 }
 .carousel-arrow:hover {
   background: #3b2ff5;
   color: #fff;
   box-shadow: 0 6px 24px #3b2ff533;
-  transform: scale(1.08);
 }
 
 .carousel-wrapper {
