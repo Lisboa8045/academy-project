@@ -75,6 +75,12 @@ export class ScheduleComponent implements OnInit {
     this.organizeSlotsByDay();
   }
 
+  goToCurrentWeek() {
+    this.currentWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+    this.currentWeekEnd = endOfWeek(new Date(), { weekStartsOn: 1 });
+    this.updateWeekDays();
+  }
+
   goToNextWeek() {
     this.currentWeekStart = addDays(this.currentWeekStart, 7);
     this.currentWeekEnd = addDays(this.currentWeekEnd, 7);

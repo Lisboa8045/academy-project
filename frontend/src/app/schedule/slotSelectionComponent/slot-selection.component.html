@@ -14,7 +14,10 @@
     {{ provider }}
   </button>
 </div>
-<app-week-navigation></app-week-navigation>
+<app-week-navigation (onNextWeekEmitter)="this.nextWeek.emit()"
+                     (onPreviousWeekEmitter)="this.previousWeek.emit()"
+                     (onCurrentWeekEmitter)="this.currentWeek.emit()"
+></app-week-navigation>
 <h3>Calendar</h3>
 <div class="weekly-slots">
   <div class="day-column"

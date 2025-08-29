@@ -1,5 +1,5 @@
 
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit, output} from '@angular/core';
 import { WeekNavigationService } from '../week-navigation.service';
 import {DatePipe} from '@angular/common';
 
@@ -16,6 +16,10 @@ export class WeekNavigationComponent implements OnInit {
   currentWeekStart!: Date;
   currentWeekEnd!: Date;
 
+  onPreviousWeekEmitter = output<void>();
+  onNextWeekEmitter = output<void>();
+  onCurrentWeekEmitter = output<void>();
+
   constructor(private weekNavigationService: WeekNavigationService) {}
 
   ngOnInit() {
@@ -28,13 +32,16 @@ export class WeekNavigationComponent implements OnInit {
 
   onPreviousWeek() {
     this.weekNavigationService.goToPreviousWeek();
+    this.onPreviousWeekEmitter.emit();
   }
 
   onNextWeek() {
     this.weekNavigationService.goToNextWeek();
+    this.onNextWeekEmitter.emit();
   }
 
   onCurrentWeek() {
     this.weekNavigationService.resetToCurrentWeek();
+    this.onCurrentWeekEmitter.emit();
   }
 }
