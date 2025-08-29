@@ -1,4 +1,4 @@
-import {Component, computed, inject} from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {Router, RouterModule} from '@angular/router';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
@@ -18,7 +18,6 @@ import {UserProfileService} from '../profile/user-profile.service';
 export class AppHeaderComponent {
   readonly username = inject(AuthStore).username;
   readonly imageUrl = inject(UserProfileService).imageUrl;
-  readonly isAdmin = computed(() => this.authStore.role() === 'ADMIN');
 
   form = new FormGroup({
     query: new FormControl('')

@@ -8,6 +8,8 @@ export class AuthStore {
   readonly profilePicture = signal<string>("");
   readonly role = signal<string>("");
 
+  readonly loaded = signal(false);
+
   constructor(private readonly userProfileService: UserProfileService) {
     effect(() => {
 
@@ -45,4 +47,6 @@ export class AuthStore {
     this.profilePicture.set("");
     this.role.set('');
   }
+
+  markLoaded() { this.loaded.set(true); }
 }
