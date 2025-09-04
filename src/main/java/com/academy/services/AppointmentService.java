@@ -228,7 +228,7 @@ public class AppointmentService {
         if (!AppointmentStatus.PENDING.equals(appointment.getStatus()))
             throw new BadRequestException("Appointment can't be confirmed with status " + appointment.getStatus());
 
-        appointment.setStatus(AppointmentStatus.CONFIRMED);
+        appointment.setStatus(AppointmentStatus.FINISHED);
         appointmentRepository.save(appointment);
         sendNotificationToProviderConfirmedAppointment(appointment);
         return ResponseEntity.ok(new ConfirmAppointmentResponseDTO("Appointment confirmed successfully"));

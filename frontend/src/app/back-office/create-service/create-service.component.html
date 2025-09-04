@@ -9,7 +9,7 @@
         <label>Name:</label>
         <input placeholder="Enter Service Name" formControlName="name"/>
         <div class="validation-error" *ngIf="form.get('name')?.invalid && form.get('name')?.touched">
-          Name is required
+          Name is required and should be less than 60 characters.
         </div>
       </div>
 
@@ -17,7 +17,7 @@
         <label>Description:</label>
         <textarea formControlName="description"></textarea>
         <div class="validation-error" *ngIf="form.get('description')?.invalid && form.get('description')?.touched">
-          Description should exist and be less than 2000 characters.
+          Description is required and should be less than 2000 characters.
         </div>
       </div>
       <div class="input-wrapper">
@@ -97,6 +97,16 @@
               </div>
             </div>
           </div>
+          <div *ngIf="form.enabled" class="button-wrapper">
+            <button type="button"
+                    (click)="generateImage()"
+                    class="ai-button"
+                    [disabled]="generatingImage()"
+            >
+              {{ generatingImage() ? 'Generating Image...' : 'Generate Image with AI' }}
+            </button>
+            <span *ngIf="generatingImage()" class="spinner"></span>
+          </div>
         </div>
         <div class="tag-section">
           <!-- Input to add a new tag -->
@@ -104,10 +114,10 @@
             type="text"
             [(ngModel)]="newTag"
             [ngModelOptions]="{ standalone: true }"
-            (keyup.enter)="addTag()"
+            (keyup.enter)="addNewTag()"
             placeholder="Add a tag"
           />
-          <button type="button" (click)="addTag()">Add Tag</button>
+          <button type="button" (click)="addNewTag()" class="edit-button">Add Tag</button>
 
           <!-- Display tags -->
           <div class="tags-container">
@@ -121,6 +131,16 @@
                 ></fa-icon>
               </span>
             }
+          </div>
+          <div *ngIf="form.enabled" class="button-wrapper">
+            <button type="button"
+                    (click)="generateTags()"
+                    class="ai-button"
+                    [disabled]="generatingTags()"
+            >
+              {{ generatingTags() ? 'Generating Tags...' : 'Generate Tags with AI' }}
+            </button>
+            <span *ngIf="generatingTags()" class="spinner"></span>
           </div>
         </div>
       </div>
@@ -143,6 +163,6 @@
       </div>
     </fieldset>
 
-    <button type="submit" [disabled]="form.invalid">Submit</button>
+    <button type="submit" [disabled]="form.invalid" class="edit-button">Submit</button>
   </form>
 </div>

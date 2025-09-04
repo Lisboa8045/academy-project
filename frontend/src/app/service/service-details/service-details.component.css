@@ -302,6 +302,7 @@ app-service-review {
   border-radius: 1rem;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
   transition: transform 0.3s ease;
+  word-break: break-all;
 }
 
 .service-description:hover {
@@ -334,4 +335,22 @@ app-service-review {
 .clickable:hover {
   text-decoration: underline;
   color: #0056b3; /* darker blue on hover */
+}
+
+.service-title {
+  font-size: 2rem;
+  line-height: 1.2;
+  margin: 0;
+
+  /* multi-line clamp to 2 lines with ellipsis */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;    /* Chrome/Safari/Edge */
+  line-clamp: 2;            /* spec-ish, harmless elsewhere */
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  /* allow breaking very long words/strings */
+  overflow-wrap: anywhere;  /* modern */
+  word-break: break-word;   /* fallback */
 }

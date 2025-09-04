@@ -20,6 +20,7 @@ import {ConfirmationModalComponent} from '../shared/confirmation-component/confi
 import {MemberStatusEnum} from '../models/member-status-enum.model';
 import {ServiceReviewComponent} from '../service/service-review/service-review.component';
 import {snackBarInfo} from '../shared/snackbar/snackbar-info';
+import {ReviewAnalyseComponent} from '../service/review-analyse/review-analyse/review-analyse.component';
 import {CountdownSnackbarComponent} from '../shared/snackbar/count-down-snackbar';
 
 @Component({
@@ -33,7 +34,8 @@ import {CountdownSnackbarComponent} from '../shared/snackbar/count-down-snackbar
     MyServicesComponent,
     ServiceReviewComponent,
     DecimalPipe,
-    CommonModule
+    CommonModule,
+    ReviewAnalyseComponent
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
@@ -51,6 +53,7 @@ export class ProfileComponent implements OnInit {
 
   protected readonly MemberStatusEnum = MemberStatusEnum;
   upgradeWorkerRole = false;
+  hasReviews = false;
 
   constructor(
     private fb: FormBuilder,
@@ -66,7 +69,7 @@ export class ProfileComponent implements OnInit {
     effect(() => {
       if (this.route.snapshot.paramMap.get('id')) return;
       const id = this.authStore.id();
-      if (id > -1) {
+      if (id > 0) {
         this.loading.set(true);
         this.getMember(id);
       }
@@ -76,15 +79,23 @@ export class ProfileComponent implements OnInit {
   ngOnInit() {
     this.loading.set(true);
     const idParam = this.route.snapshot.paramMap.get('id');
+    let id: number;
+
     if (idParam) {
-      const id = Number(idParam);
-      if (!isNaN(id)) {
-        this.getMember(id);
-      }
+      id = Number(idParam);
     } else {
-      this.getMember(this.authStore.id());
+      id = this.authStore.id();
     }
-    this.loading.set(false);
+    this.getReviews();
+
+
+    if (!id || id <= 0) {
+      this.loading.set(false);
+      this.router.navigate(['/not-found']);
+      return;
+    }
+
+    this.getMember(id);
   }
 
   getMember(id: number) {
@@ -93,20 +104,31 @@ export class ProfileComponent implements OnInit {
         this.loading.set(false);
         this.user = res;
         this.userProfileService.getImage(res.profilePicture).then((url) => {
-          this.imageUrl.set(url);
+          const safeUrl = url ?? "";
+          this.imageUrl.set(safeUrl);
+          this.userProfileService.setImageUrl(safeUrl);
         });
         this.loadForm(this.user);
       },
       error: (err: any) => {
         this.loading.set(false);
         console.error('Member Retrieval Failed', err);
+        this.router.navigate(['/not-found']);
       }
     });
   }
 
+  getReviews() {
+    this.profileService.getReviewsByMemberId(this.authStore.id()).subscribe({
+      next: (res) => {
+        this.hasReviews = res.length > 0;
+      }
+    })
+  }
+
   loadForm(user: MemberResponseDTO) {
     this.profileForm = this.fb.group({
-      username: [user.username, [Validators.required, noSpecialCharsValidator()]],
+      username: [user.username, [Validators.required, noSpecialCharsValidator(), Validators.minLength(4), Validators.maxLength(20)]],
       email: [user.email, Validators.required],
       address: [user.address],
       postalCode: [user.postalCode, Validators.pattern(/^[0-9]{4}-[0-9]{3}$/)],
@@ -119,20 +141,11 @@ export class ProfileComponent implements OnInit {
     this.profileForm.disable();
   }
 
-  /*private passwordsMatchValidator(group: AbstractControl): ValidationErrors | null {
-    const password = group.get('newPassword')?.value;
-    const confirm = group.get('confirmPassword')?.value;
-    if (!password || !confirm) return null;
-    return password === confirm ? null : { passwordsMismatch: true };
-  }
-
-   */
-
   private updatePasswordValidators() {
     if (this.editPasswordMode) {
       this.profileForm.get('oldPassword')?.setValidators([Validators.required]);
-      this.profileForm.get('newPassword')?.setValidators([Validators.required, strongPasswordValidator()]);
-      this.profileForm.get('confirmPassword')?.setValidators([Validators.required]);
+      this.profileForm.get('newPassword')?.setValidators([Validators.required, Validators.minLength(8), Validators.maxLength(64), strongPasswordValidator()]);
+      this.profileForm.get('confirmPassword')?.setValidators([Validators.required, Validators.maxLength(64)]);
     } else {
       this.profileForm.get('oldPassword')?.clearValidators();
       this.profileForm.get('newPassword')?.clearValidators();
@@ -227,57 +240,57 @@ export class ProfileComponent implements OnInit {
   }
 
   onSubmit(): void {
-
     if (this.profileForm.invalid) {
       this.profileForm.markAllAsTouched();
       return;
     }
 
     const updatedUser: Partial<MemberResponseDTO> = this.profileForm.value;
+
+    const doUpdateMember = () => {
+      const payload = this.upgradeWorkerRole
+          ? { ...updatedUser, roleId: 3 }
+          : updatedUser;
+
+      this.profileService.updateMember(payload, this.authStore.id()).subscribe({
+        next: () => {
+          if (this.upgradeWorkerRole) {
+            snackBarSuccess(this.snackBar, 'Member is now a Worker');
+            this.authStore.setRole('WORKER');
+            this.toggleUpgradeRoleEditMode();
+          } else {
+            snackBarSuccess(this.snackBar, 'Member Updated Successfully');
+            this.toggleEdit();
+          }
+          this.authStore.setUsername(updatedUser.username ?? "");
+          this.getMember(this.authStore.id()); // refresh view
+        },
+        error: (err) => {
+          snackBarError(this.snackBar, 'Member Update failed. ' + err.error);
+          console.error(err);
+        }
+      });
+    };
+
     if (this.tempImageUrl()) {
       const formData = new FormData();
       formData.append('file', this.selectedFile!);
+
       this.profileService.uploadProfilePicture(formData, this.authStore.id()).subscribe({
         next: () => {
           this.authStore.setProfilePicture(this.tempImageUrl());
+          doUpdateMember();
         },
         error: (err) => {
-          alert('Upload failed.');
+          snackBarError(this.snackBar, 'Upload failed. ' + err.error);
           console.error(err);
-        }
-      });
-    }
-    if (!this.upgradeWorkerRole) {
-
-      this.profileService.updateMember(updatedUser, this.authStore.id()).subscribe({
-        next: (res) => {
-          snackBarSuccess(this.snackBar, 'Member Updated Successfully');
-          this.getMember(this.authStore.id());
-          this.toggleEdit();
-        },
-        error: (err) => {
-          snackBarError(this.snackBar, 'Member Update failed. ' + err.error);
         }
       });
     } else {
-      const upgradeUser: Partial<MemberResponseDTO> = {
-        ...updatedUser,
-        roleId: 3
-      }
-
-      this.profileService.updateMember(upgradeUser, this.authStore.id()).subscribe({
-        next: (res) => {
-          snackBarSuccess(this.snackBar, 'Member is now a Worker');
-          this.getMember(this.authStore.id());
-          this.toggleUpgradeRoleEditMode();
-        },
-        error: (err) => {
-          snackBarError(this.snackBar, 'Member Update failed. ' + err.error);
-          console.error(err);
-        }
-      });
+      doUpdateMember();
     }
   }
+
 
   logout() {
     this.authService.logout().subscribe({
@@ -288,8 +301,6 @@ export class ProfileComponent implements OnInit {
       error: (err) => console.error('Logout failed', err)
     });
   }
-
-  protected readonly UserProfileService = UserProfileService;
 
   canEdit(): Boolean{
     return this.user ? this.authStore.id() === this.user.id : false;

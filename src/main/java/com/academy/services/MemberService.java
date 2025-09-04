@@ -279,7 +279,7 @@ public class MemberService {
     }
 
     public List<Member> searchByUsernameAndRole(String username, String roleName) {
-        return memberRepository.searchMemberByUsernameContainsIgnoreCaseAndRoleName(username, roleName);
+        return memberRepository.searchMemberByUsernameContainsIgnoreCaseAndRoleNameAndEnabled(username, roleName, true);
     }
 
     public Optional<Member> findbyId(long memberId) {

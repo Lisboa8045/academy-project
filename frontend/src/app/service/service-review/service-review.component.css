@@ -36,13 +36,14 @@
   color: #FFD700;
 }
 
-.review-stars .empty {
+.review-stars .empty-star {
   color: #ccc;
 }
 
 .review-comment {
   margin-top: 0.5rem;
   color: #555;
+  word-break: break-all;
 }
 
 .star-rating span {
@@ -54,7 +55,7 @@
   color: #FFD700;
 }
 
-.star-rating .empty {
+.empty-star {
   color: #ccc;
 }
 

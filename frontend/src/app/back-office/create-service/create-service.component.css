@@ -8,6 +8,17 @@
   gap: 2rem;
 }
 
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.header button {
+  margin: .25rem;
+}
+
 fieldset{
   display: flex;
   flex-direction: column;
@@ -72,7 +83,8 @@ label, span{
   font-family: 'Poppins', sans-serif;
 }
 
-button {
+.edit-button,
+.submit-button, .cancel-button{
   background-color: #3B82F6;
   color: white;
   padding: 0.7rem 1.2rem;
@@ -90,6 +102,43 @@ button {
   gap: 8px;
 }
 
+.button-wrapper{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ai-button {
+  background: linear-gradient(45deg, #d58eff, #ff6ed1, #8c00ff, #ff4dd2);
+  background-size: 400% 400%;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 25px;
+  font-weight: bold;
+  cursor: pointer;
+  animation: gradientShift 3s ease infinite;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.ai-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 20px #ff6ed1, 0 0 40px #d58eff;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 .spinner {
   width: 18px;
   height: 18px;
@@ -97,6 +146,11 @@ button {
   border-top: 2px solid #007bff;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .image-section {
@@ -120,7 +174,7 @@ button {
   align-items: center;
   overflow: hidden;
   border-radius: 10px;
-
+  margin-bottom: .5rem;
 
 }
 .main-image {
@@ -183,7 +237,7 @@ button {
 .image-hover-container {
   position: relative;
   width: 700px;
-  height: 400px;
+  height: 415px;
 }
 
 .thumbnails-overlay {
@@ -247,14 +301,18 @@ button {
   color: #2563EB;
 }
 
+.tag-section {
+  max-height: 415px;
+}
+
 .tags-container {
   margin-top: 0.5rem;
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  max-height: 100%;
+  max-height: 310px;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: scroll;
   box-sizing: border-box;
 }
 
@@ -267,7 +325,6 @@ button {
   border-radius: 16px;
   font-size: 14px;
   align-items: center;
-  max-width: 150px;
   box-sizing: border-box;
 }
 
@@ -293,6 +350,11 @@ button {
   gap: 1rem;
 }
 
+.thumbnail-container {
+  position: relative;
+  display: inline-block;
+}
+
 .image-icon-container {
   z-index: 10;
 }
@@ -304,4 +366,3 @@ button {
 .image-icon:hover {
   scale: 150%;
 }
-

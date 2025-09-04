@@ -22,6 +22,7 @@ export class SlotSelectionComponent {
   @Output() providerFilter = new EventEmitter<string | null>();
   @Output() previousWeek = new EventEmitter<void>();
   @Output() nextWeek = new EventEmitter<void>();
+  @Output() currentWeek = new EventEmitter<void>();
   @Output() slotSelected = new EventEmitter<SlotModel>();
   @Output() backToServices = new EventEmitter<void>();
 

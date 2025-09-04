@@ -38,7 +38,7 @@ public class Service extends BaseEntity {
     private String name;
 
     @Lob
-    @Column(name="description")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @ManyToOne(fetch = FetchType.EAGER)
