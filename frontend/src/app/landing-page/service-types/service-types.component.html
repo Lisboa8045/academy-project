@@ -37,7 +37,7 @@
     <!-- Row 2 (RTL) -->
     <div class="row">
       <div class="track track-rtl">
-        <ng-container *ngFor="let type of types">
+        <ng-container *ngFor="let type of types | shiftArray:types.length/2">
           <div class="type-card" (click)="onIconClick(type.name)">
             <div class="type-icon">
               <fa-icon [icon]="getIconTuple(type.icon)"></fa-icon>
@@ -45,7 +45,7 @@
             <span>{{ type.name }}</span>
           </div>
         </ng-container>
-        <ng-container *ngFor="let type of types">
+        <ng-container *ngFor="let type of types | shiftArray:types.length/2">
           <div class="type-card" (click)="onIconClick(type.name)">
             <div class="type-icon">
               <fa-icon [icon]="getIconTuple(type.icon)"></fa-icon>

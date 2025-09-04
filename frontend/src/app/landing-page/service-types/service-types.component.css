@@ -122,11 +122,11 @@
 /* Motion settings; tweak duration to taste */
 .track-ltr {
   animation: marquee-ltr linear infinite;
-  animation-duration: 22s; /* adjust for speed */
+  animation-duration: 60s; /* adjust for speed */
 }
 .track-rtl {
   animation: marquee-rtl linear infinite;
-  animation-duration: 24s; /* slightly different for a natural feel */
+  animation-duration: 60s; /* slightly different for a natural feel */
 }
 
 /* Pause a row when hovered */
@@ -188,10 +188,6 @@ h3 {
 }
 
 /* Responsive speeds: slower on big screens for elegance, faster on mobile */
-@media (min-width: 768px) {
-  .track-ltr { animation-duration: 100s; }
-  .track-rtl { animation-duration: 100s; }
-}
 @media (max-width: 480px) {
   .type-card { min-width: 96px; }
   .type-icon { font-size: 28px; }

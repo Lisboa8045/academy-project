@@ -7,11 +7,12 @@ import {Router} from '@angular/router';
 import {FaIconComponent, FaIconLibrary, FontAwesomeModule} from '@fortawesome/angular-fontawesome';
 import {IconProp} from '@fortawesome/fontawesome-svg-core';
 import { fas } from '@fortawesome/free-solid-svg-icons';
+import {ShiftArrayPipe} from '../../shared/pipes/shift-array.pipe';
 
 @Component({
   selector: 'app-service-types',
   standalone: true,
-  imports: [CommonModule, FaIconComponent],
+  imports: [CommonModule, FaIconComponent, ShiftArrayPipe],
   templateUrl: './service-types.component.html',
   styleUrls: ['./service-types.component.css']
 })
