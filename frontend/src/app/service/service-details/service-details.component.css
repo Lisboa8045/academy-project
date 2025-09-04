@@ -1,9 +1,10 @@
 .service-page {
   display: grid;
   grid-template-columns: 2.5fr 0.5fr;
-  grid-template-rows: 500px auto auto; /* Add rows as needed */
-  align-items: stretch; /* Ensures both items stretch equally */
+  grid-template-rows: 500px auto auto;
+  align-items: center;
   gap: 2rem;
+  padding-top: 0;
 }
 
 .image-section {
@@ -185,7 +186,6 @@ app-service-review {
 }
 
 .info-section h2 {
-  font-size: 2rem;
   line-height: 1.2;
 }
 .info-section h3{
@@ -216,19 +216,18 @@ app-service-review {
 .original-price {
   text-decoration: line-through;
   color: #999;
-  font-size: 1.2rem;
 }
 
 .discounted-price {
   color: #d32f2f;
   font-weight: bold;
-  font-size: 3rem;
+  font-size: 2rem;
   margin-left: 1rem;
   margin-top: 0rem;
 }
 
 .normal-price {
-  font-size: 3em;
+  font-size: 2em;
   font-weight: bold;
   color: #222;
 }
@@ -298,32 +297,27 @@ app-service-review {
   grid-column: 1 / 3;
   grid-row: 2 / 3;
   background-color: #fff;
-  padding: 1rem;
+  padding: 2rem;
   border-radius: 1rem;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
   transition: transform 0.3s ease;
   word-break: break-all;
 }
 
-.service-description:hover {
-  transform: translateY(-3px);
-}
-
-.service-description h3 {
-  font-size: 1.8rem;
+.service-description h2 {
   margin-bottom: 1rem;
   color: #007bff;
   border-left: 5px solid #007bff;
   padding-left: 1rem;
   font-weight: 600;
+  margin-top: 0;
 }
 
 .service-description p {
-  margin-left: 1.5rem;
-  font-size: 1.1rem;
   line-height: 1.8;
   color: #444;
   text-align: justify;
+  font-family: 'Poppins', sans-serif;
 }
 
 .clickable {
@@ -335,6 +329,16 @@ app-service-review {
 .clickable:hover {
   text-decoration: underline;
   color: #0056b3; /* darker blue on hover */
+}
+
+.service-reviews-card {
+  grid-column: 1 / 3;
+  grid-row: 3 / 4;
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease;
 }
 
 .service-title {

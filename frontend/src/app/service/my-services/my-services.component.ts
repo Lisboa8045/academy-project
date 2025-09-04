@@ -1,4 +1,4 @@
-import {Component, computed, effect, Input, signal} from '@angular/core';
+import {Component, effect, Input, signal} from '@angular/core';
 import {PagedResponse, ServiceApiService} from '../../shared/service-api.service';
 import {ServiceModel} from '../service.model';
 import {ControlsBarComponent} from '../search/controls-bar/controls-bar.component';
@@ -24,37 +24,45 @@ import {RouterLink} from '@angular/router';
   ]
 })
 export class MyServicesComponent{
-  @Input() memberIdInput : number | undefined;
-  memberId = computed(() => this.memberIdInput ?? this.authStore.id());
+  @Input() member : any;
+  memberId! : number;
   services = signal<ServiceModel[]>([]);
   loading = signal(false);
   currentPage = signal(0);
   totalPages = signal(0);
   pageSize = signal(10);
   sortOrder = signal("price,asc");
+  isMyServices = false;
 
   constructor(private serviceApiService: ServiceApiService, private authStore: AuthStore) {
     this.loading.set(true);
     effect(() => {
-      const id = this.memberId();
-      if (id === -1) {
+      if (this.member ===  undefined) {
+        this.memberId = this.authStore.id();
+        this.isMyServices = true;
+      } else {
+        this.memberId = this.member.id;
+      }
+
+      if (this.memberId === -1) {
         this.services.set([]);
         this.totalPages.set(0);
         this.currentPage.set(0);
         this.loading.set(false);
         return;
       }
-      if (id !== undefined && id !== null && id > 0) {
+
+      if (this.memberId !== undefined && this.memberId !== null && this.memberId > 0) {
         this.fetchServices(this.buildQuery({ page: 0 }));
       }
     });
   }
 
     fetchServices(query: ServiceQuery){
-      this.serviceApiService.getServicesOfMember(query, this.memberId()).subscribe({
+      this.serviceApiService.getServicesOfMember(query, this.memberId).subscribe({
         next: (res: PagedResponse) => {
           let services = res.content;
-          if (this.memberIdInput) {
+          if (this.memberId) {
             services = services.filter(service => service.status == 'APPROVED');
           }
           this.services.set(services);

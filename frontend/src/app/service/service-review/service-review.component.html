@@ -1,22 +1,28 @@
-<div class="reviews-section" *ngIf="reviews && reviews.length > 0">
-  <h3>Reviews</h3>
+  <div  *ngIf="reviews && reviews.length > 0">
+    <div class="review-title-container">
+      <h2 class="title">
+        {{ member?.username ? member?.username + "'s Reviews" : 'Reviews' }}
+      </h2>
+      @if (this.hasReviews && isProfile) {
+        <app-review-analyse></app-review-analyse>
+      }
+    </div>
+    <div *ngFor="let review of reviews; let i = index" class="review">
+      <div class="review-header">
+        <div class="reviewer-info">
+          <div class="profile-and-name">
+            <a [routerLink]="'/profile/' + review.memberId">
+              <img
+                *ngIf="imageUrls[i]; else placeholder"
+                [src]="imageUrls[i]"
+                alt="🧑"
+                class="profile-picture"
+              />
+            </a>
 
-  <div *ngFor="let review of reviews; let i = index" class="review">
-    <div class="review-header">
-      <div class="reviewer-info">
-        <div class="profile-and-name">
-          <a [routerLink]="'/profile/' + review.memberId">
-            <img
-              *ngIf="imageUrls[i]; else placeholder"
-              [src]="imageUrls[i]"
-              alt="🧑"
-              class="profile-picture"
-            />
-          </a>
-
-          <ng-template #placeholder>
-            <span class="profile-picture placeholder-emoji">🧑</span>
-          </ng-template>
+            <ng-template #placeholder>
+              <span class="profile-picture placeholder-emoji">🧑</span>
+            </ng-template>
 
           <span class="reviewer-name">{{ review.memberUsername }}</span>
         </div>
@@ -29,14 +35,18 @@
         </div>
       </div>
 
-      <span class="review-date">{{ review.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+        <span class="review-date">{{ review.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
 
+      </div>
+      <p class="review-comment">{{ review.comment }}</p>
     </div>
-    <p class="review-comment">{{ review.comment }}</p>
   </div>
-</div>
 
-<div class="reviews-section" *ngIf="reviews && reviews.length === 0">
-  <h3>Reviews</h3>
-  <p>This service doesn't have any reviews yet.</p>
-</div>
+  <div *ngIf="reviews && reviews.length === 0">
+    <h2 class="title" style="margin-top: 0; margin-bottom: 10px">
+      {{ member?.username ? member?.username + "'s reviews" : 'Reviews' }}
+    </h2>
+    <p style="font-family: 'Poppins', sans-serif;">
+      There aren't any reviews available.
+    </p>
+  </div>

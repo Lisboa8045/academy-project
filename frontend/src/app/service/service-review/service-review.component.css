@@ -1,19 +1,17 @@
 .reviews-section {
-  padding: 1.5rem;
   background-color: #fff;
-  padding: 1rem;
   border-radius: 1rem;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
   transition: transform 0.3s ease;
 }
 
 .review {
-  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
   padding: 1rem 0;
 }
 
-.review:first-child {
-  border-top: none;
+.review:last-child {
+  border-bottom: none;
 }
 
 .review-header {
@@ -21,6 +19,22 @@
   justify-content: space-between;
   align-items: center;
 }
+
+.review-title-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px; /* space under title row */
+}
+
+.title {
+  margin: 0;
+  color: #007bff;
+  border-left: 5px solid #007bff;
+  padding-left: 1rem;
+  font-weight: 600;
+}
+
 
 .reviewer-name {
   font-weight: bold;
@@ -98,4 +112,12 @@
   white-space: nowrap;
   margin-top: -3rem;
   margin-right: 2rem;
+}
+
+.title{
+    margin-bottom: 1rem;
+    color: #007bff;
+    border-left: 5px solid #007bff;
+    padding-left: 1rem;
+    font-weight: 600;
 }

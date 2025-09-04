@@ -4,6 +4,9 @@ import {ServiceAppointmentReviewModel} from '../service-details/service-appointm
 import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
 import {ProfileService} from '../../profile/profile.service';
 import {RouterLink} from '@angular/router';
+import {MemberResponseDTO} from '../../auth/member-response-dto.model';
+import {AuthStore} from '../../auth/auth.store';
+import {ReviewAnalyseComponent} from '../review-analyse/review-analyse/review-analyse.component';
 
 @Component({
   selector: 'app-service-review',
@@ -12,7 +15,8 @@ import {RouterLink} from '@angular/router';
     NgForOf,
     NgIf,
     DatePipe,
-    RouterLink
+    RouterLink,
+    ReviewAnalyseComponent
   ],
   templateUrl: './service-review.component.html',
   styleUrl: './service-review.component.css'
@@ -23,14 +27,25 @@ export class ServiceReviewComponent implements OnInit {
   private fetched = false;
   private apiUrl = 'http://localhost:8080/auth/uploads';
   @Input() serviceId?: number;
-  @Input() memberId?: number;
+  @Input() member : MemberResponseDTO | undefined;
   reviews?: ServiceAppointmentReviewModel[] = [];
+  hasReviews = false;
+  @Input() isProfile?: boolean;
+
 
   constructor(
     private serviceApiService: ServiceApiService,
-    private profileService: ProfileService
+    private profileService: ProfileService,
+    private authStore: AuthStore,
   ) {
+  }
 
+  getReviews() {
+    this.profileService.getReviewsByMemberId(this.authStore.id()).subscribe({
+      next: (res) => {
+        this.hasReviews = res.length > 0;
+      }
+    })
   }
 
   async loadReviewImage(fileName: string): Promise<string | null> {
@@ -64,8 +79,8 @@ export class ServiceReviewComponent implements OnInit {
           console.error("Error loading service reviews", err);
         }
       });
-    } else if (this.memberId) {
-      this.profileService.getReviewsByMemberId(this.memberId).subscribe({
+    } else if (this.member?.id) {
+      this.profileService.getReviewsByMemberId(this.member.id).subscribe({
         next: (data) => {
           this.handleReviews(data);
         },
@@ -74,6 +89,7 @@ export class ServiceReviewComponent implements OnInit {
         }
       });
     }
+    this.getReviews();
   }
 
   private handleReviews(data: ServiceAppointmentReviewModel[]) {
