@@ -38,6 +38,10 @@ export class UserProfileService {
       .catch(() => null);
   }
 
+  setImageUrl(url: string | null) {
+    this._imageUrl.set(url);
+  }
+
   revoke() {
     const current = this._imageUrl();
     if (current) URL.revokeObjectURL(current);

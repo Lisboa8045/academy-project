@@ -19,16 +19,16 @@
               <span class="profile-picture placeholder-emoji">🧑</span>
             </ng-template>
 
-            <span class="reviewer-name">{{ review.memberUsername }}</span>
-          </div>
-          <div class="star-rating">
-            <ng-container *ngFor="let star of [1,2,3,4,5]">
-              <span [ngClass]="{'filled': star ===1 || star <= review.rating, 'empty': star > review.rating && star!==1}">
-                &#9733;
-              </span>
-            </ng-container>
-          </div>
+          <span class="reviewer-name">{{ review.memberUsername }}</span>
         </div>
+        <div class="star-rating">
+          <ng-container *ngFor="let star of [1,2,3,4,5]">
+            <span [ngClass]="{'filled': star ===1 || star <= review.rating, 'empty-star': star > review.rating && star!==1}">
+              &#9733;
+            </span>
+          </ng-container>
+        </div>
+      </div>
 
         <span class="review-date">{{ review.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
 
@@ -45,4 +45,3 @@
       There aren't any reviews available.
     </p>
   </div>
-

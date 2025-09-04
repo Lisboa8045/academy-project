@@ -1,62 +1,174 @@
-<div class="content card">
+<div class="tailwind-scope">
+  <div class="content card">
     <div class="content-header">
-        <h2>
-            My calendar
-        </h2>
-        @if (canSave()) {
-            <button (click)="saveAvailability()" class="save-button">
-                💾 Save Availability
-            </button>
-        }
-    </div>
-    <div class="calendar-container">
-        <full-calendar #calendar [options]="calendarOptions"></full-calendar>
+      <h2>My calendar</h2>
+
+      <div class="right-side-controls">
+        <div class="view-toggle" aria-label="Toggle view">
+          <button
+            class="icon-btn"
+            [class.active]="viewMode === 'calendar'"
+            (click)="setView('calendar')"
+            title="Calendar view"
+          >
+            📅
+          </button>
+          <button
+            class="icon-btn"
+            [class.active]="viewMode === 'list'"
+            (click)="setView('list')"
+            title="List view"
+          >
+            📋
+          </button>
+        </div>
+
+        <button *ngIf="canSave()" (click)="saveAvailability()" class="save-button">
+          💾 Save Availability
+        </button>
+      </div>
     </div>
 
-    <div *ngIf="showRepeatModal" class="modal-overlay">
+    <!-- CALENDAR VIEW -->
+    <ng-container>
+      <div [hidden]="viewMode === 'list'" class="calendar-container">
+        <full-calendar #calendar [options]="calendarOptions"></full-calendar>
+      </div>
+
+      <!-- repeat modal -->
+      <div *ngIf="showRepeatModal" class="modal-overlay">
         <div class="modal-content">
-            <h3>Repeat availability from {{ selectedRepeatDate }}</h3>
-            <form [formGroup]="replicateForm" (ngSubmit)="submitModalRepeat()">
-                <label>
-                    Repeat from:
-                    <input type="date" formControlName="startDate" [min]="todayString" required/>
-                </label>
-                <label>
-                    To:
-                    <input type="date" formControlName="endDate"  [min]="replicateForm.value.startDate || todayString" required/>
-                </label>
-                <ng-select
-                        [items]="weekDays"
-                        bindLabel="label"
-                        bindValue="value"
-                        [multiple]="true"
-                        formControlName="repeatDays"
-                        placeholder="Repeat on...">
-                </ng-select>
-                <div class="modal-actions">
-                    <button type="submit" [disabled]="replicateForm.invalid">Confirm</button>
-                    <button type="button" (click)="closeRepeatModal()">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    <div *ngIf="conflictModalVisible" class="modal-overlay">
-        <div class="modal-content">
-            <h3>⚠️ Conflicts Detected</h3>
-            <ul>
-                <li *ngFor="let msg of conflictMessages" style="white-space: pre-line;">
-                    {{ msg }}
-                </li>
-            </ul>
+          <h3>Repeat availability from {{ selectedRepeatDate }}</h3>
+          <form [formGroup]="replicateForm" (ngSubmit)="submitModalRepeat()">
+            <label>
+              Repeat from:
+              <input type="date" formControlName="startDate" [min]="todayString" required/>
+            </label>
+            <label>
+              To:
+              <input type="date" formControlName="endDate" [min]="replicateForm.value.startDate || todayString"
+                     required/>
+            </label>
+            <ng-select
+              [items]="weekDays"
+              bindLabel="label"
+              bindValue="value"
+              [multiple]="true"
+              formControlName="repeatDays"
+              placeholder="Repeat on..."
+            ></ng-select>
             <div class="modal-actions">
-                <button (click)="closeConflictsModal()">Close</button>
+              <button type="submit" [disabled]="replicateForm.invalid">Confirm</button>
+              <button type="button" (click)="closeRepeatModal()">Cancel</button>
             </div>
+          </form>
         </div>
+      </div>
+
+      <!-- conflict modal -->
+      <div *ngIf="conflictModalVisible" class="modal-overlay">
+        <div class="modal-content">
+          <h3>⚠️ Conflicts Detected</h3>
+          <ul>
+            <li *ngFor="let msg of conflictMessages" style="white-space: pre-line;">
+              {{ msg }}
+            </li>
+          </ul>
+          <div class="modal-actions">
+            <button (click)="closeConflictsModal()">Close</button>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- LIST VIEW -->
+    <div [hidden]="viewMode === 'calendar'">
+      <div class="list-toolbar">
+        <div class="filter-group">
+          <label>
+            Date:
+            <select [(ngModel)]="dateSort" (change)="recomputeList()">
+              <option value="DESC">Descending</option>
+              <option value="ASC">Ascending</option>
+            </select>
+          </label>
+
+          <label>
+            Status:
+            <select [(ngModel)]="statusFilter" (change)="recomputeList()">
+              <option value="ALL">ALL</option>
+              <option value="PENDING">PENDING</option>
+              <option value="CONFIRMED">CONFIRMED</option>
+              <option value="CANCELLED">CANCELLED</option>
+              <option value="FINISHED">FINISHED</option>
+            </select>
+          </label>
+          <div class="period-filter">
+            <label>From:
+              <input type="date" [(ngModel)]="fromDate" (change)="recomputeList()"/>
+            </label>
+            <label>To:
+              <input type="date" [(ngModel)]="toDate" [min]="fromDate || null" (change)="recomputeList()"/>
+            </label>
+            <button class="btn" (click)="clearPeriod()">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="appt-table">
+          <thead>
+          <tr>
+            <th>SERVICE</th>
+            <th>DATE</th>
+            <th>STATUS</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let appt of listAppointments">
+            <td>{{ appt.serviceName }}</td>
+            <td>{{ appt.startDateTime | date:'MMM d, y, h:mm a' }}</td>
+            <td class="status" [class.pending]="appt.status==='PENDING'"
+                [class.confirmed]="appt.status==='CONFIRMED'"
+                [class.cancelled]="appt.status==='CANCELLED'"
+                [class.finished]="appt.status==='FINISHED'">
+              {{ appt.status }}
+            </td>
+          </tr>
+          <tr *ngIf="listAppointments.length === 0">
+            <td colspan="5" class="empty">No appointments found.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
+  </div>
+
+  @if (showDeleteModal()) {
+    <div class="modal-overlay">
+      <div class="modal-content">
+        <button class="modal-close" (click)="closeDeleteModal()">×</button>
+
+        <h3>Confirm Deletion</h3>
+        <p>Are you sure you want to delete this availability?</p>
+
+        <div class="modal-actions">
+          <button class="px-4 py-2 rounded-full bg-red-500 text-white hover:bg-red-800 transition"
+                  (click)="closeDeleteModal()">Cancel
+          </button>
+          <button class="px-4 py-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition"
+                  (click)="confirmDelete()">Yes
+          </button>
+
+        </div>
+      </div>
+    </div>
+  }
+  <!-- your existing modal -->
+  <app-appointment-modal
+    *ngIf="showAppointmentModal && selectedAppointment"
+    [appointment]="selectedAppointment"
+    [isCalendarContext]="true"
+    (close)="refetchAppointments()"
+  ></app-appointment-modal>
 </div>
-<app-appointment-modal
-  *ngIf="showAppointmentModal && selectedAppointment"
-  [appointment]="selectedAppointment"
-  [isCalendarContext]="true"
-  (close)="refetchAppointments()"
-></app-appointment-modal>

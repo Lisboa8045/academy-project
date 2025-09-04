@@ -1,4 +1,4 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, effect, inject, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {
   AbstractControl,
@@ -12,8 +12,7 @@ import {AuthService} from './auth.service';
 import {Router, RouterLink} from '@angular/router';
 import {strongPasswordValidator} from '../shared/validators/password.validator';
 import {noSpecialCharsValidator} from '../shared/validators/no-special-chars.validator';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {snackBarSuccess} from '../shared/snackbar/snackbar-success';
+import {AuthStore} from "./auth.store";
 
 @Component({
   selector: 'app-auth',
@@ -22,7 +21,7 @@ import {snackBarSuccess} from '../shared/snackbar/snackbar-success';
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.css']
 })
-export class AuthComponent{
+export class AuthComponent {
   readonly isLoginMode = signal(true);
 
   authForm!: FormGroup;
@@ -33,8 +32,13 @@ export class AuthComponent{
   confirmPasswordVisible = signal(false);
   loading = signal(false);
 
-  constructor(private readonly authService: AuthService, private readonly router: Router, private readonly snackBar: MatSnackBar) {
-    this.buildForm()
+  constructor(private readonly authService: AuthService, private readonly router: Router, private readonly authStore: AuthStore) {
+    this.buildForm();
+    effect(() => {
+      if (this.authStore.loaded() && this.authStore.id() > 0) {
+        this.router.navigate(['/'], { replaceUrl: true });
+      }
+    });
   }
 
   togglePasswordVisibility(event: MouseEvent) {

@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, signal} from '@angular/core';
 import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {buildServiceForm} from '../service-form/service-form.builder';
 import {ServiceApiService} from '../../shared/service-api.service';
@@ -9,6 +9,8 @@ import { faPlus, faTimes} from '@fortawesome/free-solid-svg-icons';
 import {Router} from '@angular/router';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {snackBarError} from '../../shared/snackbar/snackbar-error';
+import {snackBarSuccess} from '../../shared/snackbar/snackbar-success';
+import {AiService, ServiceModelBasicInfo} from '../../shared/ai.service';
 
 
 @Component({
@@ -25,6 +27,8 @@ import {snackBarError} from '../../shared/snackbar/snackbar-error';
   styleUrl: './create-service.component.css'
 })
 export class CreateServiceComponent implements OnInit {
+  generatingImage = signal(false);
+  generatingTags = signal(false);
   selectedFiles: File[] = [];
   readonly imageUrl = 'https://placehold.co/300x200?text=No+Image';
   faPlus=faPlus
@@ -38,7 +42,8 @@ export class CreateServiceComponent implements OnInit {
   constructor(private fb: FormBuilder,
               private serviceApi: ServiceApiService,
               private router: Router,
-              private snackBar: MatSnackBar) {}
+              private snackBar: MatSnackBar,
+              private aiService: AiService) {}
 
   ngOnInit() {
     this.form = buildServiceForm(this.fb);
@@ -55,12 +60,21 @@ export class CreateServiceComponent implements OnInit {
     return this.form.get('tagNames') as FormArray;
   }
 
-  addTag(): void {
-    const trimmed = this.newTag.trim();
-    if (trimmed && !this.tagNames.value.includes(trimmed)) {
-      this.tagNames.push(this.fb.control(trimmed));
+  addNewTag(): void {
+    let tagWasAdded = this.addTag(this.newTag, false);
+    if (tagWasAdded) {
       this.newTag = '';
     }
+  }
+
+  addTag(tagName: string, aiGenerated: boolean) :boolean {
+    const trimmed = tagName.trim().toLowerCase();
+    if (trimmed && !this.tagNames.value.includes(trimmed)) {
+      this.tagNames.push(this.fb.control(trimmed));
+      return true;
+    }
+    if (!aiGenerated) snackBarError(this.snackBar, 'Tag already exists.');
+    return false;
   }
 
   removeTag(index: number): void {
@@ -82,13 +96,13 @@ export class CreateServiceComponent implements OnInit {
               }
             });
           }
+          snackBarSuccess(this.snackBar, 'Service created successfully!');
           this.router.navigate([`/backoffice/services/${res.id}`]);
         },
         error: () => {
           snackBarError(this.snackBar, 'Service creation failed.');
         }
       });
-
     }
   }
 
@@ -175,5 +189,58 @@ export class CreateServiceComponent implements OnInit {
     const tempUrl = this.imageUrls[imageIndex1];
     this.imageUrls[imageIndex1] = this.imageUrls[imageIndex2];
     this.imageUrls[imageIndex2] = tempUrl;
+  }
+
+  blobToFile(blob: Blob, fileName: string): File {
+    return new File([blob], fileName, {
+      type: blob.type,
+      lastModified: Date.now(),
+    });
+  }
+
+  generateImage() {
+    this.generatingImage.set(true);
+
+    let serviceBasicInfo: ServiceModelBasicInfo = {
+      name: this.form.controls['name'].value as string,
+      description: this.form.controls['description'].value as string,
+      tags: this.tagNames.value as string[],
+    }
+    this.aiService.generateServiceImage(serviceBasicInfo).subscribe({
+      next: (blob) => {
+        snackBarSuccess(this.snackBar, 'Image Generated Successfully');
+        const objectUrl = URL.createObjectURL(blob);
+        this.imageUrls.push(objectUrl);
+        this.selectedFiles.push(this.blobToFile(blob, 'new_service.png'));
+        this.generatingImage.set(false);
+      },
+      error: () => {
+        snackBarError(this.snackBar, 'Image generation failed.');
+        this.generatingImage.set(false);
+      }
+    });
+  }
+
+  generateTags() {
+    this.generatingTags.set(true);
+
+    let serviceBasicInfo: ServiceModelBasicInfo = {
+      name: this.form.controls['name'].value as string,
+      description: this.form.controls['description'].value as string,
+      tags: this.tagNames.value as string[],
+    }
+    this.aiService.generateServiceTags(serviceBasicInfo).subscribe({
+      next: (tags) => {
+        snackBarSuccess(this.snackBar, 'Tags Generated Successfully');
+        tags.forEach(tag => {
+          this.addTag(tag, true);
+        })
+        this.generatingTags.set(false);
+      },
+      error: () => {
+        snackBarError(this.snackBar, 'Tag generation failed.');
+        this.generatingTags.set(false);
+      }
+    });
   }
 }

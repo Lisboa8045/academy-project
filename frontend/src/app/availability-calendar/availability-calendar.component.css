@@ -1,3 +1,133 @@
+.right-side-controls {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.view-toggle {
+  display: inline-flex;
+  background: #f1f5f9;
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.icon-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+}
+.icon-btn.active {
+  background: #2563eb1a;
+  box-shadow: inset 0 0 0 1px #2563eb33;
+}
+
+/* list view controls */
+.list-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.filter-group {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+.filter-group label {
+  font-size: 14px;
+  color: #333;
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.filter-group select {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 14px;
+  background: #fff;
+}
+
+/* table like the screenshot */
+.table-wrap {
+  overflow: auto;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+}
+
+.appt-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+.appt-table th,
+.appt-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #eef2f7;
+  text-align: left;
+  font-size: 14px;
+}
+.appt-table thead th {
+  font-weight: 700;
+  color: #455a64;
+  background: #f8fafc;
+}
+.appt-table tr:hover td {
+  background: #fafcff;
+}
+
+.status.pending { color: #f0ad4e; font-weight: 600; }
+.status.confirmed { color: #2ecc71; font-weight: 600; }
+.status.cancelled { color: #e74c3c; font-weight: 600; }
+.status.finished { color: #95a5a6; font-weight: 600; }
+
+.actions-col { width: 260px; }
+.actions {
+  display: flex;
+  gap: 10px;
+}
+.btn {
+  border: none;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-primary { background: #2d62ea; color: #fff; }
+.btn-danger { background: #e53935; color: #fff; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.empty {
+  text-align: center;
+  color: #6b7280;
+}
+
+.period-filter {
+  display: inline-flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-left: 0.5rem;
+}
+.period-filter label {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  font-size: 14px;
+}
+.period-filter input[type="date"] {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 14px;
+  background: #fff;
+}
+.btn { background: #eef2ff; }
+
 /* Card container */
 .content.card {
   max-width: 1000px;
@@ -14,6 +144,24 @@
   font-size: 1.75rem;
   margin-bottom: 1rem;
   color: #333;
+}
+
+/* Taller rows for each 30-min slot */
+:host ::ng-deep .fc .fc-timegrid-slot,
+:host ::ng-deep .fc .fc-timegrid-slot-lane {
+  height: 3.25em; /* tweak to taste: 2.5em, 3em, 4em, etc. */
+}
+
+/* Vertically center the time labels to match the new row height */
+:host ::ng-deep .fc .fc-timegrid-slot-label-cushion {
+  line-height: 3.25em;
+}
+
+/* Make events themselves feel roomier */
+:host ::ng-deep .fc .fc-timegrid-event {
+  min-height: 32px;
+  padding: 6px 8px;
+  border-radius: 5px; /* optional, matches your style */
 }
 
 .save-button {
@@ -298,3 +446,51 @@ ng-select ::ng-deep .ng-dropdown-panel .ng-option.ng-option-selected {
 .content-header h2{
   margin: 0;
 }
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 1rem;
+  overflow-y: auto;
+  backdrop-filter: blur(3px);
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.modal {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 80vh;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  text-align: left;
+  overflow-y: auto;
+  transform: scale(0.8);
+  opacity: 0;
+  animation: scaleUp 0.3s ease forwards;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #333;
+  transition: color 0.2s;
+}
+
+
