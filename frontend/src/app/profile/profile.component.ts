@@ -20,6 +20,7 @@ import {ConfirmationModalComponent} from '../shared/confirmation-component/confi
 import {MemberStatusEnum} from '../models/member-status-enum.model';
 import {ServiceReviewComponent} from '../service/service-review/service-review.component';
 import {snackBarInfo} from '../shared/snackbar/snackbar-info';
+import {ReviewAnalyseComponent} from '../service/review-analyse/review-analyse/review-analyse.component';
 import {CountdownSnackbarComponent} from '../shared/snackbar/count-down-snackbar';
 
 @Component({
@@ -33,7 +34,8 @@ import {CountdownSnackbarComponent} from '../shared/snackbar/count-down-snackbar
     MyServicesComponent,
     ServiceReviewComponent,
     DecimalPipe,
-    CommonModule
+    CommonModule,
+    ReviewAnalyseComponent
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
@@ -51,6 +53,7 @@ export class ProfileComponent implements OnInit {
 
   protected readonly MemberStatusEnum = MemberStatusEnum;
   upgradeWorkerRole = false;
+  hasReviews = false;
 
   constructor(
     private fb: FormBuilder,
@@ -83,6 +86,8 @@ export class ProfileComponent implements OnInit {
     } else {
       id = this.authStore.id();
     }
+    this.getReviews();
+
 
     if (!id || id <= 0) {
       this.loading.set(false);
@@ -109,6 +114,14 @@ export class ProfileComponent implements OnInit {
         this.router.navigate(['/not-found']);
       }
     });
+  }
+
+  getReviews() {
+    this.profileService.getReviewsByMemberId(this.authStore.id()).subscribe({
+      next: (res) => {
+        this.hasReviews = res.length > 0;
+      }
+    })
   }
 
   loadForm(user: MemberResponseDTO) {
@@ -286,8 +299,6 @@ export class ProfileComponent implements OnInit {
       error: (err) => console.error('Logout failed', err)
     });
   }
-
-  protected readonly UserProfileService = UserProfileService;
 
   canEdit(): Boolean{
     return this.user ? this.authStore.id() === this.user.id : false;

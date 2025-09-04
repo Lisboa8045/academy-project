@@ -14,7 +14,11 @@
 
 <div class="modal-backdrop" *ngIf="showModal">
   <div class="modal">
-    <h3 class="modal-title">All Tags</h3>
+    <div class="modal-header">
+      <h3 class="modal-title">All Tags</h3>
+      <button class="modal-close" (click)="closeModal()">×</button>
+    </div>
+
     <div class="tag-container">
       <div *ngFor="let tag of tags" class="tag-more" (click)="onTagClick(tag)">
         {{ tag }}
@@ -25,4 +29,3 @@
     </div>
   </div>
 </div>
-
