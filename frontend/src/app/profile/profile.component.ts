@@ -35,7 +35,6 @@ import {CountdownSnackbarComponent} from '../shared/snackbar/count-down-snackbar
     ServiceReviewComponent,
     DecimalPipe,
     CommonModule,
-    ReviewAnalyseComponent
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
@@ -53,7 +52,6 @@ export class ProfileComponent implements OnInit {
 
   protected readonly MemberStatusEnum = MemberStatusEnum;
   upgradeWorkerRole = false;
-  hasReviews = false;
 
   constructor(
     private fb: FormBuilder,
@@ -86,7 +84,6 @@ export class ProfileComponent implements OnInit {
     } else {
       id = this.authStore.id();
     }
-    this.getReviews();
 
 
     if (!id || id <= 0) {
@@ -116,14 +113,6 @@ export class ProfileComponent implements OnInit {
         this.router.navigate(['/not-found']);
       }
     });
-  }
-
-  getReviews() {
-    this.profileService.getReviewsByMemberId(this.authStore.id()).subscribe({
-      next: (res) => {
-        this.hasReviews = res.length > 0;
-      }
-    })
   }
 
   loadForm(user: MemberResponseDTO) {

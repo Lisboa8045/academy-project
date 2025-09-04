@@ -1,7 +1,12 @@
   <div  *ngIf="reviews && reviews.length > 0">
-    <h2 class="title" style="margin-top: 0; margin-bottom: 10px">
-      {{ member?.username ? member?.username + "'s Reviews" : 'Reviews' }}
-    </h2>
+    <div class="review-title-container">
+      <h2 class="title">
+        {{ member?.username ? member?.username + "'s Reviews" : 'Reviews' }}
+      </h2>
+      @if (this.hasReviews) {
+        <app-review-analyse></app-review-analyse>
+      }
+    </div>
     <div *ngFor="let review of reviews; let i = index" class="review">
       <div class="review-header">
         <div class="reviewer-info">

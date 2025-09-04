@@ -5,6 +5,8 @@ import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
 import {ProfileService} from '../../profile/profile.service';
 import {RouterLink} from '@angular/router';
 import {MemberResponseDTO} from '../../auth/member-response-dto.model';
+import {AuthStore} from '../../auth/auth.store';
+import {ReviewAnalyseComponent} from '../review-analyse/review-analyse/review-analyse.component';
 
 @Component({
   selector: 'app-service-review',
@@ -13,7 +15,8 @@ import {MemberResponseDTO} from '../../auth/member-response-dto.model';
     NgForOf,
     NgIf,
     DatePipe,
-    RouterLink
+    RouterLink,
+    ReviewAnalyseComponent
   ],
   templateUrl: './service-review.component.html',
   styleUrl: './service-review.component.css'
@@ -26,12 +29,23 @@ export class ServiceReviewComponent implements OnInit {
   @Input() serviceId?: number;
   @Input() member : MemberResponseDTO | undefined;
   reviews?: ServiceAppointmentReviewModel[] = [];
+  hasReviews = false;
+
 
   constructor(
     private serviceApiService: ServiceApiService,
-    private profileService: ProfileService
+    private profileService: ProfileService,
+    private authStore: AuthStore,
   ) {
 
+  }
+
+  getReviews() {
+    this.profileService.getReviewsByMemberId(this.authStore.id()).subscribe({
+      next: (res) => {
+        this.hasReviews = res.length > 0;
+      }
+    })
   }
 
   async loadReviewImage(fileName: string): Promise<string | null> {
@@ -75,6 +89,7 @@ export class ServiceReviewComponent implements OnInit {
         }
       });
     }
+    this.getReviews();
   }
 
   private handleReviews(data: ServiceAppointmentReviewModel[]) {
