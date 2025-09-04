@@ -96,13 +96,13 @@ export class CreateServiceComponent implements OnInit {
               }
             });
           }
+          snackBarSuccess(this.snackBar, 'Service created successfully!');
           this.router.navigate([`/backoffice/services/${res.id}`]);
         },
         error: () => {
           snackBarError(this.snackBar, 'Service creation failed.');
         }
       });
-
     }
   }
 
