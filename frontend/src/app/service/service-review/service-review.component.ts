@@ -30,6 +30,7 @@ export class ServiceReviewComponent implements OnInit {
   @Input() member : MemberResponseDTO | undefined;
   reviews?: ServiceAppointmentReviewModel[] = [];
   hasReviews = false;
+  @Input() isProfile?: boolean;
 
 
   constructor(
@@ -37,7 +38,6 @@ export class ServiceReviewComponent implements OnInit {
     private profileService: ProfileService,
     private authStore: AuthStore,
   ) {
-
   }
 
   getReviews() {

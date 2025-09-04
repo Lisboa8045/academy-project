@@ -167,7 +167,7 @@
   @if (user) {
     <app-my-services [member]="user" *ngIf="user.role=='WORKER'"></app-my-services>
     <div *ngIf="user && user.role=='WORKER'" class="card">
-      <app-service-review [member]="user"></app-service-review>
+      <app-service-review [member]="user" [isProfile]="true"></app-service-review>
     </div>
   }
 }
