@@ -15,6 +15,39 @@
   >
 
   </app-status-filter>
+
+    <div class="flex items-center gap-3">
+      <label class="text-sm text-gray-600">
+        From
+        <input
+          type="date"
+          class="ml-2 border rounded-md px-2 py-1 text-sm"
+          [(ngModel)]="fromDate"
+          (change)="onDateRangeChange()"
+          [max]="toDate || null"
+        />
+      </label>
+
+      <label class="text-sm text-gray-600">
+        To
+        <input
+          type="date"
+          class="ml-2 border rounded-md px-2 py-1 text-sm"
+          [(ngModel)]="toDate"
+          (change)="onDateRangeChange()"
+          [min]="fromDate || null"
+        />
+      </label>
+
+      <button
+        type="button"
+        class="text-sm px-3 py-1 rounded-md border hover:bg-gray-100"
+        (click)="clearDateRange()"
+        [disabled]="!fromDate && !toDate"
+      >
+        Clear
+      </button>
+    </div>
   </div>
 
 <!-- Appointment Table -->

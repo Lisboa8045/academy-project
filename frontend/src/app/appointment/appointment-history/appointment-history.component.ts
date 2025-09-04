@@ -52,6 +52,8 @@ export class AppointmentHistoryComponent implements OnInit {
   totalPages = 0;
   page: Page<AppointmentResponseDTO> | null = null;
   status: AppointmentStatusEnumModel = AppointmentStatusEnumModel.ALL;
+  fromDate: string | null = null;
+  toDate: string | null = null;
 
   constructor(private appointmentHistoryService: AppointmentService,
               private router: Router,
@@ -80,7 +82,18 @@ export class AppointmentHistoryComponent implements OnInit {
     let filtered = this.status === AppointmentStatusEnumModel.ALL
       ? this.appointments
       : this.appointments.filter(a => a.status === this.status);
-
+    if (this.fromDate) {
+      const from = new Date(this.fromDate);
+      // normalize start of day
+      from.setHours(0, 0, 0, 0);
+      filtered = filtered.filter(a => new Date(a.startDateTime) >= from);
+    }
+    if (this.toDate) {
+      const to = new Date(this.toDate);
+      // include the entire end day
+      to.setHours(23, 59, 59, 999);
+      filtered = filtered.filter(a => new Date(a.startDateTime) <= to);
+    }
     this.totalItems = filtered.length;
     this.totalPages = Math.ceil(this.totalItems / this.pageSize);
 
@@ -196,5 +209,17 @@ export class AppointmentHistoryComponent implements OnInit {
         snackBarError(this.snackBar, "Failed to submit review");
       }
     });
+  }
+
+  onDateRangeChange() {
+    this.currentPage = 0;
+    this.applyFiltersAndPagination();
+  }
+
+  clearDateRange() {
+    this.fromDate = null;
+    this.toDate = null;
+    this.currentPage = 0;
+    this.applyFiltersAndPagination();
   }
 }
