@@ -6,6 +6,7 @@ import {ServiceModel} from '../service/service.model';
 import {ServiceQuery} from './models/service-query.model';
 import {ServiceTypeResponseDTO} from "./models/service-type.model";
 import {ServiceAppointmentReviewModel} from '../service/service-details/service-appointment-review-model';
+import {ServiceProvidersBubblesModel} from '../service/serviceProvidersBubbles.model';
 
 export interface PagedResponse {
   content: ServiceModel[];
@@ -23,7 +24,7 @@ export class ServiceApiService {
   private SERVICE_TYPE_URL = 'http://localhost:8080/service-types';
   private UPLOADS_URL = 'http://localhost:8080/auth/uploads/service-image';
   private REVIEWS_URL = 'http://localhost:8080/services/service_with_review';
-
+  private SERVICE_PROVIDERS_URL = 'http://localhost:8080/service-providers/bubbles/services';
   constructor(private http: HttpClient) {
   }
 
@@ -100,4 +101,7 @@ export class ServiceApiService {
     return this.http.patch<void>(`${this.BASE_URL}/reject-service/${id}`, {});
   }
 
+  getServiceProvidersBubbles(serviceId: number) {
+    return this.http.get<ServiceProvidersBubblesModel[]>(`${this.SERVICE_PROVIDERS_URL}/${serviceId}`);
+  }
 }

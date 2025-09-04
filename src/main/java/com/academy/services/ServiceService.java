@@ -19,6 +19,7 @@ import com.academy.models.service.ServiceImage;
 import com.academy.models.service.ServiceStatusEnum;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
+import com.academy.repositories.AppointmentRepository;
 import com.academy.repositories.ServiceProviderRepository;
 import com.academy.repositories.ServiceRepository;
 import com.academy.specifications.ServiceSpecifications;
@@ -26,6 +27,7 @@ import com.academy.utils.Utils;
 import jakarta.transaction.Transactional;
 import org.apache.coyote.BadRequestException;
 import org.hibernate.collection.spi.PersistentBag;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -48,20 +50,22 @@ public class ServiceService {
     private final MemberService memberService;
     private final TagService tagService;
     private final ServiceTypeService serviceTypeService;
-    private final EmailService emailService;
     private final NotificationService notificationService;
-    private final AppointmentMapper appointmentMapper;
+    private final AppointmentRepository appointmentRepository;
     private final ServiceProviderRepository serviceProviderRepository;
+    private final EmailService emailService;
+    private final AppointmentMapper appointmentMapper;
 
     public ServiceService(ServiceRepository serviceRepository,
                           ServiceMapper serviceMapper,
-                          ServiceProviderService serviceProviderService,
+                          @Lazy ServiceProviderService serviceProviderService,
                           AuthenticationFacade authenticationFacade,
                           MemberService memberService,
                           TagService tagService,
                           ServiceTypeService serviceTypeService,
                           ServiceProviderRepository serviceProviderRepository,
                           AppointmentMapper appointmentMapper,
+                          AppointmentRepository appointmentRepository,
                           EmailService emailService,
                           NotificationService notificationService) {
         this.serviceRepository = serviceRepository;
@@ -75,7 +79,7 @@ public class ServiceService {
         this.notificationService = notificationService;
         this.appointmentMapper = appointmentMapper;
         this.serviceProviderRepository = serviceProviderRepository;
-
+        this.appointmentRepository = appointmentRepository;
     }
 
     @Transactional
@@ -104,7 +108,9 @@ public class ServiceService {
     public ServiceResponseDTO update(Long id, ServiceRequestDTO dto) throws AuthenticationException{
         String username = authenticationFacade.getUsername();
         Service existing = getServiceEntityById(id);
-
+        if(existing.getDiscount() < dto.discount()) {
+            sendDiscountNotification(existing, dto.discount());
+        }
         List<ProviderPermissionEnum> permissions = getPermissionsByProviderUsernameAndServiceId(username, existing.getId());
         checkIfHasPermission(permissions,ProviderPermissionEnum.UPDATE, "update service");
 
@@ -115,6 +121,22 @@ public class ServiceService {
         serviceRepository.save(existing);
         return serviceMapper.toDto(existing, permissions);
     }
+
+    private void sendDiscountNotification(Service service, int newDiscount) {
+
+        List<Member> clients = appointmentRepository.findDistinctMembersByServiceId(service.getId());
+
+        for (Member client : clients) {
+            Notification notification = new Notification();
+            notification.setMember(client);
+            notification.setTitle("Service " + service.getName() + " is on Sale!");
+            notification.setNotificationTypeEnum(NotificationTypeEnum.SERVICE_ON_SALE);
+            notification.setBody("Service " + service.getName() + " is " + newDiscount + "% off");
+
+            notificationService.createNotification(notification);
+        }
+    }
+
 
     public List<ServiceResponseDTO> getAllEnabled() {
         String username =  authenticationFacade.getUsername();
@@ -147,7 +169,7 @@ public class ServiceService {
                 throw new AccessDeniedException("This service is not currently available for the public.");
             }
             Member member = memberService.getMemberByUsername(username);
-            if (!"ADMIN".equals(member.getRole().getName())) {
+            if (!("ADMIN".equals(member.getRole().getName()) || serviceProviderService.existsByServiceIdAndProviderUsername(id, username))) {
                 throw new AccessDeniedException("This service is not currently available for the public.");
             }
         }
@@ -348,7 +370,7 @@ public class ServiceService {
     }
 
     public Page<ServiceResponseDTO> getServicesByMemberId(Long memberId, Pageable pageable) {
-       return serviceRepository.queryEnabledServicesByMemberId(memberId, pageable)
+       return serviceRepository.queryNotRejectedServicesByMemberId(memberId, pageable)
                .map(service ->  serviceMapper.toDto(service,
                getPermissionsByProviderIdAndServiceId(memberId, service.getId())));
     }

@@ -8,10 +8,13 @@ import com.academy.dtos.register.LoginRequestDto;
 import com.academy.dtos.register.LoginResponseDto;
 import com.academy.dtos.register.PasswordResetRequestDto;
 import com.academy.dtos.register.PasswordResetResponseDto;
+import com.academy.dtos.register.RecreateAccountDeletionTokenRequestDto;
+import com.academy.dtos.register.RecreateAccountDeletionTokenResponseDto;
 import com.academy.dtos.register.RecreateConfirmationTokenRequestDto;
 import com.academy.dtos.register.RecreateConfirmationTokenResponseDto;
 import com.academy.dtos.register.RegisterRequestDto;
 import com.academy.dtos.register.RegisterResponseDto;
+import com.academy.exceptions.MaxTokensException;
 import com.academy.services.MemberService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -94,10 +97,21 @@ public class AuthController {
         return ResponseEntity.ok(new RecreateConfirmationTokenResponseDto("Confirmation token recreated"));
     }
 
+    @PostMapping("/recreate-delete-account-token")
+    public ResponseEntity<RecreateAccountDeletionTokenResponseDto> recreateAccountDeletionToken(
+            @RequestBody RecreateAccountDeletionTokenRequestDto request) {
+        memberService.recreateDeletionToken(request.login());
+        return ResponseEntity.ok(new RecreateAccountDeletionTokenResponseDto("Account deletion token recreated"));
+    }
+
     @PostMapping("/password-reset-token")
     public ResponseEntity<CreatePasswordResetTokenResponseDto> createPasswordResetToken(
             @RequestBody CreatePasswordResetTokenRequestDto request) {
-        memberService.createPasswordResetToken(request.email());
+        try {
+            memberService.createPasswordResetToken(request.email());
+        } catch (MaxTokensException ignored) {
+            // Always return success response to avoid leaking info
+        }
         return ResponseEntity.ok(new CreatePasswordResetTokenResponseDto("Password reset token created"));
     }
 }

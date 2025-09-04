@@ -1,6 +1,8 @@
 package com.academy.services;
 
 import com.academy.config.authentication.AuthenticationFacade;
+import com.academy.dtos.register.MemberBubbleMapper;
+import com.academy.dtos.service_provider.ServiceProviderBubblesResponseDTO;
 import com.academy.dtos.service_provider.ServiceProviderMapper;
 import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
 import com.academy.dtos.service_provider.ServiceProviderResponseDTO;
@@ -32,6 +34,7 @@ public class ServiceProviderService {
     private final AuthenticationFacade authenticationFacade;
     private final ProviderPermissionService providerPermissionService;
     private final AppointmentRepository appointmentRepository;
+    private final MemberBubbleMapper memberBubbleMapper;
 
     @Autowired
     public ServiceProviderService(ServiceProviderRepository serviceProviderRepository,
@@ -39,7 +42,7 @@ public class ServiceProviderService {
                                   ProviderPermissionService providerPermissionService,
                                   MemberService memberService,
                                   @Lazy ServiceService serviceService,
-                                  AuthenticationFacade authenticationFacade, AppointmentRepository appointmentRepository) {
+                                  AuthenticationFacade authenticationFacade, AppointmentRepository appointmentRepository, MemberBubbleMapper memberBubbleMapper) {
         this.serviceProviderRepository = serviceProviderRepository;
         this.serviceProviderMapper = serviceProviderMapper;
         this.memberService = memberService;
@@ -47,10 +50,11 @@ public class ServiceProviderService {
         this.providerPermissionService = providerPermissionService;
         this.authenticationFacade = authenticationFacade;
         this.appointmentRepository = appointmentRepository;
+        this.memberBubbleMapper = memberBubbleMapper;
     }
 
     public static void checkIfValidPermissions(List<ProviderPermissionEnum> newPermissions) throws BadRequestException {
-        if(newPermissions.contains(ProviderPermissionEnum.OWNER))
+        if (newPermissions.contains(ProviderPermissionEnum.OWNER))
             throw new BadRequestException("Cannot give Owner Permission");
     }
 
@@ -70,9 +74,9 @@ public class ServiceProviderService {
         return serviceProviderMapper.toResponseDTO(getServiceProviderEntityById(id));
     }
 
-    public ServiceProvider getServiceProviderByUsername(String username){
+    public ServiceProvider getServiceProviderByUsername(String username) {
         Optional<ServiceProvider> optionalServiceProvider = serviceProviderRepository.findByProviderUsername(username);
-        if(optionalServiceProvider.isEmpty())
+        if (optionalServiceProvider.isEmpty())
             throw new MemberNotFoundException(username);
         return optionalServiceProvider.get();
     }
@@ -100,11 +104,11 @@ public class ServiceProviderService {
         String loggedUsername = authenticationFacade.getUsername();
         Member loggedMember = memberService.getMemberByUsername(loggedUsername);
 
-        if(!checkIfHasPermissionToAddServiceProvider(loggedMember, service, dto.isServiceCreation()))
+        if (!checkIfHasPermissionToAddServiceProvider(loggedMember, service, dto.isServiceCreation()))
             throw new AuthenticationException("You do not have permission to create a Service Provider");
 
         Optional<ServiceProvider> existingProvider = serviceProviderRepository.findByServiceIdAndProviderId(service.getId(), member.getId());
-        if(existingProvider.isPresent()) {
+        if (existingProvider.isPresent()) {
             ServiceProvider serviceProvider = existingProvider.get();
             existingProvider.get().setActive(true);
             return serviceProviderRepository.save(serviceProvider);
@@ -118,17 +122,17 @@ public class ServiceProviderService {
 
         validatePermissions(dto.permissions(), dto.isServiceCreation());
 
-        ServiceProvider serviceProviderWithPermissions = providerPermissionService.createPermissionsViaList(dto.permissions(),saved);
+        ServiceProvider serviceProviderWithPermissions = providerPermissionService.createPermissionsViaList(dto.permissions(), saved);
         return serviceProviderRepository.save(serviceProviderWithPermissions);
     }
 
-    private boolean checkIfHasPermissionToAddServiceProvider(Member loggedMember, com.academy.models.service.Service service, boolean isServiceCreation){
-        if(isServiceCreation)
+    private boolean checkIfHasPermissionToAddServiceProvider(Member loggedMember, com.academy.models.service.Service service, boolean isServiceCreation) {
+        if (isServiceCreation)
             return true;
         ServiceProvider loggedMemberServiceProvider;
-        try{
+        try {
             loggedMemberServiceProvider = getByServiceIdAndMemberId(service.getId(), loggedMember.getId());
-        }catch(EntityNotFoundException e){
+        } catch (EntityNotFoundException e) {
             return false;
         }
         List<ProviderPermissionEnum> permissions = getPermissions(loggedMemberServiceProvider.getId());
@@ -136,7 +140,7 @@ public class ServiceProviderService {
     }
 
     private void validatePermissions(List<ProviderPermissionEnum> permissions, boolean isServiceCreation) throws BadRequestException {
-        if(!isServiceCreation && permissions.contains(ProviderPermissionEnum.OWNER))
+        if (!isServiceCreation && permissions.contains(ProviderPermissionEnum.OWNER))
             throw new BadRequestException("Can't give the Owner permission to a new worker!");
     }
 
@@ -163,10 +167,10 @@ public class ServiceProviderService {
         Member loggedMember = memberService.getMemberByUsername(loggedUsername);
         Service service = serviceProvider.getService();
 
-        if(!checkIfHasPermissionToAddServiceProvider(loggedMember, service, false))
+        if (!checkIfHasPermissionToAddServiceProvider(loggedMember, service, false))
             throw new AuthenticationException("You do not have permission to delete a Service Provider");
 
-        if (serviceProvider.getPermissions().stream().anyMatch(permission -> permission.getPermission().equals(ProviderPermissionEnum.OWNER) ) ) {
+        if (serviceProvider.getPermissions().stream().anyMatch(permission -> permission.getPermission().equals(ProviderPermissionEnum.OWNER))) {
             throw new BadRequestException("Cannot remove owner from service.");
         }
 
@@ -174,20 +178,20 @@ public class ServiceProviderService {
         serviceProvider.setActive(false);
     }
 
-    public List<ProviderPermissionEnum> getPermissionsByProviderUsernameAndServiceId(String username, Long serviceId){
-        ServiceProvider serviceProvider= getServiceProviderByProviderUsernameAndServiceID(username, serviceId);
+    public List<ProviderPermissionEnum> getPermissionsByProviderUsernameAndServiceId(String username, Long serviceId) {
+        ServiceProvider serviceProvider = getServiceProviderByProviderUsernameAndServiceID(username, serviceId);
         return getPermissions(serviceProvider.getId());
     }
 
-    public List<ProviderPermissionEnum> getPermissionsByProviderIdAndServiceId(Long id, Long serviceId){
-        ServiceProvider serviceProvider= getServiceProviderByProviderIdAndServiceID(id, serviceId);
+    public List<ProviderPermissionEnum> getPermissionsByProviderIdAndServiceId(Long id, Long serviceId) {
+        ServiceProvider serviceProvider = getServiceProviderByProviderIdAndServiceID(id, serviceId);
         return getPermissions(serviceProvider.getId());
     }
 
     private ServiceProvider getServiceProviderByProviderUsernameAndServiceID(String username, Long serviceId) {
         Optional<ServiceProvider> optionalServiceProvider =
                 serviceProviderRepository.findByProviderUsernameAndServiceId(username, serviceId);
-        if(optionalServiceProvider.isEmpty())
+        if (optionalServiceProvider.isEmpty())
             throw new EntityNotFoundException(ServiceProvider.class,
                     " not found for user " + username + " and serviceId " + serviceId);
         return optionalServiceProvider.get();
@@ -196,18 +200,18 @@ public class ServiceProviderService {
     public ServiceProvider getServiceProviderByProviderIdAndServiceID(Long id, Long serviceId) {
         Optional<ServiceProvider> optionalServiceProvider =
                 serviceProviderRepository.findByProviderIdAndServiceId(id, serviceId);
-        if(optionalServiceProvider.isEmpty())
+        if (optionalServiceProvider.isEmpty())
             throw new EntityNotFoundException(ServiceProvider.class,
                     " not found for user with id" + id + " and serviceId " + serviceId);
         return optionalServiceProvider.get();
     }
 
-    public ServiceProviderResponseDTO getServiceProviderDTOByProviderIdAndServiceID(Long providerId, Long serviceId){
+    public ServiceProviderResponseDTO getServiceProviderDTOByProviderIdAndServiceID(Long providerId, Long serviceId) {
         ServiceProvider sp = getServiceProviderByProviderIdAndServiceID(providerId, serviceId);
         return serviceProviderMapper.toResponseDTO(sp);
     }
 
-    public List<ProviderPermissionEnum> getPermissions(Long id){
+    public List<ProviderPermissionEnum> getPermissions(Long id) {
         return providerPermissionService.getPermissions(id);
     }
 
@@ -223,9 +227,9 @@ public class ServiceProviderService {
         return serviceProviderRepository.existsByServiceIdAndProviderId(serviceId, id);
     }
 
-    public ServiceProvider getByServiceIdAndMemberId(Long serviceId, Long memberId){
-        Optional<ServiceProvider> optionalServiceProvider =  serviceProviderRepository.findByServiceIdAndProviderId(serviceId, memberId);
-        if(optionalServiceProvider.isEmpty())
+    public ServiceProvider getByServiceIdAndMemberId(Long serviceId, Long memberId) {
+        Optional<ServiceProvider> optionalServiceProvider = serviceProviderRepository.findByServiceIdAndProviderId(serviceId, memberId);
+        if (optionalServiceProvider.isEmpty())
             throw new EntityNotFoundException(ServiceProvider.class, serviceId);
         return optionalServiceProvider.get();
     }
@@ -237,7 +241,7 @@ public class ServiceProviderService {
     }
 
     @Transactional
-    public void addPermissions(ServiceProvider serviceProvider,List<ProviderPermissionEnum> permissions){
+    public void addPermissions(ServiceProvider serviceProvider, List<ProviderPermissionEnum> permissions) {
         providerPermissionService.createPermissionsViaList(permissions, serviceProvider);
     }
 
@@ -245,7 +249,7 @@ public class ServiceProviderService {
         return serviceProviderRepository.findMemberIdsByServiceId(serviceId);
     }
 
-    public ServiceProvider getServiceProviderEntityById(long id){
+    public ServiceProvider getServiceProviderEntityById(long id) {
         return serviceProviderRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(ServiceProvider.class, id));
     }
 
@@ -254,7 +258,7 @@ public class ServiceProviderService {
     }
 
     @Transactional
-    public void updateRating(Long id){
+    public void updateRating(Long id) {
         Double rating = appointmentRepository.findAverageRatingByServiceProvider_Id(id);
         System.out.println("Updating rating for service provider with id " + id + " to " + rating);
         if (rating != null) {
@@ -264,5 +268,13 @@ public class ServiceProviderService {
             provider.setRating(roundedRating);
             serviceProviderRepository.save(provider);
         }
+    }
+
+    public List<ServiceProviderBubblesResponseDTO> getServiceProvidersByServiceIdBubbles(Long serviceId) {
+        List<Member> members = serviceProviderRepository.findMembersByServiceId(serviceId, ProviderPermissionEnum.SERVE);
+        members.forEach(m -> System.out.println("Member: " + m.getUsername()));
+        return members.stream()
+                .map(memberBubbleMapper::toBubble)
+                .toList();
     }
 }

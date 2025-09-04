@@ -272,14 +272,14 @@ button:hover {
   color: #666;
 }
 
-.day-column.empty {
+.day-column.empty-star {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
 }
 
-.day-column.empty h4 {
+.day-column.empty-star h4 {
   margin-bottom: 16px;
 }
 

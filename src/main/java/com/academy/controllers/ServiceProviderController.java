@@ -1,5 +1,6 @@
 package com.academy.controllers;
 
+import com.academy.dtos.service_provider.ServiceProviderBubblesResponseDTO;
 import com.academy.dtos.service_provider.ServiceProviderRequestDTO;
 import com.academy.dtos.service_provider.ServiceProviderResponseDTO;
 import com.academy.exceptions.EntityNotFoundException;
@@ -47,7 +48,7 @@ public class ServiceProviderController {
         return ResponseEntity.ok(serviceProviders);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or hasRole('WORKER')")
+    @PreAuthorize("hasRole('WORKER')")
     @PostMapping
     public ResponseEntity<ServiceProviderResponseDTO> createServiceProvider(
             @Valid @RequestBody ServiceProviderRequestDTO serviceProvider) throws BadRequestException {
@@ -56,7 +57,7 @@ public class ServiceProviderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdServiceProvider);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @serviceProviderSecurity.canUpdateServiceProvider(#id, authentication.name)")
+    @PreAuthorize("@serviceProviderSecurity.canUpdateServiceProvider(#id, authentication.name)")
     @PutMapping("/{id}")
     public ResponseEntity<ServiceProviderResponseDTO> updateServiceProvider(@PathVariable long id, @Valid @RequestBody ServiceProviderRequestDTO serviceProvider) {
         try {
@@ -67,7 +68,7 @@ public class ServiceProviderController {
         }
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @serviceProviderSecurity.isSelf(#id, authentication.name)")
+    @PreAuthorize("@serviceProviderSecurity.isSelf(#id, authentication.name)")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteServiceProvider(@PathVariable long id) throws BadRequestException {
         serviceProviderService.deleteServiceProvider(id);
@@ -82,6 +83,13 @@ public class ServiceProviderController {
         ServiceProviderResponseDTO serviceProvider = serviceProviderService.getServiceProviderDTOByProviderIdAndServiceID(providerId, serviceId);
 
         return ResponseEntity.ok(serviceProvider);
+    }
+
+    @GetMapping("bubbles/services/{serviceId}")
+    public ResponseEntity<List<ServiceProviderBubblesResponseDTO>> getServiceProvidersByServiceIdForBubble(
+            @PathVariable Long serviceId){
+        List<ServiceProviderBubblesResponseDTO> bubbles = serviceProviderService.getServiceProvidersByServiceIdBubbles(serviceId);
+        return ResponseEntity.ok(bubbles);
     }
 
 }

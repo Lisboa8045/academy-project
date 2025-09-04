@@ -202,6 +202,7 @@ app-service-review {
 }
 
 .price-container {
+  margin-top:-1rem;
   display: flex;
   align-items: first baseline;
   gap: 1rem;
@@ -280,8 +281,8 @@ app-service-review {
 .type-and-duration {
   display: flex;
   align-items: center;
-  gap: 2rem;
-  margin-bottom: 3rem;
+  gap: 5px;
+  margin-top: -2rem;
 }
 
 .type-and-duration h3 {
@@ -334,4 +335,22 @@ app-service-review {
 .clickable:hover {
   text-decoration: underline;
   color: #0056b3; /* darker blue on hover */
+}
+
+.service-title {
+  font-size: 2rem;
+  line-height: 1.2;
+  margin: 0;
+
+  /* multi-line clamp to 2 lines with ellipsis */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;    /* Chrome/Safari/Edge */
+  line-clamp: 2;            /* spec-ish, harmless elsewhere */
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  /* allow breaking very long words/strings */
+  overflow-wrap: anywhere;  /* modern */
+  word-break: break-word;   /* fallback */
 }

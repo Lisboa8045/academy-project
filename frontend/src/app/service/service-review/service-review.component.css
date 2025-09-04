@@ -36,7 +36,7 @@
   color: #FFD700;
 }
 
-.review-stars .empty {
+.review-stars .empty-star {
   color: #ccc;
 }
 
@@ -55,7 +55,7 @@
   color: #FFD700;
 }
 
-.star-rating .empty {
+.empty-star {
   color: #ccc;
 }
 

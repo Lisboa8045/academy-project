@@ -1,6 +1,6 @@
 import {Component, OnInit, signal} from '@angular/core';
 import {ServiceModel} from '../service.model';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {ServiceApiService} from '../../shared/service-api.service';
 import {LoadingComponent} from '../../loading/loading.component';
 import {NgForOf, NgIf} from "@angular/common";
@@ -8,6 +8,8 @@ import {UserProfileService} from '../../profile/user-profile.service';
 import {ServiceReviewComponent} from '../service-review/service-review.component';
 import {TagListComponent} from './tag-list/tag-list.component';
 import {switchMap, tap} from 'rxjs';
+import {ServiceProvidersBubblesModel} from '../serviceProvidersBubbles.model';
+import {ProvidersBubblesComponent} from './app-providers-bubbles/providers-bubbles.component';
 
 @Component({
   selector: 'app-service-details',
@@ -16,7 +18,8 @@ import {switchMap, tap} from 'rxjs';
     NgIf,
     NgForOf,
     ServiceReviewComponent,
-    TagListComponent
+    TagListComponent,
+    ProvidersBubblesComponent
   ],
   templateUrl: './service-details.component.html',
   styleUrl: './service-details.component.css'
@@ -29,6 +32,7 @@ export class ServiceDetailsComponent implements OnInit {
   formatedTimeMinutes: number = 0;
   serviceId!: number;
   service?: ServiceModel;
+  serviceProviderBubbles?: ServiceProvidersBubblesModel[]
   loading = signal(false);
 
   constructor(
@@ -87,7 +91,6 @@ export class ServiceDetailsComponent implements OnInit {
         }
       });
   }
-
 
   search(string: string) {
     this.router.navigate(['/services'], {queryParams: {q: string}});

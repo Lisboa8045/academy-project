@@ -55,7 +55,7 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @appointmentSecurity.isClientOrProvider(#id, authentication.name)")
+    @PreAuthorize("@appointmentSecurity.isClientOrProvider(#id, authentication.name)")
     @PutMapping("/{id}")
     public ResponseEntity<AppointmentResponseDTO> updateAppointment(@PathVariable Long id, @RequestBody AppointmentRequestDTO appointmentDetails) {
         AppointmentResponseDTO updated = appointmentService.updateAppointment(id, appointmentDetails);
@@ -67,7 +67,7 @@ public class AppointmentController {
         return appointmentService.confirmAppointment(id);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @appointmentSecurity.isClientOrProvider(#id, authentication.name)")
+    @PreAuthorize("@appointmentSecurity.isClientOrProvider(#id, authentication.name)")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> cancelAppointment(@PathVariable Long id) {
         appointmentService.cancelAppointment(id);

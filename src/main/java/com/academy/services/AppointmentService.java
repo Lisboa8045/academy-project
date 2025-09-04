@@ -15,6 +15,8 @@ import com.academy.exceptions.TokenExpiredException;
 import com.academy.models.appointment.Appointment;
 import com.academy.models.appointment.AppointmentStatus;
 import com.academy.models.member.Member;
+import com.academy.models.notification.Notification;
+import com.academy.models.notification.NotificationTypeEnum;
 import com.academy.models.service.service_provider.ProviderPermission;
 import com.academy.models.service.service_provider.ProviderPermissionEnum;
 import com.academy.models.service.service_provider.ServiceProvider;
@@ -24,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -38,6 +41,7 @@ public class AppointmentService {
     private final EmailService emailService;
     private final AppointmentSchedulerService appointmentSchedulerService;
     private final GlobalConfigurationService globalConfigurationService;
+    private final NotificationService notificationService;
 
     public AppointmentService(AppointmentRepository appointmentRepository
             , ServiceProviderService serviceProviderService,
@@ -47,7 +51,8 @@ public class AppointmentService {
                               EmailService emailService,
                               AppointmentSchedulerService appointmentSchedulerService,
                               GlobalConfigurationService globalConfigurationService,
-                              ServiceService serviceService) {
+                              ServiceService serviceService,
+                              NotificationService notificationService) {
         this.appointmentRepository = appointmentRepository;
         this.serviceProviderService = serviceProviderService;
         this.appointmentMapper = appointmentMapper;
@@ -57,6 +62,7 @@ public class AppointmentService {
         this.emailService = emailService;
         this.appointmentSchedulerService = appointmentSchedulerService;
         this.globalConfigurationService = globalConfigurationService;
+        this.notificationService = notificationService;
     }
 
     public List<AppointmentResponseDTO> getAllAppointments() {
@@ -116,7 +122,7 @@ public class AppointmentService {
         appointment.setServiceProvider(serviceProvider);
         appointment.setEndDateTime(endDateTime);
         appointment.setStatus(AppointmentStatus.PENDING);
-        appointment.setPrice(price - ( price * service.getDiscount()/100));
+        appointment.setPrice(price - (price * service.getDiscount() / 100));
 
         appointment = appointmentRepository.save(appointment);
 
@@ -138,14 +144,14 @@ public class AppointmentService {
         if(appointmentDetails.rating().equals(appointment.getRating()))
             appointment.setRating(appointmentDetails.rating());
 
-        if(appointmentDetails.comment() != null) appointment.setComment(appointmentDetails.comment());
+        if (appointmentDetails.comment() != null) appointment.setComment(appointmentDetails.comment());
 
         return appointmentMapper.toResponseDTO(appointmentRepository.save(appointment));
 
     }
 
 
-    public void deleteReview(Long id){
+    public void deleteReview(Long id) {
 
         Appointment appointment = appointmentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Appointment.class, id));
@@ -174,6 +180,7 @@ public class AppointmentService {
         return appointmentList.stream().map(appointmentMapper::toAppointmentCalendarDTO).toList();
     }
 
+
     public List<Appointment> getAppointmentsForServiceProvider(Long serviceProviderId) {
         return appointmentRepository.findByServiceProviderId(serviceProviderId).stream().filter(
                 appointment -> !appointment.getStatus().equals(AppointmentStatus.CANCELLED)
@@ -189,14 +196,14 @@ public class AppointmentService {
             if(AppointmentStatus.PENDING.equals(appointment.getStatus()))
                 throw new BadRequestException("Pending payment appointment can't be cancelled");
             emailService.sendCancelAppointmentClientEmail(appointment);
+            sendNotificationToClientCancelledAppointment(appointment);
         }
-        else
+        else{
             emailService.sendCancelAppointmentProviderEmail(appointment);
-
+            sendNotificationToProviderCancelledAppointment(appointment);
+        }
         appointment.setStatus(AppointmentStatus.CANCELLED);
         appointmentRepository.save(appointment);
-
-
     }
 
     public ResponseEntity<ReviewResponseDTO> addReview(Long appointmentId, ReviewRequestDTO request) {
@@ -204,24 +211,76 @@ public class AppointmentService {
 
         appointment.setRating(request.rating());
         appointment.setComment(request.comment());
+        appointment = appointmentRepository.save(appointment);
 
         serviceProviderService.updateRating(appointment.getServiceProvider().getId());
         serviceService.updateRating(appointment.getServiceProvider().getService().getId());
         memberService.updateMemberRating(appointment.getServiceProvider().getProvider().getId());
 
-        return ResponseEntity.ok(new ReviewResponseDTO("Review added successfully"));
+        sendNotificationToProviderReviewAdded(appointment);
+    return ResponseEntity.ok(new ReviewResponseDTO("Review added successfully"));
     }
 
     public ResponseEntity<ConfirmAppointmentResponseDTO> confirmAppointment(Long id) {
         Appointment appointment = getAppointmentEntityById(id);
-        if(AppointmentStatus.CANCELLED.equals(appointment.getStatus()))
+        if (AppointmentStatus.CANCELLED.equals(appointment.getStatus()))
             throw new TokenExpiredException("Time to confirm appointment has passed" + appointment.getStatus());
-        if(!AppointmentStatus.PENDING.equals(appointment.getStatus()))
+        if (!AppointmentStatus.PENDING.equals(appointment.getStatus()))
             throw new BadRequestException("Appointment can't be confirmed with status " + appointment.getStatus());
 
-        appointment.setStatus(AppointmentStatus.CONFIRMED);
+        appointment.setStatus(AppointmentStatus.FINISHED);
         appointmentRepository.save(appointment);
+        sendNotificationToProviderConfirmedAppointment(appointment);
         return ResponseEntity.ok(new ConfirmAppointmentResponseDTO("Appointment confirmed successfully"));
+    }
+
+    private void sendNotificationToProviderReviewAdded(Appointment appointment) {
+        Notification notification = new Notification();
+        notification.setNotificationTypeEnum(NotificationTypeEnum.APPOINTMENT_REVIEW_ADDED);
+        notification.setTitle(appointment.getServiceProvider().getService().getName());
+        notification.setBody("A review has been added");
+        notification.setMember(appointment.getServiceProvider().getProvider());
+        notificationService.createNotification(notification);
+    }
+
+    private void sendNotificationToProviderConfirmedAppointment(Appointment appointment) {
+        Notification notification = new Notification();
+        notification.setNotificationTypeEnum(NotificationTypeEnum.APPOINTMENT_CONFIRMED);
+        notification.setTitle(appointment.getServiceProvider().getService().getName());
+        notification.setBody("Appointment with "
+                + appointment.getMember().getUsername()
+                + " at " + formatDate(appointment.getStartDateTime()) + " has been confirmed.");
+        notification.setMember(appointment.getServiceProvider().getProvider());
+        notificationService.createNotification(notification);
+    }
+    private void sendNotificationToProviderCancelledAppointment(Appointment appointment) {
+        Notification notification = new Notification();
+        notification.setNotificationTypeEnum(NotificationTypeEnum.APPOINTMENT_CANCELLED);
+        notification.setTitle(appointment.getServiceProvider().getService().getName());
+        notification.setBody("Appointment with "
+                + appointment.getMember().getUsername()
+                + " at " + formatDate(appointment.getStartDateTime()) + " has been cancelled by the client.");
+        notification.setMember(appointment.getServiceProvider().getProvider());
+        notificationService.createNotification(notification);
+    }
+
+    private void sendNotificationToClientCancelledAppointment(Appointment appointment) {
+        Notification notification = new Notification();
+        notification.setNotificationTypeEnum(NotificationTypeEnum.APPOINTMENT_CANCELLED);
+        notification.setTitle(appointment.getServiceProvider().getService().getName());
+        notification.setBody("Appointment for "
+                + appointment.getServiceProvider().getService().getName()
+                + " at " + formatDate(appointment.getStartDateTime()) + " has been cancelled by the provider");
+        notification.setMember(appointment.getMember());
+        notificationService.createNotification(notification);
+    }
+
+    private String formatDate(LocalDateTime dateTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy 'at' h:mm a");
+
+        // Format the datetime
+        return dateTime.format(formatter);
+
     }
 
     public List<AppointmentCardDTO> getAppointmentsForService(Long id, String dateOrder) {

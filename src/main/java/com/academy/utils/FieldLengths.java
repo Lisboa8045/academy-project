@@ -20,8 +20,9 @@ public final class FieldLengths {
     public static final int USERNAME_MAX = 20;
 
     // Service info
-    public static final int SERVICE_TITLE_MAX = 100;
+    public static final int SERVICE_TITLE_MAX = 60;
     public static final int SERVICE_DESCRIPTION_MAX = 2000;
+
     public static final int SERVICE_TYPE_MAX = 50;
 
     // Tag info
@@ -32,7 +33,7 @@ public final class FieldLengths {
     public static final int URL_MAX = 2048;
 
     // Notifications
-    public static final int NOTIFICATION_TITLE_MAX = 60;
+    public static final int NOTIFICATION_TITLE_MAX = 100;
     public static final int NOTIFICATION_BODY_MAX = 240;
 
     // Role

@@ -8,9 +8,9 @@ import {LoginResponseDto} from './login-response-dto.model';
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8080/auth';
+  private readonly apiUrl = 'http://localhost:8080/auth';
 
-  constructor(private http: HttpClient,   private authStore: AuthStore) {}
+  constructor(private readonly http: HttpClient,   private readonly authStore: AuthStore) {}
 
   login(login: string, password: string): Observable<any> {
     return this.http.post<LoginResponseDto>(
@@ -32,6 +32,13 @@ export class AuthService {
             }));
           }
 
+          if (error.status === 403 && error.error?.startsWith('Member is Inactive with status PENDING_DELETION')) {
+            const email = error.error.split(':')[1] || '';
+            return throwError(() => ({
+              type: 'PENDING_DELETION_ACCOUNT',
+              email
+            }))
+          }
           return throwError(() => error);
         })
     );
@@ -71,6 +78,12 @@ export class AuthService {
   resetPassword(token: string, password: string) {
     return this.http.patch(`${this.apiUrl}/password-reset/${token}`, {
       newPassword: password
+    });
+  }
+
+  resendDeleteAccountEmail(login: string) {
+    return this.http.post(`${this.apiUrl}/recreate-delete-account-token`, {
+      login: login
     });
   }
 }

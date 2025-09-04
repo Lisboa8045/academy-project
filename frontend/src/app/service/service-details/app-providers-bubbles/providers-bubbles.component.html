@@ -1,0 +1,19 @@
+@if (loading()) {
+  <app-loading/>
+} @else {
+  <div *ngIf="serviceProviderBubbles" class="service-providers-bubbles">
+    @for (spBubble of serviceProviderBubbles; track spBubble.id) {
+      <div class="bubble" [title]="spBubble.username" [style.z-index]="serviceProviderBubbles.length - $index">
+        <a [routerLink]="'/profile/' + spBubble.id">
+          <img
+            [src]="spBubble.profilePicture"
+            [alt]="spBubble.username"
+            class="avatar"
+            loading="lazy"
+            (error)="onImgError($event)"
+          />
+        </a>
+      </div>
+    }
+  </div>
+}

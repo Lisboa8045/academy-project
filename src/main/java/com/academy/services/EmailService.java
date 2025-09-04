@@ -175,6 +175,17 @@ public class EmailService{
         );
     }
 
+    @Async
+    public void sendDeleteAccountConfirmationEmail(Member member, String revertToken) {
+        String revertUrl = appProperties.getFrontendUrl() + "/revert-delete-account/" + revertToken;
+        String html = loadEmailTemplate("templates/delete-account-confirmation.html")
+                .replace("[USER_NAME]", member.getUsername())
+                .replace("[App Name]", appProperties.getName())
+                .replace("[REVERT_DELETE_ACCOUNT_LINK]", revertUrl)
+                .replace("[EXPIRATION_DAYS]", globalConfigurationService.getConfigValue("account_deletion_expiry_days"));
+        send(member.getEmail(), "Account Deleted - Revert Available", "", html);
+    }
+
 
     private String loadEmailTemplate(String templatePath) {
         try {

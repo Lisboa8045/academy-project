@@ -43,6 +43,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/logout").authenticated()
                         .requestMatchers("/auth/uploads/profile-picture").authenticated()
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/chatbot/**").permitAll()
                         .requestMatchers("/").permitAll()
                         .requestMatchers(HttpMethod.GET, "/admin/global_configurations/{configKey}").permitAll()
                         .requestMatchers(HttpMethod.GET, "/members/**").permitAll()
@@ -53,6 +54,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/tags/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/service-providers/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/appointments/confirm-appointment/**").permitAll()
+                        .requestMatchers("/members/revert-delete/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 ).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
         ;
