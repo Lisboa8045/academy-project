@@ -126,7 +126,7 @@
 }
 .track-rtl {
   animation: marquee-rtl linear infinite;
-  animation-duration: 60s; /* slightly different for a natural feel */
+  animation-duration: 60s;
 }
 
 /* Pause a row when hovered */
