@@ -19,7 +19,7 @@
         <div class="results-container">
           @if (services().length === 0) {
             <div class="no-services-message">
-              @if (!memberId) {
+              @if (memberId && !member) {
                 <ng-container>
                   <p>You don't have any services. Let's create one!</p>
                 </ng-container>
