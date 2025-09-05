@@ -103,7 +103,9 @@ export class ProfileComponent implements OnInit {
         this.userProfileService.getImage(res.profilePicture).then((url) => {
           const safeUrl = url ?? "";
           this.imageUrl.set(safeUrl);
-          this.userProfileService.setImageUrl(safeUrl);
+          if(id === this.authStore.id()) {
+            this.userProfileService.setImageUrl(safeUrl);
+          }
         });
         this.loadForm(this.user);
       },
