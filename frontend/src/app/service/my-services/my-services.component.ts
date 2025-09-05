@@ -112,4 +112,7 @@ export class MyServicesComponent{
     }
   }
 
+  get clickPath() {
+    return this.isMyServices ? 'backoffice/services' : 'services';
+  }
 }

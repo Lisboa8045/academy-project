@@ -34,7 +34,7 @@
               [pageSize]="pageSize"
               [sortOrder]="sortOrder">
             </app-controls-bar>
-            <app-service-list [services]="services()" clickPath="/backoffice/services"></app-service-list>
+            <app-service-list [services]="services()" [clickPath]="clickPath"></app-service-list>
           }
 
           <app-pagination-bar
