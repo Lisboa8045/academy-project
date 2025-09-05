@@ -9,6 +9,7 @@ import {ServiceQuery} from '../../shared/models/service-query.model';
 import {AuthStore} from '../../auth/auth.store';
 import {NgTemplateOutlet} from '@angular/common';
 import {RouterLink} from '@angular/router';
+import {MemberResponseDTO} from '../../auth/member-response-dto.model';
 
 @Component({
   selector: 'app-my-services',
@@ -24,7 +25,7 @@ import {RouterLink} from '@angular/router';
   ]
 })
 export class MyServicesComponent{
-  @Input() member : any;
+  @Input() member : MemberResponseDTO | undefined;
   memberId! : number;
   services = signal<ServiceModel[]>([]);
   loading = signal(false);
