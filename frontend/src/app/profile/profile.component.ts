@@ -75,24 +75,29 @@ export class ProfileComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.loading.set(true);
-    const idParam = this.route.snapshot.paramMap.get('id');
-    let id: number;
+    this.route.paramMap.subscribe(params => {
+      const idParam = params.get('id');
+      let id: number;
 
-    if (idParam) {
-      id = Number(idParam);
-    } else {
-      id = this.authStore.id();
-    }
+      if (idParam) {
+        id = Number(idParam);
+      } else {
+        id = this.authStore.id();
+      }
 
+      if (!id || id <= 0) {
+        this.loading.set(false);
+        this.router.navigate(['/not-found']);
+        return;
+      }
 
-    if (!id || id <= 0) {
-      this.loading.set(false);
-      this.router.navigate(['/not-found']);
-      return;
-    }
+      this.user = undefined;
+      this.imageUrl.set("");
+      this.tempImageUrl.set("");
+      this.loading.set(true);
 
-    this.getMember(id);
+      this.getMember(id);
+    });
   }
 
   getMember(id: number) {
