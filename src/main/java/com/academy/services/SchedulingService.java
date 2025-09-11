@@ -1,5 +1,6 @@
 package com.academy.services;
 
+import com.academy.config.authentication.AuthenticationFacade;
 import com.academy.dtos.SlotDTO;
 import com.academy.models.appointment.Appointment;
 import com.academy.models.availability.Availability;
@@ -24,6 +25,7 @@ public class SchedulingService {
     private final ServiceProviderService serviceProviderService;
     private final MemberService memberService;
     private final ServiceService serviceService;
+    private final AuthenticationFacade authenticationFacade;
 
     @Autowired
     public SchedulingService(
@@ -31,14 +33,15 @@ public class SchedulingService {
             AppointmentService appointmentService,
             ServiceProviderService serviceProviderService,
             MemberService memberService,
-            ServiceService serviceService
+            ServiceService serviceService,
+            AuthenticationFacade authenticationFacade
     ) {
         this.availabilityService = availabilityService;
         this.appointmentService = appointmentService;
         this.serviceProviderService = serviceProviderService;
         this.memberService = memberService;
         this.serviceService = serviceService;
-
+        this.authenticationFacade = authenticationFacade;
     }
 
     public List<SlotDTO> getFreeSlotsForService(Long serviceId) {
@@ -48,6 +51,8 @@ public class SchedulingService {
         int serviceDurationMinutes = serviceService.getById(serviceId).duration();
 
         List<SlotDTO> allFreeSlots = new ArrayList<>();
+
+        String username = authenticationFacade.getUsername();
 
         List<ServiceProvider> providersWithServePermission = serviceProviderService
                 .findProvidersByServiceIdAndPermission(serviceId, ProviderPermissionEnum.SERVE);
@@ -61,6 +66,10 @@ public class SchedulingService {
             }
 
             Member member = memberOpt.get();
+
+            if (member.getUsername().equals(username)) {
+                continue;
+            }
 
             List<Availability> allAvailabilities = availabilityService.getAllAvailabilitiesEntity();
             List<Availability> availabilities = allAvailabilities.stream()
