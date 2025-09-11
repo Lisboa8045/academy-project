@@ -15,6 +15,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -75,6 +76,7 @@ public class SchedulingService {
             List<Availability> availabilities = allAvailabilities.stream()
                     .filter(av -> av.getMemberAvailabilities().stream()
                             .anyMatch(ma -> ma.getMember().getId().equals(providerId)))
+                    .sorted(Comparator.comparing(Availability::getStartTime))
                     .toList();
 
             List<Appointment> appointments = appointmentService.getAppointmentsForServiceProvider(
