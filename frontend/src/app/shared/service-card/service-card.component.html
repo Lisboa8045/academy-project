@@ -4,7 +4,7 @@
          (error)="onImgError($event)"
          alt="Service Image" />
     <div *ngIf="discountedPrice" class="discount-badge">
-      -{{ service?.discount }}%
+      -{{ service.discount }}%
     </div>
   </div>
   <div class="service-info">
@@ -21,14 +21,14 @@
     @if(discountedPrice){
 
           <div class="original-price" style="text-decoration: line-through; color: grey;">
-            {{ service?.price }}€
+            {{ service.price }}€
           </div>
           <div class="discounted-price" style="font-weight: bold;">
             {{ discountedPrice }}€
           </div>
     }@else{
       <div style="font-weight: bold">
-        {{ service?.price }}€
+        {{ service.price }}€
       </div>
     }
     </div>

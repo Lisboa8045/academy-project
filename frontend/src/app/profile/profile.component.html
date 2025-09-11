@@ -146,7 +146,7 @@
                 type="button"
                 class="logout-button"
                 (click)="deleteMember()"
-                [disabled]="user?.status === MemberStatusEnum.PENDING_DELETION">
+                [disabled]="user.status === MemberStatusEnum.PENDING_DELETION">
                 Delete Account
               </button>
               <button type="button" class="logout-button" (click)="logout()">Logout</button>
