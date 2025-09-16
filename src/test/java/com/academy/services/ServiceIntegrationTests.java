@@ -94,7 +94,7 @@ class ServiceIntegrationTests {
     }
 
     private ServiceRequestDTO createDTO(String name, String description, String serviceTypeName, List<String> tags) {
-        return new ServiceRequestDTO(name, description, 80, 20, false, 30, serviceTypeName, tags);
+        return new ServiceRequestDTO(name, description, 80, 20, false, 30, "123456", serviceTypeName, tags);
     }
 
     private ServiceType createServiceType(String name) {

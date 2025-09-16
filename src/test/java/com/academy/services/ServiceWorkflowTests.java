@@ -88,7 +88,7 @@ class ServiceWorkflowTests {
     }
 
     private ServiceRequestDTO createDTO(List<String> tags) {
-        return new ServiceRequestDTO("Test Service", "Test Description", 80, 20, false, 30, "Test Service Type", tags);
+        return new ServiceRequestDTO("Test Service", "Test Description", 80, 20, false, 30, "123456", "Test Service Type", tags);
     }
 
     private ServiceProviderRequestDTO createProviderDTO(Long memberId, Long serviceId) {

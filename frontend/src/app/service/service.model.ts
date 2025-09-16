@@ -9,6 +9,7 @@ export interface ServiceModel {
   discount: number;
   negotiable: boolean;
   duration: number;
+  entity: string;
   permissions: string[];
   status:  ServiceStatus;
   serviceTypeName: string;

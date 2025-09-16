@@ -19,6 +19,7 @@ public record ServiceRequestDTO(
         int discount,
         boolean negotiable,
         @Positive int duration,
+        @NotBlank @Size(max = FieldLengths.SERVICE_ENTITY_MAX) String entity,
         @NotBlank @Size(max = FieldLengths.SERVICE_TYPE_MAX) String serviceTypeName,
 
         @Size(max = FieldLengths.MAX_SERVICE_TAGS)

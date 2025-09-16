@@ -162,6 +162,16 @@
         </div>
       </div>
     </fieldset>
+    <fieldset>
+      <legend>Payment Information</legend>
+      <div class="input-wrapper">
+        <label>Entity:</label>
+        <input type="text" formControlName="entity"/>
+        <div class="validation-error" *ngIf="form.get('entity')?.invalid && form.get('entity')?.touched">
+          Entity is required and should be no more than 10 characters.
+        </div>
+      </div>
+    </fieldset>
 
     <button type="submit" [disabled]="form.invalid" class="edit-button">Submit</button>
   </form>
