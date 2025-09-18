@@ -15,6 +15,7 @@ public record ServiceResponseDTO(
         int discount,
         boolean negotiable,
         int duration,
+        String entity,
         List<ProviderPermissionEnum> permissions,
         ServiceStatusEnum status,
         String serviceTypeName,

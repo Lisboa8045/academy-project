@@ -66,7 +66,7 @@ public class AppointmentRatingTests {
         // Create a service
         ServiceRequestDTO serviceDTO = new ServiceRequestDTO(
                 "Test Service", "Description", 100, 10, false, 60,
-                "test-type", List.of("test-tag")
+                "123456", "test-type", List.of("test-tag")
         );
         try {
             serviceService.create(serviceDTO);

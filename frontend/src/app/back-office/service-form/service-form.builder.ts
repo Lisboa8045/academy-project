@@ -8,6 +8,7 @@ export function buildServiceForm(fb: FormBuilder, initialData: any = {}): FormGr
     discount: [initialData.discount ?? 0, [Validators.min(0), Validators.max(100)]],
     negotiable: [initialData.negotiable ?? false],
     duration: [initialData.duration ?? 30, [Validators.min(1), Validators.required]],
+    entity: [initialData.entity || '', [Validators.maxLength(10), Validators.required]],
     serviceTypeName: [initialData.serviceTypeName || '', Validators.required],
     permissions: [initialData.permissions || []],
     tagNames: fb.array(

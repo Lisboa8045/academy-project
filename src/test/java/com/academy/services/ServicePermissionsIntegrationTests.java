@@ -104,6 +104,7 @@ public class ServicePermissionsIntegrationTests {
                 1,
                 false,
                 100,
+                "123456",
                 serviceType.getName(),
                 new ArrayList<>()
         );
@@ -146,6 +147,7 @@ public class ServicePermissionsIntegrationTests {
                                 1,
                                 false,
                                 100,
+                                "123456",
                                 serviceType.getName(),
                                 new ArrayList<>()
                         )
@@ -170,6 +172,7 @@ public class ServicePermissionsIntegrationTests {
                                 1,
                                 false,
                                 100,
+                                "123456",
                                 serviceType.getName(),
                                 new ArrayList<>()
                         )
@@ -193,6 +196,7 @@ public class ServicePermissionsIntegrationTests {
                                 1,
                                 false,
                                 100,
+                                "123456",
                                 serviceType.getName(),
                                 new ArrayList<>()
                         )
@@ -299,6 +303,7 @@ public class ServicePermissionsIntegrationTests {
                 1,
                 false,
                 100,
+                "123456",
                 serviceType.getName(),
                 new ArrayList<>()
         );

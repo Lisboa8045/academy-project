@@ -22,6 +22,7 @@ public final class FieldLengths {
     // Service info
     public static final int SERVICE_TITLE_MAX = 60;
     public static final int SERVICE_DESCRIPTION_MAX = 2000;
+    public static final int SERVICE_ENTITY_MAX = 10;
 
     public static final int SERVICE_TYPE_MAX = 50;
 
