@@ -67,6 +67,11 @@ public class AppointmentController {
         return appointmentService.confirmAppointment(id);
     }
 
+    @PostMapping("/finish-appointment/{id}")
+    public ResponseEntity<ConfirmAppointmentResponseDTO> finishAppointment(@PathVariable Long id){
+        return appointmentService.finishAppointment(id);
+    }
+
     @PreAuthorize("@appointmentSecurity.isClientOrProvider(#id, authentication.name)")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> cancelAppointment(@PathVariable Long id) {

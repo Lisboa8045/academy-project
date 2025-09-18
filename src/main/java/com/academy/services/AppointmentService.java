@@ -228,7 +228,7 @@ public class AppointmentService {
         if (!AppointmentStatus.PENDING.equals(appointment.getStatus()))
             throw new BadRequestException("Appointment can't be confirmed with status " + appointment.getStatus());
 
-        appointment.setStatus(AppointmentStatus.FINISHED);
+        appointment.setStatus(AppointmentStatus.CONFIRMED);
         appointmentRepository.save(appointment);
         sendNotificationToProviderConfirmedAppointment(appointment);
         return ResponseEntity.ok(new ConfirmAppointmentResponseDTO("Appointment confirmed successfully"));
@@ -275,6 +275,17 @@ public class AppointmentService {
         notificationService.createNotification(notification);
     }
 
+    private void sendNotificationToClientFinishedAppointment(Appointment appointment) {
+        Notification notification = new Notification();
+        notification.setNotificationTypeEnum(NotificationTypeEnum.APPOINTMENT_FINISHED);
+        notification.setTitle(appointment.getServiceProvider().getService().getName());
+        notification.setBody("Appointment for "
+                + appointment.getServiceProvider().getService().getName()
+                + " at " + formatDate(appointment.getStartDateTime()) + " has been declared finished by the provider");
+        notification.setMember(appointment.getMember());
+        notificationService.createNotification(notification);
+    }
+
     private String formatDate(LocalDateTime dateTime) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy 'at' h:mm a");
 
@@ -292,4 +303,12 @@ public class AppointmentService {
         return appointmentList.stream().map(appointmentMapper::toAppointmentCardDTO).toList();
     }
 
+    public ResponseEntity<ConfirmAppointmentResponseDTO> finishAppointment(Long appointmentId) {
+        Appointment appointment = getAppointmentEntityById(appointmentId);
+
+        appointment.setStatus(AppointmentStatus.FINISHED);
+        appointmentRepository.save(appointment);
+        sendNotificationToClientFinishedAppointment(appointment);
+        return ResponseEntity.ok(new ConfirmAppointmentResponseDTO("Appointment finished successfully"));
+    }
 }

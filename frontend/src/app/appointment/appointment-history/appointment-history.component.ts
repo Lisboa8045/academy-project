@@ -157,6 +157,12 @@ export class AppointmentHistoryComponent implements OnInit {
     return [AppointmentStatusEnumModel.CANCELLED, AppointmentStatusEnumModel.FINISHED].includes(status);
   }
 
+  hasPassedTheTimeOfTheAppointment(dateLike: string | Date): boolean {
+    const d = new Date(dateLike);
+    return !isNaN(d.getTime()) && d.getTime() < Date.now();
+  }
+
+
   confirmCancelAppointment() {
     this.appointmentHistoryService.cancelAppointment(this.selectedAppointment!.id).subscribe({
       next: data => {

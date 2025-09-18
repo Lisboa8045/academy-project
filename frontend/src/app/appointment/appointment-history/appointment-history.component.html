@@ -82,11 +82,11 @@
         <button
           class="w-20 py-2 rounded-full text-white transition"
           [ngClass]="{
-            'bg-red-600 hover:bg-red-700': !isCancelledOrFinished(appointment.status),
-            'bg-gray-400 cursor-not-allowed': isCancelledOrFinished(appointment.status)
+            'bg-red-600 hover:bg-red-700': !isCancelledOrFinished(appointment.status) && !hasPassedTheTimeOfTheAppointment(appointment.startDateTime),
+            'bg-gray-400 cursor-not-allowed': isCancelledOrFinished(appointment.status) || hasPassedTheTimeOfTheAppointment(appointment.startDateTime)
           }"
           (click)="onCancelAppointmentClick(appointment.id)"
-          [disabled]="isCancelledOrFinished(appointment.status)"
+          [disabled]="isCancelledOrFinished(appointment.status) || hasPassedTheTimeOfTheAppointment(appointment.startDateTime)"
         >
           Cancel
         </button>
