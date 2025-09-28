@@ -45,6 +45,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     List<Appointment> findByServiceProviderId(Long serviceProviderId);
 
+    List<Appointment> findByServiceProvider_Provider_IdAndStatusNot(Long providerMemberId, AppointmentStatus status);
+
     @Query("""
         SELECT DISTINCT a.member
         FROM Appointment a

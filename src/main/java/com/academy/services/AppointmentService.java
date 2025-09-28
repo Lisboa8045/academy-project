@@ -181,10 +181,8 @@ public class AppointmentService {
     }
 
 
-    public List<Appointment> getAppointmentsForServiceProvider(Long serviceProviderId) {
-        return appointmentRepository.findByServiceProviderId(serviceProviderId).stream().filter(
-                appointment -> !appointment.getStatus().equals(AppointmentStatus.CANCELLED)
-        ).toList();
+    public List<Appointment> getAppointmentsForWorker(Long workerId) {
+        return appointmentRepository.findByServiceProvider_Provider_IdAndStatusNot(workerId, AppointmentStatus.CANCELLED);
     }
 
     public void cancelAppointment(Long id) {

@@ -79,9 +79,7 @@ public class SchedulingService {
                     .sorted(Comparator.comparing(Availability::getStartTime))
                     .toList();
 
-            List<Appointment> appointments = appointmentService.getAppointmentsForServiceProvider(
-                    serviceProvider.getId()
-            );
+            List<Appointment> appointments = appointmentService.getAppointmentsForWorker(serviceProvider.getProvider().getId());
 
             List<SlotDTO> freeSlots = generateFreeSlots(
                     providerId,
