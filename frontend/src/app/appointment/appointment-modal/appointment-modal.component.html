@@ -84,7 +84,7 @@
           </button>
         </div>
         @if (isCalendarContext) {
-          <div *ngIf="hasHappened(appointment) && !finishAppointmentModal && (appointment.status !== 'PENDING')" class="flex justify-end mt-auto pt-6">
+          <div *ngIf="hasHappened(appointment) && !finishAppointmentModal && (appointment.status == 'CONFIRMED')" class="flex justify-end mt-auto pt-6">
             <button
               class="px-4 py-2 rounded-full bg-green-500 text-white hover:bg-green-800 transition"
               (click)="finishAppointmentModal = true"
