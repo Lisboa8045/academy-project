@@ -53,7 +53,7 @@ export class AppointmentService {
   }
 
   finishAppointment(id: number) {
-    return this.http.post<ConfirmAppointmentResponseDTO>(`${this.apiUrl}/confirm-appointment/${id}`, null);
+    return this.http.post<ConfirmAppointmentResponseDTO>(`${this.apiUrl}/finish-appointment/${id}`, null);
   }
 
   sendReview(id: number, review: Review): Observable<{ message: string }> {

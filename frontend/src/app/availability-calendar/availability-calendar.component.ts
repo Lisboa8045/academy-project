@@ -290,9 +290,6 @@ export class CalendarComponent implements OnInit, AfterViewInit {
     if (event.title !== 'Available' && event.extendedProps['appointment'].status !== 'PENDING' && event.start) {
       const now = new Date();
       const eventEnd = event.end ? event.end : event.start;
-      if (eventEnd < now) {
-        return
-      }
     }
     if (event.title === 'Available') {
       return; // Skip available events
