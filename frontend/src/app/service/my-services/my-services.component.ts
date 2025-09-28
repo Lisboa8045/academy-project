@@ -63,7 +63,7 @@ export class MyServicesComponent{
       this.serviceApiService.getServicesOfMember(query, this.memberId).subscribe({
         next: (res: PagedResponse) => {
           let services = res.content;
-          if (this.memberId) {
+          if (!this.isMyServices) {
             services = services.filter(service => service.status == 'APPROVED');
           }
           this.services.set(services);
