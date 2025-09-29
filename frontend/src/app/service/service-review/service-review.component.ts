@@ -30,7 +30,7 @@ export class ServiceReviewComponent implements OnInit {
   @Input() member : MemberResponseDTO | undefined;
   reviews?: ServiceAppointmentReviewModel[] = [];
   hasReviews = false;
-  @Input() isProfile?: boolean;
+  isMyProfile?: boolean;
 
 
   constructor(
@@ -80,6 +80,7 @@ export class ServiceReviewComponent implements OnInit {
         }
       });
     } else if (this.member?.id) {
+      this.isMyProfile = this.authStore.id() === this.member.id;
       this.profileService.getReviewsByMemberId(this.member.id).subscribe({
         next: (data) => {
           this.handleReviews(data);

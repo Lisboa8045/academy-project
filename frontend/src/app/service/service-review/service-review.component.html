@@ -3,7 +3,7 @@
       <h2 class="title">
         {{ member?.username ? member?.username + "'s Reviews" : 'Reviews' }}
       </h2>
-      @if (this.hasReviews && isProfile) {
+      @if (this.hasReviews && isMyProfile) {
         <app-review-analyse></app-review-analyse>
       }
     </div>
