@@ -51,6 +51,7 @@ export class EditServiceComponent implements OnInit {
   imageUrls: string[] = [];
   currentImageIndex = 0;
   newTag: string = '';
+  loadingImages = false;
 
   constructor(private fb: FormBuilder,
               private serviceApi: ServiceApiService,
@@ -94,6 +95,8 @@ export class EditServiceComponent implements OnInit {
       return;
     }
 
+    this.loadingImages = true;
+
     for (const fileName of fileNames) {
       try {
         const res = await fetch(`http://localhost:8080/auth/uploads/${fileName}`);
@@ -107,6 +110,8 @@ export class EditServiceComponent implements OnInit {
         snackBarError(this.snackBar, "Error loading the image: " + fileName)
       }
     }
+
+    this.loadingImages = false;
   }
 
   fetchServiceTypes() {

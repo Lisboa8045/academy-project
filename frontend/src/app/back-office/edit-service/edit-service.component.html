@@ -59,7 +59,7 @@
             <div class="image-wrapper">
               <button class="nav left" (click)="prevImage(thumbContainer)" type="button" [disabled]="currentImageIndex === 0">&#10094;
               </button>
-              @if (imageUrls.length === 0) {
+                @if (imageUrls.length === 0 && !loadingImages) {
                 <div class="thumbnail-placeholder">
                   No Image Provided
                 </div>
