@@ -4,6 +4,8 @@ import com.academy.models.appointment.Appointment;
 import com.academy.models.appointment.AppointmentStatus;
 import com.academy.models.member.Member;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -58,7 +60,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     Double findAverageRatingByServiceProvider_Id(@Param("serviceProviderId") Long serviceProviderId);
 
     @Query("SELECT a FROM Appointment a WHERE a.serviceProvider.provider.id = :memberId AND (a.comment IS NOT NULL OR a.rating IS NOT NULL)")
-    List<Appointment> findAllReviewsByMemberId(@Param("memberId") Long memberId);
+    Page<Appointment> findAllReviewsByMemberId(@Param("memberId") Long memberId, Pageable pageable);
 
     List<Appointment> findAllByServiceProviderProviderUsernameAndStatusIsNot(String username, AppointmentStatus status);
 

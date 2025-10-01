@@ -16,6 +16,15 @@ export interface PagedResponse {
   size: number;
 }
 
+export interface PagedReviewResponse {
+  content: ServiceAppointmentReviewModel[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+
+
 @Injectable({
   providedIn: 'root',
 })
@@ -81,8 +90,12 @@ export class ServiceApiService {
     return this.http.get<ServiceModel>(`${this.BASE_URL}/${id}`);
   }
 
-  getReviewsByServiceId(id: number): Observable<ServiceAppointmentReviewModel[]> {
-    return this.http.get<ServiceAppointmentReviewModel[]>(`${this.REVIEWS_URL}/${id}`);
+  getReviewsByServiceId(id: number, page = 0, size = 10): Observable<PagedReviewResponse> {
+    let params = new HttpParams()
+        .set('page', page.toString())
+        .set('size', size.toString());
+
+    return this.http.get<PagedReviewResponse>(`${this.REVIEWS_URL}/${id}`, { params });
   }
 
   getServicesOfMember(query: ServiceQuery, id: number): Observable<PagedResponse>{

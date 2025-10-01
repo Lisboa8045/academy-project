@@ -29,13 +29,17 @@ import org.apache.coyote.BadRequestException;
 import org.hibernate.collection.spi.PersistentBag;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -395,14 +399,23 @@ public class ServiceService {
         serviceRepository.save(service);
     }
 
-    public List<AppointmentReviewResponseDTO> getReviewsByServiceId(Long serviceId) {
+    public Page<AppointmentReviewResponseDTO> getReviewsByServiceId(Long serviceId, Pageable pageable) {
         Service service = serviceRepository.findById(serviceId)
                 .orElseThrow(() -> new EntityNotFoundException(Service.class, serviceId));
-        return service.getServiceProviders().stream()
+
+        List<AppointmentReviewResponseDTO> allReviews = service.getServiceProviders().stream()
                 .flatMap(sp -> sp.getAppointmentList().stream())
                 .filter(app -> app.getComment() != null || app.getRating() != null)
                 .map(appointmentMapper::toReviewResponseDTO)
+                .sorted(Comparator.comparing(AppointmentReviewResponseDTO::appointmentDate).reversed())
                 .toList();
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), allReviews.size());
+        List<AppointmentReviewResponseDTO> pagedReviews =
+                (start <= end) ? allReviews.subList(start, end) : List.of();
+
+        return new PageImpl<>(pagedReviews, pageable, allReviews.size());
     }
 
     @Transactional
@@ -451,4 +464,21 @@ public class ServiceService {
         notificationService.createNotification(notification);
     }
 
+    public List<ServiceResponseDTO> getTopRatedServices() {
+        List<Service> services = serviceRepository.findTop10ByEnabledTrueOrderByRatingDesc();
+        return serviceMapper.mapServicesToDTOs(services);
+    }
+
+    public List<ServiceResponseDTO> getDiscountedServices() {
+        List<Service> services = serviceRepository.findTop10ByEnabledTrueAndDiscountGreaterThanOrderByDiscountDesc(0.0);
+        return serviceMapper.mapServicesToDTOs(services);
+    }
+
+    public List<ServiceResponseDTO> getTrendingServices() {
+        LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
+        Pageable top10 = PageRequest.of(0, 10);
+
+        List<Service> services = serviceRepository.findTopTrendingServicesInPastMonth(oneMonthAgo, top10);
+        return serviceMapper.mapServicesToDTOs(services);
+    }
 }

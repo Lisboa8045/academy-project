@@ -35,7 +35,7 @@
         </div>
       </div>
 
-        <span class="review-date">{{ review.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+        <span class="review-date">{{ review.appointmentDate | date:'dd/MM/yyyy' }}</span>
 
       </div>
       <p class="review-comment">{{ review.comment }}</p>
@@ -50,3 +50,11 @@
       There aren't any reviews available.
     </p>
   </div>
+
+  <app-pagination-bar
+          [currentPage]="currentPage"
+          [totalPages]="totalPages"
+          [goToPageFn]="goToPage.bind(this)"
+          [goToPreviousPageFn]="goToPreviousPage.bind(this)"
+          [goToNextPageFn]="goToNextPage.bind(this)"
+  ></app-pagination-bar>

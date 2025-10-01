@@ -6,5 +6,5 @@ export interface ServiceAppointmentReviewModel {
   comment: string;
   memberUsername: string;
   memberProfilePicture: string;
-  createdAt: string;
+  appointmentDate: string;
 }
