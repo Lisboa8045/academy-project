@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {Observable, map, forkJoin} from 'rxjs';
+import { Observable } from 'rxjs';
 import {AppointmentModel} from '../models/appointment.model';
 import {ServiceModel} from '../service/service.model';
-import {ServiceProviderModel} from '../models/service-provider.model';
 
 @Injectable({
   providedIn: 'root'
@@ -19,21 +18,15 @@ export class LandingPageService {
     return this.http.get<any[]>(`${this.BASE_URL}/service-types`);
   }
 
-  getServices(): Observable<any[]> {
-    return this.http.get<ServiceModel[]>(`${this.BASE_URL}/services`);
-  }
-
-  getAppointments(): Observable<any[]> {
-    return this.http.get<AppointmentModel[]>(`${this.BASE_URL}/appointments`);
-  }
-
   getTopRatedServices(): Observable<ServiceModel[]> {
-    return this.getServices().pipe(
-      map((services) =>
-        services
-          .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
-          .slice(0, 10)
-      )
-    );
+    return this.http.get<ServiceModel[]>(`${this.BASE_URL}/services/top-rated`);
+  }
+
+  getDiscountedServices(): Observable<ServiceModel[]> {
+    return this.http.get<ServiceModel[]>(`${this.BASE_URL}/services/discounted`);
+  }
+
+  getTrendingServices(): Observable<ServiceModel[]> {
+    return this.http.get<ServiceModel[]>(`${this.BASE_URL}/services/trending`);
   }
 }

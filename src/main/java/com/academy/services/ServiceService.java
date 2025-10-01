@@ -30,10 +30,12 @@ import org.hibernate.collection.spi.PersistentBag;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -462,4 +464,21 @@ public class ServiceService {
         notificationService.createNotification(notification);
     }
 
+    public List<ServiceResponseDTO> getTopRatedServices() {
+        List<Service> services = serviceRepository.findTop10ByEnabledTrueOrderByRatingDesc();
+        return serviceMapper.mapServicesToDTOs(services);
+    }
+
+    public List<ServiceResponseDTO> getDiscountedServices() {
+        List<Service> services = serviceRepository.findTop10ByEnabledTrueAndDiscountGreaterThanOrderByDiscountDesc(0.0);
+        return serviceMapper.mapServicesToDTOs(services);
+    }
+
+    public List<ServiceResponseDTO> getTrendingServices() {
+        LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
+        Pageable top10 = PageRequest.of(0, 10);
+
+        List<Service> services = serviceRepository.findTopTrendingServicesInPastMonth(oneMonthAgo, top10);
+        return serviceMapper.mapServicesToDTOs(services);
+    }
 }

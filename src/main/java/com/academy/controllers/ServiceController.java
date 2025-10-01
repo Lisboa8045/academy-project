@@ -140,4 +140,22 @@ public class ServiceController {
         Page<AppointmentReviewResponseDTO> reviews = serviceService.getReviewsByServiceId(id, pageable);
         return ResponseEntity.ok(reviews);
     }
+
+    @GetMapping("/top-rated")
+    public ResponseEntity<List<ServiceResponseDTO>> getTopRatedServices() {
+        List<ServiceResponseDTO> services = serviceService.getTopRatedServices();
+        return ResponseEntity.ok(services);
+    }
+
+    @GetMapping("/discounted")
+    public ResponseEntity<List<ServiceResponseDTO>> getDiscountedServices() {
+        List<ServiceResponseDTO> services = serviceService.getDiscountedServices();
+        return ResponseEntity.ok(services);
+    }
+
+    @GetMapping("/trending")
+    public ResponseEntity<List<ServiceResponseDTO>> getTrendingServices() {
+        List<ServiceResponseDTO> services = serviceService.getTrendingServices();
+        return ResponseEntity.ok(services);
+    }
 }

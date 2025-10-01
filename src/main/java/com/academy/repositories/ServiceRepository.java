@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ServiceRepository extends JpaRepository<Service, Long>, JpaSpecificationExecutor<Service> {
@@ -35,4 +36,17 @@ public interface ServiceRepository extends JpaRepository<Service, Long>, JpaSpec
           and s.owner.id = :memberId
     """)
     List<Service> findOwnedAndProvidedByMember(@Param("memberId") Long memberId);
+
+    List<Service> findTop10ByEnabledTrueOrderByRatingDesc();
+
+    List<Service> findTop10ByEnabledTrueAndDiscountGreaterThanOrderByDiscountDesc(double discountThreshold);
+
+    @Query("SELECT s FROM Service s " +
+            "LEFT JOIN s.serviceProviders sp " +
+            "LEFT JOIN sp.appointmentList a " +
+            "WHERE s.enabled = true " +
+            "AND a.endDateTime >= :startDate " +
+            "GROUP BY s " +
+            "ORDER BY COUNT(a) DESC")
+    List<Service> findTopTrendingServicesInPastMonth(@Param("startDate") LocalDateTime startDate, Pageable pageable);
 }
