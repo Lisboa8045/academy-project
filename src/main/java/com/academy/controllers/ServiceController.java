@@ -134,8 +134,10 @@ public class ServiceController {
     }
 
     @GetMapping("/service_with_review/{id}")
-    public ResponseEntity<List<AppointmentReviewResponseDTO>> getServiceReviews(@PathVariable Long id) {
-        List<AppointmentReviewResponseDTO> reviews = serviceService.getReviewsByServiceId(id);
+    public ResponseEntity<Page<AppointmentReviewResponseDTO>> getServiceReviews(
+            @PathVariable Long id,
+            Pageable pageable) {
+        Page<AppointmentReviewResponseDTO> reviews = serviceService.getReviewsByServiceId(id, pageable);
         return ResponseEntity.ok(reviews);
     }
 }

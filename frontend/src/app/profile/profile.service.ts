@@ -1,8 +1,16 @@
 import {Injectable} from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import {MemberResponseDTO} from '../auth/member-response-dto.model';
 import {Observable} from 'rxjs';
 import {ServiceAppointmentReviewModel} from '../service/service-details/service-appointment-review-model';
+
+export interface PagedReviewResponse {
+  content: ServiceAppointmentReviewModel[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -48,8 +56,12 @@ export class ProfileService {
     );
   }
 
-  getReviewsByMemberId(memberId: number): Observable<ServiceAppointmentReviewModel[]> {
-    return this.http.get<ServiceAppointmentReviewModel[]>(`${this.apiUrl}/${memberId}/reviews`);
+  getReviewsByMemberId(memberId: number, page = 0, size = 5): Observable<PagedReviewResponse> {
+    let params = new HttpParams()
+        .set('page', page.toString())
+        .set('size', size.toString());
+
+    return this.http.get<PagedReviewResponse>(`${this.apiUrl}/${memberId}/reviews`, { params });
   }
 
   deleteMember(id: number) {

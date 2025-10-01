@@ -7,6 +7,10 @@ import com.academy.dtos.member.MemberRequestDTO;
 import com.academy.dtos.member.MemberResponseDTO;
 import com.academy.services.MemberService;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -88,8 +92,10 @@ public class MemberController {
     }
 
     @GetMapping("/{id}/reviews")
-    public ResponseEntity<List<AppointmentReviewResponseDTO>> getReviewsByMemberId(@PathVariable Long id) {
-        List<AppointmentReviewResponseDTO> reviews = memberService.getReviewsByMemberId(id);
+    public ResponseEntity<Page<AppointmentReviewResponseDTO>> getReviewsByMemberId(
+            @PathVariable Long id,
+            @PageableDefault(sort = "endDateTime", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<AppointmentReviewResponseDTO> reviews = memberService.getReviewsByMemberId(id, pageable);
         return ResponseEntity.ok(reviews);
     }
 }

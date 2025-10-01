@@ -1,6 +1,6 @@
 package com.academy.dtos.appointment;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public record AppointmentReviewResponseDTO(
         Long id,
@@ -9,5 +9,5 @@ public record AppointmentReviewResponseDTO(
         String comment,
         String memberUsername,
         String memberProfilePicture,
-        LocalDateTime createdAt
+        LocalDate appointmentDate
 ) {}

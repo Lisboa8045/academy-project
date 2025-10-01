@@ -44,6 +44,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -497,11 +499,24 @@ public class MemberService {
         }
     }
 
-    public List<AppointmentReviewResponseDTO> getReviewsByMemberId(Long id) {
-        List<Appointment> appointments = appointmentRepository.findAllReviewsByMemberId(id);
-        return appointments.stream()
-                .map(appointmentMapper::toReviewResponseDTO)
-                .toList();
+    public Page<AppointmentReviewResponseDTO> getReviewsByMemberId(Long id, Pageable pageable) {
+        System.out.println("Fetching reviews for memberId: " + id);
+        System.out.println("Pageable info: page=" + pageable.getPageNumber() + ", size=" + pageable.getPageSize() +
+                ", sort=" + pageable.getSort());
+
+        Page<Appointment> appointments = appointmentRepository.findAllReviewsByMemberId(id, pageable);
+
+        System.out.println("Appointments fetched: " + appointments.getTotalElements());
+        appointments.forEach(app -> System.out.println(
+                "Appointment id=" + app.getId() + ", rating=" + app.getRating() + ", comment=" + app.getComment() +
+                        ", memberId=" + app.getMember().getId()
+        ));
+
+        Page<AppointmentReviewResponseDTO> dtoPage = appointments.map(appointmentMapper::toReviewResponseDTO);
+
+        System.out.println("Mapped DTOs count: " + dtoPage.getContent().size());
+
+        return dtoPage;
     }
 
     @Transactional
