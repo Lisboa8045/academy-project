@@ -48,10 +48,9 @@ export class EditServiceComponent implements OnInit {
   faTimes=faTimes
   form!: FormGroup;
   serviceTypeOptions!: ServiceTypeResponseDTO[];
-  imageUrls: string[] = [];
+  imageUrls = signal<string[]>([]);
   currentImageIndex = 0;
   newTag: string = '';
-  loadingImages = false;
 
   constructor(private fb: FormBuilder,
               private serviceApi: ServiceApiService,
@@ -89,13 +88,11 @@ export class EditServiceComponent implements OnInit {
   }
 
   async loadImages(fileNames: string[]) {
-    this.imageUrls = [];
+    this.imageUrls.set([]);
     this.selectedFiles = [];
     if (!fileNames || fileNames.length === 0) {
       return;
     }
-
-    this.loadingImages = true;
 
     for (const fileName of fileNames) {
       try {
@@ -104,14 +101,12 @@ export class EditServiceComponent implements OnInit {
 
         const blob = await res.blob();
         const objectUrl = URL.createObjectURL(blob);
-        this.imageUrls.push(objectUrl);
+        this.imageUrls.update(urls => [...urls, objectUrl]);
         this.selectedFiles.push(this.blobToFile(blob, fileName));
       } catch (error) {
         snackBarError(this.snackBar, "Error loading the image: " + fileName)
       }
     }
-
-    this.loadingImages = false;
   }
 
   fetchServiceTypes() {
@@ -183,7 +178,7 @@ export class EditServiceComponent implements OnInit {
   }
 
   nextImage(container: HTMLElement) {
-    if (this.currentImageIndex < this.imageUrls.length - 1) {
+    if (this.currentImageIndex < this.imageUrls().length - 1) {
       this.currentImageIndex++;
       this.scrollToThumbnail(container);
     }
@@ -232,13 +227,13 @@ export class EditServiceComponent implements OnInit {
     newFiles.forEach(file => {
       this.selectedFiles.push(file);
       const objectUrl = URL.createObjectURL(file);
-      this.imageUrls.push(objectUrl);
+      this.imageUrls.update(urls => [...urls, objectUrl]);
     });
   }
 
   deleteImage(index: number) {
     this.selectedFiles.splice(index, 1);
-    this.imageUrls.splice(index, 1);
+    this.imageUrls.update(urls => urls.filter((_, i) => i !== index));
   }
 
   blobToFile(blob: Blob, fileName: string): File {
@@ -263,9 +258,11 @@ export class EditServiceComponent implements OnInit {
     this.selectedFiles[imageIndex1] = this.selectedFiles[imageIndex2];
     this.selectedFiles[imageIndex2] = tempFile;
 
-    const tempUrl = this.imageUrls[imageIndex1];
-    this.imageUrls[imageIndex1] = this.imageUrls[imageIndex2];
-    this.imageUrls[imageIndex2] = tempUrl;
+    this.imageUrls.update(urls => {
+      const newUrls = [...urls];
+      [newUrls[imageIndex1], newUrls[imageIndex2]] = [newUrls[imageIndex2], newUrls[imageIndex1]];
+      return newUrls;
+    });
   }
 
   setupServiceForm() {
@@ -303,7 +300,7 @@ export class EditServiceComponent implements OnInit {
       next: (blob) => {
         snackBarSuccess(this.snackBar, 'Image Generated Successfully');
         const objectUrl = URL.createObjectURL(blob);
-        this.imageUrls.push(objectUrl);
+        this.imageUrls.update(urls => [...urls, objectUrl]);
         this.selectedFiles.push(this.blobToFile(blob, 'service_' + this.service!.id + '.png'));
         this.generatingImage.set(false);
       },

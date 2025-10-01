@@ -59,24 +59,24 @@
             <div class="image-wrapper">
               <button class="nav left" (click)="prevImage(thumbContainer)" type="button" [disabled]="currentImageIndex === 0">&#10094;
               </button>
-                @if (imageUrls.length === 0 && !loadingImages) {
+                @if (imageUrls().length === 0) {
                 <div class="thumbnail-placeholder">
                   No Image Provided
                 </div>
               } @else {
                 <img
-                  [src]="imageUrls[currentImageIndex]"
+                  [src]="imageUrls()[currentImageIndex]"
                   alt="Service Image"
                   class="main-image"
                 />
               }
               <button class="nav right" (click)="nextImage(thumbContainer)" type="button"
-                      [disabled]="currentImageIndex === imageUrls.length - 1">&#10095;
+                      [disabled]="currentImageIndex === imageUrls().length - 1">&#10095;
               </button>
 
               <div class="thumbnails-overlay">
                 <div class="thumbnails-scroll-wrapper" #thumbContainer>
-                  <ng-container *ngFor="let imageUrl of imageUrls; let i = index">
+                  <ng-container *ngFor="let imageUrl of imageUrls(); let i = index">
                     <div class="thumbnail-container">
                       <img
                         [src]="imageUrl"
