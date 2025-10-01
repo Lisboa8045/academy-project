@@ -358,3 +358,7 @@ app-service-review {
   overflow-wrap: anywhere;  /* modern */
   word-break: break-word;   /* fallback */
 }
+
+.description-text {
+  white-space: pre-line;
+}

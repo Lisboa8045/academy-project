@@ -47,13 +47,6 @@
 </div>
 
 <div class="filter-group">
-    <label>
-        <input type="checkbox" [(ngModel)]="filters().negotiable" (change)="onFilterChange()"/>
-        Negotiable Only
-    </label>
-</div>
-
-<div class="filter-group">
     <label for="serviceType">Service Type</label>
     <select id="serviceType" [(ngModel)]="filters().serviceType" (change)="onFilterChange()">
         <option value="">All</option>
