@@ -98,4 +98,10 @@ public class MemberController {
         Page<AppointmentReviewResponseDTO> reviews = memberService.getReviewsByMemberId(id, pageable);
         return ResponseEntity.ok(reviews);
     }
+
+    @GetMapping("/{id}/allReviews")
+    public ResponseEntity<List<AppointmentReviewResponseDTO>> getAllReviewsByMemberId(@PathVariable Long id) {
+        List<AppointmentReviewResponseDTO> reviews = memberService.getAllReviewsByMemberId(id);
+        return ResponseEntity.ok(reviews);
+    }
 }

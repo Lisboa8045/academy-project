@@ -56,6 +56,10 @@ export class ProfileService {
     );
   }
 
+  getAllReviewsByMemberId(memberId: number): Observable<ServiceAppointmentReviewModel[]> {
+    return this.http.get<ServiceAppointmentReviewModel[]>(`${this.apiUrl}/${memberId}/allReviews`);
+  }
+
   getReviewsByMemberId(memberId: number, page = 0, size = 5): Observable<PagedReviewResponse> {
     let params = new HttpParams()
         .set('page', page.toString())

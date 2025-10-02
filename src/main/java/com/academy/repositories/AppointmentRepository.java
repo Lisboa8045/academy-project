@@ -62,6 +62,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     @Query("SELECT a FROM Appointment a WHERE a.serviceProvider.provider.id = :memberId AND (a.comment IS NOT NULL OR a.rating IS NOT NULL)")
     Page<Appointment> findAllReviewsByMemberId(@Param("memberId") Long memberId, Pageable pageable);
 
+    @Query("SELECT a FROM Appointment a WHERE a.serviceProvider.provider.id = :memberId AND (a.comment IS NOT NULL OR a.rating IS NOT NULL)")
+    List<Appointment> findAllReviewsByMemberId(@Param("memberId") Long memberId);
+
     List<Appointment> findAllByServiceProviderProviderUsernameAndStatusIsNot(String username, AppointmentStatus status);
 
     @Query("SELECT a FROM Appointment a WHERE a.serviceProvider.service.id = :serviceId")

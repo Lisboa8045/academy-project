@@ -28,7 +28,7 @@ export class ReviewAnalyseComponent {
     const memberId = this.authStore.id();
     this.loading.set(true);
 
-    this.profileService.getReviewsByMemberId(memberId).subscribe({
+    this.profileService.getAllReviewsByMemberId(memberId).subscribe({
       next: (reviews) => {
         const webhookUrl = 'http://localhost:5678/webhook/reviews-analysis';
 

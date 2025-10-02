@@ -500,23 +500,16 @@ public class MemberService {
     }
 
     public Page<AppointmentReviewResponseDTO> getReviewsByMemberId(Long id, Pageable pageable) {
-        System.out.println("Fetching reviews for memberId: " + id);
-        System.out.println("Pageable info: page=" + pageable.getPageNumber() + ", size=" + pageable.getPageSize() +
-                ", sort=" + pageable.getSort());
-
         Page<Appointment> appointments = appointmentRepository.findAllReviewsByMemberId(id, pageable);
-
-        System.out.println("Appointments fetched: " + appointments.getTotalElements());
-        appointments.forEach(app -> System.out.println(
-                "Appointment id=" + app.getId() + ", rating=" + app.getRating() + ", comment=" + app.getComment() +
-                        ", memberId=" + app.getMember().getId()
-        ));
-
         Page<AppointmentReviewResponseDTO> dtoPage = appointments.map(appointmentMapper::toReviewResponseDTO);
-
-        System.out.println("Mapped DTOs count: " + dtoPage.getContent().size());
-
         return dtoPage;
+    }
+
+    public List<AppointmentReviewResponseDTO> getAllReviewsByMemberId(Long id) {
+        List<Appointment> appointments = appointmentRepository.findAllReviewsByMemberId(id);
+        return appointments.stream()
+                .map(appointmentMapper::toReviewResponseDTO)
+                .toList();
     }
 
     @Transactional
